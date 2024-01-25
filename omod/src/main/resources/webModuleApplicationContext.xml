@@ -24,5 +24,5 @@
 
 	<context:annotation-config/>
 
-	<context:component-scan base-package="org.openmrs.module.kenyaemr.cashier" />
+	<context:component-scan base-package="org.openmrs.modulecashier" />
 </beans>

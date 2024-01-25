@@ -4,7 +4,7 @@
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans
   		    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-	<bean id="genericRepositoryDao" class="org.openmrs.module.kenyaemr.cashier.api.base.entity.db.hibernate.BaseHibernateRepositoryImpl">
+	<bean id="genericRepositoryDao" class="org.openmrs.module.cashier.api.base.entity.db.hibernate.BaseHibernateRepositoryImpl">
 		<constructor-arg name="sessionFactory" ref="dbSessionFactory"/>
 	</bean>
 </beans>

@@ -7,7 +7,7 @@
 	<name>${project.parent.name}</name>
 	<version>${project.parent.version}</version>
 	<package>${project.parent.groupId}.${project.parent.artifactId}</package>
-	<author>OpenHMIS</author>
+	<author>Palladium devs</author>
 	<description>
 		${project.parent.description}
 	</description>
@@ -31,7 +31,7 @@
 	</require_modules>
 
 	<!-- Module Activator -->
-	<activator>org.openmrs.module.kenyaemr.cashier.CashierModuleActivator</activator>
+	<activator>org.openmrs.module.cashier.CashierModuleActivator</activator>
 
 	<advice>
 		<point>org.openmrs.api.OrderService</point>
@@ -148,19 +148,19 @@
 	<!-- Extensions -->
 <!--	<extension>-->
 <!--		<point>org.openmrs.admin.list</point>-->
-<!--		<class>org.openmrs.module.kenyaemr.cashier.html.extension.cashier.AdminList</class>-->
+<!--		<class>org.openmrs.module.cashier.html.extension.cashier.AdminList</class>-->
 <!--	</extension>-->
 <!--	<extension>-->
 <!--		<point>org.openmrs.gutter.tools</point>-->
-<!--		<class>org.openmrs.module.kenyaemr.cashier.html.extension.cashier.CashierMenuItem</class>-->
+<!--		<class>org.openmrs.module.cashier.html.extension.cashier.CashierMenuItem</class>-->
 <!--	</extension>-->
 <!--	<extension>-->
 <!--		<point>org.openmrs.patientDashboardTab</point>-->
-<!--		<class>org.openmrs.module.kenyaemr.cashier.html.extension.cashier.CashierPatientBilHistoryExt</class>-->
+<!--		<class>org.openmrs.module.cashier.html.extension.cashier.CashierPatientBilHistoryExt</class>-->
 <!--	</extension>-->
 <!--	<extension>-->
 <!--		<point>org.openmrs.headerFull.userBar</point>-->
-<!--		<class>org.openmrs.module.kenyaemr.cashier.html.extension.cashier.CashierLinkExt</class>-->
+<!--		<class>org.openmrs.module.cashier.html.extension.cashier.CashierLinkExt</class>-->
 <!--	</extension>-->
 
 	<!-- Privileges -->
