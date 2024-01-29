@@ -51,6 +51,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<powermock.version>1.4.10</powermock.version>
 		<javaCompilerVersion>1.7</javaCompilerVersion>
+		<openmrsPlatformToolsVersion>2.4.0</openmrsPlatformToolsVersion>
 	</properties>
 
 	<dependencyManagement>
@@ -249,47 +250,29 @@
 	<build>
 		<pluginManagement>
 			<plugins>
-				<!--<plugin>
-					<groupId>com.googlecode.maven-java-formatter-plugin</groupId>
-					<artifactId>maven-java-formatter-plugin</artifactId>
-					<version>0.4</version>
+				<plugin>
+					<groupId>net.revelc.code.formatter</groupId>
+					<artifactId>formatter-maven-plugin</artifactId>
+					<version>2.16.0</version>
 					<configuration>
-						<compilerSource>${javaCompilerVersion}</compilerSource>
-						<compilerCompliance>${javaCompilerVersion}</compilerCompliance>
-						<compilerTargetPlatform>${javaCompilerVersion}</compilerTargetPlatform>
-						<configFile>format/OpenHMIS Eclipse Format.xml</configFile>
-						<overrideConfigCompilerVersion>true</overrideConfigCompilerVersion>
-						<lineEnding>CRLF</lineEnding>
+						<lineEnding>LF</lineEnding>
+						<configFile>eclipse/OpenMRSFormatter.xml</configFile>
 					</configuration>
 					<dependencies>
 						<dependency>
-							<groupId>org.openmrs.module</groupId>
-							<artifactId>openhmis.commons-tools</artifactId>
-							<version>4.1.0-SNAPSHOT</version>
+							<groupId>org.openmrs.tools</groupId>
+							<artifactId>openmrs-tools</artifactId>
+							<version>${openmrsPlatformToolsVersion}</version>
 						</dependency>
 					</dependencies>
-				</plugin>-->
-<!--				<plugin>-->
-<!--					<groupId>org.apache.maven.plugins</groupId>-->
-<!--					<artifactId>maven-checkstyle-plugin</artifactId>-->
-<!--					<version>2.9.1</version>-->
-<!--					<configuration>-->
-<!--						<configLocation>checkstyle/openhmis-checkstyle.xml</configLocation>-->
-<!--						<propertiesLocation>checkstyle/openhmis-checkstyle.properties</propertiesLocation>-->
-<!--						&lt;!&ndash;<headerLocation>checkstyle/license-header.txt</headerLocation>&ndash;&gt;-->
-<!--						<suppressionsLocation>checkstyle/checkstyle-suppressions.xml</suppressionsLocation>-->
-<!--						<encoding>UTF-8</encoding>-->
-<!--						<consoleOutput>true</consoleOutput>-->
-<!--						<failsOnError>true</failsOnError>-->
-<!--					</configuration>-->
-<!--					<dependencies>-->
-<!--						<dependency>-->
-<!--							<groupId>org.openmrs.module</groupId>-->
-<!--							<artifactId>openhmis.commons-tools</artifactId>-->
-<!--							<version>4.1.0-SNAPSHOT</version>-->
-<!--						</dependency>-->
-<!--					</dependencies>-->
-<!--				</plugin>-->
+					<executions>
+						<execution>
+							<goals>
+								<goal>format</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>

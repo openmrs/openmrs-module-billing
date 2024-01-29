@@ -24,27 +24,29 @@ import org.openmrs.module.cashier.api.base.entity.IObjectDataService;
 
 /**
  * Support class to build property editors for entities.
+ * 
  * @param <E> The model class
  */
 public class EntityPropertyEditor<E extends OpenmrsObject> extends PropertyEditorSupport {
+	
 	private final IObjectDataService<E> service;
-
+	
 	public EntityPropertyEditor(Class<? extends IObjectDataService<E>> service) {
 		this.service = Context.getService(service);
 	}
-
+	
 	@Override
 	@SuppressWarnings("unchecked")
 	public String getAsText() {
-		E entity = (E)getValue();
-
+		E entity = (E) getValue();
+		
 		if (entity == null) {
 			return "";
 		} else {
 			return entity.getId().toString();
 		}
 	}
-
+	
 	@Override
 	public void setAsText(String text) {
 		if (StringUtils.isEmpty(text)) {
@@ -56,18 +58,18 @@ public class EntityPropertyEditor<E extends OpenmrsObject> extends PropertyEdito
 			} else {
 				entity = service.getByUuid(text);
 			}
-
+			
 			setValue(entity);
 			if (entity == null) {
 				throw new IllegalArgumentException("Entity ('" + getEntityClass().getName() + "') not found: " + text);
 			}
 		}
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	protected Class<E> getEntityClass() {
-		ParameterizedType parameterizedType = (ParameterizedType)getClass().getGenericSuperclass();
-
-		return (Class)parameterizedType.getActualTypeArguments()[0];
+		ParameterizedType parameterizedType = (ParameterizedType) getClass().getGenericSuperclass();
+		
+		return (Class) parameterizedType.getActualTypeArguments()[0];
 	}
 }

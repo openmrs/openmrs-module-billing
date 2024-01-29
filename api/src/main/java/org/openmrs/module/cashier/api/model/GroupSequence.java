@@ -19,34 +19,37 @@ import org.openmrs.BaseOpenmrsObject;
  * Model class that represent the Group Sequence
  */
 public class GroupSequence extends BaseOpenmrsObject {
+	
 	public static final long serialVersionUID = 0L;
-
+	
 	private Integer groupSequenceId;
+	
 	private String group;
+	
 	private int value;
-
+	
 	@Override
 	public Integer getId() {
 		return groupSequenceId;
 	}
-
+	
 	@Override
 	public void setId(Integer id) {
 		groupSequenceId = id;
 	}
-
+	
 	public String getGroup() {
 		return group;
 	}
-
+	
 	public void setGroup(String group) {
 		this.group = group;
 	}
-
+	
 	public int getValue() {
 		return value;
 	}
-
+	
 	public void setValue(int value) {
 		this.value = value;
 	}

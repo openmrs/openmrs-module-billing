@@ -20,40 +20,41 @@ import org.hibernate.criterion.CriteriaQuery;
 import org.hibernate.criterion.Order;
 
 /**
- * Allows for ordering hibernate queries by some customized sql (for example, a database function). Adapted from:
- * http://blog.hexican.com/2012/05/how-to-customize-hibernate-order-by/
+ * Allows for ordering hibernate queries by some customized sql (for example, a database function).
+ * Adapted from: http://blog.hexican.com/2012/05/how-to-customize-hibernate-order-by/
  */
 public class CustomizedOrderBy extends Order {
+	
 	private final String sqlExpression;
-
+	
 	public static Order asc(String sqlFormula) {
 		if (!StringUtils.endsWith(sqlFormula, " asc")) {
 			sqlFormula += " asc";
 		}
-
+		
 		return new CustomizedOrderBy(sqlFormula);
 	}
-
+	
 	public static Order desc(String sqlFormula) {
 		if (!StringUtils.endsWith(sqlFormula, " desc")) {
 			sqlFormula += " desc";
 		}
-
+		
 		return new CustomizedOrderBy(sqlFormula);
 	}
-
+	
 	protected CustomizedOrderBy(String sqlExpression) {
 		super(sqlExpression, true);
-
+		
 		this.sqlExpression = sqlExpression;
 	}
-
+	
 	public String toSqlString(Criteria criteria, CriteriaQuery criteriaQuery) throws HibernateException {
 		return sqlExpression;
 	}
-
+	
 	public String toString() {
 		return sqlExpression;
 	}
-
+	
 }

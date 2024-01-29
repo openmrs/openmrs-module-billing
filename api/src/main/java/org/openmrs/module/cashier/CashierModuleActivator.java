@@ -26,8 +26,9 @@ import org.openmrs.module.web.WebModuleUtil;
  * This class contains the logic that is run every time this module is either started or stopped.
  */
 public class CashierModuleActivator extends BaseModuleActivator {
+	
 	private static final Log LOG = LogFactory.getLog(CashierModuleActivator.class);
-
+	
 	/**
 	 * @see BaseModuleActivator#contextRefreshed()
 	 */
@@ -35,17 +36,17 @@ public class CashierModuleActivator extends BaseModuleActivator {
 	public void contextRefreshed() {
 		LOG.info("OpenHMIS Cashier Module Module refreshed");
 	}
-
+	
 	/**
 	 * @see BaseModuleActivator#started()
 	 */
 	@Override
 	public void started() {
 		//		RoundingUtil.setupRoundingDeptAndItem(LOG);
-
+		
 		LOG.info("OpenHMIS Cashier Module Module started");
 	}
-
+	
 	/**
 	 * @see BaseModuleActivator#stopped()
 	 */
@@ -53,7 +54,7 @@ public class CashierModuleActivator extends BaseModuleActivator {
 	public void stopped() {
 		Module module = ModuleFactory.getModuleById(CashierWebConstants.OPENHMIS_CASHIER_MODULE_ID);
 		WebModuleUtil.unloadFilters(module);
-
+		
 		LOG.info("OpenHMIS Cashier Module Module stopped");
 	}
 }

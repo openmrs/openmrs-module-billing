@@ -9,5 +9,6 @@ import java.util.List;
 
 @Transactional
 public interface IBillableItemsService extends IEntityDataService<BillableService> {
-    List<BillableService> findServices(final BillableServiceSearch search);
+	
+	List<BillableService> findServices(final BillableServiceSearch search);
 }

@@ -14,46 +14,46 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Transactional
-public class BillableItemsServiceImpl extends BaseEntityDataServiceImpl<BillableService> implements IEntityAuthorizationPrivileges
-        , IBillableItemsService {
-
-    @Override
-    public List<BillableService> findServices(final BillableServiceSearch serviceSearch) {
-        return executeCriteria(BillableService.class, null, new Action1<Criteria>() {
-            @Override
-            public void apply(Criteria criteria) {
-                serviceSearch.updateCriteria(criteria);
-            }
-        });
-    }
-
-    @Override
-    protected IEntityAuthorizationPrivileges getPrivileges() {
-        return this;
-    }
-
-    @Override
-    protected void validate(BillableService object) {
-
-    }
-
-    @Override
-    public String getVoidPrivilege() {
-        return null;
-    }
-
-    @Override
-    public String getSavePrivilege() {
-        return null;
-    }
-
-    @Override
-    public String getPurgePrivilege() {
-        return null;
-    }
-
-    @Override
-    public String getGetPrivilege() {
-        return null;
-    }
+public class BillableItemsServiceImpl extends BaseEntityDataServiceImpl<BillableService> implements IEntityAuthorizationPrivileges, IBillableItemsService {
+	
+	@Override
+	public List<BillableService> findServices(final BillableServiceSearch serviceSearch) {
+		return executeCriteria(BillableService.class, null, new Action1<Criteria>() {
+			
+			@Override
+			public void apply(Criteria criteria) {
+				serviceSearch.updateCriteria(criteria);
+			}
+		});
+	}
+	
+	@Override
+	protected IEntityAuthorizationPrivileges getPrivileges() {
+		return this;
+	}
+	
+	@Override
+	protected void validate(BillableService object) {
+		
+	}
+	
+	@Override
+	public String getVoidPrivilege() {
+		return null;
+	}
+	
+	@Override
+	public String getSavePrivilege() {
+		return null;
+	}
+	
+	@Override
+	public String getPurgePrivilege() {
+		return null;
+	}
+	
+	@Override
+	public String getGetPrivilege() {
+		return null;
+	}
 }

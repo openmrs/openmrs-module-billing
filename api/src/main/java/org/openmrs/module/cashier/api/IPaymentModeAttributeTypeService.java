@@ -18,7 +18,8 @@ import org.openmrs.module.cashier.api.model.PaymentModeAttributeType;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Interface that represents classes which perform data operations for {@link PaymentModeAttributeType}s.
+ * Interface that represents classes which perform data operations for
+ * {@link PaymentModeAttributeType}s.
  */
 @Transactional
 public interface IPaymentModeAttributeTypeService extends IMetadataDataService<PaymentModeAttributeType> {}

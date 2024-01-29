@@ -27,14 +27,16 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional
 public class PaymentModeServiceImpl extends BaseMetadataDataServiceImpl<PaymentMode> implements IPaymentModeService {
+	
 	@Override
 	protected IMetadataAuthorizationPrivileges getPrivileges() {
 		return new BasicMetadataAuthorizationPrivileges();
 	}
-
+	
 	@Override
-	protected void validate(PaymentMode entity) {}
-
+	protected void validate(PaymentMode entity) {
+	}
+	
 	@Override
 	protected Order[] getDefaultSort() {
 		return new Order[] { Order.asc("sortOrder"), Order.asc("name") };

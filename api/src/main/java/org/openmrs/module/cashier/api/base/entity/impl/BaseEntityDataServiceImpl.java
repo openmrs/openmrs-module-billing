@@ -31,12 +31,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The base type for {@link IEntityDataService}s.
+ * 
  * @param <E> The entity model type.
  */
 
 @Transactional
-public abstract class BaseEntityDataServiceImpl<E extends OpenmrsData>
-        extends BaseObjectDataServiceImpl<E, IEntityAuthorizationPrivileges> implements IEntityDataService<E> {
+public abstract class BaseEntityDataServiceImpl<E extends OpenmrsData> extends BaseObjectDataServiceImpl<E, IEntityAuthorizationPrivileges> implements IEntityDataService<E> {
+	
 	@Override
 	@Transactional
 	public E voidEntity(E entity, final String reason) {
@@ -44,39 +45,40 @@ public abstract class BaseEntityDataServiceImpl<E extends OpenmrsData>
 		if (privileges != null && !StringUtils.isEmpty(privileges.getVoidPrivilege())) {
 			PrivilegeUtil.requirePrivileges(Context.getAuthenticatedUser(), privileges.getVoidPrivilege());
 		}
-
+		
 		if (entity == null) {
 			throw new NullPointerException("The entity to void cannot be null.");
 		}
 		if (StringUtils.isEmpty(reason)) {
 			throw new IllegalArgumentException("The reason to void must be defined.");
 		}
-
+		
 		final User user = Context.getAuthenticatedUser();
 		final Date dateVoided = new Date();
 		setVoidProperties(entity, reason, user, dateVoided);
-
+		
 		List<OpenmrsData> updatedObjects = executeOnRelatedObjects(OpenmrsData.class, entity, new Action1<OpenmrsData>() {
+			
 			@Override
 			public void apply(OpenmrsData data) {
 				setVoidProperties(data, reason, user, dateVoided);
 			}
 		});
-
+		
 		if (!updatedObjects.isEmpty()) {
 			return saveAll(entity, updatedObjects);
 		} else {
 			return save(entity);
 		}
 	}
-
+	
 	protected void setVoidProperties(OpenmrsData data, String reason, User user, Date dateVoided) {
 		data.setVoided(true);
 		data.setVoidReason(reason);
 		data.setVoidedBy(user);
 		data.setDateVoided(dateVoided);
 	}
-
+	
 	@Override
 	@Transactional
 	public E unvoidEntity(E entity) {
@@ -84,35 +86,37 @@ public abstract class BaseEntityDataServiceImpl<E extends OpenmrsData>
 		if (privileges != null && !StringUtils.isEmpty(privileges.getVoidPrivilege())) {
 			PrivilegeUtil.requirePrivileges(Context.getAuthenticatedUser(), privileges.getVoidPrivilege());
 		}
-
+		
 		if (entity == null) {
 			throw new NullPointerException("The entity to unvoid cannot be null.");
 		}
-
+		
 		setUnvoidProperties(entity);
-
+		
 		List<OpenmrsData> updatedObjects = executeOnRelatedObjects(OpenmrsData.class, entity, new Action1<OpenmrsData>() {
+			
 			@Override
 			public void apply(OpenmrsData data) {
 				setUnvoidProperties(data);
 			}
 		});
-
+		
 		if (!updatedObjects.isEmpty()) {
 			return saveAll(entity, updatedObjects);
 		} else {
 			return save(entity);
 		}
 	}
-
+	
 	protected void setUnvoidProperties(OpenmrsData data) {
 		data.setVoided(false);
 		data.setVoidReason(null);
 		data.setVoidedBy(null);
 	}
-
+	
 	/**
 	 * Gets all unvoided entities.
+	 * 
 	 * @param pagingInfo
 	 * @return Returns all unvoided entities
 	 * @should return all unvoided entities when voided is not specified
@@ -122,13 +126,13 @@ public abstract class BaseEntityDataServiceImpl<E extends OpenmrsData>
 	public List<E> getAll(PagingInfo pagingInfo) {
 		return getAll(false, pagingInfo);
 	}
-
+	
 	@Override
 	@Transactional(readOnly = true)
 	public List<E> getAll(boolean includeVoided) {
 		return getAll(includeVoided, null);
 	}
-
+	
 	@Override
 	@Transactional(readOnly = true)
 	public List<E> getAll(final boolean includeVoided, PagingInfo pagingInfo) {
@@ -136,8 +140,9 @@ public abstract class BaseEntityDataServiceImpl<E extends OpenmrsData>
 		if (privileges != null && !StringUtils.isEmpty(privileges.getGetPrivilege())) {
 			PrivilegeUtil.requirePrivileges(Context.getAuthenticatedUser(), privileges.getGetPrivilege());
 		}
-
+		
 		return executeCriteria(getEntityClass(), pagingInfo, new Action1<Criteria>() {
+			
 			@Override
 			public void apply(Criteria criteria) {
 				if (!includeVoided) {

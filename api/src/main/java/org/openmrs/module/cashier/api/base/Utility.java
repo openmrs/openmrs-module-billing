@@ -26,15 +26,21 @@ import org.apache.commons.logging.LogFactory;
  * General utility methods.
  */
 public class Utility {
+	
 	private static final Log LOG = LogFactory.getLog(Utility.class);
+	
 	private static final int DATE_ONLY_TEXT_LENGTH = 10;
+	
 	private static final int DATE_TIME_TEXT_LENGTH = 16;
+	
 	private static final int DATE_TIME_SECOND_TEXT_LENGTH = 19;
-
-	private Utility() {}
-
+	
+	private Utility() {
+	}
+	
 	/**
 	 * Returns the specified object as the specified class or returns null if the cast is not supported.
+	 * 
 	 * @param cls The generic class to cast the object to.
 	 * @param o The object to cast.
 	 * @param <T> The generic class to cast the object to.
@@ -46,25 +52,28 @@ public class Utility {
 		}
 		return null;
 	}
-
+	
 	/**
-	 * Clears the time portion of the specified {@link Calendar}, setting the hour, minute, second, and millisecond parts to
-	 * 0.
+	 * Clears the time portion of the specified {@link Calendar}, setting the hour, minute, second, and
+	 * millisecond parts to 0.
+	 * 
 	 * @param cal The calendar object to clear the time portion from.
 	 */
 	public static void clearCalendarTime(Calendar cal) {
 		if (cal == null) {
 			throw new IllegalArgumentException("The calendar must be defined.");
 		}
-
+		
 		cal.set(Calendar.HOUR_OF_DAY, 0);
 		cal.set(Calendar.MINUTE, 0);
 		cal.set(Calendar.SECOND, 0);
 		cal.set(Calendar.MILLISECOND, 0);
 	}
-
+	
 	/**
-	 * Parses a standard OpenHMIS formatted (openhmis.dateFormat) date returning the {@link java.util.Date} object.
+	 * Parses a standard OpenHMIS formatted (openhmis.dateFormat) date returning the
+	 * {@link java.util.Date} object.
+	 * 
 	 * @param dateText The date text to parse
 	 * @return The date or null if the text cannot be parsed.
 	 */
@@ -72,7 +81,7 @@ public class Utility {
 		if (StringUtils.isEmpty(dateText)) {
 			return null;
 		}
-
+		
 		SimpleDateFormat dateFormat = null;
 		if (dateText.length() == DATE_ONLY_TEXT_LENGTH) {
 			dateFormat = new SimpleDateFormat("dd-MM-yyyy");
@@ -81,18 +90,19 @@ public class Utility {
 		} else if (dateText.length() == DATE_TIME_SECOND_TEXT_LENGTH) {
 			dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 		}
-
+		
 		Date result = null;
 		if (dateFormat == null) {
 			LOG.warn("Could not parse the date string '" + dateText + "'.");
 		} else {
 			try {
 				result = dateFormat.parse(dateText);
-			} catch (ParseException pex) {
+			}
+			catch (ParseException pex) {
 				LOG.warn("Could not parse the date string '" + dateText + "'.", pex);
 			}
 		}
-
+		
 		return result;
 	}
 }

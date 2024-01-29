@@ -20,8 +20,9 @@ import org.openmrs.BaseOpenmrsData;
  * Base class for {@link org.openmrs.OpenmrsData} that need to support JSON serialization.
  */
 public abstract class BaseSerializableOpenmrsData extends BaseOpenmrsData {
+	
 	public static final long serialVersionUID = 0L;
-
+	
 	@Override
 	@JsonIgnore
 	public Boolean getVoided() {

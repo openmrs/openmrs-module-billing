@@ -19,8 +19,8 @@ import org.openmrs.module.cashier.api.util.PrivilegeConstants;
 /**
  * Default authorization privileges for {@link org.openmrs.OpenmrsMetadata} data services.
  */
-public class BasicMetadataAuthorizationPrivileges extends BasicEntityAuthorizationPrivileges
-        implements IMetadataAuthorizationPrivileges {
+public class BasicMetadataAuthorizationPrivileges extends BasicEntityAuthorizationPrivileges implements IMetadataAuthorizationPrivileges {
+	
 	@Override
 	public String getRetirePrivilege() {
 		return PrivilegeConstants.MANAGE_METADATA;

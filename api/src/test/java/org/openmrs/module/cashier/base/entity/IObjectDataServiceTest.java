@@ -28,59 +28,61 @@ import org.openmrs.module.cashier.base.BaseModuleContextTest;
 import org.openmrs.module.cashier.api.base.PagingInfo;
 import org.openmrs.module.cashier.api.base.f.Action2;
 
-public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E extends OpenmrsObject>
-        extends BaseModuleContextTest {
+public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E extends OpenmrsObject> extends BaseModuleContextTest {
+	
 	protected S service;
-
+	
 	/**
-	 * Tests that the specified object are not null and that the {@link OpenmrsObject} properties are equal.
+	 * Tests that the specified object are not null and that the {@link OpenmrsObject} properties are
+	 * equal.
+	 * 
 	 * @param expected The expected object properties
 	 * @param actual The actual object properties
 	 */
 	public static void assertOpenmrsObject(OpenmrsObject expected, OpenmrsObject actual) {
 		Assert.assertNotNull(expected);
 		Assert.assertNotNull(actual);
-
+		
 		Assert.assertEquals(expected.getId(), actual.getId());
 		Assert.assertEquals(expected.getUuid(), actual.getUuid());
 	}
-
+	
 	public static <T> void assertCollection(Collection<T> expected, Collection<T> actual, Action2<T, T> test) {
 		if (expected == null) {
 			Assert.assertNull(actual);
 		} else {
 			Assert.assertEquals(expected.size(), actual.size());
-
-			T[] expectedArray = (T[])new Object[expected.size()];
+			
+			T[] expectedArray = (T[]) new Object[expected.size()];
 			expected.toArray(expectedArray);
-			T[] actualArray = (T[])new Object[actual.size()];
+			T[] actualArray = (T[]) new Object[actual.size()];
 			actual.toArray(actualArray);
-
+			
 			for (int i = 0; i < expected.size(); i++) {
 				test.apply(expectedArray[i], actualArray[i]);
 			}
 		}
 	}
-
+	
 	public abstract E createEntity(boolean valid);
-
+	
 	protected abstract int getTestEntityCount();
-
+	
 	protected abstract void updateEntityFields(E entity);
-
+	
 	protected void assertEntity(E expected, E actual) {
 		assertOpenmrsObject(expected, actual);
 	}
-
+	
 	protected S createService() {
 		return Context.getService(getServiceClass());
 	}
-
+	
 	@Before
 	public void before() throws Exception {
 		service = createService();
 	}
-
+	
 	/**
 	 * @verifies throw NullPointerException if the object is null
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#save(OpenmrsObject)
@@ -89,7 +91,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	public void save_shouldThrowNullPointerExceptionIfTheObjectIsNull() throws Exception {
 		service.save(null);
 	}
-
+	
 	/**
 	 * @verifies validate the object before saving
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#save(OpenmrsObject)
@@ -97,10 +99,10 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	@Test(expected = APIException.class)
 	public void save_shouldValidateTheObjectBeforeSaving() throws Exception {
 		E entity = createEntity(false);
-
+		
 		service.save(entity);
 	}
-
+	
 	/**
 	 * @verifies return saved object
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#save(OpenmrsObject)
@@ -108,14 +110,14 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	@Test
 	public void save_shouldReturnSavedObject() throws Exception {
 		E entity = createEntity(true);
-
+		
 		E result = service.save(entity);
 		Context.flushSession();
-
+		
 		Assert.assertNotNull(result);
 		Assert.assertNotNull(result.getId());
 	}
-
+	
 	/**
 	 * @verifies update the object successfully
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#save(OpenmrsObject)
@@ -124,16 +126,16 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	public void save_shouldUpdateTheObjectSuccessfully() throws Exception {
 		E entity = service.getById(0);
 		Assert.assertNotNull(entity);
-
+		
 		updateEntityFields(entity);
-
+		
 		service.save(entity);
 		Context.flushSession();
-
+		
 		E updatedEntity = service.getById(entity.getId());
 		assertEntity(entity, updatedEntity);
 	}
-
+	
 	/**
 	 * @verifies create the object successfully
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#save(OpenmrsObject)
@@ -141,14 +143,14 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	@Test
 	public void save_shouldCreateTheObjectSuccessfully() throws Exception {
 		E entity = createEntity(true);
-
+		
 		entity = service.save(entity);
 		Context.flushSession();
-
+		
 		E result = service.getById(entity.getId());
 		assertEntity(entity, result);
 	}
-
+	
 	/**
 	 * @verifies throw NullPointerException if the object is null
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#purge(OpenmrsObject)
@@ -157,7 +159,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	public void purge_shouldThrowNullPointerExceptionIfTheObjectIsNull() throws Exception {
 		service.purge(null);
 	}
-
+	
 	/**
 	 * @verifies delete the specified object
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#purge(OpenmrsObject)
@@ -165,20 +167,20 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	@Test
 	public void purge_shouldDeleteTheSpecifiedObject() throws Exception {
 		E entity = createEntity(true);
-
+		
 		service.save(entity);
 		Context.flushSession();
-
+		
 		E result = service.getById(entity.getId());
 		Assert.assertNotNull(result);
-
+		
 		service.purge(entity);
 		Context.flushSession();
-
+		
 		result = service.getById(entity.getId());
 		Assert.assertNull(result);
 	}
-
+	
 	/**
 	 * @verifies return all object records
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#getAll()
@@ -187,10 +189,10 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	public void getAll_shouldReturnAllObjectRecords() throws Exception {
 		List<E> entities = service.getAll();
 		Assert.assertNotNull(entities);
-
+		
 		Assert.assertEquals(getTestEntityCount(), entities.size());
 	}
-
+	
 	/**
 	 * @verifies return an empty list if there are no objects
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#getAll()
@@ -201,14 +203,14 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 		for (E entity : entities) {
 			service.purge(entity);
 		}
-
+		
 		Context.flushSession();
-
+		
 		entities = service.getAll();
 		Assert.assertNotNull(entities);
 		Assert.assertEquals(0, entities.size());
 	}
-
+	
 	/**
 	 * @verifies return the object with the specified id
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#getById(int)
@@ -216,10 +218,10 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	@Test
 	public void getById_shouldReturnTheObjectWithTheSpecifiedId() throws Exception {
 		E entity = service.getById(0);
-
-		Assert.assertEquals((Integer)0, entity.getId());
+		
+		Assert.assertEquals((Integer) 0, entity.getId());
 	}
-
+	
 	/**
 	 * @verifies return null if no object can be found.
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#getById(int)
@@ -227,10 +229,10 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	@Test
 	public void getById_shouldReturnNullIfNoObjectCanBeFound() throws Exception {
 		E entity = service.getById(-100);
-
+		
 		Assert.assertNull(entity);
 	}
-
+	
 	/**
 	 * @verifies find the object with the specified uuid
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#getByUuid(String)
@@ -239,10 +241,10 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	public void getByUuid_shouldFindTheObjectWithTheSpecifiedUuid() throws Exception {
 		E entity = service.getById(0);
 		E uuidEntity = service.getByUuid(entity.getUuid());
-
+		
 		assertEntity(entity, uuidEntity);
 	}
-
+	
 	/**
 	 * @verifies return null if no object is found
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#getByUuid(String)
@@ -250,10 +252,10 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	@Test
 	public void getByUuid_shouldReturnNullIfNoObjectIsFound() throws Exception {
 		E entity = service.getByUuid("Invalid");
-
+		
 		Assert.assertNull(entity);
 	}
-
+	
 	/**
 	 * @verifies throw IllegalArgumentException if uuid is null
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#getByUuid(String)
@@ -262,7 +264,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	public void getByUuid_shouldThrowIllegalArgumentExceptionIfUuidIsNull() throws Exception {
 		service.getByUuid(null);
 	}
-
+	
 	/**
 	 * @verifies throw IllegalArgumentException if uuid is empty
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#getByUuid(String)
@@ -271,7 +273,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	public void getByUuid_shouldThrowIllegalArgumentExceptionIfUuidIsEmpty() throws Exception {
 		service.getByUuid("");
 	}
-
+	
 	/**
 	 * @verifies return all object records if paging is null
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#getAll(PagingInfo)
@@ -279,11 +281,11 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	@Test
 	public void getAll_shouldReturnAllObjectRecordsIfPagingIsNull() throws Exception {
 		List<E> entities = service.getAll(null);
-
+		
 		Assert.assertNotNull(entities);
 		Assert.assertEquals(getTestEntityCount(), entities.size());
 	}
-
+	
 	/**
 	 * @verifies return all object records if paging page or size is less than one
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#getAll(PagingInfo)
@@ -292,17 +294,17 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	public void getAll_shouldReturnAllObjectRecordsIfPagingPageOrSizeIsLessThanOne() throws Exception {
 		PagingInfo paging = new PagingInfo(0, 1);
 		List<E> entities = service.getAll(paging);
-
+		
 		Assert.assertNotNull(entities);
 		Assert.assertEquals(getTestEntityCount(), entities.size());
-
+		
 		paging = new PagingInfo(1, 0);
 		entities = service.getAll(paging);
-
+		
 		Assert.assertNotNull(entities);
 		Assert.assertEquals(getTestEntityCount(), entities.size());
 	}
-
+	
 	/**
 	 * @verifies set the paging total records to the total number of object records
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#getAll(PagingInfo)
@@ -311,12 +313,12 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	public void getAll_shouldSetThePagingTotalRecordsToTheTotalNumberOfObjectRecords() throws Exception {
 		PagingInfo paging = new PagingInfo(1, 1);
 		List<E> entities = service.getAll(paging);
-
+		
 		Assert.assertNotNull(entities);
 		Assert.assertEquals(1, entities.size());
 		Assert.assertEquals(Long.valueOf(getTestEntityCount()), paging.getTotalRecordCount());
 	}
-
+	
 	/**
 	 * @verifies not get the total paging record count if it is more than zero
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#getAll(PagingInfo)
@@ -326,12 +328,12 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 		PagingInfo paging = new PagingInfo(1, 1);
 		paging.setLoadRecordCount(false);
 		List<E> entities = service.getAll(paging);
-
+		
 		Assert.assertNotNull(entities);
 		Assert.assertEquals(1, entities.size());
 		Assert.assertNull(paging.getTotalRecordCount());
 	}
-
+	
 	/**
 	 * @verifies return paged object records if paging is specified
 	 * @see IObjectDataService#getAll(PagingInfo)
@@ -339,23 +341,23 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	@Test
 	public void getAll_shouldReturnPagedObjectRecordsIfPagingIsSpecified() throws Exception {
 		List<E> allEntities = service.getAll();
-
+		
 		PagingInfo paging = new PagingInfo(1, 1);
 		List<E> entities;
 		for (int i = 0; i < getTestEntityCount(); i++) {
 			paging.setPage(i + 1);
 			entities = service.getAll(paging);
-
+			
 			Assert.assertNotNull(entities);
 			Assert.assertEquals(1, entities.size());
 			Assert.assertEquals(allEntities.get(i), entities.get(0));
 		}
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	protected Class<S> getServiceClass() {
-		ParameterizedType parameterizedType = (ParameterizedType)getClass().getGenericSuperclass();
-
-		return (Class<S>)parameterizedType.getActualTypeArguments()[0];
+		ParameterizedType parameterizedType = (ParameterizedType) getClass().getGenericSuperclass();
+		
+		return (Class<S>) parameterizedType.getActualTypeArguments()[0];
 	}
 }

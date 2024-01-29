@@ -17,10 +17,13 @@ package org.openmrs.module.cashier.api.base.web;
  * Base constants used to store module web resources and urls.
  */
 public class WebConstants {
+	
 	protected static final String MODULE_BASE = "/module/kenyaemr/";
+	
 	protected static final String MODULE_RESOURCE_BASE = "/moduleResources/kenyaemr/";
-
+	
 	public static final String REPORT_DOWNLOAD_URL = "/moduleServlet/jasperreport/jreportDownload";
-
-	protected WebConstants() {}
+	
+	protected WebConstants() {
+	}
 }

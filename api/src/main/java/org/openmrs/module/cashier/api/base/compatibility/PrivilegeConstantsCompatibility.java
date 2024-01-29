@@ -14,27 +14,39 @@
 package org.openmrs.module.cashier.api.base.compatibility;
 
 /**
- * A layer to allow privilege constants to be selected and have their assignment of different OpenMRS versions done elsewhere
+ * A layer to allow privilege constants to be selected and have their assignment of different
+ * OpenMRS versions done elsewhere
  */
 public abstract class PrivilegeConstantsCompatibility {
-
+	
 	/* Commons privilege constants */
 	public static String GET_LOCATIONS = "";
+	
 	public static String GET_CONCEPT_CLASSES = "";
+	
 	public static String GET_USERS = "";
+	
 	public static String GET_PROVIDERS = "";
+	
 	public static String GET_CONCEPTS = "";
-
+	
 	/* Cashier Module privilege constants */
 	public static String GET_VISITS = "";
+	
 	public static String GET_ENCOUNTERS = "";
+	
 	public static String GET_OBS = "";
+	
 	public static String GET_PATIENTS = "";
+	
 	public static String DASHBOARD_SUMMARY = "";
+	
 	public static String DASHBOARD_DEMOGRAPHICS = "";
+	
 	public static String DASHBOARD_OVERVIEW = "";
+	
 	public static String DASHBOARD_VISITS = "";
-
+	
 	/* Inventory Module privilege constants */
 	public static String GET_ROLES = "";
 }

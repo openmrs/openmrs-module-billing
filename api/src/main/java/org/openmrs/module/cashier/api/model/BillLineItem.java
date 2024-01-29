@@ -19,35 +19,44 @@ import org.openmrs.BaseOpenmrsData;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
 
 /**
- * A LineItem represents a line on a {@link Bill} which will bill some quantity
- * of a particular {@link StockItem}.
+ * A LineItem represents a line on a {@link Bill} which will bill some quantity of a particular
+ * {@link StockItem}.
  */
 public class BillLineItem extends BaseOpenmrsData {
+	
 	public static final long serialVersionUID = 0L;
-
+	
 	private int billLineItemId;
+	
 	private Bill bill;
+	
 	private StockItem item;
+	
 	private BillableService billableService;
+	
 	private BigDecimal price;
+	
 	private String priceName;
+	
 	private CashierItemPrice itemPrice;
+	
 	private Integer quantity;
+	
 	private Integer lineItemOrder;
-
+	
 	private BillStatus paymentStatus; // this should only be set to either
-										// pending or paid
-
+	                                  // pending or paid
+	
 	@Override
 	public Integer getId() {
 		return billLineItemId;
 	}
-
+	
 	@Override
 	public void setId(Integer id) {
 		billLineItemId = id;
 	}
-
+	
 	/**
 	 * Get the total price for the line item
 	 * 
@@ -56,75 +65,75 @@ public class BillLineItem extends BaseOpenmrsData {
 	public BigDecimal getTotal() {
 		return price.multiply(BigDecimal.valueOf(quantity));
 	}
-
+	
 	public CashierItemPrice getItemPrice() {
 		return itemPrice;
 	}
-
+	
 	public void setItemPrice(CashierItemPrice itemPrice) {
 		this.itemPrice = itemPrice;
 	}
-
+	
 	public BillableService getBillableService() {
 		return billableService;
 	}
-
+	
 	public void setBillableService(BillableService billableService) {
 		this.billableService = billableService;
 	}
-
+	
 	public Integer getQuantity() {
 		return quantity;
 	}
-
+	
 	public void setQuantity(Integer quantity) {
 		this.quantity = quantity;
 	}
-
+	
 	public Bill getBill() {
 		return bill;
 	}
-
+	
 	public void setBill(Bill bill) {
 		this.bill = bill;
 	}
-
+	
 	public StockItem getItem() {
 		return item;
 	}
-
+	
 	public void setItem(StockItem item) {
 		this.item = item;
 	}
-
+	
 	public BigDecimal getPrice() {
 		return price;
 	}
-
+	
 	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
-
+	
 	public String getPriceName() {
 		return priceName;
 	}
-
+	
 	public void setPriceName(String priceName) {
 		this.priceName = priceName;
 	}
-
+	
 	public Integer getLineItemOrder() {
 		return lineItemOrder;
 	}
-
+	
 	public void setLineItemOrder(Integer lineItemOrder) {
 		this.lineItemOrder = lineItemOrder;
 	}
-
+	
 	public BillStatus getPaymentStatus() {
 		return paymentStatus;
 	}
-
+	
 	public void setPaymentStatus(BillStatus paymentStatus) {
 		this.paymentStatus = paymentStatus;
 	}

@@ -20,16 +20,17 @@ import org.openmrs.module.cashier.api.util.PrivilegeConstants;
  * Default authorization privileges for {@link org.openmrs.OpenmrsObject} data services.
  */
 public class BasicEntityAuthorizationPrivileges implements IObjectAuthorizationPrivileges {
+	
 	@Override
 	public String getSavePrivilege() {
 		return PrivilegeConstants.MANAGE_METADATA;
 	}
-
+	
 	@Override
 	public String getPurgePrivilege() {
 		return PrivilegeConstants.PURGE_METADATA;
 	}
-
+	
 	@Override
 	public String getGetPrivilege() {
 		return PrivilegeConstants.VIEW_METADATA;

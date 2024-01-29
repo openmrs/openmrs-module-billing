@@ -17,6 +17,7 @@ package org.openmrs.module.cashier.api.base.f;
  * Represents a function with no parameters and no return value.
  */
 public interface Action {
+	
 	/**
 	 * Executes the action.
 	 */

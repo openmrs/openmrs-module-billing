@@ -20,8 +20,9 @@ import org.openmrs.BaseOpenmrsMetadata;
  * Base class for {@link org.openmrs.OpenmrsMetadata} that need to support JSON serialization.
  */
 public abstract class BaseSerializableOpenmrsMetadata extends BaseOpenmrsMetadata {
+	
 	public static final long serialVersionUID = 0L;
-
+	
 	@Override
 	@JsonIgnore
 	public Boolean getRetired() {

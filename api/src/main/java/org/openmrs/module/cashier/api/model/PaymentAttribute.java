@@ -19,5 +19,6 @@ import org.openmrs.module.cashier.api.base.entity.model.BaseInstanceAttributeDat
  * Model class that represents a payment mode attribute for a particular {@link Payment}.
  */
 public class PaymentAttribute extends BaseInstanceAttributeData<Payment, PaymentMode, PaymentModeAttributeType> {
+	
 	public static final long serialVersionUID = 1L;
 }

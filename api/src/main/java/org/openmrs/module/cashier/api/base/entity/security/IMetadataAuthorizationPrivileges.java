@@ -18,8 +18,10 @@ package org.openmrs.module.cashier.api.base.entity.security;
  * {@link org.openmrs.module.openhmis.commons.api.entity .IMetadataDataService} operations.
  */
 public interface IMetadataAuthorizationPrivileges extends IObjectAuthorizationPrivileges {
+	
 	/**
 	 * The privilege required to retire or unretire metadata or {@code null} for no authorization.
+	 * 
 	 * @return The privilege name.
 	 */
 	String getRetirePrivilege();

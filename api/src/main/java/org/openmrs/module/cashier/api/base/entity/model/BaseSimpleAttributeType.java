@@ -17,5 +17,6 @@ package org.openmrs.module.cashier.api.base.entity.model;
  * Base class for simple attribute type models.
  */
 public class BaseSimpleAttributeType extends BaseAttributeType implements ISimpleAttributeType {
+	
 	public static final long serialVersionUID = 0L;
 }

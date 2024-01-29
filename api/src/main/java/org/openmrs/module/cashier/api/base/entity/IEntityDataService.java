@@ -20,13 +20,17 @@ import org.openmrs.module.cashier.api.base.PagingInfo;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Represents classes that provide data access services to model types that implement {@link org.openmrs.OpenmrsData}.
+ * Represents classes that provide data access services to model types that implement
+ * {@link org.openmrs.OpenmrsData}.
+ * 
  * @param <E> The {@link org.openmrs.OpenmrsData} model class.
  */
 @Transactional
 public interface IEntityDataService<E extends OpenmrsData> extends IObjectDataService<E> {
+	
 	/**
 	 * Voiding an entity essentially removes it from circulation.
+	 * 
 	 * @param entity The entity object to void.
 	 * @param reason The reason for voiding.
 	 * @should void the entity
@@ -34,26 +38,29 @@ public interface IEntityDataService<E extends OpenmrsData> extends IObjectDataSe
 	 * @should throw NullPointerException with null entity
 	 */
 	E voidEntity(E entity, String reason);
-
+	
 	/**
 	 * Unvoid the entity record.
+	 * 
 	 * @param entity The entity to be revived.
 	 * @should unvoid the entity
 	 * @should throw NullPointerException with null entity
 	 */
 	E unvoidEntity(E entity);
-
+	
 	/**
 	 * Returns all entity records that have the specified voided status.
+	 * 
 	 * @param includeVoided {@code true} to include voided entities.
 	 * @return All the entity records that have the specified voided status.
 	 * @should return all entities when includeVoided is set to true
 	 * @should return all unvoided entities when includeVoided is set to false
 	 */
 	List<E> getAll(boolean includeVoided);
-
+	
 	/**
 	 * Returns all entity records that have the specified voided status and paging.
+	 * 
 	 * @param includeVoided {@code true} to include voided entities.
 	 * @param paging The paging information.
 	 * @return All the entity records that have the specified voided status.

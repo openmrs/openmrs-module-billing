@@ -5,5 +5,4 @@ import org.openmrs.module.cashier.api.model.CashierItemPrice;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
-public interface ICashierItemPriceService extends IEntityDataService<CashierItemPrice> {
-}
+public interface ICashierItemPriceService extends IEntityDataService<CashierItemPrice> {}

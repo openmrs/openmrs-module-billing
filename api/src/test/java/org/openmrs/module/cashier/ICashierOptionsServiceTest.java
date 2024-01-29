@@ -22,16 +22,18 @@ import org.openmrs.module.cashier.base.BaseModuleContextTest;
 import org.openmrs.module.cashier.api.model.CashierOptions;
 
 public class ICashierOptionsServiceTest extends BaseModuleContextTest {
+	
 	public static final String OPTIONS_DATASET_VALID = TestConstants.BASE_DATASET_DIR + "CashierOptionsTestValid.xml";
+	
 	public static final String OPTIONS_DATASET_INVALID = TestConstants.BASE_DATASET_DIR + "CashierOptionsTestInvalid.xml";
-
+	
 	private ICashierOptionsService cashierOptionsService;
-
+	
 	@Before
 	public void before() {
 		cashierOptionsService = Context.getService(ICashierOptionsService.class);
 	}
-
+	
 	/**
 	 * @see ICashierOptionsService#getOptions()
 	 * @verifies Load options
@@ -41,22 +43,21 @@ public class ICashierOptionsServiceTest extends BaseModuleContextTest {
 		executeDataSet(OPTIONS_DATASET_VALID);
 		//		executeDataSet(IDepartmentDataServiceTest.DEPARTMENT_DATASET);
 		//		executeDataSet(IItemDataServiceTest.ITEM_DATASET);
-
+		
 		CashierOptions options = cashierOptionsService.getOptions();
 		Assert.assertEquals("4028814B399565AA01399681B1B5000E", options.getRoundingItemUuid());
 		Assert.assertEquals(3, options.getDefaultReceiptReportId());
 		Assert.assertEquals(CashierOptions.RoundingMode.MID, options.getRoundingMode());
-		Assert.assertEquals(5, (int)options.getRoundToNearest());
+		Assert.assertEquals(5, (int) options.getRoundToNearest());
 		Assert.assertTrue(options.isTimesheetRequired());
 	}
-
+	
 	/**
 	 * @see ICashierOptionsService#getOptions()
 	 * @verifies Revert to defaults if there are problems loading options
 	 */
 	@Test
-	public void getOptions_shouldRevertToDefaultsIfThereAreProblemsLoadingOptions()
-	        throws Exception {
+	public void getOptions_shouldRevertToDefaultsIfThereAreProblemsLoadingOptions() throws Exception {
 		executeDataSet(OPTIONS_DATASET_INVALID);
 		CashierOptions reference = new CashierOptions();
 		CashierOptions options = cashierOptionsService.getOptions();
@@ -66,5 +67,5 @@ public class ICashierOptionsServiceTest extends BaseModuleContextTest {
 		Assert.assertEquals(reference.getRoundToNearest(), options.getRoundToNearest());
 		Assert.assertEquals(reference.isTimesheetRequired(), options.isTimesheetRequired());
 	}
-
+	
 }

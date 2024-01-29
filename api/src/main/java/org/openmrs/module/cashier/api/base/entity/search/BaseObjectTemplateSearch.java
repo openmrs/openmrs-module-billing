@@ -22,29 +22,33 @@ import org.openmrs.OpenmrsObject;
 
 /**
  * Base template search class for {@link org.openmrs.OpenmrsObject} models.
+ * 
  * @param <T> The model class.
  */
 public class BaseObjectTemplateSearch<T extends OpenmrsObject> {
+	
 	public static final long serialVersionUID = 0L;
+	
 	private T template;
-
+	
 	public BaseObjectTemplateSearch(T template) {
 		this.template = template;
 	}
-
+	
 	public T getTemplate() {
 		return template;
 	}
-
+	
 	public void setTemplate(T template) {
 		this.template = template;
 	}
-
-	public void updateCriteria(Criteria criteria) {}
-
+	
+	public void updateCriteria(Criteria criteria) {
+	}
+	
 	protected Criterion createCriterion(String field, Object value, ComparisonType comparisonType) {
 		ComparisonType comparison = comparisonType == null ? ComparisonType.EQUAL : comparisonType;
-
+		
 		Criterion result;
 		switch (comparison) {
 			case EQUAL:
@@ -62,13 +66,13 @@ public class BaseObjectTemplateSearch<T extends OpenmrsObject> {
 			default:
 				throw new IllegalArgumentException();
 		}
-
+		
 		return result;
 	}
-
+	
 	protected Criterion createCriterion(String field, String value, StringComparisonType comparisonType) {
 		StringComparisonType comparison = comparisonType == null ? StringComparisonType.EQUAL : comparisonType;
-
+		
 		Criterion result;
 		switch (comparison) {
 			case EQUAL:
@@ -95,13 +99,13 @@ public class BaseObjectTemplateSearch<T extends OpenmrsObject> {
 			default:
 				throw new IllegalArgumentException();
 		}
-
+		
 		return result;
 	}
-
+	
 	protected Criterion createCriterion(String field, Date value, DateComparisonType comparisonType) {
 		DateComparisonType comparison = comparisonType == null ? DateComparisonType.EQUAL : comparisonType;
-
+		
 		Criterion result;
 		switch (comparison) {
 			case EQUAL:
@@ -131,28 +135,44 @@ public class BaseObjectTemplateSearch<T extends OpenmrsObject> {
 			default:
 				throw new IllegalArgumentException();
 		}
-
+		
 		return result;
 	}
-
+	
 	/**
 	 * Basic comparison types.
 	 */
 	public enum ComparisonType {
-		EQUAL, NOT_EQUAL, IS_NULL, IS_NOT_NULL
+		EQUAL,
+		NOT_EQUAL,
+		IS_NULL,
+		IS_NOT_NULL
 	}
-
+	
 	/**
 	 * String comparison types.
 	 */
 	public enum StringComparisonType {
-		EQUAL, NOT_EQUAL, IS_NULL, IS_NOT_NULL, IS_EMPTY, IS_NOT_EMPTY, LIKE
+		EQUAL,
+		NOT_EQUAL,
+		IS_NULL,
+		IS_NOT_NULL,
+		IS_EMPTY,
+		IS_NOT_EMPTY,
+		LIKE
 	}
-
+	
 	/**
 	 * Date comparison types.
 	 */
 	public enum DateComparisonType {
-		EQUAL, NOT_EQUAL, IS_NULL, IS_NOT_NULL, GREATER_THAN, GREATER_THAN_EQUAL, LESS_THAN, LESS_THAN_EQUAL,
+		EQUAL,
+		NOT_EQUAL,
+		IS_NULL,
+		IS_NOT_NULL,
+		GREATER_THAN,
+		GREATER_THAN_EQUAL,
+		LESS_THAN,
+		LESS_THAN_EQUAL,
 	}
 }

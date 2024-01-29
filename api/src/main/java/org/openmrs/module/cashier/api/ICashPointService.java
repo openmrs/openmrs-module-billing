@@ -27,8 +27,10 @@ import org.springframework.transaction.annotation.Transactional;
  * Interface that represents classes which perform data operations for {@link CashPoint}s.
  */
 public interface ICashPointService extends IMetadataDataService<CashPoint> {
+	
 	/**
 	 * Gets all the cashpoints for the specified {@link Location}.
+	 * 
 	 * @param location The location.
 	 * @param includeRetired Whether retired cashpoints should be included in the results.
 	 * @return All cashpoints for the specified {@link Location}.
@@ -40,9 +42,10 @@ public interface ICashPointService extends IMetadataDataService<CashPoint> {
 	@Transactional(readOnly = true)
 	@Authorized({ PrivilegeConstants.MANAGE_METADATA })
 	List<CashPoint> getCashPointsByLocation(Location location, boolean includeRetired);
-
+	
 	/**
 	 * Gets all the cashpoints for the specified {@link org.openmrs.Location}.
+	 * 
 	 * @param location The location.
 	 * @param includeRetired Whether retired cashpoints should be included in the results.
 	 * @param pagingInfo The paging information
@@ -52,9 +55,10 @@ public interface ICashPointService extends IMetadataDataService<CashPoint> {
 	@Transactional(readOnly = true)
 	@Authorized({ PrivilegeConstants.MANAGE_METADATA })
 	List<CashPoint> getCashPointsByLocation(Location location, boolean includeRetired, PagingInfo pagingInfo);
-
+	
 	/**
 	 * Gets all cashpoints in the specified {@link Location} that start with the specified name.
+	 * 
 	 * @param location The location to search within.
 	 * @param name The cashpoints name fragment.
 	 * @param includeRetired Whether retired cashpoints should be included in the results.
@@ -71,9 +75,10 @@ public interface ICashPointService extends IMetadataDataService<CashPoint> {
 	@Transactional(readOnly = true)
 	@Authorized({ PrivilegeConstants.MANAGE_METADATA })
 	List<CashPoint> getCashPointsByLocationAndName(Location location, String name, boolean includeRetired);
-
+	
 	/**
 	 * Gets all cashpoints in the specified {@link Location} that start with the specified name.
+	 * 
 	 * @param location The location to search within.
 	 * @param name The cashpoints name fragment.
 	 * @param includeRetired Whether retired cashpoints should be included in the results.

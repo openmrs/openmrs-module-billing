@@ -19,30 +19,31 @@ import org.openmrs.module.cashier.api.base.entity.model.BaseInstanceCustomizable
  * Model class that represents a mode of payment (e.g., cash, check, credit card).
  */
 public class PaymentMode extends BaseInstanceCustomizableType<PaymentModeAttributeType> {
+	
 	public static final long serialVersionUID = 0L;
-
+	
 	private Integer sortOrder;
-
+	
 	public Integer getSortOrder() {
 		return sortOrder;
 	}
-
+	
 	public void setSortOrder(Integer sortOrder) {
 		this.sortOrder = sortOrder;
 	}
-
+	
 	public PaymentModeAttributeType addAttributeType(String name, String format, String regExp, boolean required) {
 		PaymentModeAttributeType attributeType = new PaymentModeAttributeType();
-
+		
 		attributeType.setOwner(this);
-
+		
 		attributeType.setName(name);
 		attributeType.setFormat(format);
 		attributeType.setRegExp(regExp);
 		attributeType.setRequired(required);
-
+		
 		addAttributeType(attributeType);
-
+		
 		return attributeType;
 	}
 }

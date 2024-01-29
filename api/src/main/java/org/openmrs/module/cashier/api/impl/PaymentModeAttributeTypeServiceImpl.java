@@ -22,14 +22,14 @@ import org.openmrs.module.cashier.api.security.BasicMetadataAuthorizationPrivile
 /**
  * Data service implementation class for {@link PaymentModeAttributeType}s.
  */
-public class PaymentModeAttributeTypeServiceImpl extends BaseMetadataDataServiceImpl<PaymentModeAttributeType>
-        implements IPaymentModeAttributeTypeService {
-
+public class PaymentModeAttributeTypeServiceImpl extends BaseMetadataDataServiceImpl<PaymentModeAttributeType> implements IPaymentModeAttributeTypeService {
+	
 	@Override
 	protected IMetadataAuthorizationPrivileges getPrivileges() {
 		return new BasicMetadataAuthorizationPrivileges();
 	}
-
+	
 	@Override
-	protected void validate(PaymentModeAttributeType entity) {}
+	protected void validate(PaymentModeAttributeType entity) {
+	}
 }

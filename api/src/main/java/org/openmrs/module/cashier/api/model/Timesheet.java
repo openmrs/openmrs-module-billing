@@ -22,52 +22,57 @@ import org.openmrs.Provider;
  * Model class to represent a cashier timesheet entry.
  */
 public class Timesheet extends BaseOpenmrsData {
+	
 	public static final long serialVersionUID = 0L;
-
+	
 	private Integer timesheetId;
+	
 	private Provider cashier;
+	
 	private CashPoint cashPoint;
+	
 	private Date clockIn;
+	
 	private Date clockOut;
-
+	
 	@Override
 	public Integer getId() {
 		return timesheetId;
 	}
-
+	
 	@Override
 	public void setId(Integer id) {
 		this.timesheetId = id;
 	}
-
+	
 	public Provider getCashier() {
 		return cashier;
 	}
-
+	
 	public void setCashier(Provider cashier) {
 		this.cashier = cashier;
 	}
-
+	
 	public CashPoint getCashPoint() {
 		return cashPoint;
 	}
-
+	
 	public void setCashPoint(CashPoint cashPoint) {
 		this.cashPoint = cashPoint;
 	}
-
+	
 	public Date getClockIn() {
 		return clockIn;
 	}
-
+	
 	public void setClockIn(Date clockIn) {
 		this.clockIn = clockIn;
 	}
-
+	
 	public Date getClockOut() {
 		return clockOut;
 	}
-
+	
 	public void setClockOut(Date clockOut) {
 		this.clockOut = clockOut;
 	}

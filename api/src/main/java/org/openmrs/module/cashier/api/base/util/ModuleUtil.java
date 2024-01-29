@@ -19,8 +19,9 @@ import org.openmrs.module.ModuleFactory;
  * Utility class for working with modules.
  */
 public class ModuleUtil {
+	
 	public static final String IDGEN_MODULE_ID = "idgen";
-
+	
 	public static Boolean isLoaded(String moduleId) {
 		return ModuleFactory.getStartedModuleById(moduleId) != null;
 	}

@@ -15,11 +15,14 @@ package org.openmrs.module.cashier.api.base.f;
 
 /**
  * Represents a function with a single parameter and no return value.
+ * 
  * @param <TParm1> The first parameter class.
  */
 public interface Action1<TParm1> {
+	
 	/**
 	 * Executes the action.
+	 * 
 	 * @param parameter The parameter.
 	 */
 	void apply(TParm1 parameter);

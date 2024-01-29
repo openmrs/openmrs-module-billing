@@ -21,24 +21,25 @@ import org.openmrs.module.cashier.api.base.entity.model.BaseCustomizableMetadata
 
 /**
  * Base data service for {@link BaseCustomizableMetadata} models.
+ * 
  * @param <E> The model class.
  */
-public abstract class BaseCustomizableMetadataDataServiceImpl<E extends BaseCustomizableMetadata<?>>
-        extends BaseMetadataDataServiceImpl<E> {
+public abstract class BaseCustomizableMetadataDataServiceImpl<E extends BaseCustomizableMetadata<?>> extends BaseMetadataDataServiceImpl<E> {
+	
 	@Override
 	@SuppressWarnings("unchecked")
 	protected Collection<? extends OpenmrsObject> getRelatedObjects(E entity) {
 		Collection<? extends OpenmrsObject> result = super.getRelatedObjects(entity);
-
+		
 		if (result == null) {
 			result = new ArrayList<OpenmrsObject>();
 		}
-
+		
 		Collection attributes = entity.getAttributes();
 		if (attributes != null && !attributes.isEmpty()) {
 			result.addAll(attributes);
 		}
-
+		
 		return result;
 	}
 }

@@ -10,9 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 public interface ItemPriceService extends IEntityDataService<CashierItemPrice> {
+	
 	CashierItemPrice save(CashierItemPrice price);
-
+	
 	List<CashierItemPrice> getItemPrice(StockItem stockItem);
-
+	
 	List<CashierItemPrice> getServicePrice(BillableService billableService);
 }

@@ -17,40 +17,42 @@ import org.openmrs.module.cashier.api.IReceiptNumberGenerator;
 import org.openmrs.module.cashier.api.model.Bill;
 
 public class TestReceiptNumberGenerator implements IReceiptNumberGenerator {
+	
 	private int loadedCount = 0;
+	
 	private boolean loaded = false;
-
+	
 	@Override
 	public String getName() {
 		return "Test Receipt Number Generator";
 	}
-
+	
 	@Override
 	public String getDescription() {
 		return "";
 	}
-
+	
 	@Override
 	public void load() {
 		loadedCount++;
 		loaded = true;
 	}
-
+	
 	@Override
 	public String generateNumber(Bill bill) {
 		return null;
 	}
-
+	
 	@Override
 	public String getConfigurationPage() {
 		return null;
 	}
-
+	
 	@Override
 	public boolean isLoaded() {
 		return loaded;
 	}
-
+	
 	public int getLoadedCount() {
 		return loadedCount;
 	}
