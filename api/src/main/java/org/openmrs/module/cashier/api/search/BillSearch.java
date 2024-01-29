@@ -14,42 +14,47 @@
 package org.openmrs.module.cashier.api.search;
 
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.joda.time.DateTime;
 import org.openmrs.module.cashier.api.base.entity.search.BaseDataTemplateSearch;
 import org.openmrs.module.cashier.api.model.Bill;
+
+import java.util.Date;
 
 /**
  * A search template class for the {@link Bill} model.
  */
 public class BillSearch extends BaseDataTemplateSearch<Bill> {
-	public BillSearch() {
-		this(new Bill(), false);
-	}
+    public BillSearch() {
+        this(new Bill(), false);
+    }
 
-	public BillSearch(Bill template) {
-		this(template, false);
-	}
+    public BillSearch(Bill template) {
+        this(template, false);
+    }
 
-	public BillSearch(Bill template, Boolean includeRetired) {
-		super(template, includeRetired);
-	}
+    public BillSearch(Bill template, Boolean includeRetired) {
+        super(template, includeRetired);
+    }
 
-	@Override
-	public void updateCriteria(Criteria criteria) {
-		super.updateCriteria(criteria);
+    @Override
+    public void updateCriteria(Criteria criteria) {
+        super.updateCriteria(criteria);
 
-		Bill bill = getTemplate();
-		if (bill.getCashier() != null) {
-			criteria.add(Restrictions.eq("cashier", bill.getCashier()));
-		}
-		if (bill.getCashPoint() != null) {
-			criteria.add(Restrictions.eq("cashPoint", bill.getCashPoint()));
-		}
-		if (bill.getPatient() != null) {
-			criteria.add(Restrictions.eq("patient", bill.getPatient()));
-		}
-		if (bill.getStatus() != null) {
-			criteria.add(Restrictions.eq("status", bill.getStatus()));
-		}
-	}
+        Bill bill = getTemplate();
+        if (bill.getCashier() != null) {
+            criteria.add(Restrictions.eq("cashier", bill.getCashier()));
+        }
+        if (bill.getCashPoint() != null) {
+            criteria.add(Restrictions.eq("cashPoint", bill.getCashPoint()));
+        }
+        if (bill.getPatient() != null) {
+            criteria.add(Restrictions.eq("patient", bill.getPatient()));
+        }
+        if (bill.getStatus() != null) {
+            criteria.add(Restrictions.eq("status", bill.getStatus()));
+        }
+        criteria.addOrder(Order.desc("id"));
+    }
 }

@@ -58,7 +58,7 @@ public class BillableServiceResource extends BaseRestDataResource<BillableServic
         String serviceStatus = context.getParameter("isDisabled");
         BillableServiceStatus status = BillableServiceStatus.ENABLED;
         if (Strings.isNotEmpty(serviceStatus)) {
-            if (serviceStatus.equals("yes")) {
+            if (serviceStatus.equalsIgnoreCase("yes") || serviceStatus.equalsIgnoreCase("1")) {
                 status = BillableServiceStatus.DISABLED;
             }
         }
