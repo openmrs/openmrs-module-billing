@@ -26,7 +26,7 @@ public class CashierWebConstants extends WebConstants {
 	public static final String MODULE_RESOURCE_ROOT = WebConstants.MODULE_RESOURCE_BASE + CashierModuleConstants.MODULE_NAME
 	        + "/";
 	
-	public static final String MODULE_COMMONS_RESOURCE_ROOT = "/moduleResources/kenyaemr/commons/";
+	public static final String MODULE_COMMONS_RESOURCE_ROOT = "/moduleResources/billing/commons/";
 	
 	public static final String CASHIER_PAGE = MODULE_ROOT + "cashier";
 	

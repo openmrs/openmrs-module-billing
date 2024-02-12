@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * Controller to manage the Cashier Options page.
  */
 @Controller
-@RequestMapping("/module/kenyaemr/cashier/options")
+@RequestMapping("/module/billing/cashier/options")
 public class CashierOptionsController {
 
 	public CashierOptionsController() {

@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * Controller to manage the page to display patient's bills history.
  */
 @Controller
-@RequestMapping(value = "/module/kenyaemr/cashier/portlets/patientBillHistory")
+@RequestMapping(value = "/module/billing/cashier/portlets/patientBillHistory")
 public class PatientBillHistoryController {
 	private static final Logger LOG = Logger.getLogger(PatientBillHistoryController.class);
 
