@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("/rest/" + RestConstants.VERSION_1 + CashierSubResourceController.KENYAEMR_CASHIER_NAMESPACE)
 public class CashierSubResourceController extends MainSubResourceController {
-	public static final String KENYAEMR_CASHIER_NAMESPACE = "/cashier";
+	public static final String KENYAEMR_CASHIER_NAMESPACE = "/";
 	@Override
 	public String getNamespace() {
 		return RestConstants.VERSION_1 + CashierSubResourceController.KENYAEMR_CASHIER_NAMESPACE;
