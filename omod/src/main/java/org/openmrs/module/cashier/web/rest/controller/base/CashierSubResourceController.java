@@ -22,11 +22,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * REST sub controller for Cashier resources.
  */
 @Controller
-@RequestMapping("/rest/" + RestConstants.VERSION_1 + CashierSubResourceController.KENYAEMR_CASHIER_NAMESPACE)
+@RequestMapping("/rest/" + RestConstants.VERSION_1 + CashierSubResourceController.BILLING_NAMESPACE)
 public class CashierSubResourceController extends MainSubResourceController {
-	public static final String KENYAEMR_CASHIER_NAMESPACE = "/";
+	public static final String BILLING_NAMESPACE = "/billing";
 	@Override
 	public String getNamespace() {
-		return RestConstants.VERSION_1 + CashierSubResourceController.KENYAEMR_CASHIER_NAMESPACE;
+		return RestConstants.VERSION_1 + CashierSubResourceController.BILLING_NAMESPACE;
 	}
 }
