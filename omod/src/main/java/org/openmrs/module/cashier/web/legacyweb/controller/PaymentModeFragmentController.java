@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * Controller to manage the payment mode fragments.
  */
 @Controller
-@RequestMapping("/module/kenyaemr/cashier/paymentModeFragment")
+@RequestMapping("/module/billing/paymentModeFragment")
 public class PaymentModeFragmentController {
 	@RequestMapping(method = RequestMethod.GET)
 	public void paymentModeFragment(@RequestParam("uuid") String uuid, ModelMap model) {

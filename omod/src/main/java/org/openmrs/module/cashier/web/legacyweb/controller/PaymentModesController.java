@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * The controller that manages the Payment Modes page.
  */
 @Controller
-@RequestMapping("/module/kenyaemr/cashier/paymentModes")
+@RequestMapping("/module/billing/paymentModes")
 public class PaymentModesController {
 	@RequestMapping(method = RequestMethod.GET)
 	public void paymentModes(ModelMap model) throws IOException {
