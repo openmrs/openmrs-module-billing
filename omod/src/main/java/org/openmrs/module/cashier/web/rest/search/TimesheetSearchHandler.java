@@ -39,7 +39,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class TimesheetSearchHandler implements SearchHandler {
-	private final SearchConfig searchConfig = new SearchConfig("default", RestConstants.VERSION_2 + "/timesheet",
+	private final SearchConfig searchConfig = new SearchConfig("default", RestConstants.VERSION_2 + "/billing/timesheet",
             Collections.singletonList("*"), new SearchQuery.Builder("Find a timesheet by date").withRequiredParameters("date")
 	                .build());
 
