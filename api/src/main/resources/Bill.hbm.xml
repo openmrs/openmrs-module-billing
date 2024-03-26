@@ -2,9 +2,9 @@
 <!DOCTYPE hibernate-mapping PUBLIC
 		"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 		"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
-<hibernate-mapping package="org.openmrs.module.cashier.api.model">
+<hibernate-mapping package="org.openmrs.module.billing.api.model">
 
-	<class name="org.openmrs.module.cashier.api.model.CashierItemPrice" table="cashier_item_price">
+	<class name="org.openmrs.module.billing.api.model.CashierItemPrice" table="cashier_item_price">
 		<cache usage="read-write"/>
 		<id name="id" type="int" column="item_price_id">
 			<generator class="native">
@@ -14,8 +14,8 @@
 		<discriminator column="item_price_id" insert="false" />
 
 		<many-to-one name="item" class="org.openmrs.module.stockmanagement.api.model.StockItem" not-null="false" column="item_id" />
-		<many-to-one name="billableService" class="org.openmrs.module.cashier.api.model.BillableService" not-null="false" column="service_id" />
-		<many-to-one name="paymentMode" class="org.openmrs.module.cashier.api.model.PaymentMode" not-null="false" column="payment_mode" />
+		<many-to-one name="billableService" class="org.openmrs.module.billing.api.model.BillableService" not-null="false" column="service_id" />
+		<many-to-one name="paymentMode" class="org.openmrs.module.billing.api.model.PaymentMode" not-null="false" column="payment_mode" />
 
 		<property name="name" type="java.lang.String" column="name" not-null="false" length="255" />
 		<property name="price" type="java.math.BigDecimal" column="price" not-null="true" />
@@ -34,7 +34,7 @@
 		<property name="uuid" type="java.lang.String" column="uuid" length="38" unique="true" />
 	</class>
 
-	<class name="org.openmrs.module.cashier.api.model.BillableService" table="cashier_billable_service">
+	<class name="org.openmrs.module.billing.api.model.BillableService" table="cashier_billable_service">
 		<cache usage="read-write"/>
 
 		<id name="id" type="int" column="service_id">
@@ -54,11 +54,11 @@
 
 		<bag name="servicePrices" lazy="false" inverse="true" cascade="all-delete-orphan">
 			<key column="service_id" />
-			<one-to-many class="org.openmrs.module.cashier.api.model.CashierItemPrice" />
+			<one-to-many class="org.openmrs.module.billing.api.model.CashierItemPrice" />
 		</bag>
 		<property name="serviceStatus" column="service_status" not-null="true">
 			<type name="org.hibernate.type.EnumType">
-				<param name="enumClass">org.openmrs.module.cashier.api.model.BillableServiceStatus</param>
+				<param name="enumClass">org.openmrs.module.billing.api.model.BillableServiceStatus</param>
 				<param name="type">12</param>
 			</type>
 		</property>
@@ -78,7 +78,7 @@
 		<property name="uuid" type="java.lang.String" column="uuid" length="38" unique="true" />
 	</class>
 
-	<class name="org.openmrs.module.cashier.api.model.Bill" table="cashier_bill">
+	<class name="org.openmrs.module.billing.api.model.Bill" table="cashier_bill">
 		<cache usage="read-write"/>
 
 		<id name="id" type="int" column="bill_id">
@@ -91,12 +91,12 @@
 		<property name="receiptNumber" type="java.lang.String" column="receipt_number" not-null="true" length="255" />
 		<many-to-one name="cashier" class="org.openmrs.Provider" not-null="true" column="provider_id" />
 		<many-to-one name="patient" class="org.openmrs.Patient" not-null="true" column="patient_id" />
-		<many-to-one name="cashPoint" class="org.openmrs.module.cashier.api.model.CashPoint" not-null="true" column="cash_point_id" />
-		<many-to-one name="billAdjusted" class="org.openmrs.module.cashier.api.model.Bill" column="adjusted_bill_id" />
+		<many-to-one name="cashPoint" class="org.openmrs.module.billing.api.model.CashPoint" not-null="true" column="cash_point_id" />
+		<many-to-one name="billAdjusted" class="org.openmrs.module.billing.api.model.Bill" column="adjusted_bill_id" />
 
 		<property name="status" column="status" not-null="true">
 			<type name="org.hibernate.type.EnumType">
-				<param name="enumClass">org.openmrs.module.cashier.api.model.BillStatus</param>
+				<param name="enumClass">org.openmrs.module.billing.api.model.BillStatus</param>
 				<param name="type">12</param>
 			</type>
 		</property>
@@ -104,15 +104,15 @@
 		<list name="lineItems" lazy="false" inverse="true" cascade="all-delete-orphan">
 			<key column="bill_id" />
 			<list-index column="line_item_order" />
-			<one-to-many class="org.openmrs.module.cashier.api.model.BillLineItem" />
+			<one-to-many class="org.openmrs.module.billing.api.model.BillLineItem" />
 		</list>
 		<set name="payments" lazy="false" inverse="true" cascade="all-delete-orphan">
 			<key column="bill_id" />
-			<one-to-many class="org.openmrs.module.cashier.api.model.Payment" />
+			<one-to-many class="org.openmrs.module.billing.api.model.Payment" />
 		</set>
 		<set name="adjustedBy" lazy="true" inverse="true">
 			<key column="adjusted_bill_id" />
-			<one-to-many class="org.openmrs.module.cashier.api.model.Bill" />
+			<one-to-many class="org.openmrs.module.billing.api.model.Bill" />
 		</set>
 
 		<property name="receiptPrinted" column="receipt_printed" type="java.lang.Boolean" length="1" not-null="true" />
@@ -134,7 +134,7 @@
         <property name="adjustmentReason" type="java.lang.String" column="adjustment_reason" length="500" not-null="false"/>
 	</class>
 
-	<class name="org.openmrs.module.cashier.api.model.BillLineItem" table="cashier_bill_line_item">
+	<class name="org.openmrs.module.billing.api.model.BillLineItem" table="cashier_bill_line_item">
 		<cache usage="read-write"/>
 
 		<id name="id" type="int" column="bill_line_item_id">
@@ -144,17 +144,17 @@
 		</id>
 		<discriminator column="bill_line_item_id" insert="false" />
 
-		<many-to-one name="bill" class="org.openmrs.module.cashier.api.model.Bill" column="bill_id" not-null="true" />
+		<many-to-one name="bill" class="org.openmrs.module.billing.api.model.Bill" column="bill_id" not-null="true" />
 		<many-to-one name="item" class="org.openmrs.module.stockmanagement.api.model.StockItem" column="item_id" not-null="false" />
-		<many-to-one name="billableService" class="org.openmrs.module.cashier.api.model.BillableService" column="service_id" not-null="false" />
-		<many-to-one name="itemPrice" class="org.openmrs.module.cashier.api.model.CashierItemPrice" column="price_id" />
+		<many-to-one name="billableService" class="org.openmrs.module.billing.api.model.BillableService" column="service_id" not-null="false" />
+		<many-to-one name="itemPrice" class="org.openmrs.module.billing.api.model.CashierItemPrice" column="price_id" />
 		<property name="price" type="java.math.BigDecimal" column="price" not-null="true" />
 		<property name="priceName" type="java.lang.String" column="price_name" length="255" />
 		<property name="quantity" type="int" column="quantity" not-null="true" />
 		<property name="lineItemOrder" type="int" column="line_item_order" />
 		<property name="paymentStatus" column="payment_status" not-null="true">
 			<type name="org.hibernate.type.EnumType">
-				<param name="enumClass">org.openmrs.module.cashier.api.model.BillStatus</param>
+				<param name="enumClass">org.openmrs.module.billing.api.model.BillStatus</param>
 				<param name="type">12</param>
 			</type>
 		</property>
@@ -174,7 +174,7 @@
 		<property name="uuid" type="java.lang.String" column="uuid" length="38" unique="true" />
 	</class>
 
-	<class name="org.openmrs.module.cashier.api.model.Payment" table="cashier_bill_payment">
+	<class name="org.openmrs.module.billing.api.model.Payment" table="cashier_bill_payment">
 		<cache usage="read-write" />
 
 		<id name="id" type="int" column="bill_payment_id">
@@ -184,15 +184,15 @@
 		</id>
 		<discriminator column="bill_payment_id" insert="false" />
 
-		<many-to-one name="bill" class="org.openmrs.module.cashier.api.model.Bill" column="bill_id" not-null="true" />
-		<many-to-one name="instanceType" class="org.openmrs.module.cashier.api.model.PaymentMode" column="payment_mode_id" not-null="true" />
+		<many-to-one name="bill" class="org.openmrs.module.billing.api.model.Bill" column="bill_id" not-null="true" />
+		<many-to-one name="instanceType" class="org.openmrs.module.billing.api.model.PaymentMode" column="payment_mode_id" not-null="true" />
 
 		<property name="amount" type="java.math.BigDecimal" column="amount" not-null="true" />
 		<property name="amountTendered" type="java.math.BigDecimal" column="amount_tendered" not-null="true" />
 
 		<set name="attributes" lazy="false" inverse="true" cascade="all-delete-orphan">
 			<key column="bill_payment_id" />
-			<one-to-many class="org.openmrs.module.cashier.api.model.PaymentAttribute" />
+			<one-to-many class="org.openmrs.module.billing.api.model.PaymentAttribute" />
 		</set>
 
 		<!-- BaseOpenmrsData Fields-->
@@ -207,7 +207,7 @@
 		<property name="uuid" type="java.lang.String" column="uuid" length="38" unique="true" />
 	</class>
 
-	<class name="org.openmrs.module.cashier.api.model.PaymentAttribute" table="cashier_bill_payment_attribute">
+	<class name="org.openmrs.module.billing.api.model.PaymentAttribute" table="cashier_bill_payment_attribute">
 		<cache usage="read-write" />
 
 		<id name="id" type="int" column="bill_payment_attribute_id">
@@ -217,14 +217,14 @@
 		</id>
 		<discriminator column="bill_payment_attribute_id" insert="false" />
 
-		<many-to-one name="owner" class="org.openmrs.module.cashier.api.model.Payment" column="bill_payment_id" not-null="true" />
-		<many-to-one name="attributeType" class="org.openmrs.module.cashier.api.model.PaymentModeAttributeType" column="payment_mode_attribute_type_id" not-null="true" />
+		<many-to-one name="owner" class="org.openmrs.module.billing.api.model.Payment" column="bill_payment_id" not-null="true" />
+		<many-to-one name="attributeType" class="org.openmrs.module.billing.api.model.PaymentModeAttributeType" column="payment_mode_attribute_type_id" not-null="true" />
 		<property name="value" type="text" access="field" column="value_reference" length="65535" />
 
 		<property name="uuid" type="java.lang.String" column="uuid" length="38" unique="true" />
 	</class>
 
-	<class name="org.openmrs.module.cashier.api.model.PaymentMode" table="cashier_payment_mode">
+	<class name="org.openmrs.module.billing.api.model.PaymentMode" table="cashier_payment_mode">
 		<cache usage="read-write"/>
 
 		<id name="id" type="int" column="payment_mode_id">
@@ -241,7 +241,7 @@
 		<list name="attributeTypes" lazy="false" inverse="true" cascade="all-delete-orphan">
 			<key column="payment_mode_id" />
 			<list-index column="attribute_order" />
-			<one-to-many class="org.openmrs.module.cashier.api.model.PaymentModeAttributeType" />
+			<one-to-many class="org.openmrs.module.billing.api.model.PaymentModeAttributeType" />
 		</list>
 
 		<!-- BaseOpenmrsMetadata fields -->
@@ -256,7 +256,7 @@
 		<property name="uuid" type="java.lang.String" column="uuid" length="38" unique="true" />
 	</class>
 
-	<class name="org.openmrs.module.cashier.api.model.PaymentModeAttributeType" table="cashier_payment_mode_attribute_type">
+	<class name="org.openmrs.module.billing.api.model.PaymentModeAttributeType" table="cashier_payment_mode_attribute_type">
 		<cache usage="read-write"/>
 
 		<id name="id" type="int" column="payment_mode_attribute_type_id">
@@ -266,7 +266,7 @@
 		</id>
 		<discriminator column="payment_mode_attribute_type_id" insert="false" />
 
-		<many-to-one name="owner" class="org.openmrs.module.cashier.api.model.PaymentMode" column="payment_mode_id" not-null="true" />
+		<many-to-one name="owner" class="org.openmrs.module.billing.api.model.PaymentMode" column="payment_mode_id" not-null="true" />
 
 		<property name="attributeOrder" type="int" column="attribute_order" />
 		<property name="name" type="java.lang.String" column="name" not-null="true" length="255" />

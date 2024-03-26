@@ -14,7 +14,7 @@
 		<mapping resource="InvDepartment.hbm.xml" />
 		<mapping resource="InvItem.hbm.xml" />
 		<mapping resource="Bill.hbm.xml" />
-		<mapping resource="Cashier.hbm.xml" />
+		<mapping resource="Billing.hbm.xml" />
 		<mapping resource="SequentialReceiptNumberGenerator.hbm.xml" />
 	</session-factory>
 </hibernate-configuration>
