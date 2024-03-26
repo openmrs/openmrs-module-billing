@@ -24,8 +24,8 @@ import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.cashier.api.ICashPointService;
 import org.openmrs.module.cashier.api.ITimesheetService;
-import org.openmrs.module.cashier.base.entity.IEntityDataServiceTest;
 import org.openmrs.module.cashier.api.model.Timesheet;
+import org.openmrs.module.cashier.base.entity.IEntityDataServiceTest;
 
 public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetService, Timesheet> {
 	

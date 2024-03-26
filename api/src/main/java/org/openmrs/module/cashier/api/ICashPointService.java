@@ -30,7 +30,7 @@ public interface ICashPointService extends IMetadataDataService<CashPoint> {
 	
 	/**
 	 * Gets all the cashpoints for the specified {@link Location}.
-	 * 
+	 *
 	 * @param location The location.
 	 * @param includeRetired Whether retired cashpoints should be included in the results.
 	 * @return All cashpoints for the specified {@link Location}.
@@ -45,7 +45,7 @@ public interface ICashPointService extends IMetadataDataService<CashPoint> {
 	
 	/**
 	 * Gets all the cashpoints for the specified {@link org.openmrs.Location}.
-	 * 
+	 *
 	 * @param location The location.
 	 * @param includeRetired Whether retired cashpoints should be included in the results.
 	 * @param pagingInfo The paging information
@@ -58,7 +58,7 @@ public interface ICashPointService extends IMetadataDataService<CashPoint> {
 	
 	/**
 	 * Gets all cashpoints in the specified {@link Location} that start with the specified name.
-	 * 
+	 *
 	 * @param location The location to search within.
 	 * @param name The cashpoints name fragment.
 	 * @param includeRetired Whether retired cashpoints should be included in the results.
@@ -78,7 +78,7 @@ public interface ICashPointService extends IMetadataDataService<CashPoint> {
 	
 	/**
 	 * Gets all cashpoints in the specified {@link Location} that start with the specified name.
-	 * 
+	 *
 	 * @param location The location to search within.
 	 * @param name The cashpoints name fragment.
 	 * @param includeRetired Whether retired cashpoints should be included in the results.

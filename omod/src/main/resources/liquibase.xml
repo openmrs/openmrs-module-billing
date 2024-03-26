@@ -12,24 +12,42 @@
 		</preConditions>
 		<createTable tableName="cashier_billable_service">
 			<column name="service_id" type="int" autoIncrement="true">
-				<constraints primaryKey="true" nullable="false" />
+				<constraints primaryKey="true" nullable="false"/>
 			</column>
-			<column name="name"  type="varchar(255)"><constraints nullable="false"/></column>
-			<column name="short_name"  type="varchar(255)"><constraints nullable="true" /></column>
+			<column name="name" type="varchar(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="short_name" type="varchar(255)">
+				<constraints nullable="true"/>
+			</column>
 
-			<column name="service_type" type="int"><constraints nullable="true" /></column>
-			<column name="service_category" type="int"><constraints nullable="true" /></column>
-			<column name="service_status" type="varchar(255)"><constraints nullable="true" /></column>
+			<column name="service_type" type="int">
+				<constraints nullable="true"/>
+			</column>
+			<column name="service_category" type="int">
+				<constraints nullable="true"/>
+			</column>
+			<column name="service_status" type="varchar(255)">
+				<constraints nullable="true"/>
+			</column>
 
-			<column name="creator" type="int"><constraints nullable="false"/></column>
-			<column name="date_created" type="datetime"><constraints nullable="false"/></column>
+			<column name="creator" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="date_created" type="datetime">
+				<constraints nullable="false"/>
+			</column>
 			<column name="changed_by" type="int"/>
-			<column name="date_changed" type="datetime" />
-			<column name="voided" type="boolean" defaultValueBoolean="false"><constraints nullable="false"/></column>
-			<column name="voided_by" type="int" />
-			<column name="date_voided" type="datetime" />
+			<column name="date_changed" type="datetime"/>
+			<column name="voided" type="boolean" defaultValueBoolean="false">
+				<constraints nullable="false"/>
+			</column>
+			<column name="voided_by" type="int"/>
+			<column name="date_voided" type="datetime"/>
 			<column name="void_reason" type="varchar(255)" defaultValue="null"/>
-			<column name="uuid" type="char(38)"><constraints nullable="false" unique="true" /></column>
+			<column name="uuid" type="char(38)">
+				<constraints nullable="false" unique="true"/>
+			</column>
 		</createTable>
 	</changeSet>
 
@@ -42,47 +60,63 @@
 		</preConditions>
 		<createTable tableName="cashier_item_price">
 			<column name="item_price_id" autoIncrement="true" type="int">
-				<constraints nullable="false" primaryKey="true" />
+				<constraints nullable="false" primaryKey="true"/>
 			</column>
-			<column name="item_id" type="int"><constraints nullable="true"/></column>
-			<column name="service_id" type="int"><constraints nullable="true"/></column>
+			<column name="item_id" type="int">
+				<constraints nullable="true"/>
+			</column>
+			<column name="service_id" type="int">
+				<constraints nullable="true"/>
+			</column>
 
-			<column name="price" type="decimal(10,2)"><constraints nullable="false"/></column>
-			<column name="payment_mode" type="int"><constraints nullable="true"/></column>
-			<column defaultValue="" name="name" type="varchar(255)" />
+			<column name="price" type="decimal(10,2)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="payment_mode" type="int">
+				<constraints nullable="true"/>
+			</column>
+			<column defaultValue="" name="name" type="varchar(255)"/>
 
-			<column name="creator" type="int" defaultValueNumeric="0" ><constraints nullable="false"/></column>
-			<column name="date_created" type="DATETIME"><constraints nullable="false"/></column>
+			<column name="creator" type="int" defaultValueNumeric="0">
+				<constraints nullable="false"/>
+			</column>
+			<column name="date_created" type="DATETIME">
+				<constraints nullable="false"/>
+			</column>
 			<column name="changed_by" type="int"/>
 			<column name="date_changed" type="DATETIME"/>
-			<column defaultValueBoolean="false" name="voided" type="BOOLEAN"><constraints nullable="false"/></column>
+			<column defaultValueBoolean="false" name="voided" type="BOOLEAN">
+				<constraints nullable="false"/>
+			</column>
 			<column name="voided_by" type="int"/>
 			<column name="date_voided" type="DATETIME"/>
 			<column name="void_reason" type="varchar(255)"/>
-			<column name="uuid" type="char(38)"><constraints nullable="false" unique="true" /></column>
+			<column name="uuid" type="char(38)">
+				<constraints nullable="false" unique="true"/>
+			</column>
 		</createTable>
 
 		<addForeignKeyConstraint constraintName="cashier_item_price_item_id_fk"
-								 baseTableName="cashier_item_price" baseColumnNames="item_id"
-								 referencedTableName="stockmgmt_stock_item" referencedColumnNames="stock_item_id"
-								 onDelete="CASCADE" onUpdate="CASCADE"/>
+		                         baseTableName="cashier_item_price" baseColumnNames="item_id"
+		                         referencedTableName="stockmgmt_stock_item" referencedColumnNames="stock_item_id"
+		                         onDelete="CASCADE" onUpdate="CASCADE"/>
 		<addForeignKeyConstraint constraintName="cashier_item_price_service_id_fk"
-								 baseTableName="cashier_item_price" baseColumnNames="service_id"
-								 referencedTableName="cashier_billable_service" referencedColumnNames="service_id"
-								 onDelete="CASCADE" onUpdate="CASCADE"/>
+		                         baseTableName="cashier_item_price" baseColumnNames="service_id"
+		                         referencedTableName="cashier_billable_service" referencedColumnNames="service_id"
+		                         onDelete="CASCADE" onUpdate="CASCADE"/>
 		<addForeignKeyConstraint constraintName="cashier_item_price_creator_fk"
-								 baseTableName="cashier_item_price" baseColumnNames="creator"
-								 referencedTableName="users" referencedColumnNames="user_id"/>
+		                         baseTableName="cashier_item_price" baseColumnNames="creator"
+		                         referencedTableName="users" referencedColumnNames="user_id"/>
 		<addForeignKeyConstraint constraintName="cashier_item_price_changed_by_fk"
-								 baseTableName="cashier_item_price" baseColumnNames="changed_by"
-								 referencedTableName="users" referencedColumnNames="user_id"/>
+		                         baseTableName="cashier_item_price" baseColumnNames="changed_by"
+		                         referencedTableName="users" referencedColumnNames="user_id"/>
 		<addForeignKeyConstraint constraintName="cashier_item_price_retired_by_fk"
-								 baseTableName="cashier_item_price" baseColumnNames="voided_by"
-								 referencedTableName="users" referencedColumnNames="user_id"/>
+		                         baseTableName="cashier_item_price" baseColumnNames="voided_by"
+		                         referencedTableName="users" referencedColumnNames="user_id"/>
 		<addForeignKeyConstraint constraintName="cashier_billable_service_payment_mode_fk"
-								 baseTableName="cashier_item_price" baseColumnNames="payment_mode"
-								 referencedTableName="cashier_payment_mode" referencedColumnNames="payment_mode_id"
-								 onDelete="CASCADE" onUpdate="CASCADE"/>
+		                         baseTableName="cashier_item_price" baseColumnNames="payment_mode"
+		                         referencedTableName="cashier_payment_mode" referencedColumnNames="payment_mode_id"
+		                         onDelete="CASCADE" onUpdate="CASCADE"/>
 	</changeSet>
 	<changeSet id="openhmis.cashier-001-v1.0-1" author="ibewes">
 		<createTable tableName="cashier_item">
@@ -90,103 +124,16 @@
 				<constraints nullable="false" primaryKey="true"/>
 			</column>
 
-			<column name="name" type="varchar(255)" defaultValue="" ><constraints nullable="false"/></column>
+			<column name="name" type="varchar(255)" defaultValue="">
+				<constraints nullable="false"/>
+			</column>
 			<column name="description" type="varchar(1024)" defaultValue=""/>
-			<column name="department_id" type="int"><constraints nullable="false" /></column>
-			<column name="default_price_id" type="int" />
-
-			<column name="creator" type="int" defaultValueNumeric="0" ><constraints nullable="false"/></column>
-			<column name="date_created" type="DATETIME"><constraints nullable="false"/></column>
-			<column name="changed_by" type="int"/>
-			<column name="date_changed" type="DATETIME"/>
-			<column defaultValueBoolean="false" name="retired" type="BOOLEAN"><constraints nullable="false"/></column>
-			<column name="retired_by" type="int"/>
-			<column name="date_retired" type="DATETIME"/>
-			<column name="retire_reason" type="varchar(255)"/>
-			<column name="uuid" type="char(38)"><constraints nullable="false" unique="true" /></column>
-		</createTable>
-
-		<createTable tableName="cashier_item_attribute_type">
-			<column name="item_attribute_type_id" type="int" autoIncrement="true">
-				<constraints primaryKey="true" nullable="false" />
-			</column>
-			<column name="name" type="varchar(255)"><constraints nullable="false" /></column>
-			<column name="description" type="varchar(1024)" />
-			<column name="datatype" type="varchar(255)" />
-			<column name="datatype_config" type="text" />
-			<column name="preferred_handler" type="varchar(255)" />
-			<column name="handler_config" type="text" />
-			<column name="min_occurs" type="int"><constraints nullable="false" /></column>
-			<column name="max_occurs" type="int"/>
-			<column name="creator" type="int"><constraints nullable="false" /></column>
-			<column name="date_created" type="datetime"><constraints nullable="false" /></column>
-			<column name="changed_by" type="int" />
-			<column name="date_changed" type="datetime" />
-			<column name="retired" type="boolean" defaultValueBoolean="false"><constraints nullable="false" /></column>
-			<column name="retired_by" type="int" />
-			<column name="date_retired" type="datetime" />
-			<column name="retire_reason" type="varchar(255)" defaultValue="null" />
-			<column name="uuid" type="char(38)"><constraints nullable="false" unique="true" /></column>
-		</createTable>
-
-		<createTable tableName="cashier_item_attribute">
-			<column name="item_attribute_id" type="int" autoIncrement="true">
-				<constraints primaryKey="true" nullable="false" />
-			</column>
-			<column name="item_id" type="int"><constraints nullable="false" /></column>
-			<column name="item_attribute_type_id" type="int"><constraints nullable="false" /></column>
-			<column name="value_reference" type="text"><constraints nullable="false" /></column>
-			<column name="creator" type="int"><constraints nullable="false"/></column>
-			<column name="date_created" type="datetime"><constraints nullable="false"/></column>
-			<column name="changed_by" type="int"/>
-			<column name="date_changed" type="datetime" />
-			<column name="voided" type="boolean" defaultValueBoolean="false"><constraints nullable="false"/></column>
-			<column name="voided_by" type="int" />
-			<column name="date_voided" type="datetime" />
-			<column name="void_reason" type="varchar(255)" defaultValue="null"/>
-			<column name="uuid" type="char(38)"><constraints nullable="false" unique="true" /></column>
-		</createTable>
-
-		<createTable tableName="cashier_item_price">
-			<column name="item_price_id" autoIncrement="true" type="int">
-				<constraints nullable="false" primaryKey="true" />
-			</column>
-			<column name="item_id" type="int"><constraints nullable="false"/></column>
-			<column name="price" type="decimal(10,2)"><constraints nullable="false"/></column>
-
-			<column defaultValue="" name="name" type="varchar(255)" />
-			<column defaultValue="" name="description" type="varchar(1024)" />
-
-			<column name="creator" type="int" defaultValueNumeric="0" ><constraints nullable="false"/></column>
-			<column name="date_created" type="DATETIME"><constraints nullable="false"/></column>
-			<column name="changed_by" type="int"/>
-			<column name="date_changed" type="DATETIME"/>
-			<column name="voided" type="boolean" defaultValueBoolean="false"><constraints nullable="false"/></column>
-			<column name="voided_by" type="int" />
-			<column name="date_voided" type="datetime" />
-			<column name="void_reason" type="varchar(255)" defaultValue="null"/>
-			<column defaultValueBoolean="false" name="retired" type="BOOLEAN"><constraints nullable="false"/></column>
-			<column name="retired_by" type="int"/>
-			<column name="date_retired" type="DATETIME"/>
-			<column name="retire_reason" type="varchar(255)"/>
-			<column name="uuid" type="char(38)"><constraints nullable="false" unique="true" /></column>
-		</createTable>
-
-		<createTable tableName="cashier_item_code">
-			<column name="item_code_id" autoIncrement="true" type="int">
-				<constraints nullable="false" primaryKey="true" />
-			</column>
-			<column name="item_id" type="int">
+			<column name="department_id" type="int">
 				<constraints nullable="false"/>
 			</column>
-			<column name="code" type="varchar(255)">
-				<constraints nullable="false"/>
-			</column>
+			<column name="default_price_id" type="int"/>
 
-			<column defaultValue="" name="name" type="varchar(255)" />
-			<column defaultValue="" name="description" type="varchar(1024)" />
-
-			<column name="creator" type="int" defaultValueNumeric="0" >
+			<column name="creator" type="int" defaultValueNumeric="0">
 				<constraints nullable="false"/>
 			</column>
 			<column name="date_created" type="DATETIME">
@@ -200,7 +147,109 @@
 			<column name="retired_by" type="int"/>
 			<column name="date_retired" type="DATETIME"/>
 			<column name="retire_reason" type="varchar(255)"/>
-			<column name="uuid" type="char(38)"><constraints nullable="false" unique="true" /></column>
+			<column name="uuid" type="char(38)">
+				<constraints nullable="false" unique="true"/>
+			</column>
+		</createTable>
+
+		<createTable tableName="cashier_item_attribute_type">
+			<column name="item_attribute_type_id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+			<column name="name" type="varchar(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="description" type="varchar(1024)"/>
+			<column name="datatype" type="varchar(255)"/>
+			<column name="datatype_config" type="text"/>
+			<column name="preferred_handler" type="varchar(255)"/>
+			<column name="handler_config" type="text"/>
+			<column name="min_occurs" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="max_occurs" type="int"/>
+			<column name="creator" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="date_created" type="datetime">
+				<constraints nullable="false"/>
+			</column>
+			<column name="changed_by" type="int"/>
+			<column name="date_changed" type="datetime"/>
+			<column name="retired" type="boolean" defaultValueBoolean="false">
+				<constraints nullable="false"/>
+			</column>
+			<column name="retired_by" type="int"/>
+			<column name="date_retired" type="datetime"/>
+			<column name="retire_reason" type="varchar(255)" defaultValue="null"/>
+			<column name="uuid" type="char(38)">
+				<constraints nullable="false" unique="true"/>
+			</column>
+		</createTable>
+
+		<createTable tableName="cashier_item_attribute">
+			<column name="item_attribute_id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+			<column name="item_id" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="item_attribute_type_id" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="value_reference" type="text">
+				<constraints nullable="false"/>
+			</column>
+			<column name="creator" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="date_created" type="datetime">
+				<constraints nullable="false"/>
+			</column>
+			<column name="changed_by" type="int"/>
+			<column name="date_changed" type="datetime"/>
+			<column name="voided" type="boolean" defaultValueBoolean="false">
+				<constraints nullable="false"/>
+			</column>
+			<column name="voided_by" type="int"/>
+			<column name="date_voided" type="datetime"/>
+			<column name="void_reason" type="varchar(255)" defaultValue="null"/>
+			<column name="uuid" type="char(38)">
+				<constraints nullable="false" unique="true"/>
+			</column>
+		</createTable>
+
+		<createTable tableName="cashier_item_code">
+			<column name="item_code_id" autoIncrement="true" type="int">
+				<constraints nullable="false" primaryKey="true"/>
+			</column>
+			<column name="item_id" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="code" type="varchar(255)">
+				<constraints nullable="false"/>
+			</column>
+
+			<column defaultValue="" name="name" type="varchar(255)"/>
+			<column defaultValue="" name="description" type="varchar(1024)"/>
+
+			<column name="creator" type="int" defaultValueNumeric="0">
+				<constraints nullable="false"/>
+			</column>
+			<column name="date_created" type="DATETIME">
+				<constraints nullable="false"/>
+			</column>
+			<column name="changed_by" type="int"/>
+			<column name="date_changed" type="DATETIME"/>
+			<column defaultValueBoolean="false" name="retired" type="BOOLEAN">
+				<constraints nullable="false"/>
+			</column>
+			<column name="retired_by" type="int"/>
+			<column name="date_retired" type="DATETIME"/>
+			<column name="retire_reason" type="varchar(255)"/>
+			<column name="uuid" type="char(38)">
+				<constraints nullable="false" unique="true"/>
+			</column>
 		</createTable>
 
 		<createTable tableName="cashier_department">
@@ -210,9 +259,9 @@
 			<column defaultValue="" name="name" type="varchar(255)">
 				<constraints nullable="false"/>
 			</column>
-			<column defaultValue="" name="description" type="varchar(1024)" />
+			<column defaultValue="" name="description" type="varchar(1024)"/>
 
-			<column name="creator" type="int" defaultValueNumeric="0" >
+			<column name="creator" type="int" defaultValueNumeric="0">
 				<constraints nullable="false"/>
 			</column>
 			<column name="date_created" type="DATETIME">
@@ -226,211 +275,337 @@
 			<column name="retired_by" type="int"/>
 			<column name="date_retired" type="DATETIME"/>
 			<column name="retire_reason" type="varchar(255)"/>
-			<column name="uuid" type="char(38)"><constraints nullable="false" unique="true" /></column>
+			<column name="uuid" type="char(38)">
+				<constraints nullable="false" unique="true"/>
+			</column>
 		</createTable>
 
 		<createTable tableName="cashier_cash_point">
 			<column name="cash_point_id" type="int" autoIncrement="true">
-				<constraints primaryKey="true" nullable="false" />
+				<constraints primaryKey="true" nullable="false"/>
 			</column>
 
-			<column name="name" type="varchar(255)" defaultValue="" ><constraints nullable="false"/></column>
+			<column name="name" type="varchar(255)" defaultValue="">
+				<constraints nullable="false"/>
+			</column>
 			<column name="description" type="varchar(1024)" defaultValue=""/>
 
-			<column name="creator" type="int" defaultValueNumeric="0" ><constraints nullable="false"/></column>
-			<column name="date_created" type="DATETIME"><constraints nullable="false"/></column>
+			<column name="creator" type="int" defaultValueNumeric="0">
+				<constraints nullable="false"/>
+			</column>
+			<column name="date_created" type="DATETIME">
+				<constraints nullable="false"/>
+			</column>
 			<column name="changed_by" type="int"/>
 			<column name="date_changed" type="DATETIME"/>
-			<column name="retired" type="BOOLEAN" defaultValueBoolean="false" ><constraints nullable="false"/></column>
+			<column name="retired" type="BOOLEAN" defaultValueBoolean="false">
+				<constraints nullable="false"/>
+			</column>
 			<column name="retired_by" type="int"/>
 			<column name="date_retired" type="DATETIME"/>
 			<column name="retire_reason" type="varchar(255)"/>
-			<column name="uuid" type="char(38)" />
+			<column name="uuid" type="char(38)"/>
 		</createTable>
 
 		<createTable tableName="cashier_timesheet">
 			<column name="timesheet_id" type="int" autoIncrement="true">
-				<constraints primaryKey="true" nullable="false" />
+				<constraints primaryKey="true" nullable="false"/>
 			</column>
-			<column name="provider_id" type="int"><constraints nullable="false"/></column>
-			<column name="cash_point_id" type="int"><constraints nullable="false" /></column>
-			<column name="clock_in" type="datetime"><constraints nullable="false" /></column>
-			<column name="clock_out" type="datetime" />
+			<column name="provider_id" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="cash_point_id" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="clock_in" type="datetime">
+				<constraints nullable="false"/>
+			</column>
+			<column name="clock_out" type="datetime"/>
 
-			<column name="creator" type="int"><constraints nullable="false"/></column>
-			<column name="date_created" type="datetime"><constraints nullable="false"/></column>
+			<column name="creator" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="date_created" type="datetime">
+				<constraints nullable="false"/>
+			</column>
 			<column name="changed_by" type="int"/>
-			<column name="date_changed" type="datetime" />
-			<column name="voided" type="boolean" defaultValueBoolean="false"><constraints nullable="false"/></column>
-			<column name="voided_by" type="int" />
-			<column name="date_voided" type="datetime" />
+			<column name="date_changed" type="datetime"/>
+			<column name="voided" type="boolean" defaultValueBoolean="false">
+				<constraints nullable="false"/>
+			</column>
+			<column name="voided_by" type="int"/>
+			<column name="date_voided" type="datetime"/>
 			<column name="void_reason" type="varchar(255)" defaultValue="null"/>
-			<column name="uuid" type="char(38)"><constraints nullable="false" unique="true" /></column>
+			<column name="uuid" type="char(38)">
+				<constraints nullable="false" unique="true"/>
+			</column>
 		</createTable>
 
 		<createTable tableName="cashier_bill">
 			<column name="bill_id" type="int" autoIncrement="true">
-				<constraints primaryKey="true" nullable="false" />
+				<constraints primaryKey="true" nullable="false"/>
 			</column>
-			<column name="receipt_number" type="varchar(255)" />
-			<column name="provider_id" type="int"><constraints nullable="false"/></column>
-			<column name="patient_id" type="int"><constraints nullable="false" /></column>
-			<column name="cash_point_id" type="int"><constraints nullable="false" /></column>
-			<column name="status" type="int"><constraints nullable="false" /></column>
-			<column name="adjusted_bill_id" type="int" />
+			<column name="receipt_number" type="varchar(255)"/>
+			<column name="provider_id" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="patient_id" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="cash_point_id" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="status" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="adjusted_bill_id" type="int"/>
 
-			<column name="creator" type="int"><constraints nullable="false"/></column>
-			<column name="date_created" type="datetime"><constraints nullable="false"/></column>
+			<column name="creator" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="date_created" type="datetime">
+				<constraints nullable="false"/>
+			</column>
 			<column name="changed_by" type="int"/>
-			<column name="date_changed" type="datetime" />
-			<column name="voided" type="boolean" defaultValueBoolean="false"><constraints nullable="false"/></column>
-			<column name="voided_by" type="int" />
-			<column name="date_voided" type="datetime" />
+			<column name="date_changed" type="datetime"/>
+			<column name="voided" type="boolean" defaultValueBoolean="false">
+				<constraints nullable="false"/>
+			</column>
+			<column name="voided_by" type="int"/>
+			<column name="date_voided" type="datetime"/>
 			<column name="void_reason" type="varchar(255)" defaultValue="null"/>
-			<column name="uuid" type="char(38)"><constraints nullable="false" unique="true" /></column>
+			<column name="uuid" type="char(38)">
+				<constraints nullable="false" unique="true"/>
+			</column>
 		</createTable>
 
 		<createTable tableName="cashier_bill_line_item">
 			<column name="bill_line_item_id" type="int" autoIncrement="true">
-				<constraints primaryKey="true" nullable="false" />
+				<constraints primaryKey="true" nullable="false"/>
 			</column>
-			<column name="bill_id" type="int"><constraints nullable="false" /></column>
-			<column name="item_id" type="int"><constraints nullable="false" /></column>
-			<column name="price" type="decimal(10,2)"><constraints nullable="false"/></column>
+			<column name="bill_id" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="item_id" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="price" type="decimal(10,2)">
+				<constraints nullable="false"/>
+			</column>
 			<column name="price_name" type="varchar(255)"/>
-			<column name="quantity" type="int"><constraints nullable="false" /></column>
-			<column name="line_item_order" type="int"><constraints nullable="false"/></column>
+			<column name="quantity" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="line_item_order" type="int">
+				<constraints nullable="false"/>
+			</column>
 
-			<column name="creator" type="int"><constraints nullable="false"/></column>
-			<column name="date_created" type="datetime"><constraints nullable="false"/></column>
+			<column name="creator" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="date_created" type="datetime">
+				<constraints nullable="false"/>
+			</column>
 			<column name="changed_by" type="int"/>
-			<column name="date_changed" type="datetime" />
-			<column name="voided" type="boolean" defaultValueBoolean="false"><constraints nullable="false"/></column>
-			<column name="voided_by" type="int" />
-			<column name="date_voided" type="datetime" />
+			<column name="date_changed" type="datetime"/>
+			<column name="voided" type="boolean" defaultValueBoolean="false">
+				<constraints nullable="false"/>
+			</column>
+			<column name="voided_by" type="int"/>
+			<column name="date_voided" type="datetime"/>
 			<column name="void_reason" type="varchar(255)" defaultValue="null"/>
-			<column name="uuid" type="char(38)"><constraints nullable="false" unique="true" /></column>
+			<column name="uuid" type="char(38)">
+				<constraints nullable="false" unique="true"/>
+			</column>
 		</createTable>
 
 		<createTable tableName="cashier_payment_mode">
 			<column name="payment_mode_id" type="int" autoIncrement="true">
-				<constraints primaryKey="true" nullable="false" />
+				<constraints primaryKey="true" nullable="false"/>
 			</column>
 
-			<column defaultValue="" name="name" type="varchar(255)"><constraints nullable="false"/></column>
-			<column defaultValue="" name="description" type="varchar(1024)" />
+			<column defaultValue="" name="name" type="varchar(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column defaultValue="" name="description" type="varchar(1024)"/>
 
-			<column name="creator" type="int" defaultValueNumeric="0" ><constraints nullable="false"/></column>
-			<column name="date_created" type="DATETIME"><constraints nullable="false"/></column>
+			<column name="creator" type="int" defaultValueNumeric="0">
+				<constraints nullable="false"/>
+			</column>
+			<column name="date_created" type="DATETIME">
+				<constraints nullable="false"/>
+			</column>
 			<column name="changed_by" type="int"/>
 			<column name="date_changed" type="DATETIME"/>
-			<column defaultValueBoolean="false" name="retired" type="BOOLEAN"><constraints nullable="false"/></column>
+			<column defaultValueBoolean="false" name="retired" type="BOOLEAN">
+				<constraints nullable="false"/>
+			</column>
 			<column name="retired_by" type="int"/>
 			<column name="date_retired" type="DATETIME"/>
 			<column name="retire_reason" type="varchar(255)"/>
-			<column name="uuid" type="char(38)"><constraints nullable="false" unique="true" /></column>
+			<column name="uuid" type="char(38)">
+				<constraints nullable="false" unique="true"/>
+			</column>
 		</createTable>
 
 		<createTable tableName="cashier_bill_payment">
 			<column name="bill_payment_id" type="int" autoIncrement="true">
-				<constraints primaryKey="true" nullable="false" />
+				<constraints primaryKey="true" nullable="false"/>
 			</column>
 
-			<column name="bill_id" type="int"><constraints nullable="false" /></column>
-			<column name="payment_mode_id" type="int"><constraints nullable="false"/></column>
+			<column name="bill_id" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="payment_mode_id" type="int">
+				<constraints nullable="false"/>
+			</column>
 
-			<column name="amount" type="decimal(10,2)"><constraints nullable="false"/></column>
+			<column name="amount" type="decimal(10,2)">
+				<constraints nullable="false"/>
+			</column>
 
-			<column name="creator" type="int"><constraints nullable="false"/></column>
-			<column name="date_created" type="datetime"><constraints nullable="false"/></column>
+			<column name="creator" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="date_created" type="datetime">
+				<constraints nullable="false"/>
+			</column>
 			<column name="changed_by" type="int"/>
-			<column name="date_changed" type="datetime" />
-			<column name="voided" type="boolean" defaultValueBoolean="false"><constraints nullable="false"/></column>
-			<column name="voided_by" type="int" />
-			<column name="date_voided" type="datetime" />
+			<column name="date_changed" type="datetime"/>
+			<column name="voided" type="boolean" defaultValueBoolean="false">
+				<constraints nullable="false"/>
+			</column>
+			<column name="voided_by" type="int"/>
+			<column name="date_voided" type="datetime"/>
 			<column name="void_reason" type="varchar(255)" defaultValue="null"/>
-			<column name="uuid" type="char(38)"><constraints nullable="false" unique="true" /></column>
+			<column name="uuid" type="char(38)">
+				<constraints nullable="false" unique="true"/>
+			</column>
 		</createTable>
 
 		<createTable tableName="cashier_payment_mode_attribute_type">
 			<column name="payment_mode_attribute_type_id" type="int" autoIncrement="true">
-				<constraints primaryKey="true" nullable="false" />
+				<constraints primaryKey="true" nullable="false"/>
 			</column>
 
-			<column name="payment_mode_id" type="int"><constraints nullable="false" /></column>
-			<column name="attribute_order" type="int"><constraints nullable="false"/></column>
+			<column name="payment_mode_id" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="attribute_order" type="int">
+				<constraints nullable="false"/>
+			</column>
 
-			<column name="name" type="varchar(255)"><constraints nullable="false" /></column>
-			<column name="description" type="varchar(1024)" />
-			<column name="foreignKey" type="int" />
-			<column name="format" type="varchar(255)" />
-			<column name="reg_exp" type="varchar(255)" />
-			<column name="required" type="BOOLEAN" defaultValueBoolean="false" />
+			<column name="name" type="varchar(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="description" type="varchar(1024)"/>
+			<column name="foreignKey" type="int"/>
+			<column name="format" type="varchar(255)"/>
+			<column name="reg_exp" type="varchar(255)"/>
+			<column name="required" type="BOOLEAN" defaultValueBoolean="false"/>
 
-			<column name="creator" type="int"><constraints nullable="false" /></column>
-			<column name="date_created" type="datetime"><constraints nullable="false" /></column>
-			<column name="changed_by" type="int" />
-			<column name="date_changed" type="datetime" />
-			<column name="retired" type="boolean" defaultValueBoolean="false"><constraints nullable="false" /></column>
-			<column name="retired_by" type="int" />
-			<column name="date_retired" type="datetime" />
-			<column name="retire_reason" type="varchar(255)" defaultValue="null" />
+			<column name="creator" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="date_created" type="datetime">
+				<constraints nullable="false"/>
+			</column>
+			<column name="changed_by" type="int"/>
+			<column name="date_changed" type="datetime"/>
+			<column name="retired" type="boolean" defaultValueBoolean="false">
+				<constraints nullable="false"/>
+			</column>
+			<column name="retired_by" type="int"/>
+			<column name="date_retired" type="datetime"/>
+			<column name="retire_reason" type="varchar(255)" defaultValue="null"/>
 
-			<column name="uuid" type="char(38)"><constraints nullable="false" unique="true" /></column>
+			<column name="uuid" type="char(38)">
+				<constraints nullable="false" unique="true"/>
+			</column>
 		</createTable>
 
 		<createTable tableName="cashier_bill_payment_attribute">
 			<column name="bill_payment_attribute_id" type="int" autoIncrement="true">
-				<constraints primaryKey="true" nullable="false" />
+				<constraints primaryKey="true" nullable="false"/>
 			</column>
 
-			<column name="bill_payment_id" type="int"><constraints nullable="false" /></column>
-			<column name="payment_mode_attribute_type_id" type="int"><constraints nullable="false" /></column>
-			<column name="value_reference" type="text"><constraints nullable="false" /></column>
+			<column name="bill_payment_id" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="payment_mode_attribute_type_id" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="value_reference" type="text">
+				<constraints nullable="false"/>
+			</column>
 
-			<column name="uuid" type="char(38)"><constraints nullable="false" unique="true" /></column>
+			<column name="uuid" type="char(38)">
+				<constraints nullable="false" unique="true"/>
+			</column>
 		</createTable>
 
 		<createTable tableName="cashier_seq_receipt_number_generator">
 			<column name="seq_receipt_number_generator_id" type="int" autoIncrement="true">
-				<constraints primaryKey="true" nullable="false" />
+				<constraints primaryKey="true" nullable="false"/>
 			</column>
 
-			<column name="grouping_type" type="int"><constraints nullable="false"/></column>
-			<column name="sequence_type" type="int"><constraints nullable="false"/></column>
-			<column name="sequence_separator" type="varchar(5)"><constraints nullable="false"/></column>
-			<column name="cashier_prefix" type="varchar(5)"><constraints nullable="false"/></column>
-			<column name="cash_point_prefix" type="varchar(5)"><constraints nullable="false"/></column>
-			<column name="sequence_padding" type="int"><constraints nullable="false"/></column>
-			<column name="has_check_digit" type="boolean"><constraints nullable="false"/></column>
+			<column name="grouping_type" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="sequence_type" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="sequence_separator" type="varchar(5)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="cashier_prefix" type="varchar(5)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="cash_point_prefix" type="varchar(5)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="sequence_padding" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="has_check_digit" type="boolean">
+				<constraints nullable="false"/>
+			</column>
 
-			<column name="uuid" type="char(38)"><constraints nullable="false" unique="true" /></column>
+			<column name="uuid" type="char(38)">
+				<constraints nullable="false" unique="true"/>
+			</column>
 		</createTable>
 
 		<createTable tableName="cashier_seq_group_sequence">
 			<column name="seq_group_sequence_id" type="int" autoIncrement="true">
-				<constraints primaryKey="true" nullable="false" />
+				<constraints primaryKey="true" nullable="false"/>
 			</column>
 
-			<column name="sequence_group" type="varchar(50)"><constraints nullable="false" unique="true"/></column>
-			<column name="sequence_value" type="int"><constraints nullable="false"/></column>
-			
-			<column name="uuid" type="char(38)"><constraints nullable="false" unique="true" /></column>
+			<column name="sequence_group" type="varchar(50)">
+				<constraints nullable="false" unique="true"/>
+			</column>
+			<column name="sequence_value" type="int">
+				<constraints nullable="false"/>
+			</column>
+
+			<column name="uuid" type="char(38)">
+				<constraints nullable="false" unique="true"/>
+			</column>
 		</createTable>
-		
+
 		<createIndex indexName="cashier_item_name_idx" tableName="cashier_item" unique="false">
 			<column name="name"/>
-			<column name="retired" />
+			<column name="retired"/>
 		</createIndex>
 		<createIndex indexName="cashier_item_department_name_idx" tableName="cashier_item" unique="false">
-			<column name="department_id" />
+			<column name="department_id"/>
 			<column name="name"/>
-			<column name="retired" />
+			<column name="retired"/>
 		</createIndex>
 
-		<createIndex indexName="cashier_timesheet_provider_clock_in" tableName="cashier_timesheet" >
-			<column name="provider_id" />
-			<column name="clock_in" />
+		<createIndex indexName="cashier_timesheet_provider_clock_in" tableName="cashier_timesheet">
+			<column name="provider_id"/>
+			<column name="clock_in"/>
 		</createIndex>
 		<createIndex indexName="cashier_bill_receipt_number_idx" tableName="cashier_bill" unique="true">
 			<column name="receipt_number"/>
@@ -440,25 +615,25 @@
 		</createIndex>
 
 		<createIndex indexName="cashier_seq_group_sequence_sequence_group_idx" tableName="cashier_seq_group_sequence">
-			<column name="sequence_group" />
+			<column name="sequence_group"/>
 		</createIndex>
-		
+
 		<addForeignKeyConstraint constraintName="cashier_item_creator_fk"
 		                         baseTableName="cashier_item" baseColumnNames="creator"
 		                         referencedTableName="users" referencedColumnNames="user_id"
-		                         deferrable="false" initiallyDeferred="false" />
+		                         deferrable="false" initiallyDeferred="false"/>
 		<addForeignKeyConstraint constraintName="cashier_item_changed_by_fk"
 		                         baseTableName="cashier_item" baseColumnNames="changed_by"
 		                         referencedTableName="users" referencedColumnNames="user_id"
-		                         deferrable="false" initiallyDeferred="false" />
+		                         deferrable="false" initiallyDeferred="false"/>
 		<addForeignKeyConstraint constraintName="cashier_item_retired_by_fk"
 		                         baseTableName="cashier_item" baseColumnNames="retired_by"
 		                         referencedTableName="users" referencedColumnNames="user_id"
-		                         deferrable="false" initiallyDeferred="false" />
+		                         deferrable="false" initiallyDeferred="false"/>
 		<addForeignKeyConstraint constraintName="cashier_item_department_fk"
 		                         baseTableName="cashier_item" baseColumnNames="department_id"
 		                         referencedTableName="cashier_department" referencedColumnNames="department_id"
-		                         deferrable="false" initiallyDeferred="false" />
+		                         deferrable="false" initiallyDeferred="false"/>
 
 		<addForeignKeyConstraint constraintName="cashier_item_attribute_type_creator_fk"
 		                         baseTableName="cashier_item_attribute_type" baseColumnNames="creator"
@@ -472,11 +647,12 @@
 
 		<addForeignKeyConstraint constraintName="cashier_item_attribute_attribute_type_id_fk"
 		                         baseTableName="cashier_item_attribute" baseColumnNames="item_attribute_type_id"
-		                         referencedTableName="cashier_item_attribute_type" referencedColumnNames="item_attribute_type_id" />
+		                         referencedTableName="cashier_item_attribute_type"
+		                         referencedColumnNames="item_attribute_type_id"/>
 		<addForeignKeyConstraint constraintName="cashier_item_attribute_item_id_fk"
 		                         baseTableName="cashier_item_attribute" baseColumnNames="item_id"
 		                         referencedTableName="cashier_item" referencedColumnNames="item_id"
-								 onDelete="CASCADE" onUpdate="CASCADE"/>
+		                         onDelete="CASCADE" onUpdate="CASCADE"/>
 		<addForeignKeyConstraint constraintName="cashier_item_attribute_creator_fk"
 		                         baseTableName="cashier_item_attribute" baseColumnNames="creator"
 		                         referencedTableName="users" referencedColumnNames="user_id"/>
@@ -487,24 +663,10 @@
 		                         baseTableName="cashier_item_attribute" baseColumnNames="voided_by"
 		                         referencedTableName="users" referencedColumnNames="user_id"/>
 
-		<addForeignKeyConstraint constraintName="cashier_item_price_item_id_fk"
-		                         baseTableName="cashier_item_price" baseColumnNames="item_id"
-		                         referencedTableName="cashier_item" referencedColumnNames="item_id"
-								 onDelete="CASCADE" onUpdate="CASCADE"/>
-		<addForeignKeyConstraint constraintName="cashier_item_price_creator_fk"
-		                         baseTableName="cashier_item_price" baseColumnNames="creator"
-		                         referencedTableName="users" referencedColumnNames="user_id"/>
-		<addForeignKeyConstraint constraintName="cashier_item_price_changed_by_fk"
-		                         baseTableName="cashier_item_price" baseColumnNames="changed_by"
-		                         referencedTableName="users" referencedColumnNames="user_id"/>
-		<addForeignKeyConstraint constraintName="cashier_item_price_retired_by_fk"
-		                         baseTableName="cashier_item_price" baseColumnNames="retired_by"
-		                         referencedTableName="users" referencedColumnNames="user_id"/>
-
 		<addForeignKeyConstraint constraintName="cashier_item_code_item_id_fk"
 		                         baseTableName="cashier_item_code" baseColumnNames="item_id"
 		                         referencedTableName="cashier_item" referencedColumnNames="item_id"
-								 onDelete="CASCADE" onUpdate="CASCADE" />
+		                         onDelete="CASCADE" onUpdate="CASCADE"/>
 		<addForeignKeyConstraint constraintName="cashier_item_code_creator_fk"
 		                         baseTableName="cashier_item_code" baseColumnNames="creator"
 		                         referencedTableName="users" referencedColumnNames="user_id"/>
@@ -528,15 +690,15 @@
 		<addForeignKeyConstraint constraintName="cashier_cash_point_creator_fk"
 		                         baseTableName="cashier_cash_point" baseColumnNames="creator"
 		                         referencedTableName="users" referencedColumnNames="user_id"
-		                         deferrable="false" initiallyDeferred="false" />
+		                         deferrable="false" initiallyDeferred="false"/>
 		<addForeignKeyConstraint constraintName="cashier_cash_point_changed_by_fk"
 		                         baseTableName="cashier_cash_point" baseColumnNames="changed_by"
 		                         referencedTableName="users" referencedColumnNames="user_id"
-		                         deferrable="false" initiallyDeferred="false" />
+		                         deferrable="false" initiallyDeferred="false"/>
 		<addForeignKeyConstraint constraintName="cashier_cash_point_retired_by_fk"
 		                         baseTableName="cashier_cash_point" baseColumnNames="retired_by"
 		                         referencedTableName="users" referencedColumnNames="user_id"
-		                         deferrable="false" initiallyDeferred="false" />
+		                         deferrable="false" initiallyDeferred="false"/>
 
 		<addForeignKeyConstraint constraintName="cashier_timesheet_provider_fk"
 		                         baseTableName="cashier_timesheet" baseColumnNames="provider_id"
@@ -639,12 +801,16 @@
 		                         referencedTableName="cashier_bill_payment" referencedColumnNames="bill_payment_id"
 		                         onDelete="CASCADE" onUpdate="CASCADE"/>
 		<addForeignKeyConstraint constraintName="cashier_bill_payment_attribute_payment_mode_attribute_type_id_fk"
-		                         baseTableName="cashier_bill_payment_attribute" baseColumnNames="payment_mode_attribute_type_id"
-		                         referencedTableName="cashier_payment_mode_attribute_type" referencedColumnNames="payment_mode_attribute_type_id"/>
+		                         baseTableName="cashier_bill_payment_attribute"
+		                         baseColumnNames="payment_mode_attribute_type_id"
+		                         referencedTableName="cashier_payment_mode_attribute_type"
+		                         referencedColumnNames="payment_mode_attribute_type_id"/>
 	</changeSet>
 	<changeSet id="openhmis.cashier-001-v1.0-3" author="ibewes">
 		<addColumn tableName="cashier_bill_payment">
-			<column name="amount_tendered" type="decimal(10,2)"><constraints nullable="false"/></column>
+			<column name="amount_tendered" type="decimal(10,2)">
+				<constraints nullable="false"/>
+			</column>
 		</addColumn>
 	</changeSet>
 	<changeSet id="openhmis.cashier-001-v1.5-1" author="shortend">
@@ -657,32 +823,37 @@
 
 	<changeSet id="openhmis.cashier-901-v2.0-1" author="ibewes">
 		<preConditions onFail="MARK_RAN">
-			<foreignKeyConstraintExists foreignKeyName="cashier_bill_line_item_item_id_fk" />
+			<foreignKeyConstraintExists foreignKeyName="cashier_bill_line_item_item_id_fk"/>
 		</preConditions>
 
-		<dropForeignKeyConstraint baseTableName="cashier_bill_line_item" constraintName="cashier_bill_line_item_item_id_fk" />
+		<dropForeignKeyConstraint baseTableName="cashier_bill_line_item"
+		                          constraintName="cashier_bill_line_item_item_id_fk"/>
 		<addForeignKeyConstraint constraintName="cashier_bill_line_item_item_id_fk"
-								 baseTableName="cashier_bill_line_item" baseColumnNames="item_id"
-								 referencedTableName="stockmgmt_stock_item" referencedColumnNames="stock_item_id" />
+		                         baseTableName="cashier_bill_line_item" baseColumnNames="item_id"
+		                         referencedTableName="stockmgmt_stock_item" referencedColumnNames="stock_item_id"/>
 	</changeSet>
 
-    <changeSet id="openhmis.cashier-001-v2.0.0-2" author="Benjamin Mwalimu">
-        <comment>Adding the column "adjustment_reason" to the table cashier_bill </comment>
-        <addColumn tableName="cashier_bill">
-            <column name="adjustment_reason" type="varchar(500)"><constraints nullable="true"/></column>
-        </addColumn>
-    </changeSet>
-    <changeSet id="openhmis.cashier-001-v2.0.0-3" author="Benjamin Mwalimu">
-        <comment>Adding the column "location_id" to the table cashier_cash_point</comment>
-        <addColumn tableName="cashier_cash_point">
-            <column name="location_id" type="int"><constraints nullable="true"/></column>
-        </addColumn>
-        <addForeignKeyConstraint constraintName="cashier_cash_point_location_fk"
-                                 baseTableName="cashier_cash_point" baseColumnNames="location_id"
-                                 referencedTableName="location" referencedColumnNames="location_id"/>
-    </changeSet>
-    <changeSet id="openhmis.cashier-001-v2.0.0-4" author="marios">
-    	<comment>Adding new View item Privilege</comment>
+	<changeSet id="openhmis.cashier-001-v2.0.0-2" author="Benjamin Mwalimu">
+		<comment>Adding the column "adjustment_reason" to the table cashier_bill</comment>
+		<addColumn tableName="cashier_bill">
+			<column name="adjustment_reason" type="varchar(500)">
+				<constraints nullable="true"/>
+			</column>
+		</addColumn>
+	</changeSet>
+	<changeSet id="openhmis.cashier-001-v2.0.0-3" author="Benjamin Mwalimu">
+		<comment>Adding the column "location_id" to the table cashier_cash_point</comment>
+		<addColumn tableName="cashier_cash_point">
+			<column name="location_id" type="int">
+				<constraints nullable="true"/>
+			</column>
+		</addColumn>
+		<addForeignKeyConstraint constraintName="cashier_cash_point_location_fk"
+		                         baseTableName="cashier_cash_point" baseColumnNames="location_id"
+		                         referencedTableName="location" referencedColumnNames="location_id"/>
+	</changeSet>
+	<changeSet id="openhmis.cashier-001-v2.0.0-4" author="marios">
+		<comment>Adding new View item Privilege</comment>
 		<sql>
 			INSERT INTO role_privilege (role, privilege)
 			SELECT role, 'View Inventory Items'
@@ -729,8 +900,8 @@
 			DELETE FROM privilege
 			WHERE privilege = 'Purge Cashier Items'
 		</sql>
-    </changeSet>
-    <changeSet id="openhmis.cashier-001-v2.0.0-5" author="marios">
+	</changeSet>
+	<changeSet id="openhmis.cashier-001-v2.0.0-5" author="marios">
 		<preConditions onFail="MARK_RAN">
 			<sqlCheck expectedResult="1">SELECT COUNT(*) FROM privilege WHERE privilege = 'Refund Money'</sqlCheck>
 		</preConditions>
@@ -748,28 +919,28 @@
 			DELETE FROM privilege
 			WHERE privilege = 'Give Refund'
 		</sql>
-    </changeSet>
-<!--	<changeSet id="openhmis.cashier-001-v2.0.0-6" author="pochu">-->
-<!--		<preConditions onFail="MARK_RAN">-->
-<!--			<sqlCheck expectedResult="0">-->
-<!--				SELECT COUNT(*) FROM scheduler_task_config-->
-<!--				WHERE schedulable_class = 'org.openmrs.module.cashier.tasks.api.cashier.AutoCloseTimesheetsTask'-->
-<!--				And name = 'Auto Close Open Timesheets Task'-->
-<!--			</sqlCheck>-->
-<!--		</preConditions>-->
-<!--		<comment>Inserting Auto Close Open Timesheets Task into 'schedule_task_config' table</comment>-->
-<!--		<insert tableName="scheduler_task_config">-->
-<!--			<column name="name" value="Auto Close Open Timesheets Task" />-->
-<!--			<column name="description" value="Stops all active visits that match the visit type(s) specified by the value of the global property 'autoCloseVisits.visitType'" />-->
-<!--			<column name="schedulable_class" value="org.openmrs.module.cashier.tasks.api.cashier.AutoCloseTimesheetsTask" />-->
-<!--			<column name="start_time_pattern" value="MM/dd/yyyy HH:mm:ss" />-->
-<!--			<column name="start_time" valueDate="2011-11-28T23:49:59" />-->
-<!--			<column name="repeat_interval" value="86400" />-->
-<!--			<column name="date_created" valueDate="CURRENT_TIMESTAMP" />-->
-<!--			<column name="created_by" value="1" />-->
-<!--			<column name="uuid" value="d02004f7-594b-464a-9f89-6d54a887ceaf" />-->
-<!--		</insert>-->
-<!--	</changeSet>-->
+	</changeSet>
+	<!--	<changeSet id="openhmis.cashier-001-v2.0.0-6" author="pochu">-->
+	<!--		<preConditions onFail="MARK_RAN">-->
+	<!--			<sqlCheck expectedResult="0">-->
+	<!--				SELECT COUNT(*) FROM scheduler_task_config-->
+	<!--				WHERE schedulable_class = 'org.openmrs.module.cashier.tasks.api.cashier.AutoCloseTimesheetsTask'-->
+	<!--				And name = 'Auto Close Open Timesheets Task'-->
+	<!--			</sqlCheck>-->
+	<!--		</preConditions>-->
+	<!--		<comment>Inserting Auto Close Open Timesheets Task into 'schedule_task_config' table</comment>-->
+	<!--		<insert tableName="scheduler_task_config">-->
+	<!--			<column name="name" value="Auto Close Open Timesheets Task" />-->
+	<!--			<column name="description" value="Stops all active visits that match the visit type(s) specified by the value of the global property 'autoCloseVisits.visitType'" />-->
+	<!--			<column name="schedulable_class" value="org.openmrs.module.cashier.tasks.api.cashier.AutoCloseTimesheetsTask" />-->
+	<!--			<column name="start_time_pattern" value="MM/dd/yyyy HH:mm:ss" />-->
+	<!--			<column name="start_time" valueDate="2011-11-28T23:49:59" />-->
+	<!--			<column name="repeat_interval" value="86400" />-->
+	<!--			<column name="date_created" valueDate="CURRENT_TIMESTAMP" />-->
+	<!--			<column name="created_by" value="1" />-->
+	<!--			<column name="uuid" value="d02004f7-594b-464a-9f89-6d54a887ceaf" />-->
+	<!--		</insert>-->
+	<!--	</changeSet>-->
 	<changeSet id="openhmis.cashier-001-v2.0.0-7" author="aderkey">
 		<comment>Changing enums to varchar instead of int</comment>
 		<comment>cashier_bill.status</comment>
@@ -792,7 +963,8 @@
 			UPDATE cashier_bill SET _status = 'ADJUSTED' where status = 4
 		</sql>
 		<dropColumn tableName="cashier_bill" columnName="status"/>
-		<renameColumn tableName="cashier_bill" oldColumnName="_status" newColumnName="status" columnDataType="varchar(10)"/>
+		<renameColumn tableName="cashier_bill" oldColumnName="_status" newColumnName="status"
+		              columnDataType="varchar(10)"/>
 		<addNotNullConstraint tableName="cashier_bill" columnName="status" columnDataType="varchar(10)"/>
 
 		<comment>cashier_seq_receipt_number_generator.sequence_type</comment>
@@ -809,8 +981,10 @@
 			UPDATE cashier_seq_receipt_number_generator SET _sequence_type = 'DATE_TIME_COUNTER' where sequence_type = 2
 		</sql>
 		<dropColumn tableName="cashier_seq_receipt_number_generator" columnName="sequence_type"/>
-		<renameColumn tableName="cashier_seq_receipt_number_generator" oldColumnName="_sequence_type" newColumnName="sequence_type" columnDataType="varchar(20)"/>
-		<addNotNullConstraint tableName="cashier_seq_receipt_number_generator" columnName="sequence_type" columnDataType="varchar(20)"/>
+		<renameColumn tableName="cashier_seq_receipt_number_generator" oldColumnName="_sequence_type"
+		              newColumnName="sequence_type" columnDataType="varchar(20)"/>
+		<addNotNullConstraint tableName="cashier_seq_receipt_number_generator" columnName="sequence_type"
+		                      columnDataType="varchar(20)"/>
 
 		<comment>cashier_seq_receipt_number_generator.grouping_type</comment>
 		<addColumn tableName="cashier_seq_receipt_number_generator">
@@ -826,34 +1000,43 @@
 			UPDATE cashier_seq_receipt_number_generator SET _grouping_type = 'CASH_POINT' where grouping_type = 2
 		</sql>
 		<sql>
-			UPDATE cashier_seq_receipt_number_generator SET _grouping_type = 'CASHIER_AND_CASH_POINT' where grouping_type = 3
+			UPDATE cashier_seq_receipt_number_generator SET _grouping_type = 'CASHIER_AND_CASH_POINT' where
+			grouping_type = 3
 		</sql>
 		<dropColumn tableName="cashier_seq_receipt_number_generator" columnName="grouping_type"/>
-		<renameColumn tableName="cashier_seq_receipt_number_generator" oldColumnName="_grouping_type" newColumnName="grouping_type" columnDataType="varchar(25)"/>
-		<addNotNullConstraint tableName="cashier_seq_receipt_number_generator" columnName="grouping_type" columnDataType="varchar(25)"/>
+		<renameColumn tableName="cashier_seq_receipt_number_generator" oldColumnName="_grouping_type"
+		              newColumnName="grouping_type" columnDataType="varchar(25)"/>
+		<addNotNullConstraint tableName="cashier_seq_receipt_number_generator" columnName="grouping_type"
+		                      columnDataType="varchar(25)"/>
 	</changeSet>
 	<changeSet id="openhmis.cashier-001-v2.0.0-8" author="marios">
 		<addColumn tableName="cashier_bill_line_item">
-			<column name="price_id" type="int"><constraints nullable="false" /></column>
+			<column name="price_id" type="int">
+				<constraints nullable="false"/>
+			</column>
 		</addColumn>
 	</changeSet>
 	<changeSet id="openhmis.cashier-001-v2.0.0-9" author="marios">
-		<dropNotNullConstraint  columnDataType="int" columnName="price_id" tableName="cashier_bill_line_item"/>
+		<dropNotNullConstraint columnDataType="int" columnName="price_id" tableName="cashier_bill_line_item"/>
 		<update tableName="cashier_bill_line_item">
-        	<column name="price_id" type="int" value="NULL"/>
-        	<where>price_id = 0</where>
+			<column name="price_id" type="int" value="NULL"/>
+			<where>price_id = 0</where>
 		</update>
 	</changeSet>
 	<changeSet id="openhmis.cashier-001-v2.2.0-0" author="ibewes">
 		<addColumn tableName="cashier_payment_mode">
-			<column name="sort_order" type="int"><constraints nullable="true"/></column>
+			<column name="sort_order" type="int">
+				<constraints nullable="true"/>
+			</column>
 		</addColumn>
 	</changeSet>
 
 	<changeSet id="openhmis.cashier-001-v3.0.0-0" author="Aojwang">
-		<comment>Adding the column status to the table cashier_bill_line_item </comment>
+		<comment>Adding the column status to the table cashier_bill_line_item</comment>
 		<addColumn tableName="cashier_bill_line_item">
-			<column name="payment_status" type="varchar(10)"><constraints nullable="false"/></column>
+			<column name="payment_status" type="varchar(10)">
+				<constraints nullable="false"/>
+			</column>
 		</addColumn>
 	</changeSet>
 	<changeSet id="openhmis.cashier-001-v3.0.0-0334" author="jecihjoy">
@@ -866,9 +1049,9 @@
 		<sql>ALTER TABLE cashier_bill_line_item MODIFY COLUMN item_id INT DEFAULT NULL</sql>
 
 		<addForeignKeyConstraint constraintName="cashier_bill_line_item_service_id_fk"
-								 baseTableName="cashier_bill_line_item" baseColumnNames="service_id"
-								 referencedTableName="cashier_billable_service" referencedColumnNames="service_id"
-								 onDelete="CASCADE" onUpdate="CASCADE"/>
+		                         baseTableName="cashier_bill_line_item" baseColumnNames="service_id"
+		                         referencedTableName="cashier_billable_service" referencedColumnNames="service_id"
+		                         onDelete="CASCADE" onUpdate="CASCADE"/>
 	</changeSet>
 	<changeSet id="openhmis.cashier-001-v3.0.0-01172024" author="jecihjoy">
 		<comment>Add concept_id column in billable services</comment>
@@ -879,7 +1062,7 @@
 		</addColumn>
 
 		<addForeignKeyConstraint constraintName="cashier_cashier_billable_service_concept_id_fk"
-								 baseTableName="cashier_billable_service" baseColumnNames="concept_id"
-								 referencedTableName="concept" referencedColumnNames="concept_id"/>
+		                         baseTableName="cashier_billable_service" baseColumnNames="concept_id"
+		                         referencedTableName="concept" referencedColumnNames="concept_id"/>
 	</changeSet>
 </databaseChangeLog>

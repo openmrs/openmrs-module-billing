@@ -13,15 +13,15 @@
  */
 package org.openmrs.module.cashier.api.base.entity.impl;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
 import org.hibernate.Version;
 import org.hibernate.criterion.Projection;
 import org.hibernate.transform.ResultTransformer;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 /**
  * Wrapper class to handle differences between Hibernate 3 and 4 for the CriteriaImpl class.

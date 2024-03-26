@@ -18,16 +18,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openmrs.Privilege;
 import org.openmrs.api.UserService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.jasperreport.util.JasperReportPrivilegeConstants;
 import org.openmrs.module.cashier.api.base.compatibility.PrivilegeConstantsCompatibility;
 
 /**
  * Constants class for module privilege constants.
  */
 public class PrivilegeConstants {
+	
+	private static final Log LOG = LogFactory.getLog(PrivilegeConstants.class);
 	
 	private static PrivilegeConstantsCompatibility privilegeConstantsCompatibility;
 	
@@ -87,7 +90,7 @@ public class PrivilegeConstants {
 	
 	/**
 	 * Gets all the privileges defined by the module.
-	 * 
+	 *
 	 * @return The module privileges.
 	 */
 	public static Set<Privilege> getModulePrivileges() {
@@ -107,7 +110,7 @@ public class PrivilegeConstants {
 	
 	/**
 	 * Gets the default privileges needed to fully use the module.
-	 * 
+	 *
 	 * @return A set containing the default set of privileges.
 	 */
 	public static Set<Privilege> getDefaultPrivileges() {
@@ -122,7 +125,6 @@ public class PrivilegeConstants {
 		// Add other required cashier privileges
 		names.add("View Inventory Items");
 		names.add("View Inventory Metadata");
-		names.add(JasperReportPrivilegeConstants.VIEW_JASPER_REPORTS);
 		
 		names.add(org.openmrs.util.PrivilegeConstants.ADD_ENCOUNTERS);
 		names.add(org.openmrs.util.PrivilegeConstants.ADD_VISITS);
@@ -147,7 +149,7 @@ public class PrivilegeConstants {
 			if (privilege != null) {
 				privileges.add(privilege);
 			} else {
-				System.out.println("------------NULL PRIVILEGE: " + name);
+				LOG.debug("------------NULL PRIVILEGE: " + name);
 			}
 		}
 		

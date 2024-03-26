@@ -26,19 +26,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping(value = SequentialReceiptNumberGeneratorController.SEQ_RECEIPT_NUMBER_GENERATOR_URL)
 public class SequentialReceiptNumberGeneratorController extends AbstractSequentialReceiptNumberGenerator {
 
-	public static final String SEQ_RECEIPT_NUMBER_GENERATOR_URL = CashierWebConstants.SEQ_RECEIPT_NUMBER_GENERATOR_PAGE;
+    public static final String SEQ_RECEIPT_NUMBER_GENERATOR_URL = CashierWebConstants.SEQ_RECEIPT_NUMBER_GENERATOR_PAGE;
 
-	public SequentialReceiptNumberGeneratorController() {
+    public SequentialReceiptNumberGeneratorController() {
 
-	}
+    }
 
-	@Override
-	public ISequentialReceiptNumberGeneratorService getService() {
-		return Context.getService(ISequentialReceiptNumberGeneratorService.class);
-	}
+    @Override
+    public ISequentialReceiptNumberGeneratorService getService() {
+        return Context.getService(ISequentialReceiptNumberGeneratorService.class);
+    }
 
-	@Override
-	public String getReceiptNumberGeneratorUrl() {
-		return SEQ_RECEIPT_NUMBER_GENERATOR_URL;
-	}
+    @Override
+    public String getReceiptNumberGeneratorUrl() {
+        return SEQ_RECEIPT_NUMBER_GENERATOR_URL;
+    }
 }

@@ -34,7 +34,7 @@ public abstract class BaseAttributeType extends BaseOpenmrsMetadata implements I
 	
 	/**
 	 * Gets the attribute type id.
-	 * 
+	 *
 	 * @return The attribute type id
 	 */
 	@Override
@@ -44,7 +44,7 @@ public abstract class BaseAttributeType extends BaseOpenmrsMetadata implements I
 	
 	/**
 	 * Sets the attribute type id.
-	 * 
+	 *
 	 * @param id The attribute type id
 	 */
 	@Override
@@ -54,7 +54,7 @@ public abstract class BaseAttributeType extends BaseOpenmrsMetadata implements I
 	
 	/**
 	 * Gets the attribute order.
-	 * 
+	 *
 	 * @return The attribute order
 	 */
 	public Integer getAttributeOrder() {
@@ -63,7 +63,7 @@ public abstract class BaseAttributeType extends BaseOpenmrsMetadata implements I
 	
 	/**
 	 * Sets the attribute order.
-	 * 
+	 *
 	 * @param attributeOrder The attribute order
 	 */
 	public void setAttributeOrder(Integer attributeOrder) {
@@ -72,7 +72,7 @@ public abstract class BaseAttributeType extends BaseOpenmrsMetadata implements I
 	
 	/**
 	 * Gets the attribute type format.
-	 * 
+	 *
 	 * @return The format
 	 */
 	public String getFormat() {
@@ -81,7 +81,7 @@ public abstract class BaseAttributeType extends BaseOpenmrsMetadata implements I
 	
 	/**
 	 * Sets the attribute type format.
-	 * 
+	 *
 	 * @param format The format
 	 */
 	public void setFormat(String format) {
@@ -90,7 +90,7 @@ public abstract class BaseAttributeType extends BaseOpenmrsMetadata implements I
 	
 	/**
 	 * Gets the attribute type foreign key.
-	 * 
+	 *
 	 * @return The foreign key
 	 */
 	public Integer getForeignKey() {
@@ -99,7 +99,7 @@ public abstract class BaseAttributeType extends BaseOpenmrsMetadata implements I
 	
 	/**
 	 * Sets the attribute type foreign key.
-	 * 
+	 *
 	 * @param foreignKey THe foreign key
 	 */
 	public void setForeignKey(Integer foreignKey) {
@@ -108,7 +108,7 @@ public abstract class BaseAttributeType extends BaseOpenmrsMetadata implements I
 	
 	/**
 	 * Gets the attribute type regular expression.
-	 * 
+	 *
 	 * @return The regular expression
 	 */
 	public String getRegExp() {
@@ -117,7 +117,7 @@ public abstract class BaseAttributeType extends BaseOpenmrsMetadata implements I
 	
 	/**
 	 * Sets the attribute type regular expression
-	 * 
+	 *
 	 * @param regExp The regular expression
 	 */
 	public void setRegExp(String regExp) {
@@ -126,7 +126,7 @@ public abstract class BaseAttributeType extends BaseOpenmrsMetadata implements I
 	
 	/**
 	 * Gets whether this attribute type is required.
-	 * 
+	 *
 	 * @return {@code true} if the attribute type is required; otherwise, {@code false}
 	 */
 	public Boolean getRequired() {
@@ -135,7 +135,7 @@ public abstract class BaseAttributeType extends BaseOpenmrsMetadata implements I
 	
 	/**
 	 * Sets whether this attribute type is required.
-	 * 
+	 *
 	 * @param required {@code true} if the attribute type is required; otherwise, {@code false}
 	 */
 	public void setRequired(Boolean required) {

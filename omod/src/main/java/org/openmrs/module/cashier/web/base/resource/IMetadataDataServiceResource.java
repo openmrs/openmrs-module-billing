@@ -18,7 +18,9 @@ import org.openmrs.module.cashier.api.base.entity.IMetadataDataService;
 
 /**
  * Represents REST resources for {@link org.openmrs.OpenmrsMetadata}
+ *
  * @param <T> The model class
  */
 public interface IMetadataDataServiceResource<T extends OpenmrsMetadata>
-        extends IObjectDataServiceResource<T, IMetadataDataService<T>> {}
+        extends IObjectDataServiceResource<T, IMetadataDataService<T>> {
+}

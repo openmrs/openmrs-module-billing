@@ -26,30 +26,30 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceD
 /**
  * REST resource representing a {@link CashPoint}.
  */
-@Resource(name = RestConstants.VERSION_1 + CashierResourceController.KENYAEMR_CASHIER_NAMESPACE + "/cashPoint", supportedClass = CashPoint.class,
-        supportedOpenmrsVersions = { "2.0 - 2.*" })
+@Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE + "/cashPoint", supportedClass = CashPoint.class,
+        supportedOpenmrsVersions = {"2.0 - 2.*"})
 public class CashPointResource extends BaseRestMetadataResource<CashPoint> {
-	@Override
-	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
-		DelegatingResourceDescription description = super.getRepresentationDescription(rep);
-		description.addProperty("location", Representation.REF);
-		return description;
-	}
+    @Override
+    public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
+        DelegatingResourceDescription description = super.getRepresentationDescription(rep);
+        description.addProperty("location", Representation.REF);
+        return description;
+    }
 
-	@Override
-	public DelegatingResourceDescription getCreatableProperties() {
-		DelegatingResourceDescription description = super.getCreatableProperties();
-		description.addProperty("location");
-		return description;
-	}
+    @Override
+    public DelegatingResourceDescription getCreatableProperties() {
+        DelegatingResourceDescription description = super.getCreatableProperties();
+        description.addProperty("location");
+        return description;
+    }
 
-	@Override
-	public CashPoint newDelegate() {
-		return new CashPoint();
-	}
+    @Override
+    public CashPoint newDelegate() {
+        return new CashPoint();
+    }
 
-	@Override
-	public Class<? extends IMetadataDataService<CashPoint>> getServiceClass() {
-		return ICashPointService.class;
-	}
+    @Override
+    public Class<? extends IMetadataDataService<CashPoint>> getServiceClass() {
+        return ICashPointService.class;
+    }
 }

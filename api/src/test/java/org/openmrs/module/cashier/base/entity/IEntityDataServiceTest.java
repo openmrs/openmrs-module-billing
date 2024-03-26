@@ -20,9 +20,9 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openmrs.OpenmrsData;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.cashier.api.base.PagingInfo;
 import org.openmrs.module.cashier.api.base.entity.IEntityDataService;
 import org.openmrs.module.cashier.api.base.entity.IMetadataDataService;
-import org.openmrs.module.cashier.api.base.PagingInfo;
 
 /**
  * Class to hold common entity data service test functionality.

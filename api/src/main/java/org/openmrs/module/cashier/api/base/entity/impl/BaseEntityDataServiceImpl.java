@@ -22,16 +22,16 @@ import org.hibernate.criterion.Restrictions;
 import org.openmrs.OpenmrsData;
 import org.openmrs.User;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.cashier.api.base.entity.security.IEntityAuthorizationPrivileges;
 import org.openmrs.module.cashier.api.base.PagingInfo;
 import org.openmrs.module.cashier.api.base.entity.IEntityDataService;
+import org.openmrs.module.cashier.api.base.entity.security.IEntityAuthorizationPrivileges;
 import org.openmrs.module.cashier.api.base.f.Action1;
 import org.openmrs.module.cashier.api.base.util.PrivilegeUtil;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The base type for {@link IEntityDataService}s.
- * 
+ *
  * @param <E> The entity model type.
  */
 
@@ -116,7 +116,7 @@ public abstract class BaseEntityDataServiceImpl<E extends OpenmrsData> extends B
 	
 	/**
 	 * Gets all unvoided entities.
-	 * 
+	 *
 	 * @param pagingInfo
 	 * @return Returns all unvoided entities
 	 * @should return all unvoided entities when voided is not specified

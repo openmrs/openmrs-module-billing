@@ -27,7 +27,7 @@ public interface ITimesheetService extends IEntityDataService<Timesheet> {
 	
 	/**
 	 * Gets the current {@link Timesheet} that the specified {@link Provider}.
-	 * 
+	 *
 	 * @param cashier The cashier.
 	 * @return The {@link Timesheet} or {@code null} is the cashier is not clocked in.
 	 * @should return the current timesheet for the cashier
@@ -39,7 +39,7 @@ public interface ITimesheetService extends IEntityDataService<Timesheet> {
 	
 	/**
 	 * Gets all the {@link Timesheet}'s for the specified user on the specified day.
-	 * 
+	 *
 	 * @param cashier The cashier.
 	 * @param date The date.
 	 * @return All the timesheets for the cashier on the specified day.
@@ -54,7 +54,7 @@ public interface ITimesheetService extends IEntityDataService<Timesheet> {
 	
 	/**
 	 * Closes all open {@link Timesheet}'s.
-	 * 
+	 *
 	 * @should return close all open timesheets
 	 */
 	void closeOpenTimesheets();

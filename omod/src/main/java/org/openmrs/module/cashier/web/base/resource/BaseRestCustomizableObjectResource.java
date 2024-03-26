@@ -13,15 +13,15 @@
  */
 package org.openmrs.module.cashier.web.base.resource;
 
+import java.util.HashSet;
+import java.util.List;
+
 import org.openmrs.OpenmrsObject;
 import org.openmrs.module.cashier.api.base.entity.model.IAttribute;
 import org.openmrs.module.cashier.api.base.entity.model.ICustomizable;
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
-
-import java.util.HashSet;
-import java.util.List;
 
 // @formatter:off
 /**
@@ -35,24 +35,24 @@ public abstract class BaseRestCustomizableObjectResource<
 			TAttribute extends IAttribute<E, ?>>
 		extends BaseRestObjectResource<E> {
 // @formatter:on
-	@Override
-	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
-		DelegatingResourceDescription description = super.getRepresentationDescription(rep);
-		if (!(rep instanceof RefRepresentation)) {
-			description.addProperty("attributes");
-		}
+@Override
+public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
+    DelegatingResourceDescription description = super.getRepresentationDescription(rep);
+    if (!(rep instanceof RefRepresentation)) {
+        description.addProperty("attributes");
+    }
 
-		return description;
-	}
+    return description;
+}
 
-	protected void baseSetAttributes(E instance, List<TAttribute> attributes) {
-		if (instance.getAttributes() == null) {
-			instance.setAttributes(new HashSet<TAttribute>());
-		}
+    protected void baseSetAttributes(E instance, List<TAttribute> attributes) {
+        if (instance.getAttributes() == null) {
+            instance.setAttributes(new HashSet<TAttribute>());
+        }
 
-		BaseRestDataResource.syncCollection(instance.getAttributes(), attributes);
-		for (TAttribute attribute : instance.getAttributes()) {
-			attribute.setOwner(instance);
-		}
-	}
+        BaseRestDataResource.syncCollection(instance.getAttributes(), attributes);
+        for (TAttribute attribute : instance.getAttributes()) {
+            attribute.setOwner(instance);
+        }
+    }
 }

@@ -19,7 +19,7 @@ import org.openmrs.OpenmrsData;
 
 /**
  * Base template search class for {@link org.openmrs.OpenmrsData} models.
- * 
+ *
  * @param <T> The model class.
  */
 public class BaseDataTemplateSearch<T extends OpenmrsData> extends BaseAuditableTemplateSearch<T> {

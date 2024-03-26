@@ -13,8 +13,6 @@
  */
 package org.openmrs.module.cashier.api.model;
 
-import java.math.BigDecimal;
-
 /**
  * Model class that give the options a {@link org.openmrs.Person} (Cashier) has.
  */

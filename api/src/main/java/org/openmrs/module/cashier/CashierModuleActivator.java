@@ -18,7 +18,6 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.BaseModuleActivator;
 import org.openmrs.module.Module;
 import org.openmrs.module.ModuleFactory;
-import org.openmrs.module.cashier.api.util.RoundingUtil;
 import org.openmrs.module.cashier.web.CashierWebConstants;
 import org.openmrs.module.web.WebModuleUtil;
 

@@ -24,7 +24,7 @@ import org.openmrs.module.cashier.api.base.entity.IObjectDataService;
 
 /**
  * Support class to build property editors for entities.
- * 
+ *
  * @param <E> The model class
  */
 public class EntityPropertyEditor<E extends OpenmrsObject> extends PropertyEditorSupport {

@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Represents classes that provide data access services to model types that inherit from
  * {@link org.openmrs.OpenmrsMetadata}.
- * 
+ *
  * @param <E> The {@link org.openmrs.OpenmrsMetadata} model class.
  */
 @Transactional
@@ -30,7 +30,7 @@ public interface IMetadataDataService<E extends OpenmrsMetadata> extends IObject
 	
 	/**
 	 * Retires the specified metadata. This effectively removes the entity from circulation or use.
-	 * 
+	 *
 	 * @param metadata metadata to be retired.
 	 * @param reason the reason why the metadata is being retired.
 	 * @return the newly retired metadata.
@@ -43,7 +43,7 @@ public interface IMetadataDataService<E extends OpenmrsMetadata> extends IObject
 	/**
 	 * Unretire the specified metadata. This restores a previously retired metadata back into
 	 * circulation and use.
-	 * 
+	 *
 	 * @param metadata The metadata to unretire.
 	 * @return the newly unretired metadata.
 	 * @should throw NullPointerException if the metadata is null
@@ -53,7 +53,7 @@ public interface IMetadataDataService<E extends OpenmrsMetadata> extends IObject
 	
 	/**
 	 * Returns all metadata records that have the specified retirement status.
-	 * 
+	 *
 	 * @param includeRetired {@code true} to include retired metadata.
 	 * @return All the metadata records that have the specified retirement status.
 	 * @should return all metadata when includeRetired is set to true
@@ -63,7 +63,7 @@ public interface IMetadataDataService<E extends OpenmrsMetadata> extends IObject
 	
 	/**
 	 * Returns all metadata records that have the specified retirement status and paging.
-	 * 
+	 *
 	 * @param includeRetired {@code true} to include retired metadata.
 	 * @param paging The paging information.
 	 * @return All the metadata records that have the specified retirement status.
@@ -79,7 +79,7 @@ public interface IMetadataDataService<E extends OpenmrsMetadata> extends IObject
 	
 	/**
 	 * Gets all the metadata that start with the specified name.
-	 * 
+	 *
 	 * @param nameFragment The name fragment.
 	 * @param includeRetired Whether retired items should be included in the results.
 	 * @return All metadata that starts with the specified name.
@@ -94,7 +94,7 @@ public interface IMetadataDataService<E extends OpenmrsMetadata> extends IObject
 	
 	/**
 	 * Gets all the metadata that start with the specified name and paging.
-	 * 
+	 *
 	 * @param nameFragment The name fragment.
 	 * @param includeRetired Whether retired metadata should be included in the results.
 	 * @param paging The paging information.

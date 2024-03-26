@@ -17,9 +17,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.openmrs.api.context.Context;
+import org.openmrs.module.cashier.api.base.entity.model.SafeIdentifierSource;
 import org.openmrs.module.idgen.IdentifierSource;
 import org.openmrs.module.idgen.service.IdentifierSourceService;
-import org.openmrs.module.cashier.api.base.entity.model.SafeIdentifierSource;
 
 /**
  * Idgen Utility class that does not directly reference the idgen module.
@@ -31,7 +31,7 @@ public class SafeIdgenUtil {
 	
 	/**
 	 * Gets the identifier source information with the id in the specified global property.
-	 * 
+	 *
 	 * @param propertyName The global property name.
 	 * @return The identifier source information or {@code null} if not defined.
 	 */
@@ -48,7 +48,7 @@ public class SafeIdgenUtil {
 	
 	/**
 	 * Gets the information for all defined identifier sources.
-	 * 
+	 *
 	 * @return A list containing the source information.
 	 */
 	public static List<SafeIdentifierSource> getAllIdentifierSourceInfo() {

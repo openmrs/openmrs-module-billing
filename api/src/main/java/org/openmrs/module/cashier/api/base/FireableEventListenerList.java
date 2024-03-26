@@ -13,9 +13,8 @@
  */
 package org.openmrs.module.cashier.api.base;
 
-import java.util.EventListener;
-
 import javax.swing.event.EventListenerList;
+import java.util.EventListener;
 
 /**
  * An {@link EventListenerList} that provides a 'fire' helper method.

@@ -1,20 +1,17 @@
+/*
+ * The contents of this file are subject to the OpenMRS Public License
+ * Version 1.1 (the "License"); you may not use this file except in
+ * compliance with the License. You may obtain a copy of the License at
+ * http://license.openmrs.org
+ *
+ * Software distributed under the License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ * License for the specific language governing rights and limitations
+ * under the License.
+ *
+ * Copyright (C) OpenMRS, LLC.  All Rights Reserved.
+ */
 package org.openmrs.module.cashier.util;
-
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.TrustStrategy;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
-import org.apache.http.ssl.SSLContextBuilder;
-import org.apache.http.ssl.SSLContexts;
-import org.joda.time.DateTime;
-import org.joda.time.Days;
-import org.openmrs.*;
-import org.openmrs.api.context.Context;
-// import org.openmrs.module.kenyacore.RegimenMappingUtils;
-// import org.openmrs.module.metadatadeploy.MetadataUtils;
-import org.openmrs.ui.framework.SimpleObject;
-import org.openmrs.util.PrivilegeConstants;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
@@ -31,6 +28,25 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.ssl.SSLContexts;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.openmrs.Concept;
+import org.openmrs.Encounter;
+import org.openmrs.EncounterType;
+import org.openmrs.GlobalProperty;
+import org.openmrs.Location;
+import org.openmrs.LocationAttribute;
+import org.openmrs.Obs;
+import org.openmrs.Patient;
+import org.openmrs.api.context.Context;
+import org.openmrs.util.PrivilegeConstants;
 
 public class Utils {
 	
@@ -126,8 +142,6 @@ public class Utils {
 		}
 		catch (IOException e) {
 			
-			System.out.println("IOException: " + e.getMessage());
-			
 		}
 		return requestBodyJsonStr;
 	}
@@ -183,7 +197,7 @@ public class Utils {
 	
 	/**
 	 * Get date difference between two dates (in days)
-	 * 
+	 *
 	 * @param date1
 	 * @param date2
 	 * @return
@@ -196,7 +210,7 @@ public class Utils {
 	
 	/**
 	 * Gets the integer value of a string, otherwise returns zero
-	 * 
+	 *
 	 * @param val
 	 * @return
 	 */
@@ -211,7 +225,7 @@ public class Utils {
 	
 	/**
 	 * Gets the long value of a string, otherwise returns zero
-	 * 
+	 *
 	 * @param val
 	 * @return
 	 */

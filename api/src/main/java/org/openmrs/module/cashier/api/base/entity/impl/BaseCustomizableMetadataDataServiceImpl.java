@@ -21,7 +21,7 @@ import org.openmrs.module.cashier.api.base.entity.model.BaseCustomizableMetadata
 
 /**
  * Base data service for {@link BaseCustomizableMetadata} models.
- * 
+ *
  * @param <E> The model class.
  */
 public abstract class BaseCustomizableMetadataDataServiceImpl<E extends BaseCustomizableMetadata<?>> extends BaseMetadataDataServiceImpl<E> {

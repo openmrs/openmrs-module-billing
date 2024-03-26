@@ -18,7 +18,9 @@ import org.openmrs.module.cashier.api.base.entity.IEntityDataService;
 
 /**
  * Represents REST resources for {@link org.openmrs.OpenmrsData}
+ *
  * @param <T> The model class
  */
 public interface IEntityDataServiceResource<T extends OpenmrsData>
-        extends IObjectDataServiceResource<T, IEntityDataService<T>> {}
+        extends IObjectDataServiceResource<T, IEntityDataService<T>> {
+}

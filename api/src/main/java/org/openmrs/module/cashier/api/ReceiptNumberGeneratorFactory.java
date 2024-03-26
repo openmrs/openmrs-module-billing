@@ -42,7 +42,7 @@ public class ReceiptNumberGeneratorFactory {
 	
 	/**
 	 * Returns the currently defined {@link IReceiptNumberGenerator} for the system.
-	 * 
+	 *
 	 * @return The {@link IReceiptNumberGenerator}.
 	 * @should Return the currently defined receipt number generator
 	 * @should Load the generator if it has not been loaded
@@ -69,7 +69,7 @@ public class ReceiptNumberGeneratorFactory {
 	
 	/**
 	 * Sets the system-wide {@link IReceiptNumberGenerator}.
-	 * 
+	 *
 	 * @param generator The generator.
 	 * @throws APIException
 	 * @should Set the receipt number generator for the system
@@ -109,7 +109,7 @@ public class ReceiptNumberGeneratorFactory {
 	/**
 	 * Locates and instantiates all classes that implement {@link IReceiptNumberGenerator} in the
 	 * current classpath.
-	 * 
+	 *
 	 * @return The instantiated receipt number generators.
 	 * @should Locate all classes that implement IReceiptNumberGenerator
 	 * @should Not throw an exception if the class instantiation fails

@@ -13,14 +13,14 @@
  */
 package org.openmrs.module.cashier.web.base.resource;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.openmrs.module.cashier.api.base.entity.model.IInstanceAttributeType;
 import org.openmrs.module.cashier.api.base.entity.model.IInstanceType;
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
-
-import java.util.ArrayList;
-import java.util.List;
 
 // @formatter:off
 /**
@@ -33,32 +33,32 @@ public abstract class BaseRestInstanceTypeResource<
 			TAttributeType extends IInstanceAttributeType<E>>
         extends BaseRestMetadataResource<E> {
 // @formatter:on
-	@Override
-	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
-		DelegatingResourceDescription description = super.getRepresentationDescription(rep);
-		if (!(rep instanceof RefRepresentation)) {
-			description.addProperty("attributeTypes");
-		}
+@Override
+public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
+    DelegatingResourceDescription description = super.getRepresentationDescription(rep);
+    if (!(rep instanceof RefRepresentation)) {
+        description.addProperty("attributeTypes");
+    }
 
-		return description;
-	}
+    return description;
+}
 
-	@Override
-	public DelegatingResourceDescription getCreatableProperties() {
-		DelegatingResourceDescription description = super.getCreatableProperties();
-		description.addProperty("attributeTypes");
+    @Override
+    public DelegatingResourceDescription getCreatableProperties() {
+        DelegatingResourceDescription description = super.getCreatableProperties();
+        description.addProperty("attributeTypes");
 
-		return description;
-	}
+        return description;
+    }
 
-	protected void baseSetAttributeTypes(E instance, List<TAttributeType> attributeTypes) {
-		if (instance.getAttributeTypes() == null) {
-			instance.setAttributeTypes(new ArrayList<TAttributeType>());
-		}
+    protected void baseSetAttributeTypes(E instance, List<TAttributeType> attributeTypes) {
+        if (instance.getAttributeTypes() == null) {
+            instance.setAttributeTypes(new ArrayList<TAttributeType>());
+        }
 
-		BaseRestDataResource.syncCollection(instance.getAttributeTypes(), attributeTypes);
-		for (TAttributeType type : instance.getAttributeTypes()) {
-			type.setOwner(instance);
-		}
-	}
+        BaseRestDataResource.syncCollection(instance.getAttributeTypes(), attributeTypes);
+        for (TAttributeType type : instance.getAttributeTypes()) {
+            type.setOwner(instance);
+        }
+    }
 }

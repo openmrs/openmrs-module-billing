@@ -16,11 +16,8 @@ package org.openmrs.module.cashier.api.search;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
-import org.joda.time.DateTime;
 import org.openmrs.module.cashier.api.base.entity.search.BaseDataTemplateSearch;
 import org.openmrs.module.cashier.api.model.Bill;
-
-import java.util.Date;
 
 /**
  * A search template class for the {@link Bill} model.

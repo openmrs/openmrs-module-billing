@@ -30,7 +30,7 @@ public interface ISequentialReceiptNumberGeneratorService extends IObjectDataSer
 	/**
 	 * Gets the first {@link SequentialReceiptNumberGeneratorModel} or creates a new model if none have
 	 * been defined.
-	 * 
+	 *
 	 * @return The first or new model.
 	 * @should return the first model.
 	 * @should return a new model if none has been defined.
@@ -39,7 +39,7 @@ public interface ISequentialReceiptNumberGeneratorService extends IObjectDataSer
 	
 	/**
 	 * Reserves the next sequence value for the specified group.
-	 * 
+	 *
 	 * @param group The grouping value.
 	 * @return The next sequence value.
 	 * @should Increment and return the sequence value for existing groups
@@ -51,7 +51,7 @@ public interface ISequentialReceiptNumberGeneratorService extends IObjectDataSer
 	
 	/**
 	 * Returns all sequences.
-	 * 
+	 *
 	 * @return All sequences in the database.
 	 * @should return all sequences
 	 * @should return an empty list if no sequences have been defined
@@ -61,7 +61,7 @@ public interface ISequentialReceiptNumberGeneratorService extends IObjectDataSer
 	
 	/**
 	 * Returns the sequence for the specified group.
-	 * 
+	 *
 	 * @param group The group sequence to find.
 	 * @return The group sequence
 	 * @should Throw an IllegalArgumentException if group is null
@@ -74,7 +74,7 @@ public interface ISequentialReceiptNumberGeneratorService extends IObjectDataSer
 	
 	/**
 	 * Saves the sequence, creating a new sequences or updating an existing one.
-	 * 
+	 *
 	 * @param sequence The sequence to save.
 	 * @return The saved sequence.
 	 * @should Throw a NullPointerException if sequence is null
@@ -87,7 +87,7 @@ public interface ISequentialReceiptNumberGeneratorService extends IObjectDataSer
 	
 	/**
 	 * Complete removes the specified sequence from the database.
-	 * 
+	 *
 	 * @param sequence The sequence to remove.
 	 * @should Throw a NullPointerException if the sequence is null
 	 * @should delete the sequence from the database

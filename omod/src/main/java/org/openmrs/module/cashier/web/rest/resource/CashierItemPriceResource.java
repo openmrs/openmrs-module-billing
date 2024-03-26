@@ -1,3 +1,16 @@
+/*
+ * The contents of this file are subject to the OpenMRS Public License
+ * Version 1.1 (the "License"); you may not use this file except in
+ * compliance with the License. You may obtain a copy of the License at
+ * http://license.openmrs.org
+ *
+ * Software distributed under the License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ * License for the specific language governing rights and limitations
+ * under the License.
+ *
+ * Copyright (C) OpenMRS, LLC.  All Rights Reserved.
+ */
 package org.openmrs.module.cashier.web.rest.resource;
 
 import org.openmrs.api.context.Context;
@@ -21,7 +34,7 @@ import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOp
 
 import java.math.BigDecimal;
 
-@Resource(name = RestConstants.VERSION_1 + CashierResourceController.KENYAEMR_CASHIER_NAMESPACE + "/cashierItemPrice", supportedClass = CashierItemPrice.class,
+@Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE + "/cashierItemPrice", supportedClass = CashierItemPrice.class,
         supportedOpenmrsVersions = {"2.0 - 2.*"})
 public class CashierItemPriceResource extends BaseRestDataResource<CashierItemPrice> {
     @Override
@@ -55,6 +68,7 @@ public class CashierItemPriceResource extends BaseRestDataResource<CashierItemPr
         }
         return description;
     }
+
     @Override
     public DelegatingResourceDescription getCreatableProperties() {
         DelegatingResourceDescription description = new DelegatingResourceDescription();
@@ -76,7 +90,7 @@ public class CashierItemPriceResource extends BaseRestDataResource<CashierItemPr
         double amount;
         if (price instanceof Integer) {
             int rawAmount = (Integer) price;
-            amount = Double.valueOf(rawAmount) ;
+            amount = Double.valueOf(rawAmount);
             instance.setPrice(BigDecimal.valueOf(amount));
         } else {
             instance.setPrice(BigDecimal.valueOf((Double) price));
@@ -89,13 +103,14 @@ public class CashierItemPriceResource extends BaseRestDataResource<CashierItemPr
         String itemUuid = (String) item;
         instance.setItem(service.getStockItemByUuid(itemUuid));
     }
+
     @PropertyGetter(value = "item")
     public String getItem(CashierItemPrice instance) {
         try {
             StockItem stockItem = instance.getItem();
             return stockItem.getConcept().getDisplayString();
         } catch (Exception e) {
-            System.out.println("Item probably was deleted");
+            log.error(e);
             return "";
         }
     }

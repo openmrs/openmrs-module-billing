@@ -24,9 +24,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("/rest/" + RestConstants.VERSION_1 + CashierSubResourceController.BILLING_NAMESPACE)
 public class CashierSubResourceController extends MainSubResourceController {
-	public static final String BILLING_NAMESPACE = "/billing";
-	@Override
-	public String getNamespace() {
-		return RestConstants.VERSION_1 + CashierSubResourceController.BILLING_NAMESPACE;
-	}
+    public static final String BILLING_NAMESPACE = "/billing";
+
+    @Override
+    public String getNamespace() {
+        return RestConstants.VERSION_1 + CashierSubResourceController.BILLING_NAMESPACE;
+    }
 }

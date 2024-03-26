@@ -34,7 +34,7 @@ public interface BaseHibernateRepository {
 	
 	/**
 	 * Creates a new {@link org.hibernate.Criteria}.
-	 * 
+	 *
 	 * @param cls The entity class.
 	 * @return The newly created {@link org.hibernate.Criteria}
 	 * @should return a new criteria for the entity class
@@ -44,7 +44,7 @@ public interface BaseHibernateRepository {
 	/**
 	 * Saves an entity to the database, performing either an update or insert depending on the entity
 	 * state.
-	 * 
+	 *
 	 * @param entity The entity to save.
 	 * @return The saved entity.
 	 * @should throw an IllegalArgumentException if the entity is null
@@ -56,14 +56,14 @@ public interface BaseHibernateRepository {
 	
 	/**
 	 * Saves a collection of entities to the database.
-	 * 
+	 *
 	 * @param collection The collection to save.
 	 */
 	void saveAll(Collection<? extends OpenmrsObject> collection);
 	
 	/**
 	 * Deletes an entity from the database.
-	 * 
+	 *
 	 * @param entity The entity to delete.
 	 * @should throw an IllegalArgumentException if the entity is null
 	 * @should delete the item from the database
@@ -73,7 +73,7 @@ public interface BaseHibernateRepository {
 	
 	/**
 	 * Executes the specified {@link org.hibernate.Criteria} and returns the resulting value.
-	 * 
+	 *
 	 * @param criteria The criteria to execute which must result in a single value.
 	 * @param <T> The expected value type.
 	 * @return The result of the criteria.
@@ -82,7 +82,7 @@ public interface BaseHibernateRepository {
 	
 	/**
 	 * Executes the specified {@link org.hibernate.Query} and returns the resulting value.
-	 * 
+	 *
 	 * @param query The criteria to execute which must result in a single value.
 	 * @param <T> The expected value type.
 	 * @return The result of the query.
@@ -91,7 +91,7 @@ public interface BaseHibernateRepository {
 	
 	/**
 	 * Selects a single entity from the database with the specified id.
-	 * 
+	 *
 	 * @param cls The entity class.
 	 * @param id The id of the entity.
 	 * @return The entity or {@code null} if not found.
@@ -104,7 +104,7 @@ public interface BaseHibernateRepository {
 	/**
 	 * Selects a single entity from the database using the specified {@link org.hibernate.Criteria}. If
 	 * more than one entity is found only the first is returned.
-	 * 
+	 *
 	 * @param cls The entity class.
 	 * @param criteria The search {@link org.hibernate.Criteria}.
 	 * @return The entity or {@code null} if not found.
@@ -117,7 +117,7 @@ public interface BaseHibernateRepository {
 	
 	/**
 	 * Selects all entities from the database.
-	 * 
+	 *
 	 * @param cls The entity class.
 	 * @return A list of all the entities.
 	 * @should return a list of all the entities
@@ -127,7 +127,7 @@ public interface BaseHibernateRepository {
 	
 	/**
 	 * Selects the entities from the database that meet the specified {@link org.hibernate.Criteria} .
-	 * 
+	 *
 	 * @param cls The entity class.
 	 * @param criteria The search {@link org.hibernate.Criteria}.
 	 * @return A list of the entities that were found.

@@ -21,7 +21,7 @@ public interface IMetadataAuthorizationPrivileges extends IObjectAuthorizationPr
 	
 	/**
 	 * The privilege required to retire or unretire metadata or {@code null} for no authorization.
-	 * 
+	 *
 	 * @return The privilege name.
 	 */
 	String getRetirePrivilege();

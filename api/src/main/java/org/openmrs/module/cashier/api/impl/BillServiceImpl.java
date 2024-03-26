@@ -13,8 +13,12 @@
  */
 package org.openmrs.module.cashier.api.impl;
 
+import java.math.BigDecimal;
+import java.security.AccessControlException;
+import java.util.Date;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
@@ -34,16 +38,9 @@ import org.openmrs.module.cashier.api.base.f.Action1;
 import org.openmrs.module.cashier.api.model.Bill;
 import org.openmrs.module.cashier.api.model.BillLineItem;
 import org.openmrs.module.cashier.api.model.BillStatus;
-import org.openmrs.module.cashier.api.model.CashierItemPrice;
 import org.openmrs.module.cashier.api.search.BillSearch;
 import org.openmrs.module.cashier.api.util.PrivilegeConstants;
-import org.openmrs.module.stockmanagement.api.model.StockItem;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.security.AccessControlException;
-import java.util.Date;
-import java.util.List;
 
 /**
  * Data service implementation class for {@link Bill}s.
@@ -66,7 +63,7 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 	
 	/**
 	 * Saves the bill to the database, creating a new bill or updating an existing one.
-	 * 
+	 *
 	 * @param bill The bill to be saved.
 	 * @return The saved bill.
 	 * @should Generate a new receipt number if one has not been defined.
@@ -179,8 +176,8 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 	}
 	
 	/*
-		These methods are overridden to ensure that any null line items (created as part of a bug in 1.7.0) are removed
-		from the results before being returned to the caller.
+	    These methods are overridden to ensure that any null line items (created as part of a bug in 1.7.0) are removed
+	    from the results before being returned to the caller.
 	 */
 	@Override
 	public List<Bill> getAll(boolean includeVoided, PagingInfo pagingInfo) {

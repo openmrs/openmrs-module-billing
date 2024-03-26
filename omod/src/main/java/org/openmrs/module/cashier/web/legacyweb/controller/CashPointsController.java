@@ -26,8 +26,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 @RequestMapping("/module/billing/cashPoints")
 public class CashPointsController {
-	@RequestMapping(method = RequestMethod.GET)
-	public void cashPoints(ModelMap model) throws IOException {
-		model.addAttribute("modelBase", "openhmis.cashier.cashPoint");
-	}
+    @RequestMapping(method = RequestMethod.GET)
+    public void cashPoints(ModelMap model) throws IOException {
+        model.addAttribute("modelBase", "openhmis.cashier.cashPoint");
+    }
 }

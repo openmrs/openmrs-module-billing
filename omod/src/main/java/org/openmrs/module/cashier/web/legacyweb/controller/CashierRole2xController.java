@@ -32,20 +32,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping(CashierWebConstants.CASHIER_ROLE_2X_ROOT)
 public class CashierRole2xController extends RoleCreationControllerBase {
-	private static final Log LOG = LogFactory.getLog(CashierRole2xController.class);
+    private static final Log LOG = LogFactory.getLog(CashierRole2xController.class);
 
-	public CashierRole2xController() {
+    public CashierRole2xController() {
 
-	}
+    }
 
-	@Override
-	public UserService getUserService() {
-		return Context.getUserService();
-	}
+    @Override
+    public UserService getUserService() {
+        return Context.getUserService();
+    }
 
-	@Override
-	public Set<Privilege> privileges() {
-		return PrivilegeConstants.getDefaultPrivileges();
-	}
+    @Override
+    public Set<Privilege> privileges() {
+        return PrivilegeConstants.getDefaultPrivileges();
+    }
 
 }

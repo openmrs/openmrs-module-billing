@@ -16,7 +16,6 @@ package org.openmrs.module.cashier.web.legacyweb.controller;
 
 import org.openmrs.api.context.Context;
 import org.openmrs.module.cashier.web.base.controller.HeaderController;
-import org.openmrs.module.jasperreport.JasperReportService;
 import org.openmrs.module.cashier.ModuleSettings;
 import org.openmrs.module.cashier.api.model.CashierSettings;
 import org.openmrs.web.WebConstants;
@@ -33,23 +32,20 @@ import java.io.IOException;
  * Base Controller to manage the settings pages.
  */
 public abstract class CashierSettingsControllerBase {
-	@RequestMapping(method = RequestMethod.GET)
-	public void render(ModelMap modelMap, HttpServletRequest request) throws IOException {
-		JasperReportService reportService = Context.getService(JasperReportService.class);
+    @RequestMapping(method = RequestMethod.GET)
+    public void render(ModelMap modelMap, HttpServletRequest request) throws IOException {
+        modelMap.addAttribute("cashierSettings", ModuleSettings.loadSettings());
+        HeaderController.render(modelMap, request);
+    }
 
-		modelMap.addAttribute("reports", reportService.getJasperReports());
-		modelMap.addAttribute("cashierSettings", ModuleSettings.loadSettings());
-		HeaderController.render(modelMap, request);
-	}
+    @RequestMapping(method = RequestMethod.POST)
+    public void submit(HttpServletRequest request, CashierSettings cashierSettings, Errors errors, ModelMap modelMap)
+            throws IOException {
+        ModuleSettings.saveSettings(cashierSettings);
 
-	@RequestMapping(method = RequestMethod.POST)
-	public void submit(HttpServletRequest request, CashierSettings cashierSettings, Errors errors, ModelMap modelMap)
-	        throws IOException {
-		ModuleSettings.saveSettings(cashierSettings);
+        HttpSession session = request.getSession();
+        session.setAttribute(WebConstants.OPENMRS_MSG_ATTR, "openhmis.cashier.settings.saved");
 
-		HttpSession session = request.getSession();
-		session.setAttribute(WebConstants.OPENMRS_MSG_ATTR, "openhmis.cashier.settings.saved");
-
-		render(modelMap, request);
-	}
+        render(modelMap, request);
+    }
 }

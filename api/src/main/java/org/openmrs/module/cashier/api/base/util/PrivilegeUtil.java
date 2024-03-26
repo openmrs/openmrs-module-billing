@@ -33,7 +33,7 @@ public class PrivilegeUtil {
 	
 	/**
 	 * Checks if the specified user has all of the comma separated privileges.
-	 * 
+	 *
 	 * @param user The user to check
 	 * @param privileges The privilege or comma separated list of privileges
 	 * @return {@code true} if the user has all the privileges; otherwise, {@code false}.
@@ -50,7 +50,7 @@ public class PrivilegeUtil {
 	
 	/**
 	 * Checks if the specified user has all of the specified privileges.
-	 * 
+	 *
 	 * @param user The user to check
 	 * @param privileges The privileges
 	 * @return {@code true} if the user has all the privileges; otherwise, {@code false}.

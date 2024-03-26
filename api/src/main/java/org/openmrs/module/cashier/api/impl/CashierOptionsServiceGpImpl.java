@@ -24,7 +24,7 @@ import org.openmrs.module.stockmanagement.api.model.StockItem;
 
 /**
  * Service to load CashierOptions from global options
- * 
+ *
  * @author daniel
  */
 public class CashierOptionsServiceGpImpl implements ICashierOptionsService {
@@ -37,7 +37,7 @@ public class CashierOptionsServiceGpImpl implements ICashierOptionsService {
 	
 	/**
 	 * Loads the cashier options from the database.
-	 * 
+	 *
 	 * @return The {@link CashierOptions}
 	 * @should throw APIException if rounding is set but rounding item is not
 	 * @should throw APIException if rounding is set but rounding item cannot be found

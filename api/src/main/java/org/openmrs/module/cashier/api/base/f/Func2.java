@@ -15,7 +15,7 @@ package org.openmrs.module.cashier.api.base.f;
 
 /**
  * Represents a function with two parameters and a return value.
- * 
+ *
  * @param <TParm1> The first parameter class.
  * @param <TParm2> The second parameter class.
  * @param <TResult> The return value class.

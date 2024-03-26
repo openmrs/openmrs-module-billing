@@ -77,7 +77,7 @@ public class SequentialReceiptNumberGenerator implements IReceiptNumberGenerator
 	
 	/**
 	 * Generates a sequential receipt number for the specified bill.
-	 * 
+	 *
 	 * @param bill The bill to generate a new receipt number for.
 	 * @return The receipt number.
 	 * @should Create a new receipt number by grouping type

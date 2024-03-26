@@ -21,7 +21,7 @@ import org.openmrs.module.cashier.api.base.entity.model.BaseCustomizableData;
 
 /**
  * Base data service for {@link BaseCustomizableData} models.
- * 
+ *
  * @param <E> The model class.
  */
 
