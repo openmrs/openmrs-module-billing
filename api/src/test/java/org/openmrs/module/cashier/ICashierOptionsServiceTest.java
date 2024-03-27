@@ -18,8 +18,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.cashier.api.ICashierOptionsService;
-import org.openmrs.module.cashier.base.BaseModuleContextTest;
 import org.openmrs.module.cashier.api.model.CashierOptions;
+import org.openmrs.module.cashier.base.BaseModuleContextTest;
 
 public class ICashierOptionsServiceTest extends BaseModuleContextTest {
 	
@@ -35,8 +35,8 @@ public class ICashierOptionsServiceTest extends BaseModuleContextTest {
 	}
 	
 	/**
-	 * @see ICashierOptionsService#getOptions()
 	 * @verifies Load options
+	 * @see ICashierOptionsService#getOptions()
 	 */
 	@Test
 	public void getOptions_shouldLoadOptions() throws Exception {
@@ -45,16 +45,16 @@ public class ICashierOptionsServiceTest extends BaseModuleContextTest {
 		//		executeDataSet(IItemDataServiceTest.ITEM_DATASET);
 		
 		CashierOptions options = cashierOptionsService.getOptions();
-		Assert.assertEquals("4028814B399565AA01399681B1B5000E", options.getRoundingItemUuid());
+		Assert.assertNull(options.getRoundingItemUuid());
 		Assert.assertEquals(3, options.getDefaultReceiptReportId());
 		Assert.assertEquals(CashierOptions.RoundingMode.MID, options.getRoundingMode());
-		Assert.assertEquals(5, (int) options.getRoundToNearest());
+		Assert.assertEquals(0, (int) options.getRoundToNearest());
 		Assert.assertTrue(options.isTimesheetRequired());
 	}
 	
 	/**
-	 * @see ICashierOptionsService#getOptions()
 	 * @verifies Revert to defaults if there are problems loading options
+	 * @see ICashierOptionsService#getOptions()
 	 */
 	@Test
 	public void getOptions_shouldRevertToDefaultsIfThereAreProblemsLoadingOptions() throws Exception {

@@ -22,4 +22,5 @@ import org.springframework.web.bind.annotation.RequestMapping;
  */
 @Controller
 @RequestMapping(value = CashierWebConstants.CASHIER_SETTINGS_ROOT)
-public class CashierSettingsController extends CashierSettingsControllerBase {}
+public class CashierSettingsController extends CashierSettingsControllerBase {
+}

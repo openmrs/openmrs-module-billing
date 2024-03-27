@@ -7,7 +7,7 @@
 	<name>${project.parent.name}</name>
 	<version>${project.parent.version}</version>
 	<package>${project.parent.groupId}.${project.parent.artifactId}</package>
-	<author>Palladium devs</author>
+	<author>OpenHMIS</author>
 	<description>
 		${project.parent.description}
 	</description>
@@ -27,7 +27,6 @@
 		<require_module version="2.9">org.openmrs.module.webservices.rest</require_module>
 		<aware_of_module version="2.8">org.openmrs.module.idgen</aware_of_module>
 		<require_module version="1.0.2-SNAPSHOT">org.openmrs.module.stockmanagement</require_module>
-		<require_module version="2.1.0-SNAPSHOT">org.openmrs.module.jasperreport</require_module>
 	</require_modules>
 
 	<!-- Module Activator -->
@@ -55,7 +54,8 @@
 
 	<globalProperty>
 		<property>${project.parent.artifactId}.timesheetRequired</property>
-		<description>Whether or not to require an active timesheet when creating a new bill.  True or false.</description>
+		<description>Whether or not to require an active timesheet when creating a new bill. True or false.
+		</description>
 	</globalProperty>
 
 	<globalProperty>
@@ -65,7 +65,7 @@
 
 	<globalProperty>
 		<property>${project.parent.artifactId}.roundToNearest</property>
-		<description>Nearest unit to round to.  Can be a decimal number.</description>
+		<description>Nearest unit to round to. Can be a decimal number.</description>
 	</globalProperty>
 
 	<globalProperty>
@@ -146,22 +146,22 @@
 	</globalProperty>
 
 	<!-- Extensions -->
-<!--	<extension>-->
-<!--		<point>org.openmrs.admin.list</point>-->
-<!--		<class>org.openmrs.module.cashier.html.extension.cashier.AdminList</class>-->
-<!--	</extension>-->
-<!--	<extension>-->
-<!--		<point>org.openmrs.gutter.tools</point>-->
-<!--		<class>org.openmrs.module.cashier.html.extension.cashier.CashierMenuItem</class>-->
-<!--	</extension>-->
-<!--	<extension>-->
-<!--		<point>org.openmrs.patientDashboardTab</point>-->
-<!--		<class>org.openmrs.module.cashier.html.extension.cashier.CashierPatientBilHistoryExt</class>-->
-<!--	</extension>-->
-<!--	<extension>-->
-<!--		<point>org.openmrs.headerFull.userBar</point>-->
-<!--		<class>org.openmrs.module.cashier.html.extension.cashier.CashierLinkExt</class>-->
-<!--	</extension>-->
+	<!--	<extension>-->
+	<!--		<point>org.openmrs.admin.list</point>-->
+	<!--		<class>org.openmrs.module.cashier.html.extension.cashier.AdminList</class>-->
+	<!--	</extension>-->
+	<!--	<extension>-->
+	<!--		<point>org.openmrs.gutter.tools</point>-->
+	<!--		<class>org.openmrs.module.cashier.html.extension.cashier.CashierMenuItem</class>-->
+	<!--	</extension>-->
+	<!--	<extension>-->
+	<!--		<point>org.openmrs.patientDashboardTab</point>-->
+	<!--		<class>org.openmrs.module.cashier.html.extension.cashier.CashierPatientBilHistoryExt</class>-->
+	<!--	</extension>-->
+	<!--	<extension>-->
+	<!--		<point>org.openmrs.headerFull.userBar</point>-->
+	<!--		<class>org.openmrs.module.cashier.html.extension.cashier.CashierLinkExt</class>-->
+	<!--	</extension>-->
 
 	<!-- Privileges -->
 	<!--  Bills  -->

@@ -23,10 +23,10 @@ import org.junit.Test;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.cashier.api.base.entity.IObjectDataService;
-import org.openmrs.module.cashier.base.BaseModuleContextTest;
 import org.openmrs.module.cashier.api.base.PagingInfo;
+import org.openmrs.module.cashier.api.base.entity.IObjectDataService;
 import org.openmrs.module.cashier.api.base.f.Action2;
+import org.openmrs.module.cashier.base.BaseModuleContextTest;
 
 public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E extends OpenmrsObject> extends BaseModuleContextTest {
 	
@@ -35,7 +35,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	/**
 	 * Tests that the specified object are not null and that the {@link OpenmrsObject} properties are
 	 * equal.
-	 * 
+	 *
 	 * @param expected The expected object properties
 	 * @param actual The actual object properties
 	 */

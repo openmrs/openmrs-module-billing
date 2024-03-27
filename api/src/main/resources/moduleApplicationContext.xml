@@ -1,28 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
-	xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:jee="http://www.springframework.org/schema/jee" xmlns:tx="http://www.springframework.org/schema/tx"
-	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:util="http://www.springframework.org/schema/util"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans
-  		    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-  		    http://www.springframework.org/schema/context
-  		    http://www.springframework.org/schema/context/spring-context-3.0.xsd
-  		    http://www.springframework.org/schema/jee
-  		    http://www.springframework.org/schema/jee/spring-jee-3.0.xsd
-  		    http://www.springframework.org/schema/tx
-  		    http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
-  		    http://www.springframework.org/schema/aop
-  		    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
-  		    http://www.springframework.org/schema/util
-  		    http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+  		    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
 	<!-- Services accessible via Context.getService() -->
 	<bean parent="serviceContext">
 		<property name="moduleService">
 			<list merge="true">
 				<value>org.openmrs.module.cashier.api.ItemPriceService</value>
-				<ref bean="itemPriceService" />
+				<ref bean="itemPriceService"/>
 			</list>
 		</property>
 	</bean>
@@ -30,7 +17,7 @@
 		<property name="moduleService">
 			<list merge="true">
 				<value>org.openmrs.module.cashier.api.BillLineItemService</value>
-				<ref bean="billLineItemService" />
+				<ref bean="billLineItemService"/>
 			</list>
 		</property>
 	</bean>
@@ -38,7 +25,7 @@
 		<property name="moduleService">
 			<list merge="true">
 				<value>org.openmrs.module.cashier.api.IBillService</value>
-				<ref bean="cashierBillService" />
+				<ref bean="cashierBillService"/>
 			</list>
 		</property>
 	</bean>
@@ -46,7 +33,7 @@
 		<property name="moduleService">
 			<list merge="true">
 				<value>org.openmrs.module.cashier.api.IPaymentModeService</value>
-				<ref bean="cashierPaymentModeService" />
+				<ref bean="cashierPaymentModeService"/>
 			</list>
 		</property>
 	</bean>
@@ -54,7 +41,7 @@
 		<property name="moduleService">
 			<list merge="true">
 				<value>org.openmrs.module.cashier.api.IPaymentModeAttributeTypeService</value>
-				<ref bean="cashierPaymentModeAttributeTypeService" />
+				<ref bean="cashierPaymentModeAttributeTypeService"/>
 			</list>
 		</property>
 	</bean>
@@ -62,7 +49,7 @@
 		<property name="moduleService">
 			<list merge="true">
 				<value>org.openmrs.module.cashier.api.ICashPointService</value>
-				<ref bean="cashierCashPointService" />
+				<ref bean="cashierCashPointService"/>
 			</list>
 		</property>
 	</bean>
@@ -70,7 +57,7 @@
 		<property name="moduleService">
 			<list merge="true">
 				<value>org.openmrs.module.cashier.api.ITimesheetService</value>
-				<ref bean="cashierTimesheetService" />
+				<ref bean="cashierTimesheetService"/>
 			</list>
 		</property>
 	</bean>
@@ -78,7 +65,7 @@
 		<property name="moduleService">
 			<list merge="true">
 				<value>org.openmrs.module.cashier.api.ISequentialReceiptNumberGeneratorService</value>
-				<ref bean="seqReceiptNumberGeneratorService" />
+				<ref bean="seqReceiptNumberGeneratorService"/>
 			</list>
 		</property>
 	</bean>
@@ -86,7 +73,7 @@
 		<property name="moduleService">
 			<list merge="true">
 				<value>org.openmrs.module.cashier.api.ICashierOptionsService</value>
-				<ref bean="cashierOptionsService" />
+				<ref bean="cashierOptionsService"/>
 			</list>
 		</property>
 	</bean>
@@ -94,7 +81,7 @@
 		<property name="moduleService">
 			<list merge="true">
 				<value>org.openmrs.module.cashier.api.IBillableItemsService</value>
-				<ref bean="billableItemsService" />
+				<ref bean="billableItemsService"/>
 			</list>
 		</property>
 	</bean>
@@ -102,121 +89,125 @@
 		<property name="moduleService">
 			<list merge="true">
 				<value>org.openmrs.module.cashier.api.ICashierItemPriceService</value>
-				<ref bean="cashierItemPriceService" />
+				<ref bean="cashierItemPriceService"/>
 			</list>
 		</property>
 	</bean>
 
 	<!-- Service Bean Definitions -->
 	<bean id="itemPriceService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager" ref="transactionManager" />
+		<property name="transactionManager" ref="transactionManager"/>
 		<property name="target">
 			<bean class="org.openmrs.module.cashier.api.impl.ItemPriceServiceImpl">
-				<property name="repository" ref="genericRepositoryDao" />
+				<property name="repository" ref="genericRepositoryDao"/>
 			</bean>
 		</property>
-		<property name="preInterceptors" ref="serviceInterceptors" />
-		<property name="transactionAttributeSource" ref="transactionAttributeSource" />
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
 	</bean>
 	<bean id="billLineItemService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager" ref="transactionManager" />
+		<property name="transactionManager" ref="transactionManager"/>
 		<property name="target">
 			<bean class="org.openmrs.module.cashier.api.impl.BillLineItemServiceImpl">
-				<property name="repository" ref="genericRepositoryDao" />
+				<property name="repository" ref="genericRepositoryDao"/>
 			</bean>
 		</property>
-		<property name="preInterceptors" ref="serviceInterceptors" />
-		<property name="transactionAttributeSource" ref="transactionAttributeSource" />
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
 	</bean>
 	<bean id="cashierBillService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager" ref="transactionManager" />
+		<property name="transactionManager" ref="transactionManager"/>
 		<property name="target">
 			<bean class="org.openmrs.module.cashier.api.impl.BillServiceImpl">
-				<property name="repository" ref="genericRepositoryDao" />
+				<property name="repository" ref="genericRepositoryDao"/>
 			</bean>
 		</property>
-		<property name="preInterceptors" ref="serviceInterceptors" />
-		<property name="transactionAttributeSource" ref="transactionAttributeSource" />
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
 	</bean>
-	<bean id="cashierPaymentModeService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager" ref="transactionManager" />
+	<bean id="cashierPaymentModeService"
+	      class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
 		<property name="target">
 			<bean class="org.openmrs.module.cashier.api.impl.PaymentModeServiceImpl">
-				<property name="repository" ref="genericRepositoryDao" />
+				<property name="repository" ref="genericRepositoryDao"/>
 			</bean>
 		</property>
-		<property name="preInterceptors" ref="serviceInterceptors" />
-		<property name="transactionAttributeSource" ref="transactionAttributeSource" />
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
 	</bean>
-	<bean id="cashierPaymentModeAttributeTypeService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager" ref="transactionManager" />
+	<bean id="cashierPaymentModeAttributeTypeService"
+	      class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
 		<property name="target">
 			<bean class="org.openmrs.module.cashier.api.impl.PaymentModeAttributeTypeServiceImpl">
-				<property name="repository" ref="genericRepositoryDao" />
+				<property name="repository" ref="genericRepositoryDao"/>
 			</bean>
 		</property>
-		<property name="preInterceptors" ref="serviceInterceptors" />
-		<property name="transactionAttributeSource" ref="transactionAttributeSource" />
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
 	</bean>
 	<bean id="cashierCashPointService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager" ref="transactionManager" />
+		<property name="transactionManager" ref="transactionManager"/>
 		<property name="target">
 			<bean class="org.openmrs.module.cashier.api.impl.CashPointServiceImpl">
-				<property name="repository" ref="genericRepositoryDao" />
+				<property name="repository" ref="genericRepositoryDao"/>
 			</bean>
 		</property>
-		<property name="preInterceptors" ref="serviceInterceptors" />
-		<property name="transactionAttributeSource" ref="transactionAttributeSource" />
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
 	</bean>
 	<bean id="cashierTimesheetService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager" ref="transactionManager" />
+		<property name="transactionManager" ref="transactionManager"/>
 		<property name="target">
 			<bean class="org.openmrs.module.cashier.api.impl.TimesheetServiceImpl">
-				<property name="repository" ref="genericRepositoryDao" />
+				<property name="repository" ref="genericRepositoryDao"/>
 			</bean>
 		</property>
-		<property name="preInterceptors" ref="serviceInterceptors" />
-		<property name="transactionAttributeSource" ref="transactionAttributeSource" />
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
 	</bean>
-	<bean id="seqReceiptNumberGeneratorService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager" ref="transactionManager" />
+	<bean id="seqReceiptNumberGeneratorService"
+	      class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
 		<property name="target">
 			<bean class="org.openmrs.module.cashier.api.impl.SequentialReceiptNumberGeneratorServiceImpl">
-				<property name="repository" ref="genericRepositoryDao" />
+				<property name="repository" ref="genericRepositoryDao"/>
 			</bean>
 		</property>
-		<property name="preInterceptors" ref="serviceInterceptors" />
-		<property name="transactionAttributeSource" ref="transactionAttributeSource" />
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
 	</bean>
 	<bean id="cashierOptionsService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager" ref="transactionManager" />
+		<property name="transactionManager" ref="transactionManager"/>
 		<property name="target">
 			<bean class="org.openmrs.module.cashier.api.impl.CashierOptionsServiceGpImpl"/>
 		</property>
-		<property name="preInterceptors" ref="serviceInterceptors" />
-		<property name="transactionAttributeSource" ref="transactionAttributeSource" />
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
 	</bean>
 	<bean id="billableItemsService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager" ref="transactionManager" />
+		<property name="transactionManager" ref="transactionManager"/>
 		<property name="target">
 			<bean class="org.openmrs.module.cashier.api.impl.BillableItemsServiceImpl">
-				<property name="repository" ref="genericRepositoryDao" />
+				<property name="repository" ref="genericRepositoryDao"/>
 			</bean>
 		</property>
-		<property name="preInterceptors" ref="serviceInterceptors" />
-		<property name="transactionAttributeSource" ref="transactionAttributeSource" />
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
 	</bean>
 	<bean id="cashierItemPriceService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager" ref="transactionManager" />
+		<property name="transactionManager" ref="transactionManager"/>
 		<property name="target">
 			<bean class="org.openmrs.module.cashier.api.impl.ICashierItemPriceServiceImpl">
-				<property name="repository" ref="genericRepositoryDao" />
+				<property name="repository" ref="genericRepositoryDao"/>
 			</bean>
 		</property>
-		<property name="preInterceptors" ref="serviceInterceptors" />
-		<property name="transactionAttributeSource" ref="transactionAttributeSource" />
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
 	</bean>
-	<bean id="genericRepositoryDao" class="org.openmrs.module.cashier.api.base.entity.db.hibernate.BaseHibernateRepositoryImpl">
+	<bean id="genericRepositoryDao"
+	      class="org.openmrs.module.cashier.api.base.entity.db.hibernate.BaseHibernateRepositoryImpl">
 		<constructor-arg name="sessionFactory" ref="dbSessionFactory"/>
 	</bean>
 </beans>

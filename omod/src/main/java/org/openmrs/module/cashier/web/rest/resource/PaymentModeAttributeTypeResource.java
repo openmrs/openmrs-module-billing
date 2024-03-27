@@ -24,17 +24,17 @@ import org.openmrs.module.webservices.rest.web.annotation.Resource;
 /**
  * REST resource representing a {@link PaymentModeAttributeType}.
  */
-@Resource(name = RestConstants.VERSION_1 + CashierResourceController.KENYAEMR_CASHIER_NAMESPACE + "/paymentModeAttributeType",
+@Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE + "/paymentModeAttributeType",
         supportedClass = PaymentModeAttributeType.class,
-        supportedOpenmrsVersions = { "2.0 - 2.*" })
+        supportedOpenmrsVersions = {"2.0 - 2.*"})
 public class PaymentModeAttributeTypeResource extends BaseRestAttributeTypeResource<PaymentModeAttributeType> {
-	@Override
-	public PaymentModeAttributeType newDelegate() {
-		return new PaymentModeAttributeType();
-	}
+    @Override
+    public PaymentModeAttributeType newDelegate() {
+        return new PaymentModeAttributeType();
+    }
 
-	@Override
-	public Class<? extends IMetadataDataService<PaymentModeAttributeType>> getServiceClass() {
-		return IPaymentModeAttributeTypeService.class;
-	}
+    @Override
+    public Class<? extends IMetadataDataService<PaymentModeAttributeType>> getServiceClass() {
+        return IPaymentModeAttributeTypeService.class;
+    }
 }

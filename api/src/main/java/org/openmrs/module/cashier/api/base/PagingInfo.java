@@ -32,7 +32,7 @@ public class PagingInfo {
 	
 	/**
 	 * Creates a new {@link PagingInfo} instance.
-	 * 
+	 *
 	 * @param page The 1-based number of the page being requested.
 	 * @param pageSize The number of records to include on each page.
 	 */

@@ -29,11 +29,11 @@ import org.hibernate.transform.ResultTransformer;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
-import org.openmrs.module.cashier.api.base.entity.security.IObjectAuthorizationPrivileges;
 import org.openmrs.module.cashier.api.base.PagingInfo;
 import org.openmrs.module.cashier.api.base.Utility;
 import org.openmrs.module.cashier.api.base.entity.IObjectDataService;
 import org.openmrs.module.cashier.api.base.entity.db.hibernate.BaseHibernateRepository;
+import org.openmrs.module.cashier.api.base.entity.security.IObjectAuthorizationPrivileges;
 import org.openmrs.module.cashier.api.base.f.Action1;
 import org.openmrs.module.cashier.api.base.util.PrivilegeUtil;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * The base type for object services. Provides the core implementation for the common
  * {@link org.openmrs.OpenmrsObject} operations.
- * 
+ *
  * @param <E> The {@link org.openmrs.OpenmrsObject} model type.
  */
 @Transactional
@@ -53,14 +53,14 @@ public abstract class BaseObjectDataServiceImpl<E extends OpenmrsObject, P exten
 	
 	/**
 	 * Gets the privileges to use for this service or {@code null} if none are needed.
-	 * 
+	 *
 	 * @return The service privileges.
 	 */
 	protected abstract P getPrivileges();
 	
 	/**
 	 * Validates the specified object, throwing an exception in the validation fails.
-	 * 
+	 *
 	 * @param object The object to validate.
 	 * @should not throw an exception for valid objects
 	 * @should throw IllegalArgumentException with a null object
@@ -70,7 +70,7 @@ public abstract class BaseObjectDataServiceImpl<E extends OpenmrsObject, P exten
 	
 	/**
 	 * Gets a list of all related objects for the specified entity.
-	 * 
+	 *
 	 * @param entity The parent entity.
 	 * @return The list of the related objects or {@code null} if none.
 	 */
@@ -84,7 +84,7 @@ public abstract class BaseObjectDataServiceImpl<E extends OpenmrsObject, P exten
 	
 	/**
 	 * Gets the {@link BaseHibernateRepository} for this data service.
-	 * 
+	 *
 	 * @return The repository.
 	 */
 	public BaseHibernateRepository getRepository() {
@@ -93,7 +93,7 @@ public abstract class BaseObjectDataServiceImpl<E extends OpenmrsObject, P exten
 	
 	/**
 	 * Sets the {@link BaseHibernateRepository} for this data service.
-	 * 
+	 *
 	 * @param repository The data repository object that the service will use.
 	 */
 	public void setRepository(BaseHibernateRepository repository) {
@@ -216,7 +216,7 @@ public abstract class BaseObjectDataServiceImpl<E extends OpenmrsObject, P exten
 	/**
 	 * Gets a usable instance of the actual class of the generic type E defined by the implementing
 	 * sub-class.
-	 * 
+	 *
 	 * @return The class object for the entity.
 	 */
 	@SuppressWarnings("unchecked")
@@ -232,7 +232,7 @@ public abstract class BaseObjectDataServiceImpl<E extends OpenmrsObject, P exten
 	
 	/**
 	 * Functional method to create, prepare, and execute a query with {@link Criteria}.
-	 * 
+	 *
 	 * @param action The {@link Action1} to prepare the {@link Criteria} predicates.
 	 * @return The result of the query.
 	 */
@@ -242,7 +242,7 @@ public abstract class BaseObjectDataServiceImpl<E extends OpenmrsObject, P exten
 	
 	/**
 	 * Functional method to create, prepare, and execute a paged query with {@link Criteria}.
-	 * 
+	 *
 	 * @param pagingInfo The paging information.
 	 * @param action The {@link Action1} to prepare the {@link Criteria} predicates.
 	 * @return
@@ -273,7 +273,7 @@ public abstract class BaseObjectDataServiceImpl<E extends OpenmrsObject, P exten
 	
 	/**
 	 * Functional method to apply an action to the related objects, returning the updated objects.
-	 * 
+	 *
 	 * @param clazz The class of related objects to perform the action on.
 	 * @param entity The parent entity.
 	 * @param action The {@link Action1} to apply.
@@ -300,7 +300,7 @@ public abstract class BaseObjectDataServiceImpl<E extends OpenmrsObject, P exten
 	
 	/**
 	 * Loads the total number of records for the specified object type into the specified paging object.
-	 * 
+	 *
 	 * @param pagingInfo The {@link PagingInfo} object to load with the record count.
 	 */
 	protected void loadPagingTotal(PagingInfo pagingInfo) {
@@ -309,7 +309,7 @@ public abstract class BaseObjectDataServiceImpl<E extends OpenmrsObject, P exten
 	
 	/**
 	 * Loads the record count for the specified criteria into the specified paging object.
-	 * 
+	 *
 	 * @param pagingInfo The {@link PagingInfo} object to load with the record count.
 	 * @param criteria The {@link Criteria} to execute against the hibernate data source or {@code null}
 	 *            to create a new one.
@@ -351,7 +351,7 @@ public abstract class BaseObjectDataServiceImpl<E extends OpenmrsObject, P exten
 	
 	/**
 	 * Creates a new {@link Criteria} to retrieve the data specified by the {@link PagingInfo} object.
-	 * 
+	 *
 	 * @param pagingInfo The {@link PagingInfo} object that specifies which data should be retrieved.
 	 * @return A new {@link Criteria} with the paging settings.
 	 */
@@ -362,7 +362,7 @@ public abstract class BaseObjectDataServiceImpl<E extends OpenmrsObject, P exten
 	/**
 	 * Updates the specified {@link Criteria} object to retrieve the data specified by the
 	 * {@link PagingInfo} object.
-	 * 
+	 *
 	 * @param pagingInfo The {@link PagingInfo} object that specifies which data should be retrieved.
 	 * @param criteria The {@link Criteria} to add the paging settings to, or {@code null} to create a
 	 *            new one.

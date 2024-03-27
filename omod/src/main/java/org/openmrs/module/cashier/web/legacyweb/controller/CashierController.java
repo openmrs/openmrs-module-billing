@@ -13,14 +13,6 @@
  */
 package org.openmrs.module.cashier.web.legacyweb.controller;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,9 +20,6 @@ import org.openmrs.Provider;
 import org.openmrs.api.APIException;
 import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.jasperreport.JasperReport;
-import org.openmrs.module.jasperreport.JasperReportService;
-import org.openmrs.module.cashier.ModuleSettings;
 import org.openmrs.module.cashier.api.ICashPointService;
 import org.openmrs.module.cashier.api.ITimesheetService;
 import org.openmrs.module.cashier.api.base.ProviderUtil;
@@ -44,14 +33,17 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.request.WebRequest;
+
+import javax.servlet.http.HttpServletRequest;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Controller to manahe the Cashier page.
@@ -59,125 +51,100 @@ import org.springframework.web.context.request.WebRequest;
 @Controller
 @RequestMapping(value = CashierWebConstants.CASHIER_PAGE)
 public class CashierController {
-	private static final Log LOG = LogFactory.getLog(CashierController.class);
+    private static final Log LOG = LogFactory.getLog(CashierController.class);
 
-	private JasperReportService jasperService;
+    public CashierController() {
 
-	public CashierController() {
+    }
 
-	}
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        binder.registerCustomEditor(CashPoint.class, new EntityPropertyEditor<>(ICashPointService.class));
+        binder.registerCustomEditor(Provider.class, new ProviderPropertyEditor());
 
-	@InitBinder
-	public void initBinder(WebDataBinder binder) {
-		binder.registerCustomEditor(CashPoint.class, new EntityPropertyEditor<>(ICashPointService.class));
-		binder.registerCustomEditor(Provider.class, new ProviderPropertyEditor());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm");
+        dateFormat.setLenient(false);
 
-		SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm");
-		dateFormat.setLenient(false);
+        binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
+    }
 
-		binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
-	}
+    @RequestMapping(method = RequestMethod.GET)
+    public void render(@RequestParam(value = "providerId", required = false) Integer providerId,
+                       @RequestParam(value = "returnUrl", required = false) String returnUrl, ModelMap modelMap) {
+        Provider provider;
+        ProviderService providerService = Context.getProviderService();
+        if (providerId != null) {
+            provider = providerService.getProvider(providerId);
+        } else {
+            provider = ProviderUtil.getCurrentProvider(providerService);
+        }
 
-	@RequestMapping(method = RequestMethod.GET)
-	public void render(@RequestParam(value = "providerId", required = false) Integer providerId,
-	        @RequestParam(value = "returnUrl", required = false) String returnUrl, ModelMap modelMap) {
-		Provider provider;
-		ProviderService providerService = Context.getProviderService();
-		if (providerId != null) {
-			provider = providerService.getProvider(providerId);
-		} else {
-			provider = ProviderUtil.getCurrentProvider(providerService);
-		}
+        if (provider == null) {
+            throw new APIException("ERROR: Could not locate the provider. Please make sure the user is listed as provider "
+                    + "(Admin -> Manage providers)");
+        }
 
-		if (provider == null) {
-			throw new APIException("ERROR: Could not locate the provider. Please make sure the user is listed as provider "
-			        + "(Admin -> Manage providers)");
-		}
+        String returnTo = returnUrl;
+        if (StringUtils.isEmpty(returnTo)) {
+            HttpServletRequest req = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+            returnTo = req.getHeader("Referer");
 
-		String returnTo = returnUrl;
-		if (StringUtils.isEmpty(returnTo)) {
-			HttpServletRequest req = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
-			returnTo = req.getHeader("Referer");
+            if (!StringUtils.isEmpty(returnTo)) {
+                try {
+                    URL url = new URL(returnTo);
 
-			if (!StringUtils.isEmpty(returnTo)) {
-				try {
-					URL url = new URL(returnTo);
+                    returnTo = url.getPath();
+                    if (StringUtils.startsWith(returnTo, req.getContextPath())) {
 
-					returnTo = url.getPath();
-					if (StringUtils.startsWith(returnTo, req.getContextPath())) {
+                        returnTo = returnTo.substring(req.getContextPath().length());
+                    }
+                } catch (MalformedURLException e) {
+                    LOG.warn("Could not parse referrer url '" + returnTo + "'");
+                    returnTo = "";
+                }
+            }
+        }
 
-						returnTo = returnTo.substring(req.getContextPath().length());
-					}
-				} catch (MalformedURLException e) {
-					LOG.warn("Could not parse referrer url '" + returnTo + "'");
-					returnTo = "";
-				}
-			}
-		}
+        // Load the current timesheet information
+        Timesheet timesheet = Context.getService(ITimesheetService.class).getCurrentTimesheet(provider);
+        if (timesheet == null) {
+            timesheet = new Timesheet();
+            timesheet.setCashier(provider);
+            timesheet.setClockIn(new Date());
+        }
 
-		// Load the current timesheet information
-		Timesheet timesheet = Context.getService(ITimesheetService.class).getCurrentTimesheet(provider);
-		if (timesheet == null) {
-			timesheet = new Timesheet();
-			timesheet.setCashier(provider);
-			timesheet.setClockIn(new Date());
-		}
+        addRenderAttributes(modelMap, timesheet, provider, returnTo);
+    }
 
-		// load shift report (this must be refactored for the next version)
-		loadShiftReport(modelMap);
+    @RequestMapping(method = RequestMethod.POST)
+    public String post(Timesheet timesheet, Errors errors, WebRequest request, ModelMap modelMap) {
+        String returnUrl = request.getParameter("returnUrl");
 
-		addRenderAttributes(modelMap, timesheet, provider, returnTo);
-	}
+        new TimesheetEntryValidator().validate(timesheet, errors);
+        if (errors.hasErrors()) {
+            addRenderAttributes(modelMap, timesheet, timesheet.getCashier(), returnUrl);
 
-	@RequestMapping(method = RequestMethod.POST)
-	public String post(Timesheet timesheet, Errors errors, WebRequest request, ModelMap modelMap) {
-		String returnUrl = request.getParameter("returnUrl");
+            return null;
+        }
 
-		new TimesheetEntryValidator().validate(timesheet, errors);
-		if (errors.hasErrors()) {
-			loadShiftReport(modelMap);
-			addRenderAttributes(modelMap, timesheet, timesheet.getCashier(), returnUrl);
+        Context.getService(ITimesheetService.class).save(timesheet);
 
-			return null;
-		}
+        if (StringUtils.isEmpty(returnUrl)) {
+            returnUrl = "redirect:";
+        } else {
+            returnUrl = "redirect:" + returnUrl;
+        }
+        return returnUrl;
+    }
 
-		Context.getService(ITimesheetService.class).save(timesheet);
+    @ModelAttribute("cashPoints")
+    public List<CashPoint> getCashPoints() {
+        return Context.getService(ICashPointService.class).getAll();
+    }
 
-		if (StringUtils.isEmpty(returnUrl)) {
-			returnUrl = "redirect:";
-		} else {
-			returnUrl = "redirect:" + returnUrl;
-		}
-		return returnUrl;
-	}
-
-	@ModelAttribute("cashPoints")
-	public List<CashPoint> getCashPoints() {
-		return Context.getService(ICashPointService.class).getAll();
-	}
-
-	private void loadShiftReport(ModelMap modelMap) {
-		if (jasperService == null) {
-			jasperService = Context.getService(JasperReportService.class);
-		}
-
-		JasperReport shiftReport = null;
-		String shiftReportId = Context.getAdministrationService()
-		        .getGlobalProperty(ModuleSettings.CASHIER_SHIFT_REPORT_ID_PROPERTY);
-		if (StringUtils.isNotEmpty(shiftReportId)) {
-			if (StringUtils.isNumeric(shiftReportId)) {
-				shiftReport = jasperService.getJasperReport(Integer.parseInt(shiftReportId));
-
-				if (shiftReport != null) {
-					modelMap.addAttribute("shiftReport", shiftReport);
-				}
-			}
-		}
-	}
-
-	private void addRenderAttributes(ModelMap modelMap, Timesheet timesheet, Provider cashier, String returnUrl) {
-		modelMap.addAttribute("returnUrl", returnUrl);
-		modelMap.addAttribute("cashier", cashier);
-		modelMap.addAttribute("timesheet", timesheet);
-	}
+    private void addRenderAttributes(ModelMap modelMap, Timesheet timesheet, Provider cashier, String returnUrl) {
+        modelMap.addAttribute("returnUrl", returnUrl);
+        modelMap.addAttribute("cashier", cashier);
+        modelMap.addAttribute("timesheet", timesheet);
+    }
 }

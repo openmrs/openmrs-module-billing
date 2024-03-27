@@ -33,7 +33,7 @@ public interface IBillService extends IEntityDataService<Bill> {
 	
 	/**
 	 * Gets the {@link Bill} with the specified receipt number or {@code null} if not found.
-	 * 
+	 *
 	 * @param receiptNumber The receipt number to search for.
 	 * @return The {@link Bill} with the specified receipt number or {@code null}.
 	 * @should throw IllegalArgumentException if the receipt number is null
@@ -48,7 +48,7 @@ public interface IBillService extends IEntityDataService<Bill> {
 	
 	/**
 	 * Returns all {@link Bill}s for the specified patient with the specified paging.
-	 * 
+	 *
 	 * @param patient The {@link Patient}.
 	 * @param paging The paging information.
 	 * @return All of the bills for the specified patient.
@@ -60,7 +60,7 @@ public interface IBillService extends IEntityDataService<Bill> {
 	
 	/**
 	 * Returns all {@link Bill}s for the specified patient with the specified paging.
-	 * 
+	 *
 	 * @param patientId The patient id.
 	 * @param paging The paging information.
 	 * @return All of the bills for the specified patient.
@@ -73,7 +73,7 @@ public interface IBillService extends IEntityDataService<Bill> {
 	
 	/**
 	 * Gets all bills using the specified {@link BillSearch} settings.
-	 * 
+	 *
 	 * @param billSearch The bill search settings.
 	 * @return The bills found or an empty list if no bills were found.
 	 */
@@ -83,7 +83,7 @@ public interface IBillService extends IEntityDataService<Bill> {
 	
 	/**
 	 * Gets all bills using the specified {@link BillSearch} settings.
-	 * 
+	 *
 	 * @param billSearch The bill search settings.
 	 * @param pagingInfo The paging information.
 	 * @return The bills found or an empty list if no bills were found.

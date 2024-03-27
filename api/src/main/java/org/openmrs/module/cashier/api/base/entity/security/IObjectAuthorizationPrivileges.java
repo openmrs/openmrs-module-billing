@@ -22,21 +22,21 @@ public interface IObjectAuthorizationPrivileges {
 	
 	/**
 	 * The privilege required to save an entity or {@code null} for no authorization.
-	 * 
+	 *
 	 * @return The privilege name.
 	 */
 	String getSavePrivilege();
 	
 	/**
 	 * The privilege required to purge an entity or {@code null} for no authorization.
-	 * 
+	 *
 	 * @return The privilege name.
 	 */
 	String getPurgePrivilege();
 	
 	/**
 	 * The privilege required to get an entity or {@code null} for no authorization.
-	 * 
+	 *
 	 * @return The privilege name.
 	 */
 	String getGetPrivilege();

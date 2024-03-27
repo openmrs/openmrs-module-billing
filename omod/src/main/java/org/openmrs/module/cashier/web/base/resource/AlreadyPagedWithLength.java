@@ -22,20 +22,21 @@ import org.openmrs.module.webservices.rest.web.resource.impl.AlreadyPaged;
 
 /**
  * Represents paged results that include a total length.
+ *
  * @param <T> The model class.
  */
 public class AlreadyPagedWithLength<T> extends AlreadyPaged<T> {
-	private long length = 0;
+    private long length = 0;
 
-	public AlreadyPagedWithLength(RequestContext context, List<T> results, boolean hasMoreResults, long length) {
-		super(context, results, hasMoreResults);
-		this.length = length;
-	}
+    public AlreadyPagedWithLength(RequestContext context, List<T> results, boolean hasMoreResults, long length) {
+        super(context, results, hasMoreResults);
+        this.length = length;
+    }
 
-	@Override
-	public SimpleObject toSimpleObject(Converter converter) {
-		SimpleObject obj = super.toSimpleObject(converter);
-		obj.add("length", this.length);
-		return obj;
-	}
+    @Override
+    public SimpleObject toSimpleObject(Converter converter) {
+        SimpleObject obj = super.toSimpleObject(converter);
+        obj.add("length", this.length);
+        return obj;
+    }
 }

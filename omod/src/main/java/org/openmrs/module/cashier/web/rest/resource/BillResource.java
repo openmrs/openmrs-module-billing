@@ -13,6 +13,12 @@
  */
 package org.openmrs.module.cashier.web.rest.resource;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.logging.log4j.util.Strings;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
@@ -35,7 +41,6 @@ import org.openmrs.module.cashier.api.search.BillSearch;
 import org.openmrs.module.cashier.api.util.RoundingUtil;
 import org.openmrs.module.cashier.web.base.resource.BaseRestDataResource;
 import org.openmrs.module.cashier.web.rest.controller.base.CashierResourceController;
-import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.PropertySetter;
@@ -47,17 +52,10 @@ import org.openmrs.module.webservices.rest.web.resource.impl.AlreadyPaged;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.springframework.web.client.RestClientException;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 /**
  * REST resource representing a {@link Bill}.
  */
-@Resource(name = RestConstants.VERSION_1 + CashierResourceController.KENYAEMR_CASHIER_NAMESPACE + "/bill", supportedClass = Bill.class,
+@Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE + "/bill", supportedClass = Bill.class,
         supportedOpenmrsVersions = {"2.0 - 2.*"})
 public class BillResource extends BaseRestDataResource<Bill> {
     @Override

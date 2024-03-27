@@ -1,20 +1,48 @@
+/*
+ * The contents of this file are subject to the OpenMRS Public License
+ * Version 1.1 (the "License"); you may not use this file except in
+ * compliance with the License. You may obtain a copy of the License at
+ * http://license.openmrs.org
+ *
+ * Software distributed under the License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ * License for the specific language governing rights and limitations
+ * under the License.
+ *
+ * Copyright (C) OpenMRS, LLC.  All Rights Reserved.
+ */
 package org.openmrs.module.cashier.advice;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.time.DateUtils;
-import org.openmrs.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.openmrs.DrugOrder;
+import org.openmrs.Order;
+import org.openmrs.Patient;
+import org.openmrs.Provider;
+import org.openmrs.TestOrder;
+import org.openmrs.User;
+import org.openmrs.VisitAttribute;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.cashier.api.IBillService;
 import org.openmrs.module.cashier.api.IBillableItemsService;
 import org.openmrs.module.cashier.api.ICashPointService;
 import org.openmrs.module.cashier.api.ItemPriceService;
-import org.openmrs.module.cashier.api.model.*;
-import org.openmrs.module.cashier.api.search.BillSearch;
+import org.openmrs.module.cashier.api.model.Bill;
+import org.openmrs.module.cashier.api.model.BillLineItem;
+import org.openmrs.module.cashier.api.model.BillStatus;
+import org.openmrs.module.cashier.api.model.BillableService;
+import org.openmrs.module.cashier.api.model.BillableServiceStatus;
+import org.openmrs.module.cashier.api.model.CashPoint;
+import org.openmrs.module.cashier.api.model.CashierItemPrice;
 import org.openmrs.module.cashier.api.search.BillableServiceSearch;
 import org.openmrs.module.cashier.util.Utils;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
@@ -22,6 +50,8 @@ import org.openmrs.module.stockmanagement.api.model.StockItem;
 import org.springframework.aop.MethodBeforeAdvice;
 
 public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
+	
+	private static final Log LOG = LogFactory.getLog(OrderCreationMethodBeforeAdvice.class);
 	
 	OrderService orderService = Context.getOrderService();
 	
@@ -47,25 +77,23 @@ public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 				// Check if the order already exists by looking at the database
 				if (orderService.getOrderByUuid(order.getUuid()) != null) {
 					// This is an existing order being updated
-					System.out.println("Order is being updated: " + order.getOrderId());
+					LOG.debug("Order is being updated: " + order.getOrderId());
 				} else {
 					// This is a new order
-					System.out.println("New order is being created");
+					LOG.debug("New order is being created");
 					// Add bill item to Bill
 					Patient patient = order.getPatient();
 					String patientUUID = patient.getUuid();
 					String cashierUUID = Context.getAuthenticatedUser().getUuid();
 					String cashpointUUID = Utils.getDefaultLocation().getUuid();
-					System.out.println(
-					    "Patient: " + patientUUID + " cashier: " + cashierUUID + " cash point: " + cashpointUUID);
+					LOG.debug("Patient: " + patientUUID + " cashier: " + cashierUUID + " cash point: " + cashpointUUID);
 					if (order instanceof DrugOrder) {
 						DrugOrder drugOrder = (DrugOrder) order;
 						Integer drugID = drugOrder.getDrug() != null ? drugOrder.getDrug().getDrugId() : 0;
 						String drugUUID = drugOrder.getDrug() != null ? drugOrder.getDrug().getConcept().getUuid() : "";
 						double drugQuantity = drugOrder.getQuantity() != null ? drugOrder.getQuantity() : 0.0;
 						List<StockItem> stockItems = stockService.getStockItemByDrug(drugID);
-						System.out.println(
-						    "Drug id: " + drugID + " Drug UUID: " + drugUUID + " Drug Quantity: " + drugQuantity);
+						LOG.debug("Drug id: " + drugID + " Drug UUID: " + drugUUID + " Drug Quantity: " + drugQuantity);
 						if (!stockItems.isEmpty()) {
 							addBillItemToBill(order, patient, cashierUUID, cashpointUUID, stockItems.get(0), null,
 							    (int) drugQuantity, order.getDateActivated());
@@ -81,28 +109,28 @@ public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 						IBillableItemsService service = Context.getService(IBillableItemsService.class);
 						List<BillableService> searchResult = service.findServices(new BillableServiceSearch(searchTemplate));
 						if (!searchResult.isEmpty()) {
-							System.out.println("service was found");
-							System.out.println(searchResult.get(0).getConcept().getUuid());
+							LOG.debug("service was found");
+							LOG.debug(searchResult.get(0).getConcept().getUuid());
 							addBillItemToBill(order, patient, cashierUUID, cashpointUUID, null, searchResult.get(0), 1,
 							    order.getDateActivated());
 							
 						} else {
-							System.out.println("concept was not found");
+							LOG.debug("concept was not found");
 						}
-						System.out.println("Test id: " + testID + " Test UUID: " + testUUID);
+						LOG.debug("Test id: " + testID + " Test UUID: " + testUUID);
 					}
 				}
 			}
 		}
 		catch (Exception e) {
-			System.err.println("Error intercepting order before creation: " + e.getMessage());
+			LOG.error(e);
 			e.printStackTrace();
 		}
 	}
 	
 	/**
 	 * Adds a bill item to the cashier module
-	 * 
+	 *
 	 * @param patient
 	 * @param cashierUUID
 	 * @param cashpointUUID
@@ -151,7 +179,7 @@ public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 				billLineItem.setPrice(
 				    matchingPrices.isEmpty() ? itemPrices.get(0).getPrice() : matchingPrices.get(0).getPrice());
 			} else {
-				billLineItem.setPrice(new BigDecimal(0.0));
+				billLineItem.setPrice(new BigDecimal("0.0"));
 			}
 			billLineItem.setQuantity(quantity);
 			billLineItem.setPaymentStatus(BillStatus.PENDING);
@@ -169,12 +197,12 @@ public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 				activeBill.setStatus(BillStatus.PENDING);
 				billService.save(activeBill);
 			} else {
-				System.out.println("User is not a provider");
+				LOG.debug("User is not a provider");
 			}
 			
 		}
 		catch (Exception ex) {
-			System.err.println("Error sending the bill item: " + ex.getMessage());
+			LOG.error(ex);
 			ex.printStackTrace();
 		}
 	}

@@ -21,7 +21,7 @@ public interface IEntityAuthorizationPrivileges extends IObjectAuthorizationPriv
 	
 	/**
 	 * The privilege required to void or unvoid an entity or {@code null} for no authorization.
-	 * 
+	 *
 	 * @return The privilege name.
 	 */
 	String getVoidPrivilege();

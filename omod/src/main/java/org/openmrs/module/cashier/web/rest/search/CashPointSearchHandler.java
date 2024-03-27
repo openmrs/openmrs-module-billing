@@ -20,12 +20,12 @@ import org.apache.commons.lang.StringUtils;
 import org.openmrs.Location;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.cashier.web.base.resource.AlreadyPagedWithLength;
-import org.openmrs.module.cashier.web.base.resource.PagingUtil;
-import org.openmrs.module.cashier.web.legacyweb.CashierRestConstants;
 import org.openmrs.module.cashier.api.ICashPointService;
 import org.openmrs.module.cashier.api.base.PagingInfo;
 import org.openmrs.module.cashier.api.model.CashPoint;
+import org.openmrs.module.cashier.web.base.resource.AlreadyPagedWithLength;
+import org.openmrs.module.cashier.web.base.resource.PagingUtil;
+import org.openmrs.module.cashier.web.legacyweb.CashierRestConstants;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.api.SearchConfig;
@@ -38,45 +38,45 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class CashPointSearchHandler implements SearchHandler {
-	private final SearchConfig searchConfig = new SearchConfig("default", CashierRestConstants.CASH_POINT_RESOURCE,
+    private final SearchConfig searchConfig = new SearchConfig("default", CashierRestConstants.CASH_POINT_RESOURCE,
             Collections.singletonList("*"), Collections.singletonList(new SearchQuery.Builder(
             "Find a cashpoint by its name, optionally filtering by location").withRequiredParameters("q")
             .withOptionalParameters("location_uuid").build()));
 
-	@Override
-	public PageableResult search(RequestContext context) {
-		String query = context.getParameter("q");
-		String locationUuid = context.getParameter("location_uuid");
-		query = query.isEmpty() ? null : query;
-		locationUuid = StringUtils.isEmpty(locationUuid) ? null : locationUuid;
+    @Override
+    public PageableResult search(RequestContext context) {
+        String query = context.getParameter("q");
+        String locationUuid = context.getParameter("location_uuid");
+        query = query.isEmpty() ? null : query;
+        locationUuid = StringUtils.isEmpty(locationUuid) ? null : locationUuid;
 
-		ICashPointService service = Context.getService(ICashPointService.class);
-		LocationService locationService = Context.getLocationService();
-		Location location = locationService.getLocationByUuid(locationUuid);
-		PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
+        ICashPointService service = Context.getService(ICashPointService.class);
+        LocationService locationService = Context.getLocationService();
+        Location location = locationService.getLocationByUuid(locationUuid);
+        PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
 
-		List<CashPoint> cashpoints = null;
-		PageableResult results = null;
+        List<CashPoint> cashpoints = null;
+        PageableResult results = null;
 
-		if (locationUuid == null) {
-			// Do a name search
-			cashpoints = service.getByNameFragment(query, context.getIncludeAll(), pagingInfo);
-		} else if (query == null) {
-			//performs the location search
-			cashpoints = service.getCashPointsByLocation(location, context.getIncludeAll(), pagingInfo);
-		} else {
-			// Do a name & location search
-			cashpoints = service.getCashPointsByLocationAndName(location, query, context.getIncludeAll(), pagingInfo);
-		}
+        if (locationUuid == null) {
+            // Do a name search
+            cashpoints = service.getByNameFragment(query, context.getIncludeAll(), pagingInfo);
+        } else if (query == null) {
+            //performs the location search
+            cashpoints = service.getCashPointsByLocation(location, context.getIncludeAll(), pagingInfo);
+        } else {
+            // Do a name & location search
+            cashpoints = service.getCashPointsByLocationAndName(location, query, context.getIncludeAll(), pagingInfo);
+        }
 
-		results =
-		        new AlreadyPagedWithLength<>(context, cashpoints, pagingInfo.hasMoreResults(),
-		                pagingInfo.getTotalRecordCount());
-		return results;
-	}
+        results =
+                new AlreadyPagedWithLength<>(context, cashpoints, pagingInfo.hasMoreResults(),
+                        pagingInfo.getTotalRecordCount());
+        return results;
+    }
 
-	@Override
-	public SearchConfig getSearchConfig() {
-		return searchConfig;
-	}
+    @Override
+    public SearchConfig getSearchConfig() {
+        return searchConfig;
+    }
 }

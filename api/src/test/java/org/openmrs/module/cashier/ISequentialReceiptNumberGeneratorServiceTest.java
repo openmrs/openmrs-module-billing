@@ -23,9 +23,9 @@ import org.junit.Test;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.cashier.api.ISequentialReceiptNumberGeneratorService;
 import org.openmrs.module.cashier.api.SequentialReceiptNumberGenerator;
-import org.openmrs.module.cashier.base.entity.IObjectDataServiceTest;
 import org.openmrs.module.cashier.api.model.GroupSequence;
 import org.openmrs.module.cashier.api.model.SequentialReceiptNumberGeneratorModel;
+import org.openmrs.module.cashier.base.entity.IObjectDataServiceTest;
 
 public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataServiceTest<ISequentialReceiptNumberGeneratorService, SequentialReceiptNumberGeneratorModel> {
 	

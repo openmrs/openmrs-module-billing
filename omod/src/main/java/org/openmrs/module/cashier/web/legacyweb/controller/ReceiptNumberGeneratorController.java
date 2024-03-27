@@ -24,11 +24,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping(value = ReceiptNumberGeneratorController.RECEIPT_NUMBER_GENERATOR_URL)
 public class ReceiptNumberGeneratorController extends AbstractReceiptNumberGenerator {
 
-	public static final String RECEIPT_NUMBER_GENERATOR_URL = CashierWebConstants.RECEIPT_NUMBER_GENERATOR_ROOT;
+    public static final String RECEIPT_NUMBER_GENERATOR_URL = CashierWebConstants.RECEIPT_NUMBER_GENERATOR_ROOT;
 
-	@Override
-	public String getReceiptNumberGeneratorUrl() {
-		return RECEIPT_NUMBER_GENERATOR_URL;
-	}
+    @Override
+    public String getReceiptNumberGeneratorUrl() {
+        return RECEIPT_NUMBER_GENERATOR_URL;
+    }
 
 }

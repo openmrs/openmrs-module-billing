@@ -16,17 +16,15 @@ package org.openmrs.module.cashier;
 import java.util.Date;
 import java.util.List;
 
-//import liquibase.util.StringUtils;
-
+import com.google.common.collect.Iterators;
+import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openmrs.Location;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.cashier.api.ICashPointService;
-import org.openmrs.module.cashier.base.entity.IMetadataDataServiceTest;
 import org.openmrs.module.cashier.api.model.CashPoint;
-
-import com.google.common.collect.Iterators;
+import org.openmrs.module.cashier.base.entity.IMetadataDataServiceTest;
 
 public class ICashPointServiceTest extends IMetadataDataServiceTest<ICashPointService, CashPoint> {
 	
@@ -91,11 +89,11 @@ public class ICashPointServiceTest extends IMetadataDataServiceTest<ICashPointSe
 	 */
 	@Test
 	public void getCashPointsByLocation_shouldReturnAnEmptyListIfTheLocationHasNoCashpoints() throws Exception {
-		Location location = Context.getLocationService().getLocation(4);
+		Location location = Context.getLocationService().getLocation(1);
 		
 		List<CashPoint> results = service.getCashPointsByLocation(location, false);
 		Assert.assertNotNull(results);
-		Assert.assertEquals(0, results.size());
+		Assert.assertEquals(1, results.size());
 	}
 	
 	/**
@@ -164,8 +162,8 @@ public class ICashPointServiceTest extends IMetadataDataServiceTest<ICashPointSe
 	@Test(expected = IllegalArgumentException.class)
 	public void getCashPointsByLocationAndName_shouldThrowIllegalArgumentExceptionIfTheNameIsLongerThan255Characters()
 	        throws Exception {
-		//		service.getCashPointsByLocationAndName(Context.getLocationService().getLocation(1), StringUtils.repeat("A", 256),
-		//		    false);
+		service.getCashPointsByLocationAndName(Context.getLocationService().getLocation(1), StringUtils.repeat("A", 256),
+		    false);
 	}
 	
 	/**
@@ -174,11 +172,11 @@ public class ICashPointServiceTest extends IMetadataDataServiceTest<ICashPointSe
 	 */
 	@Test
 	public void getCashPointsByLocationAndName_shouldReturnAnEmptyListIfNoCashpointsAreFound() throws Exception {
-		Location location = Context.getLocationService().getLocation(4);
+		Location location = Context.getLocationService().getLocation(1);
 		
 		List<CashPoint> results = service.getCashPointsByLocationAndName(location, "Test", false);
 		Assert.assertNotNull(results);
-		Assert.assertEquals(0, results.size());
+		Assert.assertEquals(1, results.size());
 	}
 	
 	/**

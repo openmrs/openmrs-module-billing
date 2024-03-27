@@ -17,8 +17,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.jasperreport.JasperReport;
-import org.openmrs.module.jasperreport.JasperReportService;
 import org.openmrs.module.cashier.api.base.f.Action1;
 import org.openmrs.module.cashier.api.model.CashierSettings;
 
@@ -27,41 +25,41 @@ import org.openmrs.module.cashier.api.model.CashierSettings;
  */
 public class ModuleSettings {
 	
-	public static final String RECEIPT_REPORT_ID_PROPERTY = "openhmis.cashier.defaultReceiptReportId";
+	public static final String RECEIPT_REPORT_ID_PROPERTY = "cashier.defaultReceiptReportId";
 	
-	public static final String CASHIER_SHIFT_REPORT_ID_PROPERTY = "openhmis.cashier.defaultShiftReportId";
+	public static final String CASHIER_SHIFT_REPORT_ID_PROPERTY = "cashier.defaultShiftReportId";
 	
-	public static final String TIMESHEET_REQUIRED_PROPERTY = "openhmis.cashier.timesheetRequired";
+	public static final String TIMESHEET_REQUIRED_PROPERTY = "cashier.timesheetRequired";
 	
-	public static final String ROUNDING_MODE_PROPERTY = "openhmis.cashier.roundingMode";
+	public static final String ROUNDING_MODE_PROPERTY = "cashier.roundingMode";
 	
-	public static final String ROUND_TO_NEAREST_PROPERTY = "openhmis.cashier.roundToNearest";
+	public static final String ROUND_TO_NEAREST_PROPERTY = "cashier.roundToNearest";
 	
-	public static final String ROUNDING_ITEM_ID = "openhmis.cashier.roundingItemId";
+	public static final String ROUNDING_ITEM_ID = "cashier.roundingItemId";
 	
-	public static final String ROUNDING_DEPT_ID = "openhmis.cashier.roundingDeptId";
+	public static final String ROUNDING_DEPT_ID = "cashier.roundingDeptId";
 	
-	public static final String SYSTEM_RECEIPT_NUMBER_GENERATOR = "openhmis.cashier.systemReceiptNumberGenerator";
+	public static final String SYSTEM_RECEIPT_NUMBER_GENERATOR = "cashier.systemReceiptNumberGenerator";
 	
-	public static final String ADJUSTMENT_REASEON_FIELD = "openhmis.cashier.adjustmentReasonField";
+	public static final String ADJUSTMENT_REASEON_FIELD = "cashier.adjustmentReasonField";
 	
-	public static final String ALLOW_BILL_ADJUSTMENT = "openhmis.cashier.allowBillAdjustments";
+	public static final String ALLOW_BILL_ADJUSTMENT = "cashier.allowBillAdjustments";
 	
-	public static final String AUTOFILL_PAYMENT_AMOUNT = "openhmis.cashier.autofillPaymentAmount";
+	public static final String AUTOFILL_PAYMENT_AMOUNT = "cashier.autofillPaymentAmount";
 	
-	public static final String PATIENT_DASHBOARD_2_BILL_COUNT = "openhmis.cashier.patientDashboard2BillCount";
+	public static final String PATIENT_DASHBOARD_2_BILL_COUNT = "cashier.patientDashboard2BillCount";
 	
 	private static final Integer DEFAULT_PATIENT_DASHBOARD_2_BILL_COUNT = 4;
 	
-	public static final String DEPARTMENT_COLLECTIONS_REPORT_ID_PROPERTY = "openhmis.cashier.reports.departmentCollections";
+	public static final String DEPARTMENT_COLLECTIONS_REPORT_ID_PROPERTY = "cashier.reports.departmentCollections";
 	
-	public static final String DEPARTMENT_REVENUE_REPORT_ID_PROPERTY = "openhmis.cashier.reports.departmentRevenue";
+	public static final String DEPARTMENT_REVENUE_REPORT_ID_PROPERTY = "cashier.reports.departmentRevenue";
 	
-	public static final String SHIFT_SUMMARY_REPORT_ID_PROPERTY = "openhmis.cashier.reports.shiftSummary";
+	public static final String SHIFT_SUMMARY_REPORT_ID_PROPERTY = "cashier.reports.shiftSummary";
 	
-	public static final String DAILY_SHIFT_SUMMARY_REPORT_ID_PROPERTY = "openhmis.cashier.reports.dailyShiftSummary";
+	public static final String DAILY_SHIFT_SUMMARY_REPORT_ID_PROPERTY = "cashier.reports.dailyShiftSummary";
 	
-	public static final String PAYMENTS_BY_PAYMENT_MODE_REPORT_ID_PROPERTY = "openhmis.cashier.reports.paymentsByPaymentMode";
+	public static final String PAYMENTS_BY_PAYMENT_MODE_REPORT_ID_PROPERTY = "cashier.reports.paymentsByPaymentMode";
 	
 	private static final AdministrationService administrationService;
 	
@@ -74,18 +72,6 @@ public class ModuleSettings {
 	
 	public static Integer getReceiptReportId() {
 		return getIntProperty(RECEIPT_REPORT_ID_PROPERTY);
-	}
-	
-	public static JasperReport getReceiptReport() {
-		JasperReport report = null;
-		
-		Integer reportId = getReceiptReportId();
-		if (reportId != null) {
-			JasperReportService reportService = Context.getService(JasperReportService.class);
-			report = reportService.getJasperReport(reportId);
-		}
-		
-		return report;
 	}
 	
 	public static CashierSettings loadSettings() {

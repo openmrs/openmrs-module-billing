@@ -22,7 +22,7 @@ import org.openmrs.OpenmrsObject;
 
 /**
  * Base template search class for {@link org.openmrs.OpenmrsObject} models.
- * 
+ *
  * @param <T> The model class.
  */
 public class BaseObjectTemplateSearch<T extends OpenmrsObject> {

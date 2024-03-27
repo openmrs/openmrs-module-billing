@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Represents classes that provide data access services to model types that implement
  * {@link org.openmrs.OpenmrsData}.
- * 
+ *
  * @param <E> The {@link org.openmrs.OpenmrsData} model class.
  */
 @Transactional
@@ -30,7 +30,7 @@ public interface IEntityDataService<E extends OpenmrsData> extends IObjectDataSe
 	
 	/**
 	 * Voiding an entity essentially removes it from circulation.
-	 * 
+	 *
 	 * @param entity The entity object to void.
 	 * @param reason The reason for voiding.
 	 * @should void the entity
@@ -41,7 +41,7 @@ public interface IEntityDataService<E extends OpenmrsData> extends IObjectDataSe
 	
 	/**
 	 * Unvoid the entity record.
-	 * 
+	 *
 	 * @param entity The entity to be revived.
 	 * @should unvoid the entity
 	 * @should throw NullPointerException with null entity
@@ -50,7 +50,7 @@ public interface IEntityDataService<E extends OpenmrsData> extends IObjectDataSe
 	
 	/**
 	 * Returns all entity records that have the specified voided status.
-	 * 
+	 *
 	 * @param includeVoided {@code true} to include voided entities.
 	 * @return All the entity records that have the specified voided status.
 	 * @should return all entities when includeVoided is set to true
@@ -60,7 +60,7 @@ public interface IEntityDataService<E extends OpenmrsData> extends IObjectDataSe
 	
 	/**
 	 * Returns all entity records that have the specified voided status and paging.
-	 * 
+	 *
 	 * @param includeVoided {@code true} to include voided entities.
 	 * @param paging The paging information.
 	 * @return All the entity records that have the specified voided status.

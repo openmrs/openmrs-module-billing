@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -14,23 +15,33 @@
 
 	<dependencies>
 
-		<!-- Begin OpenMRS modules -->
-
-		<dependency>
-			<groupId>org.openmrs.module</groupId>
-			<artifactId>jasperreport-api</artifactId>
-			<type>jar</type>
-		</dependency>
-
-		<dependency>
-			<groupId>org.openmrs.module</groupId>
-			<artifactId>stockmanagement-api</artifactId>
-		</dependency>
-
 		<dependency>
 			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>${project.parent.artifactId}-api</artifactId>
 			<version>${project.parent.version}</version>
+		</dependency>
+
+		<!-- Begin OpenMRS core -->
+
+		<dependency>
+			<groupId>org.openmrs.api</groupId>
+			<artifactId>openmrs-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.openmrs.web</groupId>
+			<artifactId>openmrs-web</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- End OpenMRS core -->
+
+		<!-- Begin OpenMRS modules -->
+
+		<dependency>
+			<groupId>org.openmrs.module</groupId>
+			<artifactId>stockmanagement-api</artifactId>
 		</dependency>
 
 		<dependency>
@@ -52,49 +63,11 @@
 
 		<!-- End OpenMRS modules -->
 
-
-		<!-- Begin OpenMRS core -->
-
-		<dependency>
-			<groupId>org.openmrs.api</groupId>
-			<artifactId>openmrs-api</artifactId>
-			<type>jar</type>
-		</dependency>
-
-		<dependency>
-			<groupId>org.openmrs.web</groupId>
-			<artifactId>openmrs-web</artifactId>
-			<type>jar</type>
-		</dependency>
-
-		<dependency>
-			<groupId>org.openmrs.api</groupId>
-			<artifactId>openmrs-api</artifactId>
-			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.openmrs.web</groupId>
-			<artifactId>openmrs-web</artifactId>
-			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.openmrs.test</groupId>
-			<artifactId>openmrs-test</artifactId>
-			<type>pom</type>
-			<scope>test</scope>
-		</dependency>
-
-		<!-- End OpenMRS core -->
-
 		<!-- Begin webservices.rest -->
 
 		<dependency>
-			  <groupId>org.openmrs.module</groupId>
-			  <artifactId>webservices.rest-omod</artifactId>
+			<groupId>org.openmrs.module</groupId>
+			<artifactId>webservices.rest-omod</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.openmrs.module</groupId>
@@ -107,12 +80,24 @@
 
 	<build>
 		<finalName>${project.parent.artifactId}-${project.parent.version}</finalName>
+
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
 			</resource>
 		</resources>
+
+		<testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/*.properties</include>
+					<include>**/*.xml</include>
+				</includes>
+			</testResource>
+		</testResources>
 
 		<pluginManagement>
 			<plugins>
@@ -145,7 +130,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore />
+										<ignore/>
 									</action>
 								</pluginExecution>
 								<pluginExecution>
@@ -158,7 +143,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore />
+										<ignore/>
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
@@ -191,25 +176,29 @@
 				</executions>
 			</plugin>
 
-	      <plugin>
-		      <groupId>net.alchim31.maven</groupId>
-              <artifactId>yuicompressor-maven-plugin</artifactId>
-			  <version>1.5.1</version>
-              <executions>
-                  <execution>
-                      <goals>
-                          <goal>compress</goal>
-                      </goals>
-                  </execution>
-              </executions>
-              <configuration>
-                  <!-- <verbose>true</verbose> -->
-                  <nosuffix>true</nosuffix>
-                  <excludes>
-                      <exclude>**/*.min.js</exclude>
-                  </excludes>
-              </configuration>
-          </plugin>
+			<plugin>
+				<groupId>net.alchim31.maven</groupId>
+				<artifactId>yuicompressor-maven-plugin</artifactId>
+				<version>1.5.1</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>compress</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<!-- <verbose>true</verbose> -->
+					<nosuffix>true</nosuffix>
+					<excludes>
+						<exclude>**/*.min.js</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+			</plugin>
 		</plugins>
 	</build>
 

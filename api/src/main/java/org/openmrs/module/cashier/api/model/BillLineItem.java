@@ -45,7 +45,7 @@ public class BillLineItem extends BaseOpenmrsData {
 	private Integer lineItemOrder;
 	
 	private BillStatus paymentStatus; // this should only be set to either
-	                                  // pending or paid
+	// pending or paid
 	
 	@Override
 	public Integer getId() {
@@ -59,7 +59,7 @@ public class BillLineItem extends BaseOpenmrsData {
 	
 	/**
 	 * Get the total price for the line item
-	 * 
+	 *
 	 * @return double the total price for the line item
 	 */
 	public BigDecimal getTotal() {

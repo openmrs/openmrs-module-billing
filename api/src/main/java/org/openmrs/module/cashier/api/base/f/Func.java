@@ -15,7 +15,7 @@ package org.openmrs.module.cashier.api.base.f;
 
 /**
  * Represents a function with no parameters and a return value.
- * 
+ *
  * @param <TResult> The class of the return object.
  */
 public interface Func<TResult> {

@@ -15,7 +15,7 @@ package org.openmrs.module.cashier.api.base.entity.model;
 
 /**
  * Base class for instance attribute type models.
- * 
+ *
  * @param <TOwner> The owning instance type.
  */
 public class BaseInstanceAttributeType<TOwner extends IInstanceType<?>> extends BaseAttributeType implements IInstanceAttributeType<TOwner> {
@@ -26,7 +26,7 @@ public class BaseInstanceAttributeType<TOwner extends IInstanceType<?>> extends 
 	
 	/**
 	 * Gets the attribute type owner.
-	 * 
+	 *
 	 * @return The owner
 	 */
 	public TOwner getOwner() {
@@ -35,7 +35,7 @@ public class BaseInstanceAttributeType<TOwner extends IInstanceType<?>> extends 
 	
 	/**
 	 * Sets the attribute type owner.
-	 * 
+	 *
 	 * @param parent The owner
 	 */
 	public void setOwner(TOwner parent) {

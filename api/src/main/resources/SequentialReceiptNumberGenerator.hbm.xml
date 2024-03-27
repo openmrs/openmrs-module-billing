@@ -3,7 +3,8 @@
 		"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 		"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <hibernate-mapping package="org.openmrs.module.cashier.api.model">
-	<class name="org.openmrs.module.cashier.api.model.SequentialReceiptNumberGeneratorModel" table="cashier_seq_receipt_number_generator">
+	<class name="org.openmrs.module.cashier.api.model.SequentialReceiptNumberGeneratorModel"
+	       table="cashier_seq_receipt_number_generator">
 		<cache usage="read-write"/>
 
 		<id name="id" type="int" column="seq_receipt_number_generator_id">
@@ -11,7 +12,7 @@
 				<param name="sequence">cashier_seq_receipt_number_generator_seq_receipt_number_generator_id_seq</param>
 			</generator>
 		</id>
-		<discriminator column="seq_receipt_number_generator_id" insert="false" />
+		<discriminator column="seq_receipt_number_generator_id" insert="false"/>
 
 		<property name="groupingType" column="grouping_type" not-null="true">
 			<type name="org.hibernate.type.EnumType">
@@ -32,7 +33,7 @@
 		<property name="sequencePadding" type="int" column="sequence_padding" not-null="true"/>
 		<property name="includeCheckDigit" type="boolean" column="has_check_digit" not-null="true"/>
 
-		<property name="uuid" type="java.lang.String" column="uuid" length="38" unique="true" />
+		<property name="uuid" type="java.lang.String" column="uuid" length="38" unique="true"/>
 	</class>
 
 	<class name="org.openmrs.module.cashier.api.model.GroupSequence" table="cashier_seq_group_sequence">
@@ -43,11 +44,12 @@
 				<param name="sequence">cashier_seq_group_sequence_seq_group_sequence_id_seq</param>
 			</generator>
 		</id>
-		<discriminator column="seq_group_sequence_id" insert="false" />
+		<discriminator column="seq_group_sequence_id" insert="false"/>
 
-		<property name="group" type="java.lang.String" column="sequence_group" length="50" not-null="true" unique="true"/>
+		<property name="group" type="java.lang.String" column="sequence_group" length="50" not-null="true"
+		          unique="true"/>
 		<property name="value" type="int" column="sequence_value" not-null="true"/>
 
-		<property name="uuid" type="java.lang.String" column="uuid" length="38" unique="true" />
+		<property name="uuid" type="java.lang.String" column="uuid" length="38" unique="true"/>
 	</class>
 </hibernate-mapping>

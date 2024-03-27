@@ -19,42 +19,42 @@ import org.openmrs.customdatatype.CustomValueDescriptor;
 
 /**
  * Represents a class that can be customized with attributes.
- * 
+ *
  * @param <TAttribute> The {@link ISimpleAttribute} class.
  */
 public interface ICustomizable<TAttribute extends IAttribute<?, ?>> {
 	
 	/**
 	 * Gets the {@link TAttribute}'s added to this instance.
-	 * 
+	 *
 	 * @return The attributes for this instance.
 	 */
 	Set<TAttribute> getAttributes();
 	
 	/**
 	 * Sets the {@link TAttribute}'s for this instance.
-	 * 
+	 *
 	 * @param attributes The attributes for this instance.
 	 */
 	void setAttributes(Set<TAttribute> attributes);
 	
 	/**
 	 * Adds an {@link TAttribute} to the attributes for this instance.
-	 * 
+	 *
 	 * @param attribute The attribute to add.
 	 */
 	void addAttribute(TAttribute attribute);
 	
 	/**
 	 * Removes an {@link TAttribute} from the attributes for this instance.
-	 * 
+	 *
 	 * @param attribute The attribute to remove.
 	 */
 	void removeAttribute(TAttribute attribute);
 	
 	/**
 	 * Gets the active (that is, not retired) {@link TAttribute}'s for this instance.
-	 * 
+	 *
 	 * @return The active attributes.
 	 */
 	Set<TAttribute> getActiveAttributes();
@@ -62,7 +62,7 @@ public interface ICustomizable<TAttribute extends IAttribute<?, ?>> {
 	/**
 	 * Gets the active (that is, not retired) {@link TAttribute}'s of the specified type for this
 	 * instance.
-	 * 
+	 *
 	 * @param ofType The attribute type.
 	 * @return The active attributes.
 	 */

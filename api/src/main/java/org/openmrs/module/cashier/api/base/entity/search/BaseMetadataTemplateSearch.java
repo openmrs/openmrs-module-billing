@@ -19,7 +19,7 @@ import org.openmrs.OpenmrsMetadata;
 
 /**
  * Base template search class for {@link org.openmrs.OpenmrsMetadata} models.
- * 
+ *
  * @param <T> The model class.
  */
 public class BaseMetadataTemplateSearch<T extends OpenmrsMetadata> extends BaseAuditableTemplateSearch<T> {

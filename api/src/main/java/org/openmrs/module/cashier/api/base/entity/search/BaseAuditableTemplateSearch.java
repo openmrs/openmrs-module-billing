@@ -19,7 +19,7 @@ import org.openmrs.Auditable;
 
 /**
  * Base template search class for {@link org.openmrs.Auditable} models.
- * 
+ *
  * @param <T> The model class.
  */
 public class BaseAuditableTemplateSearch<T extends Auditable> extends BaseObjectTemplateSearch<T> {

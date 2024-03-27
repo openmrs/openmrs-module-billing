@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.openmrs.module</groupId>
@@ -17,29 +18,29 @@
 			<url>https://openmrs.jfrog.io/openmrs/modules/</url>
 		</repository>
 		<snapshotRepository>
-    		<id>kenyaemr-repo</id>
+			<id>kenyaemr-repo</id>
 			<name>Snapshots</name>
-    		<url>http://mavenrepo.openhmisafrica.org/content/repositories/snapshots</url>
-  		</snapshotRepository>
+			<url>http://mavenrepo.openhmisafrica.org/content/repositories/snapshots</url>
+		</snapshotRepository>
 	</distributionManagement>
 
 	<developers>
 		<developer>
-			<name>KenyaEMR</name>
+			<name>OpenHMIS</name>
 		</developer>
 	</developers>
 
 	<organization>
 		<name>KenyaEMR</name>
-<!--		<url>http://openhmis.github.com/OpenHMIS/</url>-->
+		<!--		<url>http://openhmis.github.com/OpenHMIS/</url>-->
 	</organization>
 
-<!--	<scm>-->
-<!--		<connection>scm:git:git@github.com:OpenHMIS/openmrs-module-openhmis.cashier.git</connection>-->
-<!--		<developerConnection>scm:git:git@github.com:OpenHMIS/openmrs-module-openhmis.cashier.git</developerConnection>-->
-<!--		<url>scm:git:git@github.com:OpenHMIS/openmrs-module-openhmis.cashier.git</url>-->
-<!--		<tag>HEAD</tag>-->
-<!--	</scm>-->
+	<!--	<scm>-->
+	<!--		<connection>scm:git:git@github.com:OpenHMIS/openmrs-module-openhmis.cashier.git</connection>-->
+	<!--		<developerConnection>scm:git:git@github.com:OpenHMIS/openmrs-module-openhmis.cashier.git</developerConnection>-->
+	<!--		<url>scm:git:git@github.com:OpenHMIS/openmrs-module-openhmis.cashier.git</url>-->
+	<!--		<tag>HEAD</tag>-->
+	<!--	</scm>-->
 
 	<modules>
 		<module>api</module>
@@ -47,10 +48,10 @@
 	</modules>
 
 	<properties>
-		<openMRSVersion>2.6.2</openMRSVersion>
+		<openMRSVersion>2.4.0</openMRSVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<powermock.version>1.4.10</powermock.version>
-		<javaCompilerVersion>1.7</javaCompilerVersion>
+		<powermock.version>2.0.9</powermock.version>
+		<javaCompilerVersion>1.8</javaCompilerVersion>
 		<openmrsPlatformToolsVersion>2.4.0</openmrsPlatformToolsVersion>
 	</properties>
 
@@ -63,7 +64,6 @@
 				<groupId>org.openmrs.api</groupId>
 				<artifactId>openmrs-api</artifactId>
 				<version>${openMRSVersion}</version>
-				<type>jar</type>
 				<scope>provided</scope>
 			</dependency>
 
@@ -71,7 +71,6 @@
 				<groupId>org.openmrs.web</groupId>
 				<artifactId>openmrs-web</artifactId>
 				<version>${openMRSVersion}</version>
-				<type>jar</type>
 				<scope>provided</scope>
 			</dependency>
 
@@ -87,7 +86,7 @@
 				<groupId>org.openmrs.web</groupId>
 				<artifactId>openmrs-web</artifactId>
 				<version>${openMRSVersion}</version>
-				<type>test-jar</type>
+				<classifier>tests</classifier>
 				<scope>test</scope>
 			</dependency>
 
@@ -99,15 +98,14 @@
 				<scope>test</scope>
 			</dependency>
 
+			<!-- End OpenMRS core -->
+
 			<dependency>
 				<groupId>org.openmrs.module</groupId>
 				<artifactId>idgen-api</artifactId>
-				<version>2.7</version>
-				<type>jar</type>
+				<version>4.7.0</version>
 				<scope>provided</scope>
 			</dependency>
-
-			<!-- End OpenMRS core -->
 
 			<dependency>
 				<groupId>org.openmrs.module</groupId>
@@ -139,15 +137,6 @@
 				<scope>provided</scope>
 			</dependency>
 
-
-			<dependency>
-				<groupId>org.openmrs.module</groupId>
-				<artifactId>jasperreport-api</artifactId>
-				<version>2.1.0-SNAPSHOT</version>
-				<type>jar</type>
-				<scope>provided</scope>
-			</dependency>
-
 			<dependency>
 				<groupId>org.reflections</groupId>
 				<artifactId>reflections</artifactId>
@@ -162,31 +151,11 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.powermock</groupId>
-				<artifactId>powermock-module-junit4-rule-agent</artifactId>
-				<version>${powermock.version}</version>
-				<scope>test</scope>
-				<exclusions>
-					<exclusion>
-						<groupId>org.javassist</groupId>
-						<artifactId>javassist</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-
-			<dependency>
-				<groupId>org.javassist</groupId>
-				<artifactId>javassist</artifactId>
-				<version>3.19.0-GA</version>
-				<scope>test</scope>
-			</dependency>
-
-			<dependency>
-					<groupId>org.openmrs.module</groupId>
-					<artifactId>appframework-api</artifactId>
-					<version>2.0</version>
-					<type>jar</type>
-					<scope>provided</scope>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>appframework-api</artifactId>
+				<version>2.0</version>
+				<type>jar</type>
+				<scope>provided</scope>
 			</dependency>
 
 			<dependency>
@@ -228,22 +197,23 @@
 			</dependency>
 
 			<dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
-                <version>4.5.10</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>commons-logging</groupId>
-                        <artifactId>commons-logging</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>4.5.10</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
 
 			<dependency>
 				<groupId>joda-time</groupId>
 				<artifactId>joda-time</artifactId>
 				<version>2.10.14</version> <!-- Replace with the latest version available -->
 			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 
@@ -289,7 +259,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>2.4</version>
+					<version>3.5.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.liquibase</groupId>
@@ -322,15 +292,31 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.14</version>
-					<configuration>
-						<argLine>-javaagent:${settings.localRepository}/org/powermock/powermock-module-javaagent/${powermock.version}/powermock-module-javaagent-${powermock.version}.jar -noverify</argLine>
-					</configuration>
+					<version>3.0.0-M8</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
 					<version>2.9.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>0.8.11</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>prepare-agent</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>report</id>
+							<phase>test</phase>
+							<goals>
+								<goal>report</goal>
+							</goals>
+						</execution>
+					</executions>
 				</plugin>
 			</plugins>
 		</pluginManagement>

@@ -17,9 +17,9 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.openmrs.module.cashier.api.IPaymentModeService;
-import org.openmrs.module.cashier.base.entity.IMetadataDataServiceTest;
 import org.openmrs.module.cashier.api.model.PaymentMode;
 import org.openmrs.module.cashier.api.model.PaymentModeAttributeType;
+import org.openmrs.module.cashier.base.entity.IMetadataDataServiceTest;
 
 public class IPaymentModeServiceTest extends IMetadataDataServiceTest<IPaymentModeService, PaymentMode> {
 	

@@ -13,6 +13,9 @@
  */
 package org.openmrs.module.cashier.api.util;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 import org.openmrs.api.APIException;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
@@ -23,9 +26,6 @@ import org.openmrs.module.cashier.api.model.BillLineItem;
 import org.openmrs.module.cashier.api.model.CashierOptions;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
-
-import java.math.BigDecimal;
-import java.util.List;
 
 public class RoundingUtil {
 	
@@ -81,7 +81,7 @@ public class RoundingUtil {
 	
 	/**
 	 * Add a rounding line item to a bill if necessary
-	 * 
+	 *
 	 * @param bill
 	 * @should handle a rounding line item (add/update/delete with the appropriate value)
 	 * @should not modify a bill that needs no rounding

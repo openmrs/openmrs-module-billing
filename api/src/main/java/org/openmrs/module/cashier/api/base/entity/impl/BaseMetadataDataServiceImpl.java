@@ -24,16 +24,16 @@ import org.hibernate.criterion.Restrictions;
 import org.openmrs.OpenmrsMetadata;
 import org.openmrs.User;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.cashier.api.base.entity.security.IMetadataAuthorizationPrivileges;
 import org.openmrs.module.cashier.api.base.PagingInfo;
 import org.openmrs.module.cashier.api.base.entity.IMetadataDataService;
+import org.openmrs.module.cashier.api.base.entity.security.IMetadataAuthorizationPrivileges;
 import org.openmrs.module.cashier.api.base.f.Action1;
 import org.openmrs.module.cashier.api.base.util.PrivilegeUtil;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The base type for {@link IMetadataDataService}s.
- * 
+ *
  * @param <E> The entity metadata model type.
  */
 
@@ -84,7 +84,7 @@ public abstract class BaseMetadataDataServiceImpl<E extends OpenmrsMetadata> ext
 	
 	/**
 	 * Sets the properties to retire an {@link OpenmrsMetadata} model object.
-	 * 
+	 *
 	 * @param metadata The object to retire.
 	 * @param reason The reason to retire the metadata.
 	 * @param user The user that is retiring the metadata.
@@ -134,7 +134,7 @@ public abstract class BaseMetadataDataServiceImpl<E extends OpenmrsMetadata> ext
 	
 	/**
 	 * Gets all unretired entites.
-	 * 
+	 *
 	 * @param pagingInfo
 	 * @return Returns all unretired entities
 	 * @should return all unretired entities when retired is not specified

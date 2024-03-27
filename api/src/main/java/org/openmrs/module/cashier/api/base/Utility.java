@@ -40,7 +40,7 @@ public class Utility {
 	
 	/**
 	 * Returns the specified object as the specified class or returns null if the cast is not supported.
-	 * 
+	 *
 	 * @param cls The generic class to cast the object to.
 	 * @param o The object to cast.
 	 * @param <T> The generic class to cast the object to.
@@ -56,7 +56,7 @@ public class Utility {
 	/**
 	 * Clears the time portion of the specified {@link Calendar}, setting the hour, minute, second, and
 	 * millisecond parts to 0.
-	 * 
+	 *
 	 * @param cal The calendar object to clear the time portion from.
 	 */
 	public static void clearCalendarTime(Calendar cal) {
@@ -73,7 +73,7 @@ public class Utility {
 	/**
 	 * Parses a standard OpenHMIS formatted (openhmis.dateFormat) date returning the
 	 * {@link java.util.Date} object.
-	 * 
+	 *
 	 * @param dateText The date text to parse
 	 * @return The date or null if the text cannot be parsed.
 	 */
