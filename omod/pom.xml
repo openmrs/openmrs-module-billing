@@ -4,14 +4,14 @@
 
 	<parent>
 		<groupId>org.openmrs.module</groupId>
-		<artifactId>cashier</artifactId>
+		<artifactId>billing</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>cashier-omod</artifactId>
+	<artifactId>billing-omod</artifactId>
 	<packaging>jar</packaging>
-	<name>OpenHMIS Cashier Module OMOD</name>
-	<description>OMOD project for the OpenHMIS Cashier module</description>
+	<name>OpenHMIS Billing Module OMOD</name>
+	<description>OMOD project for the OpenHMIS Billing module</description>
 
 	<dependencies>
 

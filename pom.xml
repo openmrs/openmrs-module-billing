@@ -4,23 +4,23 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.openmrs.module</groupId>
-	<artifactId>cashier</artifactId>
+	<artifactId>billing</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<name>OpenHMIS Cashier Module</name>
-	<description>Module to provide basic cashier functionality</description>
+	<name>OpenHMIS Billing Module</name>
+	<description>Module to provide basic billing functionality</description>
 	<url>https://github.com/OpenHMIS/OpenHMIS/wiki</url>
 
 	<distributionManagement>
 		<repository>
-			<id>openmrs-repo</id>
+			<id>openmrs-repo-modules</id>
 			<name>Modules</name>
 			<url>https://openmrs.jfrog.io/openmrs/modules/</url>
 		</repository>
 		<snapshotRepository>
-			<id>kenyaemr-repo</id>
+			<id>openmrs-repo-snapshots</id>
 			<name>Snapshots</name>
-			<url>http://mavenrepo.openhmisafrica.org/content/repositories/snapshots</url>
+			<url>https://openmrs.jfrog.io/openmrs/snapshots/</url>
 		</snapshotRepository>
 	</distributionManagement>
 
@@ -337,7 +337,7 @@
 			<releases>
 				<enabled>false</enabled>
 			</releases>
-			<url>http://mavenrepo.openhmisafrica.org/content/repositories/snapshots</url>
+			<url>https://openmrs.jfrog.io/openmrs/snapshots</url>
 		</repository>
 	</repositories>
 
