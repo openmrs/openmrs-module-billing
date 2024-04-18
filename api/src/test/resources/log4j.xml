@@ -43,7 +43,7 @@
 		<appender-ref ref="CONSOLE"/>
 	</logger>
 
-	<logger name="org.openmrs.module.cashier">
+	<logger name="org.openmrs.module.billing">
 		<level value="DEBUG"/>
 	</logger>
 

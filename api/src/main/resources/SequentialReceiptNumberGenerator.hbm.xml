@@ -2,8 +2,8 @@
 <!DOCTYPE hibernate-mapping PUBLIC
 		"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 		"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
-<hibernate-mapping package="org.openmrs.module.cashier.api.model">
-	<class name="org.openmrs.module.cashier.api.model.SequentialReceiptNumberGeneratorModel"
+<hibernate-mapping package="org.openmrs.module.billing.api.model">
+	<class name="org.openmrs.module.billing.api.model.SequentialReceiptNumberGeneratorModel"
 	       table="cashier_seq_receipt_number_generator">
 		<cache usage="read-write"/>
 
@@ -16,13 +16,13 @@
 
 		<property name="groupingType" column="grouping_type" not-null="true">
 			<type name="org.hibernate.type.EnumType">
-				<param name="enumClass">org.openmrs.module.cashier.api.SequentialReceiptNumberGenerator$GroupingType</param>
+				<param name="enumClass">org.openmrs.module.billing.api.SequentialReceiptNumberGenerator$GroupingType</param>
 				<param name="type">12</param>
 			</type>
 		</property>
 		<property name="sequenceType" column="sequence_type" not-null="true">
 			<type name="org.hibernate.type.EnumType">
-				<param name="enumClass">org.openmrs.module.cashier.api.SequentialReceiptNumberGenerator$SequenceType</param>
+				<param name="enumClass">org.openmrs.module.billing.api.SequentialReceiptNumberGenerator$SequenceType</param>
 				<param name="type">12</param>
 			</type>
 		</property>
@@ -36,7 +36,7 @@
 		<property name="uuid" type="java.lang.String" column="uuid" length="38" unique="true"/>
 	</class>
 
-	<class name="org.openmrs.module.cashier.api.model.GroupSequence" table="cashier_seq_group_sequence">
+	<class name="org.openmrs.module.billing.api.model.GroupSequence" table="cashier_seq_group_sequence">
 		<cache usage="read-write"/>
 
 		<id name="id" type="int" column="seq_group_sequence_id">
