@@ -14,6 +14,7 @@
 
 package org.openmrs.module.billing.api;
 
+import java.io.File;
 import java.util.List;
 
 import org.openmrs.Patient;
@@ -30,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional
 public interface IBillService extends IEntityDataService<Bill> {
-
+	
 	/**
 	 * Gets the {@link Bill} with the specified receipt number or {@code null} if not found.
 	 *
@@ -45,7 +46,7 @@ public interface IBillService extends IEntityDataService<Bill> {
 	@Transactional(readOnly = true)
 	@Authorized({ PrivilegeConstants.VIEW_BILLS })
 	Bill getBillByReceiptNumber(String receiptNumber);
-
+	
 	/**
 	 * Returns all {@link Bill}s for the specified patient with the specified paging.
 	 *
@@ -57,7 +58,7 @@ public interface IBillService extends IEntityDataService<Bill> {
 	 * @should return an empty list if the specified patient has no bills
 	 */
 	List<Bill> getBillsByPatient(Patient patient, PagingInfo paging);
-
+	
 	/**
 	 * Returns all {@link Bill}s for the specified patient with the specified paging.
 	 *
@@ -70,7 +71,7 @@ public interface IBillService extends IEntityDataService<Bill> {
 	 * @should return an empty list if the specified patient has no bills
 	 */
 	List<Bill> getBillsByPatientId(int patientId, PagingInfo paging);
-
+	
 	/**
 	 * Gets all bills using the specified {@link BillSearch} settings.
 	 *
@@ -80,7 +81,7 @@ public interface IBillService extends IEntityDataService<Bill> {
 	@Transactional(readOnly = true)
 	@Authorized({ PrivilegeConstants.VIEW_BILLS })
 	List<Bill> getBills(BillSearch billSearch);
-
+	
 	/**
 	 * Gets all bills using the specified {@link BillSearch} settings.
 	 *
@@ -101,8 +102,18 @@ public interface IBillService extends IEntityDataService<Bill> {
 	@Transactional(readOnly = true)
 	@Authorized({ PrivilegeConstants.VIEW_BILLS })
 	List<Bill> getBills(BillSearch billSearch, PagingInfo pagingInfo);
-
+	
 	@Override
 	@Authorized(PrivilegeConstants.VIEW_BILLS)
 	Bill getByUuid(String uuid);
+	
+	/**
+	 * Gets bill receipt using the specified {@link Bill} settings.
+	 *
+	 * @param bill The bill search settings.
+	 * @return The receipt containing bill items.
+	 */
+	@Transactional(readOnly = true)
+	@Authorized({ PrivilegeConstants.VIEW_BILLS })
+	File downloadBillReceipt(Bill bill);
 }
