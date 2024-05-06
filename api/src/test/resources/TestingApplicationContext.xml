@@ -19,7 +19,7 @@
 	</bean>
 
 	<bean id="genericRepository"
-	      class="org.openmrs.module.cashier.api.base.entity.db.hibernate.BaseHibernateRepositoryImpl">
+	      class="org.openmrs.module.billing.api.base.entity.db.hibernate.BaseHibernateRepositoryImpl">
 		<constructor-arg name="sessionFactory" ref="dbSessionFactory"/>
 	</bean>
 </beans>

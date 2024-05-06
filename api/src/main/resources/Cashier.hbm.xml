@@ -2,8 +2,8 @@
 <!DOCTYPE hibernate-mapping PUBLIC
 		"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 		"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
-<hibernate-mapping package="org.openmrs.module.cashier.api.model">
-	<class name="org.openmrs.module.cashier.api.model.CashPoint" table="cashier_cash_point">
+<hibernate-mapping package="org.openmrs.module.billing.api.model">
+	<class name="org.openmrs.module.billing.api.model.CashPoint" table="cashier_cash_point">
 		<cache usage="read-write"/>
 
 		<id name="id" type="int" column="cash_point_id">
@@ -28,7 +28,7 @@
 		<many-to-one name="location" class="org.openmrs.Location" column="location_id"/>
 	</class>
 
-	<class name="org.openmrs.module.cashier.api.model.Timesheet" table="cashier_timesheet">
+	<class name="org.openmrs.module.billing.api.model.Timesheet" table="cashier_timesheet">
 		<cache usage="read-write"/>
 
 		<id name="id" type="int" column="timesheet_id">
@@ -39,7 +39,7 @@
 		<discriminator column="timesheet_id" insert="false"/>
 
 		<many-to-one name="cashier" class="org.openmrs.Provider" not-null="true" column="provider_id"/>
-		<many-to-one name="cashPoint" class="org.openmrs.module.cashier.api.model.CashPoint" not-null="true"
+		<many-to-one name="cashPoint" class="org.openmrs.module.billing.api.model.CashPoint" not-null="true"
 		             column="cash_point_id"/>
 
 		<property name="clockIn" type="java.util.Date" column="clock_in" not-null="true" length="19"/>
