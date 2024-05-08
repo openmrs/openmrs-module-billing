@@ -54,6 +54,7 @@
 		<javaCompilerVersion>1.8</javaCompilerVersion>
 		<openmrsPlatformToolsVersion>2.4.0</openmrsPlatformToolsVersion>
 		<itextPdfVersion>8.0.2</itextPdfVersion>
+		<stockmanagementVersion>2.0.0</stockmanagementVersion>
 	</properties>
 
 	<dependencyManagement>
@@ -126,14 +127,14 @@
 			<dependency>
 				<groupId>org.openmrs.module</groupId>
 				<artifactId>stockmanagement-api</artifactId>
-				<version>1.0.2-SNAPSHOT</version>
+				<version>${stockmanagementVersion}</version>
 				<type>jar</type>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.openmrs.module</groupId>
 				<artifactId>stockmanagement-omod</artifactId>
-				<version>1.0.2-SNAPSHOT</version>
+				<version>${stockmanagementVersion}</version>
 				<type>jar</type>
 				<scope>provided</scope>
 			</dependency>
