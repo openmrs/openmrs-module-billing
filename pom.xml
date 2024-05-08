@@ -31,16 +31,16 @@
 	</developers>
 
 	<organization>
-		<name>KenyaEMR</name>
-		<!--		<url>http://openhmis.github.com/OpenHMIS/</url>-->
+		<name>OpenMRS</name>
+		<url>https://openmrs.org/</url>
 	</organization>
 
-	<!--	<scm>-->
-	<!--		<connection>scm:git:git@github.com:OpenHMIS/openmrs-module-openhmis.cashier.git</connection>-->
-	<!--		<developerConnection>scm:git:git@github.com:OpenHMIS/openmrs-module-openhmis.cashier.git</developerConnection>-->
-	<!--		<url>scm:git:git@github.com:OpenHMIS/openmrs-module-openhmis.cashier.git</url>-->
-	<!--		<tag>HEAD</tag>-->
-	<!--	</scm>-->
+	<scm>
+		<connection>scm:git:git@github.com:openmrs/openmrs-module-billing.git</connection>
+		<developerConnection>scm:git:git@github.com:openmrs/openmrs-module-billing.git</developerConnection>
+		<url>scm:git:git@github.com:openmrs/openmrs-module-billing.git</url>
+		<tag>HEAD</tag>
+	</scm>
 
 	<modules>
 		<module>api</module>
