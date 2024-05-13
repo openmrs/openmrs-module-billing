@@ -16,6 +16,7 @@ package org.openmrs.module.billing.api.model;
 import java.math.BigDecimal;
 
 import org.openmrs.BaseOpenmrsData;
+import org.openmrs.Order;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
 
 /**
@@ -46,6 +47,8 @@ public class BillLineItem extends BaseOpenmrsData {
 	
 	private BillStatus paymentStatus; // this should only be set to either
 	// pending or paid
+	
+	private Order order;
 	
 	@Override
 	public Integer getId() {
@@ -136,5 +139,13 @@ public class BillLineItem extends BaseOpenmrsData {
 	
 	public void setPaymentStatus(BillStatus paymentStatus) {
 		this.paymentStatus = paymentStatus;
+	}
+	
+	public Order getOrder() {
+		return order;
+	}
+	
+	public void setOrder(Order order) {
+		this.order = order;
 	}
 }

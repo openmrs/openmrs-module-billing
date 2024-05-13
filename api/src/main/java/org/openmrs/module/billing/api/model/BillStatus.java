@@ -22,7 +22,8 @@ public enum BillStatus {
 	POSTED(4),
 	PAID(1),
 	CANCELLED(2),
-	ADJUSTED(3);
+	ADJUSTED(3),
+	EXEMPTED(5);
 	
 	private final int value;
 	
