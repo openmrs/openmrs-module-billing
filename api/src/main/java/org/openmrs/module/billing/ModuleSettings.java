@@ -39,7 +39,7 @@ public class ModuleSettings {
 	
 	public static final String ROUNDING_DEPT_ID = "cashier.roundingDeptId";
 	
-	public static final String SYSTEM_RECEIPT_NUMBER_GENERATOR = "cashier.systemReceiptNumberGenerator";
+	public static final String SYSTEM_RECEIPT_NUMBER_GENERATOR = "billing.systemReceiptNumberGenerator";
 	
 	public static final String ADJUSTMENT_REASEON_FIELD = "cashier.adjustmentReasonField";
 	

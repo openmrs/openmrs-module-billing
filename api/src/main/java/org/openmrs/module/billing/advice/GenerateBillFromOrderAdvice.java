@@ -41,7 +41,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
-
+	
 	private static final Log LOG = LogFactory.getLog(GenerateBillFromOrderAdvice.class);
 	
 	OrderService orderService = Context.getOrderService();
@@ -238,7 +238,7 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 			
 		}
 		catch (Exception ex) {
-			LOG.error("Error sending the bill item: " + ex.getMessage(), ex);			
+			LOG.error("Error sending the bill item: " + ex.getMessage(), ex);
 		}
 	}
 }
