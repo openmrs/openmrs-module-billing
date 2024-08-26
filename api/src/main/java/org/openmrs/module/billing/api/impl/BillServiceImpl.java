@@ -113,22 +113,23 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 			throw new NullPointerException("The bill must be defined.");
 		}
 		
-		/* Check for refund.
-		 * A refund is given when the total of the bill's line items is negative.
-		 */
+		// Check for refund.
+		// A refund is given when the total of the bill's line items is negative.
 		if (bill.getTotal().compareTo(BigDecimal.ZERO) < 0 && !Context.hasPrivilege(PrivilegeConstants.REFUND_MONEY)) {
 			throw new AccessControlException("Access denied to give a refund.");
 		}
+		
+		// Generate a receipt number if it hasn't been defined
 		IReceiptNumberGenerator generator = ReceiptNumberGeneratorFactory.getGenerator();
 		if (generator == null) {
-			LOG.warn("No receipt number generator has been defined.  Bills will not be given a receipt number until one is"
-			        + " defined.");
+			LOG.warn(
+			    "No receipt number generator has been defined. Bills will not be given a receipt number until one is defined.");
 		} else {
 			if (StringUtils.isEmpty(bill.getReceiptNumber())) {
 				bill.setReceiptNumber(generator.generateNumber(bill));
 			}
 		}
-		
+		// Check if there is an existing pending bill for the patient
 		List<Bill> bills = searchBill(bill.getPatient());
 		if (!bills.isEmpty()) {
 			Bill billToUpdate = bills.get(0);
@@ -137,10 +138,23 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 				item.setBill(billToUpdate);
 				billToUpdate.getLineItems().add(item);
 			}
-			// appending items to existing pending bill if available
+			
+			// Calculate the total payments made on the bill
+			BigDecimal totalPaid = billToUpdate.getPayments().stream().map(Payment::getAmountTendered)
+			        .reduce(BigDecimal.ZERO, BigDecimal::add);
+			
+			// Check if the bill is fully paid
+			if (totalPaid.compareTo(billToUpdate.getTotal()) >= 0) {
+				billToUpdate.setStatus(BillStatus.PAID);
+			} else {
+				billToUpdate.setStatus(BillStatus.PENDING);
+			}
+			
+			// Save the updated bill
 			return super.save(billToUpdate);
 		}
 		
+		// If no pending bill exists, just save the new bill as it is
 		return super.save(bill);
 	}
 	

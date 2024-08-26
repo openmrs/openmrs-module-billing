@@ -100,7 +100,7 @@ public class Bill extends BaseOpenmrsData {
 		if (payments != null) {
 			for (Payment payment : payments) {
 				if (payment != null && !payment.getVoided()) {
-					total = total.add(payment.getAmount());
+					total = total.add(payment.getAmountTendered());
 				}
 			}
 		}
@@ -283,21 +283,18 @@ public class Bill extends BaseOpenmrsData {
 		this.payments.add(payment);
 		payment.setBill(this);
 		
-		this.checkPaidAndUpdateStatus();
+		this.synchronizeBillStatus();
 	}
 	
-	public boolean checkPaidAndUpdateStatus() {
-		if (this.getPayments().size() > 0) {
-			if (this.status == BillStatus.PENDING || this.status == BillStatus.POSTED) {
-				if (getTotalPayments().compareTo(getTotal()) >= 0) {
-					this.setStatus(BillStatus.PAID);
-					return true;
-				} else if (this.status == BillStatus.PENDING) {
-					this.status = BillStatus.POSTED;
-				}
+	public void synchronizeBillStatus() {
+		if (this.getPayments().size() > 0 && getTotalPayments().compareTo(BigDecimal.ZERO) > 0) {
+			boolean billFullySettled = getTotalPayments().compareTo(getTotal()) >= 0;
+			if (billFullySettled) {
+				this.setStatus(BillStatus.PAID);
+			} else if (!billFullySettled) {
+				this.setStatus(BillStatus.POSTED);
 			}
 		}
-		return false;
 	}
 	
 	public void removePayment(Payment payment) {
