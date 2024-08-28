@@ -151,7 +151,7 @@ public class BillResource extends BaseRestDataResource<Bill> {
 
             // Now that all all attributes have been set (i.e., payments and bill status) we can check to see if the bill
             // is fully paid.
-            bill.checkPaidAndUpdateStatus();
+            bill.synchronizeBillStatus();
             if (bill.getStatus() == null) {
                 bill.setStatus(BillStatus.PENDING);
             }
