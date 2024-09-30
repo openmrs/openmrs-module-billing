@@ -3,13 +3,18 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-  		    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-  		    http://www.springframework.org/schema/context
-  		    http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+            http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
-	<!-- Add here beans related to the web context -->
+    <!-- Add here beans related to the web context -->
 
-	<context:annotation-config/>
+    <context:annotation-config/>
 
-	<context:component-scan base-package="org.openmrs.module.billing"/>
+    <context:component-scan base-package="org.openmrs.module.billing"/>
+
+    <!-- Register the ChargeItemDefinitionResource as a FHIR Resource -->
+    <bean id="chargeItemDefinitionResource" class="org.openmrs.module.billing.web.rest.resource.fhir.ChargeItemDefinitionResourceProvider" />
+	<bean id="chargeItemDefinitionService" class="org.openmrs.module.billing.api.impl.ChargeItemDefinitionServiceImpl" />
+
 </beans>
