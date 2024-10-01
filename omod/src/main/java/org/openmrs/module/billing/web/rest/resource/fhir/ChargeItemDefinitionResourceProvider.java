@@ -1,21 +1,16 @@
 package org.openmrs.module.billing.web.rest.resource.fhir;
 
-import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
 import org.openmrs.module.fhir2.api.annotations.R4Provider;
 import org.openmrs.module.billing.api.ChargeItemDefinitionService;
 import ca.uhn.fhir.rest.annotation.Create;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.ChargeItemDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -73,24 +68,9 @@ public class ChargeItemDefinitionResourceProvider implements IResourceProvider {
         ChargeItemDefinition chargeItemDefinition = new ChargeItemDefinition();
         chargeItemDefinition.setId(new IdType("ChargeItemDefinition/" + cashierItemPrice.getId()));
     
-        // Add any additional mapping here for name, price, etc.
         chargeItemDefinition.setName(cashierItemPrice.getName());
     
         return chargeItemDefinition;
     }
 
-    private CashierItemPrice mapFromChargeItemDefinition(ChargeItemDefinition chargeItemDefinition) {
-        CashierItemPrice cashierItemPrice = new CashierItemPrice();
-
-        // Example of mapping logic - uncomment and adapt as needed
-        // cashierItemPrice.setPrice(chargeItemDefinition.getPropertyGroupFirstRep()
-        //     .getPriceComponentFirstRep().getAmount().getValue());
-
-        // Coding coding = chargeItemDefinition.getCode().getCodingFirstRep();
-        // BillableService billableService = new BillableService();
-        // billableService.setName(coding.getCode());
-        // cashierItemPrice.setBillableService(billableService);
-
-        return cashierItemPrice;
-    }
 }

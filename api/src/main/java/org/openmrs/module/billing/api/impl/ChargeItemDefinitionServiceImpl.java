@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.math.BigDecimal;
+import java.util.Collections;
 
 /**
  * Implementation of ChargeItemDefinitionService for managing ChargeItemDefinitions.
@@ -32,17 +33,17 @@ public class ChargeItemDefinitionServiceImpl extends BaseEntityDataServiceImpl<C
 	
 	@Override
 	public List<CashierItemPrice> getItemPrice(StockItem stockItem) {
-		return null;
+		return Collections.emptyList();
 	}
 	
 	@Override
 	public List<CashierItemPrice> getServicePriceByName(String name) {
-		return null;
+		return Collections.emptyList();
 	}
 	
 	@Override
 	protected IEntityAuthorizationPrivileges getPrivileges() {
-		return null;
+		throw new UnsupportedOperationException();
 	}
 	
 	@Override
