@@ -29,4 +29,6 @@ public interface ItemPriceService extends IEntityDataService<CashierItemPrice> {
 	List<CashierItemPrice> getItemPrice(StockItem stockItem);
 	
 	List<CashierItemPrice> getServicePrice(BillableService billableService);
+	
+	List<CashierItemPrice> getServicePriceByName(String name);
 }

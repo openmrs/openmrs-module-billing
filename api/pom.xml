@@ -1,128 +1,155 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.openmrs.module</groupId>
-		<artifactId>billing</artifactId>
-		<version>1.2.0-SNAPSHOT</version>
-	</parent>
+    <parent>
+        <groupId>org.openmrs.module</groupId>
+        <artifactId>billing</artifactId>
+        <version>1.2.0-SNAPSHOT</version>
+    </parent>
 
-	<artifactId>billing-api</artifactId>
-	<packaging>jar</packaging>
-	<name>OpenMrs Billing Module API</name>
-	<description>API project for the OpenHMIS Billing module</description>
+    <artifactId>billing-api</artifactId>
+    <packaging>jar</packaging>
+    <name>OpenMrs Billing Module API</name>
+    <description>API project for the OpenHMIS Billing module</description>
 
-	<dependencies>
-		<!-- Begin OpenMRS core -->
+    <dependencies>
+        <!-- Begin OpenMRS core -->
 
-		<dependency>
-			<groupId>org.openmrs.api</groupId>
-			<artifactId>openmrs-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
+        <dependency>
+            <groupId>org.openmrs.api</groupId>
+            <artifactId>openmrs-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
-		<dependency>
-			<groupId>org.openmrs.web</groupId>
-			<artifactId>openmrs-web</artifactId>
-			<scope>provided</scope>
-		</dependency>
+        <dependency>
+            <groupId>org.openmrs.web</groupId>
+            <artifactId>openmrs-web</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
-		<dependency>
-			<groupId>org.openmrs.api</groupId>
-			<artifactId>openmrs-api</artifactId>
-			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
+        <dependency>
+            <groupId>org.openmrs.api</groupId>
+            <artifactId>openmrs-api</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
 
-		<dependency>
-			<groupId>org.openmrs.test</groupId>
-			<artifactId>openmrs-test</artifactId>
-			<type>pom</type>
-			<scope>test</scope>
-		</dependency>
+        <dependency>
+            <groupId>org.openmrs.test</groupId>
+            <artifactId>openmrs-test</artifactId>
+            <type>pom</type>
+            <scope>test</scope>
+        </dependency>
 
-		<!-- End OpenMRS core -->
+        <!-- End OpenMRS core -->
 
-		<dependency>
-			<groupId>org.openmrs.module</groupId>
-			<artifactId>stockmanagement-api</artifactId>
-		</dependency>
+        <!-- JUnit dependency -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
+        </dependency>
 
-		<dependency>
-			<groupId>org.openmrs.module</groupId>
-			<artifactId>uiframework-api</artifactId>
-		</dependency>
+        <!-- Mockito dependency -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>3.11.2</version>
+            <scope>test</scope>
+        </dependency>
 
-		<dependency>
-			<groupId>org.openmrs.module</groupId>
-			<artifactId>idgen-api</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>org.openmrs.module</groupId>
+            <artifactId>stockmanagement-api</artifactId>
+        </dependency>
 
-		<dependency>
-			<groupId>org.reflections</groupId>
-			<artifactId>reflections</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>org.openmrs.module</groupId>
+            <artifactId>uiframework-api</artifactId>
+        </dependency>
 
-		<!-- always needed -->
-		<dependency>
-			<groupId>com.itextpdf</groupId>
-			<artifactId>kernel</artifactId>
-		</dependency>
-		<!-- always needed -->
-		<dependency>
-			<groupId>com.itextpdf</groupId>
-			<artifactId>io</artifactId>
-		</dependency>
-		<!-- always needed -->
-		<dependency>
-			<groupId>com.itextpdf</groupId>
-			<artifactId>layout</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.itextpdf</groupId>
-			<artifactId>barcodes</artifactId>
-		</dependency>
-		<!-- only needed for Asian fonts -->
-		<dependency>
-			<groupId>com.itextpdf</groupId>
-			<artifactId>font-asian</artifactId>
-		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>org.openmrs.module</groupId>
+            <artifactId>idgen-api</artifactId>
+        </dependency>
 
-	<build>
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>true</filtering>
-			</resource>
-		</resources>
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+        </dependency>
 
-		<testResources>
-			<testResource>
-				<directory>src/test/resources</directory>
-				<filtering>true</filtering>
-				<includes>
-					<include>**/*.properties</include>
-					<include>**/*.xml</include>
-				</includes>
-			</testResource>
-		</testResources>
+        <dependency>
+            <groupId>org.openmrs.module</groupId>
+            <artifactId>fhir2-api</artifactId>
+        </dependency>
 
-		<plugins>
-			<plugin>
-				<groupId>net.revelc.code.formatter</groupId>
-				<artifactId>formatter-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
+        <!-- always needed -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>kernel</artifactId>
+        </dependency>
+        <!-- always needed -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>io</artifactId>
+        </dependency>
+        <!-- always needed -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>layout</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>barcodes</artifactId>
+        </dependency>
+        <!-- only needed for Asian fonts -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>font-asian</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.properties</include>
+                    <include>**/*.xml</include>
+                </includes>
+            </testResource>
+        </testResources>
+
+        <plugins>
+            <plugin>
+                <groupId>net.revelc.code.formatter</groupId>
+                <artifactId>formatter-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

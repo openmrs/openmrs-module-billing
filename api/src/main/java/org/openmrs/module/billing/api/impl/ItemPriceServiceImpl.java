@@ -90,4 +90,16 @@ public class ItemPriceServiceImpl extends BaseEntityDataServiceImpl<CashierItemP
 		criteria.addOrder(Order.desc("id"));
 		return criteria.list();
 	}
+	
+	@Override
+	public List<CashierItemPrice> getServicePriceByName(String name) {
+		Criteria criteria = getRepository().createCriteria(CashierItemPrice.class);
+		criteria.createAlias("billableService", "service");
+		
+		criteria.add(Restrictions.eq("service.name", name));
+		criteria.addOrder(Order.desc("id"));
+		
+		return criteria.list();
+	}
+	
 }
