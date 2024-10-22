@@ -73,12 +73,8 @@ public class Utils {
 			Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
 			String GP_DEFAULT_LOCATION = "defaultLocation";
 			GlobalProperty gp = Context.getAdministrationService().getGlobalPropertyObject(GP_DEFAULT_LOCATION);
-			// Check if gp value is a UUID string and fetch the Location by UUID
-			if (gp != null && gp.getValue() instanceof String) {
-				return Context.getLocationService().getLocationByUuid((String) gp.getValue());
-			} else {
-				return gp != null ? (Location) gp.getValue() : null;
-			}
+
+			return (gp != null && gp.getValue() instanceof Location) ? (Location) gp.getValue() : null;
 		}
 		finally {
 			Context.removeProxyPrivilege(PrivilegeConstants.GET_LOCATIONS);
