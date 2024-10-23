@@ -85,8 +85,7 @@ public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 					Patient patient = order.getPatient();
 					String patientUUID = patient.getUuid();
 					String cashierUUID = Context.getAuthenticatedUser().getUuid();
-					String cashpointUUID = Utils.getDefaultLocation().getUuid();
-					LOG.debug("Patient: " + patientUUID + " cashier: " + cashierUUID + " cash point: " + cashpointUUID);
+					LOG.debug("Patient: " + patientUUID + " cashier: " + cashierUUID);
 					if (order instanceof DrugOrder) {
 						DrugOrder drugOrder = (DrugOrder) order;
 						Integer drugID = drugOrder.getDrug() != null ? drugOrder.getDrug().getDrugId() : 0;
@@ -95,8 +94,8 @@ public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 						List<StockItem> stockItems = stockService.getStockItemByDrug(drugID);
 						LOG.debug("Drug id: " + drugID + " Drug UUID: " + drugUUID + " Drug Quantity: " + drugQuantity);
 						if (!stockItems.isEmpty()) {
-							addBillItemToBill(order, patient, cashierUUID, cashpointUUID, stockItems.get(0), null,
-							    (int) drugQuantity, order.getDateActivated());
+							addBillItemToBill(order, patient, cashierUUID, stockItems.get(0), null, (int) drugQuantity,
+							    order.getDateActivated());
 						}
 					} else if (order instanceof TestOrder) {
 						TestOrder testOrder = (TestOrder) order;
@@ -111,7 +110,7 @@ public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 						if (!searchResult.isEmpty()) {
 							LOG.debug("service was found");
 							LOG.debug(searchResult.get(0).getConcept().getUuid());
-							addBillItemToBill(order, patient, cashierUUID, cashpointUUID, null, searchResult.get(0), 1,
+							addBillItemToBill(order, patient, cashierUUID, null, searchResult.get(0), 1,
 							    order.getDateActivated());
 							
 						} else {
@@ -133,33 +132,15 @@ public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 	 *
 	 * @param patient
 	 * @param cashierUUID
-	 * @param cashpointUUID
 	 */
-	public void addBillItemToBill(Order order, Patient patient, String cashierUUID, String cashpointUUID,
-	        StockItem stockitem, BillableService service, Integer quantity, Date orderDate) {
+	public void addBillItemToBill(Order order, Patient patient, String cashierUUID, StockItem stockitem,
+	        BillableService service, Integer quantity, Date orderDate) {
 		boolean ret = false;
 		try {
 			// Search for a bill
 			Bill activeBill = new Bill();
 			activeBill.setPatient(patient);
 			activeBill.setStatus(BillStatus.PENDING);
-			//            BillSearch billSearch = new BillSearch(searchBill);
-			//            List<Bill> bills = billService.getBills(billSearch);
-			//            Bill activeBill = null;
-			//
-			//            //search for any pending bill for today
-			//            for (Bill currentBill : bills) {
-			//                //Get the bill date
-			//                if(DateUtils.isSameDay(currentBill.getDateCreated(), orderDate != null ? orderDate : new Date())) {
-			//                    activeBill = currentBill;
-			//                    break;
-			//                }
-			//            }
-			//
-			//            // if there is no active bill for today, we create one
-			//            if(activeBill == null){
-			//                activeBill = searchBill;
-			//            }
 			
 			// Bill Item
 			BillLineItem billLineItem = new BillLineItem();

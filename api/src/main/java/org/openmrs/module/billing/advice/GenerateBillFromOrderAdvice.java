@@ -6,7 +6,6 @@ import org.openmrs.DrugOrder;
 import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.PatientProgram;
-import org.openmrs.Location;
 import org.openmrs.Provider;
 import org.openmrs.TestOrder;
 import org.openmrs.User;
@@ -74,7 +73,7 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 				
 				Patient patient = order.getPatient();
 				String cashierUUID = Context.getAuthenticatedUser().getUuid();
-
+				
 				if (order instanceof DrugOrder) {
 					DrugOrder drugOrder = (DrugOrder) order;
 					Integer drugID = drugOrder.getDrug() != null ? drugOrder.getDrug().getDrugId() : 0;
@@ -85,8 +84,8 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 						// check from the list for all exemptions
 						boolean isExempted = checkIfOrderIsExempted(workflowService, order, BillingExemptions.COMMODITIES);
 						BillStatus lineItemStatus = isExempted ? BillStatus.EXEMPTED : BillStatus.PENDING;
-						addBillItemToBill(order, patient, cashierUUID, stockItems.get(0), null,
-						    (int) drugQuantity, order.getDateActivated(), lineItemStatus);
+						addBillItemToBill(order, patient, cashierUUID, stockItems.get(0), null, (int) drugQuantity,
+						    order.getDateActivated(), lineItemStatus);
 					}
 				} else if (order instanceof TestOrder) {
 					TestOrder testOrder = (TestOrder) order;
@@ -168,8 +167,8 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 	 * @param patient
 	 * @param cashierUUID
 	 */
-	public void addBillItemToBill(Order order, Patient patient, String cashierUUID,
-	        StockItem stockitem, BillableService service, Integer quantity, Date orderDate, BillStatus lineItemStatus) {
+	public void addBillItemToBill(Order order, Patient patient, String cashierUUID, StockItem stockitem,
+	        BillableService service, Integer quantity, Date orderDate, BillStatus lineItemStatus) {
 		try {
 			// Search for a bill
 			Bill activeBill = new Bill();
