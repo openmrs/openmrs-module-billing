@@ -63,7 +63,6 @@ public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 	
 	ICashPointService cashPointService = Context.getService(ICashPointService.class);
 	
-	// todo remove static variables
 	@Override
 	public void before(Method method, Object[] args, Object target) throws Throwable {
 		try {
@@ -75,32 +74,21 @@ public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 				}
 				
 				// Check if the order already exists by looking at the database
-				if (orderService.getOrderByUuid(order.getUuid()) != null) {
-					// This is an existing order being updated
-					LOG.debug("Order is being updated: " + order.getOrderId());
-				} else {
+				if (orderService.getOrderByUuid(order.getUuid()) == null) {
 					// This is a new order
-					LOG.debug("New order is being created");
-					// Add bill item to Bill
 					Patient patient = order.getPatient();
-					String patientUUID = patient.getUuid();
 					String cashierUUID = Context.getAuthenticatedUser().getUuid();
-					LOG.debug("Patient: " + patientUUID + " cashier: " + cashierUUID);
 					if (order instanceof DrugOrder) {
 						DrugOrder drugOrder = (DrugOrder) order;
 						Integer drugID = drugOrder.getDrug() != null ? drugOrder.getDrug().getDrugId() : 0;
-						String drugUUID = drugOrder.getDrug() != null ? drugOrder.getDrug().getConcept().getUuid() : "";
 						double drugQuantity = drugOrder.getQuantity() != null ? drugOrder.getQuantity() : 0.0;
 						List<StockItem> stockItems = stockService.getStockItemByDrug(drugID);
-						LOG.debug("Drug id: " + drugID + " Drug UUID: " + drugUUID + " Drug Quantity: " + drugQuantity);
 						if (!stockItems.isEmpty()) {
 							addBillItemToBill(order, patient, cashierUUID, stockItems.get(0), null, (int) drugQuantity,
 							    order.getDateActivated());
 						}
 					} else if (order instanceof TestOrder) {
 						TestOrder testOrder = (TestOrder) order;
-						int testID = testOrder.getId() != null ? testOrder.getId() : 0;
-						String testUUID = testOrder.getUuid() != null ? testOrder.getUuid() : "";
 						BillableService searchTemplate = new BillableService();
 						searchTemplate.setConcept(testOrder.getConcept());
 						searchTemplate.setServiceStatus(BillableServiceStatus.ENABLED);
@@ -108,15 +96,10 @@ public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 						IBillableItemsService service = Context.getService(IBillableItemsService.class);
 						List<BillableService> searchResult = service.findServices(new BillableServiceSearch(searchTemplate));
 						if (!searchResult.isEmpty()) {
-							LOG.debug("service was found");
-							LOG.debug(searchResult.get(0).getConcept().getUuid());
 							addBillItemToBill(order, patient, cashierUUID, null, searchResult.get(0), 1,
 							    order.getDateActivated());
 							
-						} else {
-							LOG.debug("concept was not found");
 						}
-						LOG.debug("Test id: " + testID + " Test UUID: " + testUUID);
 					}
 				}
 			}
@@ -135,7 +118,6 @@ public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 	 */
 	public void addBillItemToBill(Order order, Patient patient, String cashierUUID, StockItem stockitem,
 	        BillableService service, Integer quantity, Date orderDate) {
-		boolean ret = false;
 		try {
 			// Search for a bill
 			Bill activeBill = new Bill();
@@ -177,8 +159,6 @@ public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 				activeBill.addLineItem(billLineItem);
 				activeBill.setStatus(BillStatus.PENDING);
 				billService.save(activeBill);
-			} else {
-				LOG.debug("User is not a provider");
 			}
 			
 		}
