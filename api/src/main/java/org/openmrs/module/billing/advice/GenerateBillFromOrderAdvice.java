@@ -59,25 +59,21 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 	 */
 	@Override
 	public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
-		// This advice will be executed after the saveOrder method is successfully called
 		try {
-			// Extract the Order object from the arguments
 			ProgramWorkflowService workflowService = Context.getProgramWorkflowService();
 			if (method.getName().equals("saveOrder") && args.length > 0 && args[0] instanceof Order) {
 				Order order = (Order) args[0];
 				
-				// Check if the order already exists by looking at the database
-				// Exclude discontinuation orders as well
+				// Check if the order is a discontinuation, revision, or renewal
 				if (order.getAction().equals(Order.Action.DISCONTINUE) || order.getAction().equals(Order.Action.REVISE)
 				        || order.getAction().equals(Order.Action.RENEW)) {
-					// Do nothing unless order is new
+					// Do nothing for these actions
 					return;
 				}
 				
-				// This is a new order
 				Patient patient = order.getPatient();
 				String cashierUUID = Context.getAuthenticatedUser().getUuid();
-				String cashpointUUID = Utils.getDefaultLocation().getUuid();
+				
 				if (order instanceof DrugOrder) {
 					DrugOrder drugOrder = (DrugOrder) order;
 					Integer drugID = drugOrder.getDrug() != null ? drugOrder.getDrug().getDrugId() : 0;
@@ -88,8 +84,8 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 						// check from the list for all exemptions
 						boolean isExempted = checkIfOrderIsExempted(workflowService, order, BillingExemptions.COMMODITIES);
 						BillStatus lineItemStatus = isExempted ? BillStatus.EXEMPTED : BillStatus.PENDING;
-						addBillItemToBill(order, patient, cashierUUID, cashpointUUID, stockItems.get(0), null,
-						    (int) drugQuantity, order.getDateActivated(), lineItemStatus);
+						addBillItemToBill(order, patient, cashierUUID, stockItems.get(0), null, (int) drugQuantity,
+						    order.getDateActivated(), lineItemStatus);
 					}
 				} else if (order instanceof TestOrder) {
 					TestOrder testOrder = (TestOrder) order;
@@ -102,9 +98,8 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 					if (!searchResult.isEmpty()) {
 						boolean isExempted = checkIfOrderIsExempted(workflowService, order, BillingExemptions.SERVICES);
 						BillStatus lineItemStatus = isExempted ? BillStatus.EXEMPTED : BillStatus.PENDING;
-						addBillItemToBill(order, patient, cashierUUID, cashpointUUID, null, searchResult.get(0), 1,
+						addBillItemToBill(order, patient, cashierUUID, null, searchResult.get(0), 1,
 						    order.getDateActivated(), lineItemStatus);
-						
 					}
 				}
 			}
@@ -171,34 +166,14 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 	 *
 	 * @param patient
 	 * @param cashierUUID
-	 * @param cashpointUUID
 	 */
-	public void addBillItemToBill(Order order, Patient patient, String cashierUUID, String cashpointUUID,
-	        StockItem stockitem, BillableService service, Integer quantity, Date orderDate, BillStatus lineItemStatus) {
+	public void addBillItemToBill(Order order, Patient patient, String cashierUUID, StockItem stockitem,
+	        BillableService service, Integer quantity, Date orderDate, BillStatus lineItemStatus) {
 		try {
 			// Search for a bill
 			Bill activeBill = new Bill();
 			activeBill.setPatient(patient);
 			activeBill.setStatus(BillStatus.PENDING);
-			//            BillSearch billSearch = new BillSearch(searchBill);
-			//            List<Bill> bills = billService.getBills(billSearch);
-			//            Bill activeBill = null;
-			//
-			//            //search for any pending bill for today
-			//            for (Bill currentBill : bills) {
-			//                //Get the bill date
-			//                if(DateUtils.isSameDay(currentBill.getDateCreated(), orderDate != null ? orderDate : new Date())) {
-			//                    activeBill = currentBill;
-			//                    break;
-			//                }
-			//            }
-			//
-			//            // if there is no active bill for today, we create one
-			//            if(activeBill == null){
-			//                activeBill = searchBill;
-			//            }
-			
-			// Bill Item
 			BillLineItem billLineItem = new BillLineItem();
 			List<CashierItemPrice> itemPrices = new ArrayList<>();
 			if (stockitem != null) {

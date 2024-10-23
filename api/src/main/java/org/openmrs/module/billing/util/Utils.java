@@ -62,54 +62,6 @@ public class Utils {
 	
 	public static final String RECENCY_ID = "fd52829a-75d2-4732-8e43-4bff8e5b4f1a";
 	
-	/**
-	 * gets default location from global property
-	 *
-	 * @return
-	 */
-	public static Location getDefaultLocation() {
-		try {
-			Context.addProxyPrivilege(PrivilegeConstants.GET_LOCATIONS);
-			Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
-			String GP_DEFAULT_LOCATION = "defaultLocation";
-			GlobalProperty gp = Context.getAdministrationService().getGlobalPropertyObject(GP_DEFAULT_LOCATION);
-			return gp != null ? ((Location) gp.getValue()) : null;
-		}
-		finally {
-			Context.removeProxyPrivilege(PrivilegeConstants.GET_LOCATIONS);
-			Context.removeProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
-		}
-		
-	}
-	
-	/**
-	 * Borrowed from KenyaEMR Returns the MFL code for a location
-	 *
-	 * @param location
-	 * @return
-	 */
-	public static String getDefaultLocationMflCode(Location location) {
-		String MASTER_FACILITY_CODE = "8a845a89-6aa5-4111-81d3-0af31c45c002";
-		
-		if (location == null) {
-			location = getDefaultLocation();
-		}
-		try {
-			Context.addProxyPrivilege(PrivilegeConstants.GET_LOCATIONS);
-			Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
-			for (LocationAttribute attr : location.getAttributes()) {
-				if (attr.getAttributeType().getUuid().equals(MASTER_FACILITY_CODE) && !attr.isVoided()) {
-					return attr.getValueReference();
-				}
-			}
-		}
-		finally {
-			Context.removeProxyPrivilege(PrivilegeConstants.GET_LOCATIONS);
-			Context.removeProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
-		}
-		return null;
-	}
-	
 	public static SimpleDateFormat getSimpleDateFormat(String pattern) {
 		return new SimpleDateFormat(pattern);
 	}
