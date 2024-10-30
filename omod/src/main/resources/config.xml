@@ -145,26 +145,6 @@
 		</description>
 	</globalProperty>
 
-	<!-- Extensions -->
-	<!--	<extension>-->
-	<!--		<point>org.openmrs.admin.list</point>-->
-	<!--		<class>org.openmrs.module.billing.html.extension.cashier.AdminList</class>-->
-	<!--	</extension>-->
-	<!--	<extension>-->
-	<!--		<point>org.openmrs.gutter.tools</point>-->
-	<!--		<class>org.openmrs.module.billing.html.extension.cashier.CashierMenuItem</class>-->
-	<!--	</extension>-->
-	<!--	<extension>-->
-	<!--		<point>org.openmrs.patientDashboardTab</point>-->
-	<!--		<class>org.openmrs.module.billing.html.extension.cashier.CashierPatientBilHistoryExt</class>-->
-	<!--	</extension>-->
-	<!--	<extension>-->
-	<!--		<point>org.openmrs.headerFull.userBar</point>-->
-	<!--		<class>org.openmrs.module.billing.html.extension.cashier.CashierLinkExt</class>-->
-	<!--	</extension>-->
-
-	<!-- Privileges -->
-	<!--  Bills  -->
 	<privilege>
 		<name>View Cashier Bills</name>
 		<description>Able to view bills</description>
