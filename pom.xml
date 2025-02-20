@@ -4,7 +4,7 @@
 
 	<groupId>org.openmrs.module</groupId>
 	<artifactId>billing</artifactId>
-	<version>1.2.0</version>
+	<version>1.3.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>OpenHMIS Billing Module</name>
 	<description>Module to provide basic billing functionality</description>
@@ -38,7 +38,7 @@
 		<connection>scm:git:git@github.com:openmrs/openmrs-module-billing.git</connection>
 		<developerConnection>scm:git:git@github.com:openmrs/openmrs-module-billing.git</developerConnection>
 		<url>scm:git:git@github.com:openmrs/openmrs-module-billing.git</url>
-		<tag>v1.2.0</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<modules>
