@@ -866,4 +866,21 @@
 			<column name="date_created"/>
 		</createIndex>
 	</changeSet>
+
+	<changeSet id="add-index-and-fk-for-payment-mode" author="odorajonathan">
+        <comment>Ensure database structure supports efficient payment mode usage checks</comment>
+
+        <!-- Add an index to optimize queries on payment_mode_id -->
+        <createIndex tableName="cashier_bill_payment" indexName="idx_cashier_bill_payment_payment_mode">
+            <column name="payment_mode_id"/>
+        </createIndex>
+
+        <!-- Add foreign key to ensure referential integrity -->
+        <addForeignKeyConstraint constraintName="fk_cashier_bill_payment_payment_mode"
+                                baseTableName="cashier_bill_payment"
+                                baseColumnNames="payment_mode_id"
+                                referencedTableName="cashier_payment_mode"
+                                referencedColumnNames="payment_mode_id"
+                                onDelete="CASCADE"/>
+    </changeSet>
 </databaseChangeLog>
