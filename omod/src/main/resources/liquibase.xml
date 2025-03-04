@@ -818,14 +818,16 @@
 		</addColumn>
 	</changeSet>
 	<changeSet id="openhmis.cashier-001-v3.0.0-0334" author="jecihjoy">
+		<validCheckSum>9:0bca06446d1d81867c2faa94f8c88718</validCheckSum>
 		<comment>Adding the column service_id to the table cashier_bill_line_item</comment>
 		<addColumn tableName="cashier_bill_line_item">
 			<column name="service_id" type="int">
 				<constraints nullable="true"/>
 			</column>
 		</addColumn>
-		<sql>ALTER TABLE cashier_bill_line_item MODIFY COLUMN item_id INT DEFAULT NULL</sql>
-
+		<modifyColumn tableName="cashier_bill_line_item">
+			<column name="item_id" type="INT" defaultValue="NULL"/>
+		</modifyColumn>
 		<addForeignKeyConstraint constraintName="cashier_bill_line_item_service_id_fk"
 								 baseTableName="cashier_bill_line_item" baseColumnNames="service_id"
 								 referencedTableName="cashier_billable_service" referencedColumnNames="service_id"
