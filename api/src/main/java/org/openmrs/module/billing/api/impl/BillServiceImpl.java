@@ -433,7 +433,7 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 	private void addBillLineItem(BillLineItem item, Table table, PdfFont font) {
 		String itemName = "";
 		if (item.getItem() != null) {
-			itemName = item.getItem().getCommonName();
+			itemName = item.getItem().getDrug().getName();
 		} else if (item.getBillableService() != null) {
 			itemName = item.getBillableService().getName();
 		}

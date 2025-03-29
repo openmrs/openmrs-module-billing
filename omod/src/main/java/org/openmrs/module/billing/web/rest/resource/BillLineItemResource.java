@@ -81,7 +81,7 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
     public String getItem(BillLineItem instance) {
         try {
             StockItem stockItem = instance.getItem();
-            return stockItem.getConcept().getDisplayString();
+            return stockItem.getDrug().getName();
         } catch (Exception e) {
             return "";
         }
