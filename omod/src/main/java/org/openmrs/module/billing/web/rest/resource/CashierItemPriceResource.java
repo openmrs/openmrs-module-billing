@@ -108,7 +108,7 @@ public class CashierItemPriceResource extends BaseRestDataResource<CashierItemPr
     public String getItem(CashierItemPrice instance) {
         try {
             StockItem stockItem = instance.getItem();
-            return stockItem.getConcept().getDisplayString();
+            return stockItem.getDrug().getName();
         } catch (Exception e) {
             log.error(e);
             return "";
