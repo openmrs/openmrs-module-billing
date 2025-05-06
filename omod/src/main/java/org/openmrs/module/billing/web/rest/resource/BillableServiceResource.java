@@ -69,6 +69,7 @@ public class BillableServiceResource extends BaseRestDataResource<BillableServic
         Concept serviceCategory = context.getParameter("serviceCategory") != null ? Context.getConceptService().getConceptByUuid(
                 context.getParameter("serviceCategory")) : null;
         String serviceStatus = context.getParameter("isDisabled");
+        String serviceName = context.getParameter("serviceName");
         BillableServiceStatus status = BillableServiceStatus.ENABLED;
         if (Strings.isNotEmpty(serviceStatus)) {
             if (serviceStatus.equalsIgnoreCase("yes") || serviceStatus.equalsIgnoreCase("1")) {
@@ -79,6 +80,7 @@ public class BillableServiceResource extends BaseRestDataResource<BillableServic
         searchTemplate.setServiceType(serviceType);
         searchTemplate.setServiceCategory(serviceCategory);
         searchTemplate.setServiceStatus(status);
+        searchTemplate.setName(serviceName);
 
         IBillableItemsService service = Context.getService(IBillableItemsService.class);
         return new AlreadyPaged<>(context, service.findServices(new BillableServiceSearch(searchTemplate, false)), false);
