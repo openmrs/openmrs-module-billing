@@ -71,6 +71,7 @@
 	<globalProperty>
 		<property>${project.parent.artifactId}.systemReceiptNumberGenerator</property>
 		<description>Fully qualified class name of the receipt number generator to be used.</description>
+		<defaultValue>org.openmrs.module.billing.api.SequentialReceiptNumberGenerator</defaultValue>
 	</globalProperty>
 
 	<globalProperty>
