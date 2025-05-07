@@ -14,6 +14,7 @@
 package org.openmrs.module.billing.api.search;
 
 import org.hibernate.Criteria;
+import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.module.billing.api.base.entity.search.BaseDataTemplateSearch;
 import org.openmrs.module.billing.api.model.BillableService;
@@ -48,6 +49,9 @@ public class BillableServiceSearch extends BaseDataTemplateSearch<BillableServic
 		}
 		if (billableService.getConcept() != null) {
 			criteria.add(Restrictions.eq("concept", billableService.getConcept()));
+		}
+		if (billableService.getName() != null) {
+			criteria.add(Restrictions.like("name", billableService.getName(), MatchMode.ANYWHERE));
 		}
 	}
 }
