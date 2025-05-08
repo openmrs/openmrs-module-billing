@@ -15,11 +15,16 @@
 package org.openmrs.module.billing.api.impl;
 
 import org.hibernate.criterion.Order;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
+
 import org.openmrs.module.billing.api.IPaymentModeService;
 import org.openmrs.module.billing.api.base.entity.impl.BaseMetadataDataServiceImpl;
 import org.openmrs.module.billing.api.base.entity.security.IMetadataAuthorizationPrivileges;
 import org.openmrs.module.billing.api.model.PaymentMode;
 import org.openmrs.module.billing.api.security.BasicMetadataAuthorizationPrivileges;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -27,6 +32,9 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional
 public class PaymentModeServiceImpl extends BaseMetadataDataServiceImpl<PaymentMode> implements IPaymentModeService {
+	
+	@Autowired
+	private SessionFactory sessionFactory;
 	
 	@Override
 	protected IMetadataAuthorizationPrivileges getPrivileges() {
@@ -40,5 +48,21 @@ public class PaymentModeServiceImpl extends BaseMetadataDataServiceImpl<PaymentM
 	@Override
 	protected Order[] getDefaultSort() {
 		return new Order[] { Order.asc("sortOrder"), Order.asc("name") };
+	}
+	
+	@Override
+	public boolean isPaymentModeInUse(Integer paymentModeId) {
+		if (paymentModeId == null) {
+			throw new IllegalArgumentException("PaymentMode ID cannot be null");
+		}
+		
+		// Updated query using HQL
+		String hql = "SELECT COUNT(*) FROM Payment p WHERE p.instanceType.id = :paymentModeId";
+		Session session = sessionFactory.getCurrentSession();
+		Query<Long> query = session.createQuery(hql, Long.class);
+		query.setParameter("paymentModeId", paymentModeId);
+		
+		Long count = query.uniqueResult();
+		return count != null && count > 0;
 	}
 }
