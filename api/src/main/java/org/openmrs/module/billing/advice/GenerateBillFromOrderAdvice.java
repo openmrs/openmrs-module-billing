@@ -189,7 +189,11 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 				// billLineItem.setPrice(matchingPrices.isEmpty() ? itemPrices.get(0).getPrice() : matchingPrices.get(0).getPrice());
 				billLineItem.setPrice(itemPrices.get(0).getPrice());
 			} else {
-				billLineItem.setPrice(new BigDecimal(0.0));
+				if (stockitem != null && stockitem.getPurchasePrice() != null) {
+					billLineItem.setPrice(stockitem.getPurchasePrice());
+				} else {
+					billLineItem.setPrice(new BigDecimal(0.0));
+				}
 			}
 			billLineItem.setQuantity(quantity);
 			billLineItem.setPaymentStatus(lineItemStatus);
