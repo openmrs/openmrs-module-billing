@@ -148,7 +148,7 @@
 
 	<globalProperty>
 		<property>billing.receipt.logo.path</property>
-		<defaultValue>img/custom-logo.png</defaultValue>
+		<defaultValue>img/openmrs-logo.png</defaultValue>
 		<description>Customize billing receipt header logo </description>
 	</globalProperty>
 
