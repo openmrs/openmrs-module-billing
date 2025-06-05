@@ -40,6 +40,7 @@ import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.element.Text;
+import com.itextpdf.layout.properties.HorizontalAlignment;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 import org.apache.commons.lang.StringUtils;
@@ -313,10 +314,21 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		PdfFont headerSectionFont = helveticaBold;
 		PdfFont billItemSectionFont = helvetica;
 		PdfFont footerSectionFont = courierBold;
-		URL logoUrl = BillServiceImpl.class.getClassLoader().getResource("img/openmrs-logo.png");
+		
+		// Try to get the logo path from a global property
+		String logoPath = Context.getAdministrationService().getGlobalProperty("billing.receipt.logo.path",
+		    "img/openmrs-logo.png");
+		URL logoUrl = BillServiceImpl.class.getClassLoader().getResource(logoPath);
+		
+		if (logoUrl == null) {
+			throw new RuntimeException("Logo not found at path: " + logoPath);
+		}
 		
 		Image logiImage = new Image(ImageDataFactory.create(logoUrl));
-		logiImage.scaleToFit(80, 80);
+		logiImage.scaleToFit(100, 80);
+		/*logiImage.setAutoScale(true);
+		logiImage.setHorizontalAlignment(HorizontalAlignment.CENTER);*/
+		
 		Paragraph divider = new Paragraph("------------------------------------------------------------------");
 		Text billDateLabel = new Text(Utils.getSimpleDateFormat("dd-MMM-yyyy HH:mm:ss").format(bill.getDateCreated()));
 		
