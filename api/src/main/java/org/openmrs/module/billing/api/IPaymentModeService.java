@@ -18,8 +18,14 @@ import org.openmrs.module.billing.api.base.entity.IMetadataDataService;
 import org.openmrs.module.billing.api.model.PaymentMode;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Interface that represents classes which perform data operations for {@link PaymentMode}s.
- */
 @Transactional
-public interface IPaymentModeService extends IMetadataDataService<PaymentMode> {}
+public interface IPaymentModeService extends IMetadataDataService<PaymentMode> {
+	
+	/**
+	 * Check if a payment mode is currently in use.
+	 *
+	 * @param paymentModeId The ID of the payment mode to check.
+	 * @return True if the payment mode is in use, false otherwise.
+	 */
+	boolean isPaymentModeInUse(Integer paymentModeId);
+}
