@@ -325,9 +325,8 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 			if (file.exists()) {
 				try {
 					logoUrl = file.getAbsoluteFile().toURI().toURL();
-				}
-				catch (MalformedURLException e) {
-					e.printStackTrace();
+				} catch (MalformedURLException e) {
+					LOG.error("Error Loading file : " + logoUrl, e);
 				}
 			}
 		}
