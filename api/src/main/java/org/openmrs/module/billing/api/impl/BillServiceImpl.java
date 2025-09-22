@@ -18,6 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessControlException;
 import java.text.DecimalFormat;
@@ -54,6 +55,7 @@ import org.openmrs.GlobalProperty;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.annotation.Authorized;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.IBillService;
 import org.openmrs.module.billing.api.IReceiptNumberGenerator;
@@ -84,6 +86,8 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 	private static final String GP_DEFAULT_LOCATION = "defaultLocation";
 	
 	private static final String GP_FACILITY_ADDRESS_DETAILS = "billing.receipt.facilityAddress";
+	
+	private static final String GP_BILL_LOGO_PATH = "billing.receipt.logoPath";
 	
 	@Override
 	protected IEntityAuthorizationPrivileges getPrivileges() {
@@ -257,7 +261,7 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 	 */
 	@Override
 	public File downloadBillReceipt(Bill bill) {
-		
+		AdministrationService administrationService = Context.getAdministrationService();
 		Patient patient = bill.getPatient();
 		String fullName = patient.getGivenName().concat(" ")
 		        .concat(patient.getFamilyName() != null ? bill.getPatient().getFamilyName() : "").concat(" ")
@@ -315,12 +319,25 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		PdfFont footerSectionFont = courierBold;
 		URL logoUrl = BillServiceImpl.class.getClassLoader().getResource("img/openmrs-logo.png");
 		
+		String logoPath = administrationService.getGlobalProperty(GP_BILL_LOGO_PATH, "");
+		if (StringUtils.isNotBlank(logoPath)) {
+			File file = new File(logoPath.trim());
+			if (file.exists()) {
+				try {
+					logoUrl = file.getAbsoluteFile().toURI().toURL();
+				}
+				catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
 		Image logiImage = new Image(ImageDataFactory.create(logoUrl));
 		logiImage.scaleToFit(80, 80);
 		Paragraph divider = new Paragraph("------------------------------------------------------------------");
 		Text billDateLabel = new Text(Utils.getSimpleDateFormat("dd-MMM-yyyy HH:mm:ss").format(bill.getDateCreated()));
 		
-		GlobalProperty gp = Context.getAdministrationService().getGlobalPropertyObject(GP_DEFAULT_LOCATION);
+		GlobalProperty gp = administrationService.getGlobalPropertyObject(GP_DEFAULT_LOCATION);
 		//GlobalProperty gpFacilityAddress = Context.getAdministrationService().getGlobalPropertyObject(GP_FACILITY_ADDRESS_DETAILS);
 		//Text facilityName = new Text(gp != null && gp.getValue() != null ? ((Location) gp.getValue()).getName()
 		// : bill.getCashPoint().getLocation().getName());

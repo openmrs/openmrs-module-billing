@@ -145,6 +145,13 @@
 			The ID of the Payments by Payment Mode report.
 		</description>
 	</globalProperty>
+	<globalProperty>
+		<property>${project.parent.artifactId}.receipt.logoPath</property>
+		<description>
+			Path for the Bill Reciept Logo
+		</description>
+	</globalProperty>
+
 
 	<!-- Extensions -->
 	<!--	<extension>-->

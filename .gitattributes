@@ -1,4 +1,4 @@
-* text eol=crlf
+#* text eol=crlf
 
 # Known text file extensions
 *.as text
