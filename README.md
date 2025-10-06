@@ -52,7 +52,7 @@ Provides REST API endpoints at `/rest/v1/billing/*` for bills, payments, payment
   - Web Services REST Module 2.9+
   - Stock Management Module 1.4.0+
 - **Optional Modules**:
-  - IDGen Module 2.8+ (for custom receipt number generation)
+  - IDGen Module 4.7.0+ (for custom receipt number generation)
   - UI Framework Module
   - App Framework Module
   - Provider Management Module
