@@ -111,14 +111,6 @@ The module defines granular privileges for bill management (view, manage, adjust
 
 - **User Documentation**: [OpenMRS Billing Module Wiki](https://openmrs.atlassian.net/wiki/x/XIeEAQ)
 
-## Repository Information
-
-This repository follows the [git flow](https://github.com/nvie/gitflow) branching model:
-
-- **main**: Current released version
-- **develop**: Current development version
-- **Tags**: Each release is tagged with version number (e.g., v1.3.2)
-
 ## Development
 
 ### Building the Module
@@ -146,10 +138,9 @@ mvn formatter:format
 We welcome contributions! Please:
 
 1. Fork the repository
-2. Create a feature branch from `develop`
+2. Branch off from `main`
 3. Make your changes following OpenMRS coding conventions
 4. Write tests for new functionality
-5. Submit a pull request to the `develop` branch
 
 ## Credits
 
