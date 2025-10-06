@@ -151,6 +151,10 @@ We welcome contributions! Please:
 4. Write tests for new functionality
 5. Submit a pull request to the `develop` branch
 
+## Credits
+
+This module was originally developed by [OpenHMIS](https://openmrs.atlassian.net/wiki/x/kACXAQ) as the Cashier Module and is now maintained by the OpenMRS community.
+
 ## License
 
 This module is licensed under the OpenMRS Public License. See [LICENSE.txt](LICENSE.txt) for details.
