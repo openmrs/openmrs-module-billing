@@ -25,41 +25,41 @@ import org.openmrs.module.billing.api.model.CashierSettings;
  */
 public class ModuleSettings {
 	
-	public static final String RECEIPT_REPORT_ID_PROPERTY = "cashier.defaultReceiptReportId";
+	public static final String RECEIPT_REPORT_ID_PROPERTY = "billing.defaultReceiptReportId";
 	
-	public static final String CASHIER_SHIFT_REPORT_ID_PROPERTY = "cashier.defaultShiftReportId";
+	public static final String CASHIER_SHIFT_REPORT_ID_PROPERTY = "billing.defaultShiftReportId";
 	
-	public static final String TIMESHEET_REQUIRED_PROPERTY = "cashier.timesheetRequired";
+	public static final String TIMESHEET_REQUIRED_PROPERTY = "billing.timesheetRequired";
 	
-	public static final String ROUNDING_MODE_PROPERTY = "cashier.roundingMode";
+	public static final String ROUNDING_MODE_PROPERTY = "billing.roundingMode";
 	
-	public static final String ROUND_TO_NEAREST_PROPERTY = "cashier.roundToNearest";
+	public static final String ROUND_TO_NEAREST_PROPERTY = "billing.roundToNearest";
 	
-	public static final String ROUNDING_ITEM_ID = "cashier.roundingItemId";
+	public static final String ROUNDING_ITEM_ID = "billing.roundingItemId";
 	
-	public static final String ROUNDING_DEPT_ID = "cashier.roundingDeptId";
+	public static final String ROUNDING_DEPT_ID = "billing.roundingDeptId";
 	
 	public static final String SYSTEM_RECEIPT_NUMBER_GENERATOR = "billing.systemReceiptNumberGenerator";
 	
-	public static final String ADJUSTMENT_REASEON_FIELD = "cashier.adjustmentReasonField";
+	public static final String ADJUSTMENT_REASON_FIELD = "billing.adjustmentReasonField";
 	
-	public static final String ALLOW_BILL_ADJUSTMENT = "cashier.allowBillAdjustments";
+	public static final String ALLOW_BILL_ADJUSTMENT = "billing.allowBillAdjustments";
 	
-	public static final String AUTOFILL_PAYMENT_AMOUNT = "cashier.autofillPaymentAmount";
+	public static final String AUTOFILL_PAYMENT_AMOUNT = "billing.autofillPaymentAmount";
 	
-	public static final String PATIENT_DASHBOARD_2_BILL_COUNT = "cashier.patientDashboard2BillCount";
+	public static final String PATIENT_DASHBOARD_2_BILL_COUNT = "billing.patientDashboard2BillCount";
 	
 	private static final Integer DEFAULT_PATIENT_DASHBOARD_2_BILL_COUNT = 4;
 	
-	public static final String DEPARTMENT_COLLECTIONS_REPORT_ID_PROPERTY = "cashier.reports.departmentCollections";
+	public static final String DEPARTMENT_COLLECTIONS_REPORT_ID_PROPERTY = "billing.reports.departmentCollections";
 	
-	public static final String DEPARTMENT_REVENUE_REPORT_ID_PROPERTY = "cashier.reports.departmentRevenue";
+	public static final String DEPARTMENT_REVENUE_REPORT_ID_PROPERTY = "billing.reports.departmentRevenue";
 	
-	public static final String SHIFT_SUMMARY_REPORT_ID_PROPERTY = "cashier.reports.shiftSummary";
+	public static final String SHIFT_SUMMARY_REPORT_ID_PROPERTY = "billing.reports.shiftSummary";
 	
-	public static final String DAILY_SHIFT_SUMMARY_REPORT_ID_PROPERTY = "cashier.reports.dailyShiftSummary";
+	public static final String DAILY_SHIFT_SUMMARY_REPORT_ID_PROPERTY = "billing.reports.dailyShiftSummary";
 	
-	public static final String PAYMENTS_BY_PAYMENT_MODE_REPORT_ID_PROPERTY = "cashier.reports.paymentsByPaymentMode";
+	public static final String PAYMENTS_BY_PAYMENT_MODE_REPORT_ID_PROPERTY = "billing.reports.paymentsByPaymentMode";
 	
 	private static final AdministrationService administrationService;
 	
@@ -77,7 +77,7 @@ public class ModuleSettings {
 	public static CashierSettings loadSettings() {
 		final CashierSettings cashierSettings = new CashierSettings();
 		
-		getBoolProperty(ADJUSTMENT_REASEON_FIELD, Boolean.FALSE, new Action1<Boolean>() {
+		getBoolProperty(ADJUSTMENT_REASON_FIELD, Boolean.FALSE, new Action1<Boolean>() {
 			
 			@Override
 			public void apply(Boolean parameter) {
@@ -194,7 +194,7 @@ public class ModuleSettings {
 			throw new IllegalArgumentException("The settings to save must be defined.");
 		}
 		
-		setBoolProperty(ADJUSTMENT_REASEON_FIELD, cashierSettings.getAdjustmentReasonField());
+		setBoolProperty(ADJUSTMENT_REASON_FIELD, cashierSettings.getAdjustmentReasonField());
 		setBoolProperty(ALLOW_BILL_ADJUSTMENT, cashierSettings.getAllowBillAdjustment());
 		setBoolProperty(AUTOFILL_PAYMENT_AMOUNT, cashierSettings.getAutoFillPaymentAmount());
 		setIntProperty(CASHIER_SHIFT_REPORT_ID_PROPERTY, cashierSettings.getDefaultShiftReportId());

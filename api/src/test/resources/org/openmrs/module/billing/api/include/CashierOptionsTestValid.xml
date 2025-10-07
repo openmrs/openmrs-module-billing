@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <dataset>
-	<global_property property="cashier.roundingItemUuid" property_value="4028814B399565AA01399681B1B5000E"/>
-	<global_property property="cashier.roundingMode" property_value="MID"/>
-	<global_property property="cashier.roundToNearest" property_value="5"/>
-	<global_property property="cashier.roundingItemId" property_value="2"/>
-	<global_property property="cashier.defaultReceiptReportId" property_value="3"/>
-	<global_property property="cashier.timesheetRequired" property_value="true"/>
+	<global_property property="billing.roundingItemUuid" property_value="4028814B399565AA01399681B1B5000E"/>
+	<global_property property="billing.roundingMode" property_value="MID"/>
+	<global_property property="billing.roundToNearest" property_value="5"/>
+	<global_property property="billing.roundingItemId" property_value="2"/>
+	<global_property property="billing.defaultReceiptReportId" property_value="3"/>
+	<global_property property="billing.timesheetRequired" property_value="true"/>
 </dataset>

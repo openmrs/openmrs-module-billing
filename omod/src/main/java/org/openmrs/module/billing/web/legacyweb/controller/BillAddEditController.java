@@ -79,7 +79,7 @@ public class BillAddEditController {
         AdministrationService adminService = Context.getAdministrationService();
 
         boolean showAdjustmentReasonField = Boolean.parseBoolean(adminService.getGlobalProperty(
-                ModuleSettings.ADJUSTMENT_REASEON_FIELD));
+                ModuleSettings.ADJUSTMENT_REASON_FIELD));
         model.addAttribute("showAdjustmentReasonField", showAdjustmentReasonField);
 
         boolean allowBillAdjustment = Boolean.parseBoolean(adminService.getGlobalProperty(
