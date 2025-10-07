@@ -868,4 +868,81 @@
 			<column name="date_created"/>
 		</createIndex>
 	</changeSet>
+
+	<changeSet id="openmrs.billing-001-v3.0.0-20251007" author="Wikum Weerakutti">
+		<comment>Migrate global properties from 'cashier.*' prefix to 'billing.*'</comment>
+
+		<update tableName="global_property">
+			<column name="property" value="billing.defaultReceiptReportId"/>
+			<where>property = 'cashier.defaultReceiptReportId'</where>
+		</update>
+		<update tableName="global_property">
+			<column name="property" value="billing.defaultShiftReportId"/>
+			<where>property = 'cashier.defaultShiftReportId'</where>
+		</update>
+		<update tableName="global_property">
+			<column name="property" value="billing.timesheetRequired"/>
+			<where>property = 'cashier.timesheetRequired'</where>
+		</update>
+		<update tableName="global_property">
+			<column name="property" value="billing.roundingMode"/>
+			<where>property = 'cashier.roundingMode'</where>
+		</update>
+		<update tableName="global_property">
+			<column name="property" value="billing.roundToNearest"/>
+			<where>property = 'cashier.roundToNearest'</where>
+		</update>
+		<update tableName="global_property">
+			<column name="property" value="billing.roundingItemId"/>
+			<where>property = 'cashier.roundingItemId'</where>
+		</update>
+		<update tableName="global_property">
+			<column name="property" value="billing.roundingItemUuid"/>
+			<where>property = 'cashier.roundingItemUuid'</where>
+		</update>
+		<update tableName="global_property">
+			<column name="property" value="billing.roundingDeptId"/>
+			<where>property = 'cashier.roundingDeptId'</where>
+		</update>
+		<update tableName="global_property">
+			<column name="property" value="billing.adjustmentReasonField"/>
+			<where>property = 'cashier.adjustmentReasonField'</where>
+		</update>
+		<update tableName="global_property">
+			<column name="property" value="billing.allowBillAdjustments"/>
+			<where>property = 'cashier.allowBillAdjustments'</where>
+		</update>
+		<update tableName="global_property">
+			<column name="property" value="billing.autofillPaymentAmount"/>
+			<where>property = 'cashier.autofillPaymentAmount'</where>
+		</update>
+		<update tableName="global_property">
+			<column name="property" value="billing.patientDashboard2BillCount"/>
+			<where>property = 'cashier.patientDashboard2BillCount'</where>
+		</update>
+		<update tableName="global_property">
+			<column name="property" value="billing.reports.departmentCollections"/>
+			<where>property = 'cashier.reports.departmentCollections'</where>
+		</update>
+		<update tableName="global_property">
+			<column name="property" value="billing.reports.departmentRevenue"/>
+			<where>property = 'cashier.reports.departmentRevenue'</where>
+		</update>
+		<update tableName="global_property">
+			<column name="property" value="billing.reports.shiftSummary"/>
+			<where>property = 'cashier.reports.shiftSummary'</where>
+		</update>
+		<update tableName="global_property">
+			<column name="property" value="billing.reports.dailyShiftSummary"/>
+			<where>property = 'cashier.reports.dailyShiftSummary'</where>
+		</update>
+		<update tableName="global_property">
+			<column name="property" value="billing.reports.paymentsByPaymentMode"/>
+			<where>property = 'cashier.reports.paymentsByPaymentMode'</where>
+		</update>
+		<update tableName="global_property">
+			<column name="property" value="billing.receipt.logoPath"/>
+			<where>property = 'cashier.receipt.logoPath'</where>
+		</update>
+	</changeSet>
 </databaseChangeLog>
