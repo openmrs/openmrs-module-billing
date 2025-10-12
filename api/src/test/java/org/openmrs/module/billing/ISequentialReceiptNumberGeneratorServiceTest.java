@@ -37,7 +37,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 		Properties properties = super.getRuntimeProperties();
 		
 		// This is needed for proper locking in the in-memory database
-		properties.setProperty(Environment.URL, "jdbc:h2:mem:openmrs;DB_CLOSE_DELAY=30;MVCC=TRUE");
+		properties.setProperty(Environment.URL, "jdbc:h2:mem:openmrs;DB_CLOSE_DELAY=30");
 		
 		return properties;
 	}
