@@ -15,7 +15,7 @@ import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 import org.springframework.stereotype.Component;
-import org.openmrs.module.billing.translators.BillTranslator;
+import org.openmrs.module.billing.translators.InvoiceTranslator;
 
 import javax.annotation.Nonnull;
 
@@ -23,7 +23,7 @@ import javax.annotation.Nonnull;
 @Component
 @Setter
 @RequiredArgsConstructor
-public class BillTranslatorImpl implements BillTranslator {
+public class InvoiceTranslatorImpl implements InvoiceTranslator {
 
 
     private final PractitionerReferenceTranslator<Provider> practitionerReferenceTranslator;

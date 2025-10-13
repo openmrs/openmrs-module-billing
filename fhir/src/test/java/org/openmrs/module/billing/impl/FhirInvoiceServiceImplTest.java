@@ -10,7 +10,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.dao.FhirInvoiceDao;
-import org.openmrs.module.billing.translators.BillTranslator;
+import org.openmrs.module.billing.translators.InvoiceTranslator;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -29,7 +29,7 @@ public class FhirInvoiceServiceImplTest {
 	private FhirInvoiceDao dao;
 
 	@Mock
-	private BillTranslator translator;
+	private InvoiceTranslator translator;
 
 	@InjectMocks
 	private FhirInvoiceServiceImpl invoiceService;

@@ -11,7 +11,7 @@ import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillStatus;
-import org.openmrs.module.billing.translators.impl.BillTranslatorImpl;
+import org.openmrs.module.billing.translators.impl.InvoiceTranslatorImpl;
 import org.openmrs.module.fhir2.api.translators.PatientReferenceTranslator;
 import org.openmrs.module.fhir2.api.translators.PractitionerReferenceTranslator;
 
@@ -21,7 +21,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class BillTranslatorImplTest {
+public class InvoiceTranslatorImplTest {
 
     @Mock
     private PractitionerReferenceTranslator<Provider> practitionerTranslator;
@@ -29,7 +29,7 @@ public class BillTranslatorImplTest {
     @Mock
     private PatientReferenceTranslator patientReferenceTranslator;
 
-    private BillTranslatorImpl translator;
+    private InvoiceTranslatorImpl translator;
 
     private Bill bill;
 
@@ -41,7 +41,7 @@ public class BillTranslatorImplTest {
 
     @Before
     public void setUp() {
-        translator = new BillTranslatorImpl(practitionerTranslator, patientReferenceTranslator);
+        translator = new InvoiceTranslatorImpl(practitionerTranslator, patientReferenceTranslator);
         provider = new Provider();
         patient = new Patient();
         bill = new Bill();
