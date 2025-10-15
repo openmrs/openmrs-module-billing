@@ -33,7 +33,7 @@ public class BillingModuleActivator extends BaseModuleActivator {
 	 */
 	@Override
 	public void contextRefreshed() {
-		LOG.info("OpenHMIS Billing Module Module refreshed");
+		LOG.info("OpenMRS Billing Module refreshed");
 	}
 	
 	/**
@@ -43,7 +43,7 @@ public class BillingModuleActivator extends BaseModuleActivator {
 	public void started() {
 		//		RoundingUtil.setupRoundingDeptAndItem(LOG);
 		
-		LOG.info("OpenHMIS Billing Module Module started");
+		LOG.info("OpenMRS Billing Module started");
 	}
 	
 	/**
@@ -54,6 +54,6 @@ public class BillingModuleActivator extends BaseModuleActivator {
 		Module module = ModuleFactory.getModuleById(CashierWebConstants.OPENHMIS_CASHIER_MODULE_ID);
 		WebModuleUtil.unloadFilters(module);
 		
-		LOG.info("OpenHMIS Billing Module Module stopped");
+		LOG.info("OpenMRS Billing Module stopped");
 	}
 }

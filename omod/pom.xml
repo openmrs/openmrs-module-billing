@@ -9,8 +9,8 @@
 
 	<artifactId>billing-omod</artifactId>
 	<packaging>jar</packaging>
-	<name>OpenHMIS Billing Module OMOD</name>
-	<description>OMOD project for the OpenHMIS Billing module</description>
+	<name>OpenMRS Billing Module OMOD</name>
+	<description>OMOD project for the OpenMRS Billing module</description>
 
 	<dependencies>
 

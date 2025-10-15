@@ -6,9 +6,9 @@
 	<artifactId>billing</artifactId>
 	<version>1.3.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<name>OpenHMIS Billing Module</name>
+	<name>OpenMRS Billing Module</name>
 	<description>Module to provide basic billing functionality</description>
-	<url>https://github.com/OpenHMIS/OpenHMIS/wiki</url>
+	<url>https://github.com/openmrs/openmrs-module-billing</url>
 
 	<distributionManagement>
 		<repository>
@@ -25,7 +25,7 @@
 
 	<developers>
 		<developer>
-			<name>OpenHMIS</name>
+			<name>OpenMRS</name>
 		</developer>
 	</developers>
 
@@ -407,8 +407,8 @@
 			<url>https://openmrs.jfrog.io/openmrs/public</url>
 		</repository>
 		<repository>
-			<id>openhmis-repo</id>
-			<name>OpenHMIS Nexus Repository</name>
+			<id>openmrs-repo-snapshots</id>
+			<name>OpenMRS Snapshots Repository</name>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
