@@ -90,11 +90,10 @@ public class InvoiceTranslatorImpl implements InvoiceTranslator {
             case ADJUSTED:
                 return Invoice.InvoiceStatus.ISSUED;
             case PAID:
+            case EXEMPTED:
                 return Invoice.InvoiceStatus.BALANCED;
             case CANCELLED:
                 return Invoice.InvoiceStatus.CANCELLED;
-            case EXEMPTED:
-                return Invoice.InvoiceStatus.ENTEREDINERROR;
             default:
                 return Invoice.InvoiceStatus.DRAFT;
         }
