@@ -9,8 +9,8 @@
 
 	<artifactId>billing-api</artifactId>
 	<packaging>jar</packaging>
-	<name>OpenMrs Billing Module API</name>
-	<description>API project for the OpenHMIS Billing module</description>
+	<name>OpenMRS Billing Module API</name>
+	<description>API project for the OpenMRS Billing module</description>
 
 	<dependencies>
 		<!-- Begin OpenMRS core -->
