@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InvoiceFhirResourceProviderTest extends BaseFhirProvenanceResourceTest<Invoice> {
+
     private static final String INVOICE_UUID = "4028814B39B565A20139B95D74360004";
 
     @Mock

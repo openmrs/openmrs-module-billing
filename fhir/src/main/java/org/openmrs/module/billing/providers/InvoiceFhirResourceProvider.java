@@ -33,7 +33,7 @@ public class InvoiceFhirResourceProvider implements IResourceProvider {
     public Invoice getInvoiceByUuid(@IdParam @Nonnull IdType id) {
         Invoice invoice = fhirInvoiceService.get(id.getIdPart());
         if (invoice == null) {
-            throw new ResourceNotFoundException("Could not find the Bill with Id: " + id.getIdPart());
+            throw new ResourceNotFoundException("Could not find an invoice with Id: " + id.getIdPart());
         }
         return invoice;
     }

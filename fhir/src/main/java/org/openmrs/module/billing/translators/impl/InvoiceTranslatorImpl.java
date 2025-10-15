@@ -74,7 +74,6 @@ public class InvoiceTranslatorImpl implements InvoiceTranslator {
             Money totalNet = new Money();
             totalNet.setValue(bill.getTotal());
             invoice.setTotalNet(totalNet);
-            // Not sure if this is correct
             invoice.setTotalGross(totalNet);
         }
 
@@ -88,11 +87,11 @@ public class InvoiceTranslatorImpl implements InvoiceTranslator {
         }
         switch (status) {
             case POSTED:
+            case ADJUSTED:
                 return Invoice.InvoiceStatus.ISSUED;
             case PAID:
                 return Invoice.InvoiceStatus.BALANCED;
             case CANCELLED:
-            case ADJUSTED:
                 return Invoice.InvoiceStatus.CANCELLED;
             case EXEMPTED:
                 return Invoice.InvoiceStatus.ENTEREDINERROR;
