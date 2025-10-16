@@ -153,6 +153,12 @@
 	</globalProperty>
 
 
+	<globalProperty>
+		<property>billing.receipt.logo.path</property>
+		<defaultValue>img/openmrs-logo.png</defaultValue>
+		<description>Customize billing receipt header logo </description>
+	</globalProperty>
+
 	<!-- Extensions -->
 	<!--	<extension>-->
 	<!--		<point>org.openmrs.admin.list</point>-->
