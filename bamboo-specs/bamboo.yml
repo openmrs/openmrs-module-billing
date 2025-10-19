@@ -24,8 +24,18 @@ stages:
 Build and Test JDK 8:
   key: BTJ8
   tasks:
+  - script:
+      interpreter: SHELL
+      scripts:
+      - |-
+        #!/bin/bash -eu
+
+        set -x
+
+        docker run -v ${PWD}:/module --rm -w="/module" maven:3.9.9-amazoncorretto-8 bash -c 'chmod -R 777 .'
+      description: Resolve file permissions
   - checkout:
-      force-clean-build: false
+      force-clean-build: true
       description: Checkout default repository
   - script:
       interpreter: SHELL
@@ -41,6 +51,16 @@ Build and Test JDK 8:
 Deploy to Maven:
   key: DTM
   tasks:
+  - script:
+      interpreter: SHELL
+      scripts:
+      - |-
+        #!/bin/bash -eu
+
+        set -x
+
+        docker run -v ${PWD}:/module --rm -w="/module" maven:3.9.9-amazoncorretto-8 bash -c 'chmod -R 777 .'
+      description: Resolve file permissions
   - checkout:
       force-clean-build: true
       description: Checkout default repository
@@ -54,19 +74,29 @@ Deploy to Maven:
 
         docker pull ${bamboo.build.docker.image.id}
 
-        docker run -v m2-repo:/root/.m2/repository -v ~/.m2/settings.xml:/.m2/settings.xml:ro -v ${PWD}:/module --rm -w="/module" ${bamboo.build.docker.image.id} bash -c 'mvn deploy -B -DskipTests --settings /.m2/settings.xml'
+        docker run -v m2-repo:/root/.m2/repository -v ~/.m2/settings.xml:/.m2/settings.xml:ro -v ${PWD}:/module --rm -w="/module" ${bamboo.build.docker.image.id} bash -c 'mvn deploy -B -DskipTests --settings /.m2/settings.xml && chmod -R 777 .'
       description: Deploy
   artifact-subscriptions: []
 Release to Maven:
   key: RTM
   tasks:
+  - script:
+      interpreter: SHELL
+      scripts:
+      - |-
+        #!/bin/bash -eu
+
+        set -x
+
+        docker run -v ${PWD}:/module --rm -w="/module" maven:3.9.9-amazoncorretto-8 bash -c 'chmod -R 777 .'
+      description: Resolve file permissions
   - checkout:
-      force-clean-build: 'false'
+      force-clean-build: true
       description: Checkout Default Repository
   - checkout:
       repository: Release scripts
       path: release-scripts
-      force-clean-build: 'false'
+      force-clean-build: true
       description: Checkout Release Scripts Repository
   - script:
       interpreter: SHELL
