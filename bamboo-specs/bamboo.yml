@@ -42,7 +42,7 @@ Deploy to Maven:
   key: DTM
   tasks:
   - checkout:
-      force-clean-build: false
+      force-clean-build: true
       description: Checkout default repository
   - script:
       interpreter: SHELL
@@ -61,13 +61,13 @@ Release to Maven:
   key: RTM
   tasks:
   - checkout:
-      force-clean-build: 'false'
+      force-clean-build: false
       description: Checkout Default Repository
   - checkout:
       repository: Release scripts
       path: release-scripts
-      force-clean-build: 'false'
-      description: Checkout Release Scripts Repository
+      force-clean-build: false
+      description: Checkout Default Repository
   - script:
       interpreter: SHELL
       scripts:
