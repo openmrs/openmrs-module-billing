@@ -47,28 +47,25 @@ public class InvoiceTranslatorImpl implements InvoiceTranslator {
         }
 
         if (bill.getLineItems() != null) {
-          for (int i = 0; i < bill.getLineItems().size(); i++) {
-              BillLineItem billLineItem = bill.getLineItems().get(i);
-              Invoice.InvoiceLineItemComponent invoiceLineItemComponent = new Invoice.InvoiceLineItemComponent();
-              invoiceLineItemComponent.setSequence(i + 1);
+            for (BillLineItem billLineItem : bill.getLineItems()) {
+                Invoice.InvoiceLineItemComponent invoiceLineItemComponent = new Invoice.InvoiceLineItemComponent();
+                invoiceLineItemComponent.setSequence(billLineItem.getLineItemOrder());
+                if (billLineItem.getItem() != null && billLineItem.getItem().getCommonName() != null) {
+                    CodeableConcept codeableConcept = new CodeableConcept();
+                    codeableConcept.addCoding(new Coding().setCode(billLineItem.getUuid()).setDisplay(billLineItem.getItem().getCommonName()));
+                    invoiceLineItemComponent.setChargeItem(codeableConcept);
+                }
+                Invoice.InvoiceLineItemPriceComponentComponent priceComponent = new Invoice.InvoiceLineItemPriceComponentComponent();
+                priceComponent.setCode(new CodeableConcept().addCoding(new Coding().setCode(billLineItem.getUuid())));
 
-              if (billLineItem.getItem() != null && billLineItem.getItem().getCommonName() != null) {
-                  CodeableConcept codeableConcept = new CodeableConcept();
-                  codeableConcept.addCoding(new Coding().setCode(billLineItem.getUuid()).setDisplay(billLineItem.getItem().getCommonName()));
-                  invoiceLineItemComponent.setChargeItem(codeableConcept);
-              }
-
-              Invoice.InvoiceLineItemPriceComponentComponent priceComponent = new Invoice.InvoiceLineItemPriceComponentComponent();
-              priceComponent.setCode(new CodeableConcept().addCoding(new Coding().setCode(billLineItem.getUuid())));
-
-              if (billLineItem.getPrice() != null) {
-                  priceComponent.setFactor(billLineItem.getPrice());
-                  invoiceLineItemComponent.addPriceComponent(priceComponent);
-              }
-
-              invoice.addLineItem(invoiceLineItemComponent);
-          }
+                if (billLineItem.getPrice() != null) {
+                    priceComponent.setFactor(billLineItem.getPrice());
+                    invoiceLineItemComponent.addPriceComponent(priceComponent);
+                }
+                invoice.addLineItem(invoiceLineItemComponent);
+            }
         }
+
 
         if (bill.getTotal() != null) {
             Money totalNet = new Money();
