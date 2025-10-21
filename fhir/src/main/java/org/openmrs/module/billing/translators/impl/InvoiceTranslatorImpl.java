@@ -63,7 +63,7 @@ public class InvoiceTranslatorImpl implements InvoiceTranslator {
                 priceComponent.setCode(new CodeableConcept().addCoding(new Coding().setCode(billLineItem.getUuid())));
 
                 if (billLineItem.getPrice() != null) {
-                    priceComponent.setFactor(billLineItem.getPrice());
+                    priceComponent.setAmount(new Money().setValue(billLineItem.getPrice()));
                     invoiceLineItemComponent.addPriceComponent(priceComponent);
                 }
                 invoice.addLineItem(invoiceLineItemComponent);
