@@ -50,9 +50,13 @@ public class InvoiceTranslatorImpl implements InvoiceTranslator {
             for (BillLineItem billLineItem : bill.getLineItems()) {
                 Invoice.InvoiceLineItemComponent invoiceLineItemComponent = new Invoice.InvoiceLineItemComponent();
                 invoiceLineItemComponent.setSequence(billLineItem.getLineItemOrder());
-                if (billLineItem.getItem() != null && billLineItem.getItem().getCommonName() != null) {
+                if (billLineItem.getItem() != null) {
                     CodeableConcept codeableConcept = new CodeableConcept();
-                    codeableConcept.addCoding(new Coding().setCode(billLineItem.getUuid()).setDisplay(billLineItem.getItem().getCommonName()));
+                    Coding coding  = new Coding().setCode(billLineItem.getUuid());
+                    if (billLineItem.getItem().getConcept() != null) {
+                        coding.setDisplay(billLineItem.getItem().getCommonName());
+                    }
+                    codeableConcept.addCoding(coding);
                     invoiceLineItemComponent.setChargeItem(codeableConcept);
                 }
                 Invoice.InvoiceLineItemPriceComponentComponent priceComponent = new Invoice.InvoiceLineItemPriceComponentComponent();
