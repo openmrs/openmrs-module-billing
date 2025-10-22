@@ -8,6 +8,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Invoice;
 import org.hl7.fhir.r4.model.Money;
+import org.openmrs.Concept;
 import org.openmrs.Provider;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
@@ -39,10 +40,15 @@ public class InvoiceTranslatorImpl implements InvoiceTranslator {
         invoice.setStatus(mapStatus(bill.getStatus()));
 
         if (bill.getCashier() != null) {
-            CodeableConcept participantRole = new CodeableConcept();
-            participantRole.addCoding(new Coding().setDisplay(bill.getCashier().getRole().getDisplayString()));
-            invoice.addParticipant().setActor(practitionerReferenceTranslator.toFhirResource(bill.getCashier()))
-                    .setRole(participantRole);
+            Invoice.InvoiceParticipantComponent participantComponent = new Invoice.InvoiceParticipantComponent();
+            participantComponent.setActor(practitionerReferenceTranslator.toFhirResource(bill.getCashier()));
+            Concept role = bill.getCashier().getRole();
+            if (role != null) {
+                CodeableConcept participantRole = new CodeableConcept();
+                participantRole.addCoding(new Coding().setDisplay(role.getDisplayString()));
+                participantComponent.setRole(participantRole);
+            }
+            invoice.addParticipant(participantComponent);
         }
         if (bill.getPatient() != null) {
             invoice.setSubject(patientReferenceTranslator.toFhirResource(bill.getPatient()));
