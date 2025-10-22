@@ -971,4 +971,185 @@
         <renameColumn tableName="cashier_item_price" oldColumnName="date_voided" newColumnName="date_retired" columnDataType="datetime" />
         <renameColumn tableName="cashier_item_price" oldColumnName="void_reason" newColumnName="retire_reason" columnDataType="varchar(255)" />
     </changeSet>
+
+    <!-- Billing Exemptions Tables -->
+    <changeSet id="openmrs.billing-002-v3.0.0-20251022" author="Wikum Weerakutti">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="billing_exemption_category"/>
+            </not>
+        </preConditions>
+
+        <comment>Create billing exemption category table</comment>
+
+        <createTable tableName="billing_exemption_category">
+            <column name="exemption_category_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="category_type" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="exemption_key" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="description" type="varchar(1024)"/>
+
+            <!-- BaseOpenmrsMetadata audit fields -->
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+
+            <!-- retired fields for metadata -->
+            <column name="retired" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="retired_by" type="int"/>
+            <column name="date_retired" type="datetime"/>
+            <column name="retire_reason" type="varchar(255)"/>
+
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+
+        <!-- Foreign key constraints for category table -->
+        <addForeignKeyConstraint
+                constraintName="billing_exemption_category_creator_fk"
+                baseTableName="billing_exemption_category"
+                baseColumnNames="creator"
+                referencedTableName="users"
+                referencedColumnNames="user_id"/>
+
+        <addForeignKeyConstraint
+                constraintName="billing_exemption_category_changed_by_fk"
+                baseTableName="billing_exemption_category"
+                baseColumnNames="changed_by"
+                referencedTableName="users"
+                referencedColumnNames="user_id"/>
+
+        <addForeignKeyConstraint
+                constraintName="billing_exemption_category_retired_by_fk"
+                baseTableName="billing_exemption_category"
+                baseColumnNames="retired_by"
+                referencedTableName="users"
+                referencedColumnNames="user_id"/>
+
+        <!-- Unique constraint on (category_type, exemption_key) -->
+        <addUniqueConstraint
+                constraintName="unique_category_type_key"
+                tableName="billing_exemption_category"
+                columnNames="category_type, exemption_key"/>
+
+    </changeSet>
+
+    <changeSet id="openmrs.billing-003-v3.0.0-20251022" author="Wikum Weerakutti">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="billing_exemption_concept"/>
+            </not>
+        </preConditions>
+
+        <comment>Create billing exemption concept table</comment>
+
+        <createTable tableName="billing_exemption_concept">
+            <column name="exemption_concept_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="exemption_category_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="concept_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- BaseOpenmrsData audit fields -->
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+
+            <!-- voided fields for data -->
+            <column name="voided" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="int"/>
+            <column name="date_voided" type="datetime"/>
+            <column name="void_reason" type="varchar(255)"/>
+
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+
+        <!-- Foreign key constraints for concept table -->
+        <addForeignKeyConstraint
+                constraintName="billing_exemption_concept_category_fk"
+                baseTableName="billing_exemption_concept"
+                baseColumnNames="exemption_category_id"
+                referencedTableName="billing_exemption_category"
+                referencedColumnNames="exemption_category_id"
+                onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint
+                constraintName="billing_exemption_concept_concept_fk"
+                baseTableName="billing_exemption_concept"
+                baseColumnNames="concept_id"
+                referencedTableName="concept"
+                referencedColumnNames="concept_id"/>
+
+        <addForeignKeyConstraint
+                constraintName="billing_exemption_concept_creator_fk"
+                baseTableName="billing_exemption_concept"
+                baseColumnNames="creator"
+                referencedTableName="users"
+                referencedColumnNames="user_id"/>
+
+        <addForeignKeyConstraint
+                constraintName="billing_exemption_concept_changed_by_fk"
+                baseTableName="billing_exemption_concept"
+                baseColumnNames="changed_by"
+                referencedTableName="users"
+                referencedColumnNames="user_id"/>
+
+        <addForeignKeyConstraint
+                constraintName="billing_exemption_concept_voided_by_fk"
+                baseTableName="billing_exemption_concept"
+                baseColumnNames="voided_by"
+                referencedTableName="users"
+                referencedColumnNames="user_id"/>
+
+        <createIndex indexName="idx_exemption_concept_category"
+                     tableName="billing_exemption_concept">
+            <column name="exemption_category_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_exemption_concept_concept"
+                     tableName="billing_exemption_concept">
+            <column name="concept_id"/>
+        </createIndex>
+
+        <addUniqueConstraint
+                constraintName="unique_category_concept"
+                tableName="billing_exemption_concept"
+                columnNames="exemption_category_id, concept_id"/>
+
+    </changeSet>
 </databaseChangeLog>

@@ -12,6 +12,7 @@ import org.openmrs.User;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.ProgramWorkflowService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.billing.api.BillingExemptionService;
 import org.openmrs.module.billing.api.IBillService;
 import org.openmrs.module.billing.api.IBillableItemsService;
 import org.openmrs.module.billing.api.ICashPointService;
@@ -21,10 +22,11 @@ import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.model.BillableServiceStatus;
+import org.openmrs.module.billing.api.model.BillingExemptionCategory;
 import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
+import org.openmrs.module.billing.api.model.ExemptionCategoryType;
 import org.openmrs.module.billing.api.search.BillableServiceSearch;
-import org.openmrs.module.billing.exemptions.BillingExemptions;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
 import org.springframework.aop.AfterReturningAdvice;
@@ -33,11 +35,11 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.openmrs.module.billing.api.util.AgeExemptionMatcher.matchesAgeCondition;
 
 public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 	
@@ -81,7 +83,7 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 					
 					if (!stockItems.isEmpty()) {
 						// check from the list for all exemptions
-						boolean isExempted = checkIfOrderIsExempted(workflowService, order, BillingExemptions.COMMODITIES);
+						boolean isExempted = checkIfOrderIsExempted(workflowService, order, ExemptionCategoryType.COMMODITY);
 						BillStatus lineItemStatus = isExempted ? BillStatus.EXEMPTED : BillStatus.PENDING;
 						addBillItemToBill(order, patient, cashierUUID, stockItems.get(0), null, (int) drugQuantity,
 						    order.getDateActivated(), lineItemStatus);
@@ -95,7 +97,7 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 					IBillableItemsService service = Context.getService(IBillableItemsService.class);
 					List<BillableService> searchResult = service.findServices(new BillableServiceSearch(searchTemplate));
 					if (!searchResult.isEmpty()) {
-						boolean isExempted = checkIfOrderIsExempted(workflowService, order, BillingExemptions.SERVICES);
+						boolean isExempted = checkIfOrderIsExempted(workflowService, order, ExemptionCategoryType.SERVICE);
 						BillStatus lineItemStatus = isExempted ? BillStatus.EXEMPTED : BillStatus.PENDING;
 						addBillItemToBill(order, patient, cashierUUID, null, searchResult.get(0), 1,
 						    order.getDateActivated(), lineItemStatus);
@@ -117,45 +119,46 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 	 * @return
 	 */
 	private boolean checkIfOrderIsExempted(ProgramWorkflowService workflowService, Order order,
-	        Map<String, Set<Integer>> config) {
-		if (config == null || order == null || config.size() == 0) {
+	        ExemptionCategoryType exemptionType) {
+		
+		BillingExemptionService exemptionService = Context.getService(BillingExemptionService.class);
+		
+		if (order == null) {
 			return false;
 		}
-		if (config.get("all") != null && config.get("all").contains(order.getConcept().getConceptId())) {
+		Integer conceptId = order.getConcept().getConceptId();
+		
+		Set<Integer> allExemptions = exemptionService.getExemptedConceptIds(exemptionType, "all");
+		if (allExemptions.contains(conceptId)) {
 			return true;
 		}
-		// check in programs list
-		List<String> programExemptions = config.keySet().stream().filter(key -> key.startsWith("program:"))
-		        .collect(Collectors.toList());
-		if (programExemptions.size() > 0) {
-			List<PatientProgram> programs = workflowService.getPatientPrograms(order.getPatient(), null, null, null,
-			    new Date(), null, false);
-			Set<String> activeEnrollments = new HashSet<>();
-			programs.forEach(patientProgram -> {
-				if (patientProgram.getActive()) {
-					activeEnrollments.add(patientProgram.getProgram().getName());
-				}
-			});
-			
-			for (String programEntry : programExemptions) {
-				if (programEntry.contains(":")) { // this is our convention to distinguish program exemption
-					String programName = programEntry.substring(programEntry.indexOf(":") + 1);
-					//check if patient is active in the program
-					if (activeEnrollments.contains(programName)) {
-						// check if order is exempted
-						if (config.get(programEntry).contains(order.getConcept().getConceptId())) {
-							return true;
-						}
-						
-					}
+		
+		List<PatientProgram> programs = workflowService.getPatientPrograms(order.getPatient(), null, null, null, new Date(),
+		    null, false);
+		
+		for (PatientProgram patientProgram : programs) {
+			if (patientProgram.getActive()) {
+				String programKey = "program:" + patientProgram.getProgram().getName();
+				Set<Integer> programExemptions = exemptionService.getExemptedConceptIds(exemptionType, programKey);
+				if (programExemptions.contains(conceptId)) {
+					return true;
 				}
 			}
 		}
 		
-		// check age category
-		if (order.getPatient().getAge() < 5 && config.get("age<5") != null
-		        && config.get("age<5").contains(order.getConcept().getConceptId())) {
-			return true;
+		List<BillingExemptionCategory> ageCategories = exemptionService.getCategoriesByType(exemptionType).stream()
+		        .filter(cat -> cat.getExemptionKey().startsWith("age")).collect(Collectors.toList());
+		
+		Integer patientAge = order.getPatient().getAge();
+		
+		for (BillingExemptionCategory category : ageCategories) {
+			if (matchesAgeCondition(patientAge, category.getExemptionKey())) {
+				Set<Integer> ageExemptions = exemptionService.getExemptedConceptIds(exemptionType,
+				    category.getExemptionKey());
+				if (ageExemptions.contains(conceptId)) {
+					return true;
+				}
+			}
 		}
 		return false;
 	}

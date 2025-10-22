@@ -210,4 +210,37 @@
 	      class="org.openmrs.module.billing.api.base.entity.db.hibernate.BaseHibernateRepositoryImpl">
 		<constructor-arg name="sessionFactory" ref="dbSessionFactory"/>
 	</bean>
+
+	<!-- Billing Exemption Service -->
+	<bean parent="serviceContext">
+		<property name="moduleService">
+			<list merge="true">
+				<value>org.openmrs.module.billing.api.BillingExemptionService</value>
+				<ref bean="billingExemptionService"/>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="billingExemptionService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target">
+			<bean class="org.openmrs.module.billing.api.impl.BillingExemptionServiceImpl">
+				<constructor-arg name="exemptionCategoryDao" ref="billingExemptionCategoryDao"/>
+				<constructor-arg name="billingExemptionConceptDao" ref="billingExemptionConceptDao"/>
+			</bean>
+		</property>
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+	</bean>
+
+	<!-- Billing Exemption DAOs -->
+	<bean id="billingExemptionCategoryDao"
+	      class="org.openmrs.module.billing.api.db.hibernate.HibernateBillingExemptionCategoryDao">
+		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+
+	<bean id="billingExemptionConceptDao"
+	      class="org.openmrs.module.billing.api.db.hibernate.HibernateBillingExemptionConceptDao">
+		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
+	</bean>
 </beans>
