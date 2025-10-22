@@ -39,7 +39,10 @@ public class InvoiceTranslatorImpl implements InvoiceTranslator {
         invoice.setStatus(mapStatus(bill.getStatus()));
 
         if (bill.getCashier() != null) {
-            invoice.addParticipant().setActor(practitionerReferenceTranslator.toFhirResource(bill.getCashier()));
+            CodeableConcept participantRole = new CodeableConcept();
+            participantRole.addCoding(new Coding().setDisplay(bill.getCashier().getRole().getDisplayString()));
+            invoice.addParticipant().setActor(practitionerReferenceTranslator.toFhirResource(bill.getCashier()))
+                    .setRole(participantRole);
         }
         if (bill.getPatient() != null) {
             invoice.setSubject(patientReferenceTranslator.toFhirResource(bill.getPatient()));
