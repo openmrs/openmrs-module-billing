@@ -49,8 +49,8 @@ public class InvoiceTranslatorImpl implements InvoiceTranslator {
         if (bill.getLineItems() != null) {
             for (BillLineItem billLineItem : bill.getLineItems()) {
                 Invoice.InvoiceLineItemComponent invoiceLineItemComponent = new Invoice.InvoiceLineItemComponent();
-                invoiceLineItemComponent.setSequence(billLineItem.getLineItemOrder());
                 if (billLineItem.getItem() != null) {
+                    invoiceLineItemComponent.setSequence(billLineItem.getLineItemOrder());
                     CodeableConcept codeableConcept = new CodeableConcept();
                     Coding coding  = new Coding().setCode(billLineItem.getUuid());
                     if (billLineItem.getItem().getConcept() != null) {
@@ -59,10 +59,10 @@ public class InvoiceTranslatorImpl implements InvoiceTranslator {
                     codeableConcept.addCoding(coding);
                     invoiceLineItemComponent.setChargeItem(codeableConcept);
                 }
-                Invoice.InvoiceLineItemPriceComponentComponent priceComponent = new Invoice.InvoiceLineItemPriceComponentComponent();
-                priceComponent.setCode(new CodeableConcept().addCoding(new Coding().setCode(billLineItem.getUuid())));
 
                 if (billLineItem.getPrice() != null) {
+                    Invoice.InvoiceLineItemPriceComponentComponent priceComponent = new Invoice.InvoiceLineItemPriceComponentComponent();
+                    priceComponent.setCode(new CodeableConcept().addCoding(new Coding().setCode(billLineItem.getUuid())));
                     priceComponent.setAmount(new Money().setValue(billLineItem.getPrice()));
                     invoiceLineItemComponent.addPriceComponent(priceComponent);
                 }
