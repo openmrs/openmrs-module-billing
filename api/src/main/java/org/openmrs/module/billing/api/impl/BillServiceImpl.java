@@ -428,7 +428,25 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 			        .setFontSize(10).setFont(helvetica);
 		}
 		
+		float[] amountDueColWidth = { 1f, 5f, 2f, 2f };
+		Table amountDueSection = new Table(amountDueColWidth);
+		amountDueSection.setWidth(UnitValue.createPercentValue(100f));
+		
+		amountDueSection.addCell(new Paragraph(" "));
+		amountDueSection.addCell(new Paragraph(" "));
+		
+		amountDueSection.addCell(new Paragraph("Due Amount")).setFontSize(10).setTextAlignment(TextAlignment.RIGHT)
+		        .setFont(helvetica).setBold();
+		BigDecimal dueAmount = bill.getTotal().subtract(bill.getTotalPayments());
+		if (dueAmount.compareTo(BigDecimal.ZERO) > 0) {
+			amountDueSection.addCell(new Paragraph(df.format(dueAmount))).setFontSize(10)
+			        .setTextAlignment(TextAlignment.RIGHT).setFont(helvetica).setBold();
+		} else {
+			amountDueSection.addCell(new Paragraph("0.00")).setFontSize(10).setTextAlignment(TextAlignment.RIGHT)
+			        .setFont(helvetica).setBold();
+		}
 		setInnerCellBorder(paymentSection, Border.NO_BORDER);
+		setInnerCellBorder(amountDueSection, Border.NO_BORDER);
 		setInnerCellBorder(totalsSection, Border.NO_BORDER);
 		doc.add(logoSection);
 		//doc.add(addressSection);
@@ -439,6 +457,8 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		doc.add(totalsSection);
 		doc.add(divider);
 		doc.add(paymentSection);
+		doc.add(divider);
+		doc.add(amountDueSection);
 		doc.add(divider);
 		doc.add(new Paragraph("You were served by " + bill.getCashier().getName()).setFont(footerSectionFont).setFontSize(8)
 		        .setTextAlignment(TextAlignment.CENTER));
