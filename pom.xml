@@ -44,6 +44,7 @@
 	<modules>
 		<module>api</module>
 		<module>omod</module>
+		<module>fhir</module>
 	</modules>
 
 	<properties>
@@ -54,6 +55,8 @@
 		<openmrsPlatformToolsVersion>2.4.0</openmrsPlatformToolsVersion>
 		<itextPdfVersion>8.0.2</itextPdfVersion>
 		<stockmanagementVersion>1.4.0</stockmanagementVersion>
+		<fhir2Version>2.0.0</fhir2Version>
+		<lombokVersion>1.18.38</lombokVersion>
 	</properties>
 
 	<dependencyManagement>
@@ -135,6 +138,28 @@
 				<artifactId>stockmanagement-omod</artifactId>
 				<version>${stockmanagementVersion}</version>
 				<type>jar</type>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>fhir2-api</artifactId>
+				<version>${fhir2Version}</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>fhir2-api</artifactId>
+				<version>${fhir2Version}</version>
+				<type>test-jar</type>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>fhir2-omod</artifactId>
+				<version>${fhir2Version}</version>
 				<scope>provided</scope>
 			</dependency>
 
@@ -290,6 +315,13 @@
 						<artifactId>slf4j-simple</artifactId>
 					</exclusion>
 				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok</artifactId>
+				<version>${lombokVersion}</version>
+				<scope>provided</scope>
 			</dependency>
 
 		</dependencies>
