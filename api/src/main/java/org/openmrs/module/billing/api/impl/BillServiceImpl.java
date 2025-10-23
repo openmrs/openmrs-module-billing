@@ -22,6 +22,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessControlException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -137,10 +138,18 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		List<Bill> bills = searchBill(bill.getPatient());
 		if (!bills.isEmpty()) {
 			Bill billToUpdate = bills.get(0);
-			billToUpdate.setStatus(BillStatus.PENDING);
-			for (BillLineItem item : bill.getLineItems()) {
-				item.setBill(billToUpdate);
-				billToUpdate.getLineItems().add(item);
+			
+			List<BillLineItem> itemsToAdd = new ArrayList<>(bill.getLineItems());
+			for (BillLineItem item : itemsToAdd) {
+				// Check prevents adding items during updates: same objects have same memory address
+				// so contains() returns true and skips addition, avoiding duplicate operations
+				boolean itemExists = billToUpdate.getLineItems().contains(item);
+				
+				// Only add if not already present (filters out existing items during updates)
+				if (!itemExists) {
+					item.setBill(billToUpdate);
+					billToUpdate.getLineItems().add(item);
+				}
 			}
 			
 			// Calculate the total payments made on the bill
@@ -153,7 +162,6 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 			} else {
 				billToUpdate.setStatus(BillStatus.PENDING);
 			}
-			
 			// Save the updated bill
 			return super.save(billToUpdate);
 		}
