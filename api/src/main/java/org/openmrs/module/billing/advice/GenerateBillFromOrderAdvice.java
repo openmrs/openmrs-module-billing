@@ -22,6 +22,7 @@ import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.model.BillableServiceStatus;
+import org.openmrs.module.billing.api.model.BillingExemptionCategory;
 import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
 import org.openmrs.module.billing.api.model.ExemptionCategoryType;
@@ -36,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 	
@@ -108,40 +110,48 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 	
 	private boolean checkIfOrderIsExempted(ProgramWorkflowService workflowService, Order order,
 	        ExemptionCategoryType exemptionType) {
-		
-		BillingExemptionService exemptionService = Context.getService(BillingExemptionService.class);
-		
-		if (order == null) {
-			return false;
-		}
-		Integer conceptId = order.getConcept().getConceptId();
-		
-		Set<Integer> allExemptions = exemptionService.getExemptedConceptIds(exemptionType, "all");
-		if (allExemptions.contains(conceptId)) {
-			return true;
-		}
-		
-		List<PatientProgram> programs = workflowService.getPatientPrograms(order.getPatient(), null, null, null, new Date(),
-		    null, false);
-		
-		for (PatientProgram patientProgram : programs) {
-			if (patientProgram.getActive()) {
-				String programKey = "program:" + patientProgram.getProgram().getName();
-				Set<Integer> programExemptions = exemptionService.getExemptedConceptIds(exemptionType, programKey);
-				if (programExemptions.contains(conceptId)) {
-					return true;
-				}
-			}
-		}
-		
-		if (order.getPatient().getAge() < 5) {
-			Set<Integer> ageExemptions = exemptionService.getExemptedConceptIds(exemptionType, "age<5");
-			if (ageExemptions.contains(conceptId)) {
-				return true;
-			}
-		}
-		
-		return false;
+
+        BillingExemptionService exemptionService = Context.getService(BillingExemptionService.class);
+
+        if (order == null) {
+            return false;
+        }
+        Integer conceptId = order.getConcept().getConceptId();
+
+        Set<Integer> allExemptions = exemptionService.getExemptedConceptIds(exemptionType, "all");
+        if (allExemptions.contains(conceptId)) {
+            return true;
+        }
+
+        List<PatientProgram> programs = workflowService.getPatientPrograms(order.getPatient(), null, null, null, new Date(),
+                null, false);
+
+        for (PatientProgram patientProgram : programs) {
+            if (patientProgram.getActive()) {
+                String programKey = "program:" + patientProgram.getProgram().getName();
+                Set<Integer> programExemptions = exemptionService.getExemptedConceptIds(exemptionType, programKey);
+                if (programExemptions.contains(conceptId)) {
+                    return true;
+                }
+            }
+        }
+
+        List<BillingExemptionCategory> ageCategories = exemptionService.getCategoriesByType(exemptionType)
+                .stream()
+                .filter(cat -> cat.getExemptionKey().startsWith("age"))
+                .collect(Collectors.toList());
+
+        Integer patientAge = order.getPatient().getAge();
+
+        for (BillingExemptionCategory category : ageCategories) {
+            if (matchesAgeCondition(patientAge, category.getExemptionKey())) {
+                Set<Integer> ageExemptions = exemptionService.getExemptedConceptIds(exemptionType, category.getExemptionKey());
+                if (ageExemptions.contains(conceptId)) {
+                    return true;
+                }
+            }
+        }
+        return false;
 	}
 	
 	/**
@@ -203,4 +213,15 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 			LOG.error("Error sending the bill item: " + ex.getMessage(), ex);
 		}
 	}
+
+    private boolean matchesAgeCondition(Integer patientAge, String exemptionKey) {
+        if (exemptionKey.startsWith("age<")) {
+            int threshold = Integer.parseInt(exemptionKey.substring(4));
+            return patientAge < threshold;
+        } else if (exemptionKey.startsWith("age>")) {
+            int threshold = Integer.parseInt(exemptionKey.substring(4));
+            return patientAge > threshold;
+        }
+        return false;
+    }
 }
