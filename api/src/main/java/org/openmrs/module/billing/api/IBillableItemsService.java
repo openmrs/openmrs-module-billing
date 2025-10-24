@@ -15,6 +15,7 @@ package org.openmrs.module.billing.api;
 
 import java.util.List;
 
+import org.openmrs.Concept;
 import org.openmrs.module.billing.api.base.entity.IEntityDataService;
 import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.search.BillableServiceSearch;
@@ -24,4 +25,31 @@ import org.springframework.transaction.annotation.Transactional;
 public interface IBillableItemsService extends IEntityDataService<BillableService> {
 	
 	List<BillableService> findServices(final BillableServiceSearch search);
+	
+	/**
+	 * Find a billable service by name (case-insensitive).
+	 * 
+	 * @param name The name to search for
+	 * @return The billable service with the given name, or null if not found
+	 */
+	@Transactional(readOnly = true)
+	BillableService findByName(String name);
+	
+	/**
+	 * Find a billable service by short name (case-insensitive).
+	 * 
+	 * @param shortName The short name to search for
+	 * @return The billable service with the given short name, or null if not found
+	 */
+	@Transactional(readOnly = true)
+	BillableService findByShortName(String shortName);
+	
+	/**
+	 * Find a billable service by service type.
+	 * 
+	 * @param serviceType The service type concept to search for
+	 * @return The billable service with the given service type, or null if not found
+	 */
+	@Transactional(readOnly = true)
+	BillableService findByServiceType(Concept serviceType);
 }

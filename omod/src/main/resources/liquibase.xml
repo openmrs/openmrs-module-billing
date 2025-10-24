@@ -945,4 +945,25 @@
 			<where>property = 'cashier.receipt.logoPath'</where>
 		</update>
 	</changeSet>
+
+	<changeSet id="20251024-1430-o3-5145-add-unique-constraints-billable-service" author="ujjawal-prabhat">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<indexExists tableName="cashier_billable_service" indexName="unique_billable_service_name"/>
+			</not>
+		</preConditions>
+		<comment>Add unique constraints on billable service fields to enforce data integrity</comment>
+		<addUniqueConstraint 
+			constraintName="unique_billable_service_name"
+			tableName="cashier_billable_service"
+			columnNames="name"/>
+		<addUniqueConstraint 
+			constraintName="unique_billable_service_short_name"
+			tableName="cashier_billable_service"
+			columnNames="short_name"/>
+		<addUniqueConstraint 
+			constraintName="unique_billable_service_type"
+			tableName="cashier_billable_service"
+			columnNames="service_type"/>
+	</changeSet>
 </databaseChangeLog>

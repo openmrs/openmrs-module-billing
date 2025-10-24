@@ -15,7 +15,11 @@ package org.openmrs.module.billing.api.impl;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Restrictions;
+import org.openmrs.Concept;
+import org.openmrs.api.APIException;
 import org.openmrs.module.billing.api.IBillableItemsService;
 import org.openmrs.module.billing.api.base.entity.impl.BaseEntityDataServiceImpl;
 import org.openmrs.module.billing.api.base.entity.security.IEntityAuthorizationPrivileges;
@@ -39,13 +43,93 @@ public class BillableItemsServiceImpl extends BaseEntityDataServiceImpl<Billable
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
+	public BillableService findByName(final String name) {
+		if (StringUtils.isBlank(name)) {
+			return null;
+		}
+		
+		List<BillableService> results = executeCriteria(BillableService.class, null, new Action1<Criteria>() {
+			@Override
+			public void apply(Criteria criteria) {
+				criteria.add(Restrictions.eq("name", name).ignoreCase());
+				criteria.add(Restrictions.eq("voided", false));
+			}
+		});
+		
+		return results.isEmpty() ? null : results.get(0);
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public BillableService findByShortName(final String shortName) {
+		if (StringUtils.isBlank(shortName)) {
+			return null;
+		}
+		
+		List<BillableService> results = executeCriteria(BillableService.class, null, new Action1<Criteria>() {
+			@Override
+			public void apply(Criteria criteria) {
+				criteria.add(Restrictions.eq("shortName", shortName).ignoreCase());
+				criteria.add(Restrictions.eq("voided", false));
+			}
+		});
+		
+		return results.isEmpty() ? null : results.get(0);
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public BillableService findByServiceType(final Concept serviceType) {
+		if (serviceType == null) {
+			return null;
+		}
+		
+		List<BillableService> results = executeCriteria(BillableService.class, null, new Action1<Criteria>() {
+			@Override
+			public void apply(Criteria criteria) {
+				criteria.add(Restrictions.eq("serviceType", serviceType));
+				criteria.add(Restrictions.eq("voided", false));
+			}
+		});
+		
+		return results.isEmpty() ? null : results.get(0);
+	}
+	
+	@Override
 	protected IEntityAuthorizationPrivileges getPrivileges() {
 		return this;
 	}
 	
 	@Override
 	protected void validate(BillableService object) {
+		if (object == null) {
+			throw new APIException("Billable service cannot be null");
+		}
 		
+		// Validate name uniqueness
+		if (StringUtils.isNotBlank(object.getName())) {
+			BillableService existing = findByName(object.getName());
+			if (existing != null && !existing.getId().equals(object.getId())) {
+				throw new APIException("A billable service with the name '" + object.getName() + "' already exists");
+			}
+		}
+		
+		// Validate short name uniqueness (only if not null/blank)
+		if (StringUtils.isNotBlank(object.getShortName())) {
+			BillableService existing = findByShortName(object.getShortName());
+			if (existing != null && !existing.getId().equals(object.getId())) {
+				throw new APIException("A billable service with the short name '" + object.getShortName() + "' already exists");
+			}
+		}
+		
+		// Validate service type uniqueness (only if not null)
+		if (object.getServiceType() != null) {
+			BillableService existing = findByServiceType(object.getServiceType());
+			if (existing != null && !existing.getId().equals(object.getId())) {
+				throw new APIException("A billable service with the service type '" + object.getServiceType().getName().getName() + "' already exists");
+			}
+		}
 	}
 	
 	@Override
