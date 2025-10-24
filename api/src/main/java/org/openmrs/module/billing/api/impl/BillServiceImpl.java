@@ -22,6 +22,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessControlException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -138,10 +139,13 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		if (!bills.isEmpty()) {
 			Bill billToUpdate = bills.get(0);
 			billToUpdate.setStatus(BillStatus.PENDING);
+			// Use temporary list to avoid ConcurrentModificationException during iteration
+			List<BillLineItem> newLineItems = new ArrayList<>();
 			for (BillLineItem item : bill.getLineItems()) {
 				item.setBill(billToUpdate);
-				billToUpdate.getLineItems().add(item);
+				newLineItems.add(item);
 			}
+			billToUpdate.getLineItems().addAll(newLineItems);
 			
 			// Calculate the total payments made on the bill
 			BigDecimal totalPaid = billToUpdate.getPayments().stream().map(Payment::getAmountTendered)
