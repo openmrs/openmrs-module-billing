@@ -266,6 +266,10 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		String fullName = patient.getGivenName().concat(" ")
 		        .concat(patient.getFamilyName() != null ? bill.getPatient().getFamilyName() : "").concat(" ")
 		        .concat(patient.getMiddleName() != null ? bill.getPatient().getMiddleName() : "");
+		String gender = patient.getGender() != null ? patient.getGender() : "";
+		String dob = patient.getBirthdate() != null
+		        ? Utils.getSimpleDateFormat("dd-MMM-yyyy").format(patient.getBirthdate())
+		        : "";
 		
 		File returnFile;
 		try {
@@ -370,6 +374,16 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		receiptHeader.addCell(new Paragraph("Patient:")).setFontSize(FONT_SIZE_12).setTextAlignment(TextAlignment.LEFT)
 		        .setFont(headerSectionFont);
 		receiptHeader.addCell(new Paragraph(WordUtils.capitalizeFully(fullName))).setFontSize(FONT_SIZE_12)
+		        .setTextAlignment(TextAlignment.LEFT).setFont(helvetica);
+		
+		receiptHeader.addCell(new Paragraph("Gender:")).setFontSize(FONT_SIZE_12).setTextAlignment(TextAlignment.LEFT)
+		        .setFont(headerSectionFont);
+		receiptHeader.addCell(new Paragraph(WordUtils.capitalizeFully(gender))).setFontSize(FONT_SIZE_12)
+		        .setTextAlignment(TextAlignment.LEFT).setFont(helvetica);
+		
+		receiptHeader.addCell(new Paragraph("Date of Birth:")).setFontSize(FONT_SIZE_12).setTextAlignment(TextAlignment.LEFT)
+		        .setFont(headerSectionFont);
+		receiptHeader.addCell(new Paragraph(WordUtils.capitalizeFully(dob))).setFontSize(FONT_SIZE_12)
 		        .setTextAlignment(TextAlignment.LEFT).setFont(helvetica);
 		
 		float[] columnWidths = { 1f, 5f, 2f, 2f };
