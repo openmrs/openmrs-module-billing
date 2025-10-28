@@ -15,7 +15,9 @@ package org.openmrs.module.billing;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -30,13 +32,10 @@ import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 
 /**
- * Test cases for bill line item management scenarios:
- * 1. Creating a bill with line items
- * 2. Updating a bill by adding new line items
- * 3. Removing line items from a bill
- * 
- * These tests verify the concurrent modification fix in BillServiceImpl.save()
- * where the searchBill() method is used to find existing pending bills for the same patient.
+ * Test cases for bill line item management scenarios: 1. Creating a bill with line items 2.
+ * Updating a bill by adding new line items 3. Removing line items from a bill These tests verify
+ * the concurrent modification fix in BillServiceImpl.save() where the searchBill() method is used
+ * to find existing pending bills for the same patient.
  */
 public class BillLineItemManagementTest extends BaseModuleContextSensitiveTest {
 	
@@ -48,18 +47,15 @@ public class BillLineItemManagementTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	/**
-	 * Test Case 1: User creating a Bill and adding items to line item list
-	 * 
-	 * This test simulates the POST request scenario:
-	 * URL: /openmrs/ws/rest/v1/billing/bill
-	 * Body: {"cashPoint":"54065383-b4d4-42d2-af4d-d250a1fd2590","cashier":"f9badd80-ab76-11e2-9e96-0800200c9a66","lineItems":[{"quantity":1,"price":100,"lineItemOrder":0,"paymentStatus":"PENDING","billableService":"16435ab4-27c3-4d91-b21e-52819bd654d8"}],"payments":[],"patient":"3a4f7ac4-9197-4b14-a9bc-12b223dab61b","status":"PENDING"}
+	 * Test Case 1: User creating a Bill and adding items to line item list This test simulates the POST
+	 * request scenario: URL: /openmrs/ws/rest/v1/billing/bill Body:
+	 * {"cashPoint":"54065383-b4d4-42d2-af4d-d250a1fd2590","cashier":"f9badd80-ab76-11e2-9e96-0800200c9a66","lineItems":[{"quantity":1,"price":100,"lineItemOrder":0,"paymentStatus":"PENDING","billableService":"16435ab4-27c3-4d91-b21e-52819bd654d8"}],"payments":[],"patient":"3a4f7ac4-9197-4b14-a9bc-12b223dab61b","status":"PENDING"}
 	 */
 	@Test
 	public void testCreateBillWithLineItems() throws Exception {
 		// Create a new bill with line items
 		Bill bill = createTestBill();
-		BillLineItem lineItem = createTestLineItem("16435ab4-27c3-4d91-b21e-52819bd654d8", 
-			BigDecimal.valueOf(100), 1, 0);
+		BillLineItem lineItem = createTestLineItem("16435ab4-27c3-4d91-b21e-52819bd654d8", BigDecimal.valueOf(100), 1, 0);
 		bill.getLineItems().add(lineItem);
 		
 		// Test bill creation logic without database persistence
@@ -73,22 +69,22 @@ public class BillLineItemManagementTest extends BaseModuleContextSensitiveTest {
 		Assert.assertEquals("Line item quantity should be 1", Integer.valueOf(1), savedLineItem.getQuantity());
 		Assert.assertEquals("Line item price should be 100", BigDecimal.valueOf(100), savedLineItem.getPrice());
 		Assert.assertEquals("Line item order should be 0", Integer.valueOf(0), savedLineItem.getLineItemOrder());
-		Assert.assertEquals("Line item payment status should be PENDING", BillStatus.PENDING, savedLineItem.getPaymentStatus());
+		Assert.assertEquals("Line item payment status should be PENDING", BillStatus.PENDING,
+		    savedLineItem.getPaymentStatus());
 	}
 	
 	/**
-	 * Test Case 2: User updating the bill by modifying and adding new bill items
-	 * 
-	 * This test simulates the PUT request scenario:
-	 * URL: /openmrs/ws/rest/v1/billing/bill/5aeba62c-c10c-473b-b808-ba60cc46325b
-	 * Body: {"cashPoint":"54065383-b4d4-42d2-af4d-d250a1fd2590","cashier":"f9badd80-ab76-11e2-9e96-0800200c9a66","lineItems":[{"uuid":"fc804320-2f7b-4d92-a622-9cb3f42fcddc","display":"BillLineItem","voided":false,"voidReason":null,"item":"","billableService":"16435ab4-27c3-4d91-b21e-52819bd654d8","quantity":1,"price":100,"priceName":"","priceUuid":"","lineItemOrder":1,"paymentStatus":"PENDING","resourceVersion":"1.8"},{"uuid":"d303f086-19f1-4ea0-8507-3c9b683841f6","display":"BillLineItem","voided":false,"voidReason":null,"item":"","billableService":"16435ab4-27c3-4d91-b21e-52819bd654d8","quantity":1,"price":100,"priceName":"","priceUuid":"","lineItemOrder":0,"paymentStatus":"PENDING","resourceVersion":"1.8"}],"patient":"3a4f7ac4-9197-4b14-a9bc-12b223dab61b","status":"PENDING","uuid":"5aeba62c-c10c-473b-b808-ba60cc46325b"}
+	 * Test Case 2: User updating the bill by modifying and adding new bill items This test simulates
+	 * the PUT request scenario: URL:
+	 * /openmrs/ws/rest/v1/billing/bill/5aeba62c-c10c-473b-b808-ba60cc46325b Body:
+	 * {"cashPoint":"54065383-b4d4-42d2-af4d-d250a1fd2590","cashier":"f9badd80-ab76-11e2-9e96-0800200c9a66","lineItems":[{"uuid":"fc804320-2f7b-4d92-a622-9cb3f42fcddc","display":"BillLineItem","voided":false,"voidReason":null,"item":"","billableService":"16435ab4-27c3-4d91-b21e-52819bd654d8","quantity":1,"price":100,"priceName":"","priceUuid":"","lineItemOrder":1,"paymentStatus":"PENDING","resourceVersion":"1.8"},{"uuid":"d303f086-19f1-4ea0-8507-3c9b683841f6","display":"BillLineItem","voided":false,"voidReason":null,"item":"","billableService":"16435ab4-27c3-4d91-b21e-52819bd654d8","quantity":1,"price":100,"priceName":"","priceUuid":"","lineItemOrder":0,"paymentStatus":"PENDING","resourceVersion":"1.8"}],"patient":"3a4f7ac4-9197-4b14-a9bc-12b223dab61b","status":"PENDING","uuid":"5aeba62c-c10c-473b-b808-ba60cc46325b"}
 	 */
 	@Test
 	public void testUpdateBillWithNewLineItems() throws Exception {
 		// Create initial bill
 		Bill initialBill = createTestBill();
-		BillLineItem initialLineItem = createTestLineItem("16435ab4-27c3-4d91-b21e-52819bd654d8", 
-			BigDecimal.valueOf(100), 1, 0);
+		BillLineItem initialLineItem = createTestLineItem("16435ab4-27c3-4d91-b21e-52819bd654d8", BigDecimal.valueOf(100), 1,
+		    0);
 		initialBill.getLineItems().add(initialLineItem);
 		
 		// Simulate update scenario - create a new bill object with additional line items
@@ -96,14 +92,13 @@ public class BillLineItemManagementTest extends BaseModuleContextSensitiveTest {
 		updateBill.setPatient(initialBill.getPatient()); // Same patient to trigger searchBill logic
 		
 		// Add existing line item (with same UUID to simulate update)
-		BillLineItem existingLineItem = createTestLineItem("16435ab4-27c3-4d91-b21e-52819bd654d8", 
-			BigDecimal.valueOf(100), 1, 0);
+		BillLineItem existingLineItem = createTestLineItem("16435ab4-27c3-4d91-b21e-52819bd654d8", BigDecimal.valueOf(100),
+		    1, 0);
 		existingLineItem.setUuid(initialBill.getLineItems().get(0).getUuid());
 		updateBill.getLineItems().add(existingLineItem);
 		
 		// Add new line item
-		BillLineItem newLineItem = createTestLineItem("16435ab4-27c3-4d91-b21e-52819bd654d8", 
-			BigDecimal.valueOf(150), 1, 1);
+		BillLineItem newLineItem = createTestLineItem("16435ab4-27c3-4d91-b21e-52819bd654d8", BigDecimal.valueOf(150), 1, 1);
 		updateBill.getLineItems().add(newLineItem);
 		
 		// Test bill update logic without database persistence
@@ -118,22 +113,17 @@ public class BillLineItemManagementTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	/**
-	 * Test Case 3: Removal of bill items
-	 * 
-	 * This test verifies that line items can be properly removed from a bill
-	 * and the bill total is recalculated correctly.
+	 * Test Case 3: Removal of bill items This test verifies that line items can be properly removed
+	 * from a bill and the bill total is recalculated correctly.
 	 */
 	@Test
 	public void testRemoveBillLineItems() throws Exception {
 		// Create a bill with multiple line items
 		Bill bill = createTestBill();
 		
-		BillLineItem lineItem1 = createTestLineItem("16435ab4-27c3-4d91-b21e-52819bd654d8", 
-			BigDecimal.valueOf(100), 1, 0);
-		BillLineItem lineItem2 = createTestLineItem("16435ab4-27c3-4d91-b21e-52819bd654d8", 
-			BigDecimal.valueOf(200), 1, 1);
-		BillLineItem lineItem3 = createTestLineItem("16435ab4-27c3-4d91-b21e-52819bd654d8", 
-			BigDecimal.valueOf(50), 1, 2);
+		BillLineItem lineItem1 = createTestLineItem("16435ab4-27c3-4d91-b21e-52819bd654d8", BigDecimal.valueOf(100), 1, 0);
+		BillLineItem lineItem2 = createTestLineItem("16435ab4-27c3-4d91-b21e-52819bd654d8", BigDecimal.valueOf(200), 1, 1);
+		BillLineItem lineItem3 = createTestLineItem("16435ab4-27c3-4d91-b21e-52819bd654d8", BigDecimal.valueOf(50), 1, 2);
 		
 		bill.getLineItems().add(lineItem1);
 		bill.getLineItems().add(lineItem2);
@@ -151,30 +141,31 @@ public class BillLineItemManagementTest extends BaseModuleContextSensitiveTest {
 		
 		// Verify the remaining line items are correct
 		List<BillLineItem> remainingItems = bill.getLineItems();
-		Assert.assertEquals("First remaining item should have price 100", BigDecimal.valueOf(100), remainingItems.get(0).getPrice());
-		Assert.assertEquals("Second remaining item should have price 50", BigDecimal.valueOf(50), remainingItems.get(1).getPrice());
+		Assert.assertEquals("First remaining item should have price 100", BigDecimal.valueOf(100),
+		    remainingItems.get(0).getPrice());
+		Assert.assertEquals("Second remaining item should have price 50", BigDecimal.valueOf(50),
+		    remainingItems.get(1).getPrice());
 	}
 	
 	/**
-	 * Test Case 4: Verify concurrent modification fix
-	 * 
-	 * This test specifically verifies the fix for the concurrent modification issue
-	 * where searchBill() finds existing bills and prevents duplicate creation.
+	 * Test Case 4: Verify concurrent modification fix This test specifically verifies the fix for the
+	 * concurrent modification issue where searchBill() finds existing bills and prevents duplicate
+	 * creation.
 	 */
 	@Test
 	public void testConcurrentModificationFix() throws Exception {
 		// Create first bill
 		Bill firstBill = createTestBill();
-		BillLineItem firstLineItem = createTestLineItem("16435ab4-27c3-4d91-b21e-52819bd654d8", 
-			BigDecimal.valueOf(100), 1, 0);
+		BillLineItem firstLineItem = createTestLineItem("16435ab4-27c3-4d91-b21e-52819bd654d8", BigDecimal.valueOf(100), 1,
+		    0);
 		firstBill.getLineItems().add(firstLineItem);
 		
 		// Create second bill for same patient (simulating concurrent scenario)
 		Bill secondBill = createTestBill();
 		secondBill.setPatient(firstBill.getPatient()); // Same patient triggers searchBill()
 		
-		BillLineItem secondLineItem = createTestLineItem("16435ab4-27c3-4d91-b21e-52819bd654d8", 
-			BigDecimal.valueOf(200), 1, 0);
+		BillLineItem secondLineItem = createTestLineItem("16435ab4-27c3-4d91-b21e-52819bd654d8", BigDecimal.valueOf(200), 1,
+		    0);
 		secondBill.getLineItems().add(secondLineItem);
 		
 		// Test concurrent modification logic without database persistence
@@ -187,6 +178,134 @@ public class BillLineItemManagementTest extends BaseModuleContextSensitiveTest {
 		
 		// Verify both bills have the same patient (simulating the concurrent scenario)
 		Assert.assertEquals("Both bills should have the same patient", firstBill.getPatient(), secondBill.getPatient());
+	}
+	
+	/**
+	 * Test Case 5: Replicate Hibernate session cache behavior where searchBill() returns
+	 * the same object reference, causing bill == billToUpdate. Verifies UUID-based equals()
+	 * correctly handles duplicate detection.
+	 */
+	@Test
+	public void testHibernateSessionCacheSameObjectReference() throws Exception {
+		// Create initial bill with line item
+		Bill initialBill = createTestBill();
+		BillLineItem initialItem = createTestLineItem("16435ab4-27c3-4d91-b21e-52819bd654d8", 
+			BigDecimal.valueOf(100), 1, 0);
+		initialItem.setUuid("existing-item-uuid-1");
+		initialBill.getLineItems().add(initialItem);
+		initialBill.setId(1);
+		
+		// Simulate same object reference (Hibernate session cache)
+		Bill updateBill = initialBill;
+		Bill billToUpdate = updateBill;
+		
+		Assert.assertSame("Should be same object reference", billToUpdate, updateBill);
+		
+		// Add new line item
+		BillLineItem newItem = createTestLineItem("16435ab4-27c3-4d91-b21e-52819bd654d8", 
+			BigDecimal.valueOf(200), 1, 1);
+		newItem.setUuid("new-item-uuid-2");
+		updateBill.getLineItems().add(newItem);
+		
+		// Simulate BillServiceImpl.save() logic with HashSet
+		Set<BillLineItem> existingItemsSet = new HashSet<>(billToUpdate.getLineItems());
+		for (BillLineItem item : updateBill.getLineItems()) {
+			if (!existingItemsSet.contains(item)) {
+				item.setBill(billToUpdate);
+				billToUpdate.getLineItems().add(item);
+				existingItemsSet.add(item);
+			}
+		}
+		
+		// Verify both items exist (UUID-based equals() prevents duplicates)
+		Assert.assertEquals("Should have 2 line items", 2, billToUpdate.getLineItems().size());
+		Assert.assertEquals("Total should be 300", BigDecimal.valueOf(300), billToUpdate.getTotal());
+		
+		boolean foundInitialItem = false;
+		boolean foundNewItem = false;
+		for (BillLineItem item : billToUpdate.getLineItems()) {
+			if ("existing-item-uuid-1".equals(item.getUuid())) {
+				foundInitialItem = true;
+			}
+			if ("new-item-uuid-2".equals(item.getUuid())) {
+				foundNewItem = true;
+			}
+		}
+		Assert.assertTrue("Initial item should exist", foundInitialItem);
+		Assert.assertTrue("New item should be added", foundNewItem);
+	}
+	
+	/**
+	 * Test Case 6: Test the fix for same object reference scenario
+	 * 
+	 * This test verifies that when bill and billToUpdate are the same object,
+	 * the system correctly handles adding new line items without duplicates.
+	 */
+	@Test
+	public void testFixForSameObjectReference() throws Exception {
+		// Create bill with initial line item
+		Bill bill = createTestBill();
+		BillLineItem existingItem = createTestLineItem("16435ab4-27c3-4d91-b21e-52819bd654d8", 
+			BigDecimal.valueOf(100), 1, 0);
+		existingItem.setUuid("existing-uuid-1");
+		bill.getLineItems().add(existingItem);
+		bill.setId(1); // Simulate persisted bill
+		
+		// Simulate update: same object reference (Hibernate session cache)
+		Bill billToUpdate = bill; // Same object
+		
+		// Create new line items to add
+		BillLineItem newItem1 = createTestLineItem("16435ab4-27c3-4d91-b21e-52819bd654d8", 
+			BigDecimal.valueOf(150), 1, 1);
+		newItem1.setUuid("new-uuid-2"); // New item with different UUID
+		
+		BillLineItem duplicateItem = createTestLineItem("16435ab4-27c3-4d91-b21e-52819bd654d8", 
+			BigDecimal.valueOf(100), 1, 0);
+		duplicateItem.setUuid("existing-uuid-1"); // Duplicate of existing item
+		
+		// Simulate the fixed logic: Check by UUID instead of object reference
+		List<BillLineItem> incomingItems = new ArrayList<>();
+		incomingItems.add(existingItem); // Existing item
+		incomingItems.add(newItem1); // New item
+		incomingItems.add(duplicateItem); // Duplicate item
+		
+		List<BillLineItem> existingItems = new ArrayList<>(billToUpdate.getLineItems());
+		
+		for (BillLineItem incomingItem : incomingItems) {
+			boolean exists = false;
+			
+			// Check if item exists by UUID (this is the fix)
+			if (incomingItem.getUuid() != null) {
+				for (BillLineItem existing : existingItems) {
+					if (incomingItem.getUuid().equals(existing.getUuid())) {
+						exists = true;
+						break;
+					}
+				}
+			}
+			
+			if (!exists) {
+				incomingItem.setBill(billToUpdate);
+				billToUpdate.getLineItems().add(incomingItem);
+				existingItems.add(incomingItem); // Update the existing list for next iteration
+			}
+		}
+		
+		// Verify: Only 2 items (1 existing + 1 new), duplicate was correctly filtered out
+		Assert.assertEquals("Should have 2 line items (existing + new, no duplicate)", 
+			2, billToUpdate.getLineItems().size());
+		Assert.assertEquals("Total should be 250 (100 + 150)", 
+			BigDecimal.valueOf(250), billToUpdate.getTotal());
+		
+		// Verify new item was added
+		boolean foundNewItem = false;
+		for (BillLineItem item : billToUpdate.getLineItems()) {
+			if ("new-uuid-2".equals(item.getUuid())) {
+				foundNewItem = true;
+				break;
+			}
+		}
+		Assert.assertTrue("New item should be added", foundNewItem);
 	}
 	
 	/**

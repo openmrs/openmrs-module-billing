@@ -14,6 +14,7 @@
 package org.openmrs.module.billing.api.model;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Order;
@@ -147,5 +148,38 @@ public class BillLineItem extends BaseOpenmrsData {
 	
 	public void setOrder(Order order) {
 		this.order = order;
+	}
+	
+	/**
+	 * Compares line items for equality based on UUID only.
+	 * Two items are equal only if they have the same UUID.
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		
+		BillLineItem other = (BillLineItem) obj;
+		
+		// Only compare by UUID - both must have UUIDs and they must match
+		String thisUuid = this.getUuid();
+		String otherUuid = other.getUuid();
+		
+		if (thisUuid == null || otherUuid == null) {
+			return false; 
+		}
+		
+		return thisUuid.equals(otherUuid);
+	}
+	
+	@Override
+	public int hashCode() {
+		// Use UUID for hash code - items without UUID will all have hash 0
+		String uuid = this.getUuid();
+		return uuid != null ? Objects.hash(uuid) : 0;
 	}
 }

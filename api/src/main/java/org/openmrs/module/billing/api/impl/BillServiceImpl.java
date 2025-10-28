@@ -22,9 +22,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessControlException;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.io.image.ImageDataFactory;
@@ -139,19 +140,17 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		if (!bills.isEmpty()) {
 			Bill billToUpdate = bills.get(0);
 			
-			List<BillLineItem> itemsToAdd = new ArrayList<>(bill.getLineItems());
-			for (BillLineItem item : itemsToAdd) {
-				// Check prevents adding items during updates: same objects have same memory address
-				// so contains() returns true and skips addition, avoiding duplicate operations
-				boolean itemExists = billToUpdate.getLineItems().contains(item);
-				
-				// Only add if not already present (filters out existing items during updates)
-				if (!itemExists) {
+			// Handle the case where bill and billToUpdate are the same object reference
+			// (Hibernate session cache returns same managed instance)
+			Set<BillLineItem> existingItemsSet = new HashSet<>(billToUpdate.getLineItems());
+			
+			for (BillLineItem item : bill.getLineItems()) {
+				// Only add if not already present (BillLineItem.equals() handles comparison)
+				if (!existingItemsSet.contains(item)) {
 					item.setBill(billToUpdate);
 					billToUpdate.getLineItems().add(item);
 				}
 			}
-			
 			// Calculate the total payments made on the bill
 			BigDecimal totalPaid = billToUpdate.getPayments().stream().map(Payment::getAmountTendered)
 			        .reduce(BigDecimal.ZERO, BigDecimal::add);
