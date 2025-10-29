@@ -283,7 +283,7 @@ public abstract class IBillServiceTest extends IEntityDataServiceTest<IBillServi
 	@Test(expected = IllegalArgumentException.class)
 	public void getBillByReceiptNumber_shouldThrowIllegalArgumentExceptionIfTheReceiptNumberIsLongerThan255Characters()
 	        throws Exception {
-				service.getBillByReceiptNumber(StringUtils.repeat("A", 256));
+		service.getBillByReceiptNumber(StringUtils.repeat("A", 256));
 	}
 	
 	/**
@@ -596,7 +596,6 @@ public abstract class IBillServiceTest extends IEntityDataServiceTest<IBillServi
 		// In BillServiceImpl.save(), when searchBill() finds the existing bill,
 		// it returns the same managed instance from Hibernate session cache,
 		// so bill == billToUpdate is true
-		Assert.assertSame("bill and billToUpdate should be the same object reference when updating", 
-			bill, updatedBill);
+		Assert.assertSame("bill and billToUpdate should be the same object reference when updating", bill, updatedBill);
 	}
 }
