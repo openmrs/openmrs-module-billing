@@ -151,8 +151,8 @@ public class BillLineItem extends BaseOpenmrsData {
 	}
 	
 	/**
-	 * Compares line items for equality based on UUID only.
-	 * Two items are equal only if they have the same UUID.
+	 * Compares line items for equality based on UUID only. Two items are equal only if they have the
+	 * same UUID.
 	 */
 	@Override
 	public boolean equals(Object obj) {
@@ -170,7 +170,7 @@ public class BillLineItem extends BaseOpenmrsData {
 		String otherUuid = other.getUuid();
 		
 		if (thisUuid == null || otherUuid == null) {
-			return false; 
+			return false;
 		}
 		
 		return thisUuid.equals(otherUuid);

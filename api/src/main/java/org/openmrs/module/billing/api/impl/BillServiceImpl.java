@@ -152,8 +152,11 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 				}
 			}
 			// Calculate the total payments made on the bill
-			BigDecimal totalPaid = billToUpdate.getPayments().stream().map(Payment::getAmountTendered)
-			        .reduce(BigDecimal.ZERO, BigDecimal::add);
+			BigDecimal totalPaid = BigDecimal.ZERO;
+			if (billToUpdate.getPayments() != null) {
+				totalPaid = billToUpdate.getPayments().stream().map(Payment::getAmountTendered)
+				        .reduce(BigDecimal.ZERO, BigDecimal::add);
+			}
 			
 			// Check if the bill is fully paid
 			if (totalPaid.compareTo(billToUpdate.getTotal()) >= 0) {
