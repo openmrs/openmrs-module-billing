@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+	<cashier_billable_service service_id="0" name="Test Service 1" short_name="TS1" service_status="ENABLED" creator="1" date_created="2012-01-01 00:00:00.0" voided="false" uuid="4028814B39B565A20139B95D74360001"/>
+	<cashier_billable_service service_id="1" name="Test Service 2" short_name="TS2" service_status="ENABLED" creator="1" date_created="2012-01-01 00:00:00.0" voided="false" uuid="4028814B39B565A20139B95D74360002"/>
+	<cashier_billable_service service_id="2" name="Test Service 3" short_name="TS3" service_status="ENABLED" creator="1" date_created="2012-01-01 00:00:00.0" voided="false" uuid="4028814B39B565A20139B95D74360003"/>
+</dataset>
