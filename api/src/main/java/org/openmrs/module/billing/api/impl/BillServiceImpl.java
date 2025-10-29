@@ -23,7 +23,9 @@ import java.net.URL;
 import java.security.AccessControlException;
 import java.text.DecimalFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.io.image.ImageDataFactory;
@@ -137,15 +139,24 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		List<Bill> bills = searchBill(bill.getPatient());
 		if (!bills.isEmpty()) {
 			Bill billToUpdate = bills.get(0);
-			billToUpdate.setStatus(BillStatus.PENDING);
-			for (BillLineItem item : bill.getLineItems()) {
-				item.setBill(billToUpdate);
-				billToUpdate.getLineItems().add(item);
-			}
 			
+			// Handle the case where bill and billToUpdate are the same object reference
+			// (Hibernate session cache returns same managed instance)
+			Set<BillLineItem> existingItemsSet = new HashSet<>(billToUpdate.getLineItems());
+			
+			for (BillLineItem item : bill.getLineItems()) {
+				// Only add if not already present (BillLineItem.equals() handles comparison)
+				if (!existingItemsSet.contains(item)) {
+					item.setBill(billToUpdate);
+					billToUpdate.getLineItems().add(item);
+				}
+			}
 			// Calculate the total payments made on the bill
-			BigDecimal totalPaid = billToUpdate.getPayments().stream().map(Payment::getAmountTendered)
-			        .reduce(BigDecimal.ZERO, BigDecimal::add);
+			BigDecimal totalPaid = BigDecimal.ZERO;
+			if (billToUpdate.getPayments() != null) {
+				totalPaid = billToUpdate.getPayments().stream().map(Payment::getAmountTendered).reduce(BigDecimal.ZERO,
+				    BigDecimal::add);
+			}
 			
 			// Check if the bill is fully paid
 			if (totalPaid.compareTo(billToUpdate.getTotal()) >= 0) {
@@ -153,7 +164,6 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 			} else {
 				billToUpdate.setStatus(BillStatus.PENDING);
 			}
-			
 			// Save the updated bill
 			return super.save(billToUpdate);
 		}
