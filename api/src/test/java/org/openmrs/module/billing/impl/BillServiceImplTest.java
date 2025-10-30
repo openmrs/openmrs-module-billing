@@ -54,7 +54,6 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 @PowerMockIgnore({ "javax.management.*", "javax.net.ssl.*" })
 @PrepareForTest({ ReceiptNumberGeneratorFactory.class })
 public class BillServiceImplTest extends IBillServiceTest {
-
 	
 	private IReceiptNumberGenerator receiptNumberGenerator;
 	
@@ -78,8 +77,7 @@ public class BillServiceImplTest extends IBillServiceTest {
 		mockStatic(ReceiptNumberGeneratorFactory.class);
 		receiptNumberGenerator = mock(IReceiptNumberGenerator.class);
 		
-		when(ReceiptNumberGeneratorFactory.getGenerator())
-		        .thenReturn(receiptNumberGenerator);
+		when(ReceiptNumberGeneratorFactory.getGenerator()).thenReturn(receiptNumberGenerator);
 	}
 	
 	@Override
@@ -97,8 +95,7 @@ public class BillServiceImplTest extends IBillServiceTest {
 		bill.setReceiptNumber(null);
 		
 		String receiptNumber = "Test Number";
-		when(receiptNumberGenerator.generateNumber(bill))
-		        .thenReturn(receiptNumber);
+		when(receiptNumberGenerator.generateNumber(bill)).thenReturn(receiptNumber);
 		
 		service.save(bill);
 		Context.flushSession();
@@ -137,8 +134,7 @@ public class BillServiceImplTest extends IBillServiceTest {
 		Bill bill = createEntity(true);
 		bill.setReceiptNumber(null);
 		
-		when(receiptNumberGenerator.generateNumber(bill))
-		        .thenThrow(new APIException("Test exception"));
+		when(receiptNumberGenerator.generateNumber(bill)).thenThrow(new APIException("Test exception"));
 		
 		service.save(bill);
 	}
@@ -184,61 +180,4 @@ public class BillServiceImplTest extends IBillServiceTest {
 		Assert.assertNotNull("Retrieved bill should not be null", retrievedBill);
 		Assert.assertEquals("Patient should match", patient.getId(), retrievedBill.getPatient().getId());
 	}
-	
-	// /**
-	//  * @verifies verify bill and billToUpdate are the same object reference when updating a bill
-	//  * @see IBillService#save(Bill)
-	//  */
-	// @Test
-	// public void save_shouldHaveBillAndBillToUpdateAsSameObjectWhenUpdating() throws Exception {
-	// 	// Create and save an initial bill with PENDING status for a patient
-	// 	Patient patient = patientService.getPatient(1); // Patient 1 has no bills in test data
-		
-	// 	Bill initialBill = new Bill();
-	// 	initialBill.setCashier(providerService.getProvider(0));
-	// 	initialBill.setPatient(patient);
-	// 	initialBill.setCashPoint(cashPointService.getById(0));
-	// 	initialBill.setStatus(BillStatus.PENDING);
-		
-	// 	// Add initial line item
-	// 	BillLineItem initialItem = new BillLineItem();
-	// 	BillableService service1 = billableItemsService.getById(0);
-	// 	if (service1 != null) {
-	// 		initialItem.setBillableService(service1);
-	// 		initialItem.setPrice(BigDecimal.valueOf(100));
-	// 		initialItem.setQuantity(1);
-	// 		initialItem.setPaymentStatus(BillStatus.PENDING);
-	// 		initialBill.addLineItem(initialItem);
-	// 	}
-		
-	// 	// Save the initial bill
-	// 	Bill savedBill = service.save(initialBill);
-	// 	Context.flushSession();
-		
-	// 	// Reload the bill from the database to get the managed instance from Hibernate session
-	// 	Bill bill = service.getById(savedBill.getId());
-		
-	// 	// Add new line item to the bill being updated
-	// 	BillLineItem newItem = new BillLineItem();
-	// 	BillableService service2 = billableItemsService.getById(1);
-	// 	if (service2 != null) {
-	// 		newItem.setBillableService(service2);
-	// 		newItem.setPrice(BigDecimal.valueOf(200));
-	// 		newItem.setQuantity(1);
-	// 		newItem.setPaymentStatus(BillStatus.PENDING);
-	// 		bill.addLineItem(newItem);
-	// 	}
-		
-	// 	// When saving, searchBill() will find the same managed instance from Hibernate session
-	// 	// So bill == billToUpdate will be true (same object reference)
-	// 	// Save the bill - this simulates user updating an existing bill
-	// 	Bill updatedBill = service.save(bill);
-	// 	Context.flushSession();
-		
-	// 	// Verify that bill and billToUpdate are the same object reference
-	// 	// In BillServiceImpl.save(), when searchBill() finds the existing bill,
-	// 	// it returns the same managed instance from Hibernate session cache,
-	// 	// so bill == billToUpdate is true
-	// 	Assert.assertSame("bill and billToUpdate should be the same object reference when updating", bill, updatedBill);
-	// }
 }
