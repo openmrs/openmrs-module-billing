@@ -105,7 +105,7 @@
 			</type>
 		</property>
 
-		<list name="lineItems" lazy="false" inverse="true" cascade="all-delete-orphan">
+		<list name="lineItems" lazy="false" inverse="true" cascade="all-delete-orphan" where="voided = false">
 			<key column="bill_id"/>
 			<list-index column="line_item_order"/>
 			<one-to-many class="org.openmrs.module.billing.api.model.BillLineItem"/>
