@@ -43,6 +43,8 @@ import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.openmrs.module.webservices.rest.web.annotation.PropertySetter;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
 import org.openmrs.module.webservices.rest.web.representation.CustomRepresentation;
@@ -168,6 +170,7 @@ public class BillResource extends BaseRestDataResource<Bill> {
         String patientUuid = context.getRequest().getParameter("patientUuid");
         String status = context.getRequest().getParameter("status");
         String cashPointUuid = context.getRequest().getParameter("cashPointUuid");
+        String includeVoidedLineItemsParam = context.getRequest().getParameter("includeVoidedLineItems");
 
         Patient patient = Strings.isNotEmpty(patientUuid) ? Context.getPatientService().getPatientByUuid(patientUuid) : null;
         BillStatus billStatus = Strings.isNotEmpty(status) ? BillStatus.valueOf(status.toUpperCase()) : null;
@@ -179,8 +182,44 @@ public class BillResource extends BaseRestDataResource<Bill> {
         searchTemplate.setCashPoint(cashPoint);
         IBillService service = Context.getService(IBillService.class);
 
-        List<Bill> result = service.getBills(new BillSearch(searchTemplate, false));
+        BillSearch billSearch = new BillSearch(searchTemplate, false);
+        // Default to false (exclude voided line items) unless explicitly set to true
+        boolean includeVoidedLineItems = false;
+        if (Strings.isNotEmpty(includeVoidedLineItemsParam)) {
+            includeVoidedLineItems = Boolean.parseBoolean(includeVoidedLineItemsParam);
+        }
+        billSearch.includeVoidedLineItems(includeVoidedLineItems);
+        List<Bill> result = service.getBills(billSearch);
         return new AlreadyPaged<>(context, result, false);
+    }
+
+    @Override
+    public Bill getByUniqueId(String uniqueId) {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (Strings.isEmpty(uniqueId)) {
+            return null;
+        }
+
+        IBillService service = Context.getService(IBillService.class);
+        if (service == null) {
+            return null;
+        }
+
+        boolean includeVoidedLineItems = false;
+
+
+        if (attributes != null && attributes.getRequest() != null) {
+            String includeVoidedLineItemsParam = attributes.getRequest().getParameter("includeVoidedLineItems");
+            if (Strings.isNotEmpty(includeVoidedLineItemsParam)) {
+                includeVoidedLineItems = Boolean.parseBoolean(includeVoidedLineItemsParam);
+            }
+        }
+
+        if (includeVoidedLineItems) {
+            return service.getByUuid(uniqueId, includeVoidedLineItems);
+        } else {
+            return service.getByUuid(uniqueId);
+        }
     }
 
     @SuppressWarnings("unchecked")

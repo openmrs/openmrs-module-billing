@@ -25,7 +25,7 @@ import org.openmrs.module.billing.api.model.Bill;
 public class BillSearch extends BaseDataTemplateSearch<Bill> {
 	
 	private Boolean includeVoidedLineItems;
-
+	
 	public BillSearch() {
 		this(new Bill(), false);
 	}
@@ -38,19 +38,19 @@ public class BillSearch extends BaseDataTemplateSearch<Bill> {
 		super(template, includeRetired);
 		this.includeVoidedLineItems = false;
 	}
-
+	
 	/**
 	 * Sets whether voided line items should be included in the results.
 	 * 
-	 * @param includeVoidedLineItems {@code true} to include voided line items,
-	 *                               {@code false} to exclude them.
+	 * @param includeVoidedLineItems {@code true} to include voided line items, {@code false} to exclude
+	 * them.
 	 * @return This BillSearch instance for method chaining.
 	 */
 	public BillSearch includeVoidedLineItems(boolean includeVoidedLineItems) {
 		this.includeVoidedLineItems = includeVoidedLineItems;
 		return this;
 	}
-
+	
 	public Boolean getIncludeVoidedLineItems() {
 		return includeVoidedLineItems;
 	}
