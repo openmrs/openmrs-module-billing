@@ -188,6 +188,7 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		criteria.add(Restrictions.eq("receiptNumber", receiptNumber));
 		
 		Bill bill = getRepository().selectSingle(getEntityClass(), criteria);
+		filterVoidedLineItems(bill, includeVoidedLineItems);
 		removeNullLineItems(bill);
 		return bill;
 	}
