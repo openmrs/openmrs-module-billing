@@ -137,24 +137,21 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		List<Bill> bills = searchBill(bill.getPatient());
 		if (!bills.isEmpty()) {
 			Bill billToUpdate = bills.get(0);
+		billToUpdate.setStatus(BillStatus.PENDING);
+		for (BillLineItem item : bill.getLineItems()) {
+			item.setBill(billToUpdate);
+			billToUpdate.getLineItems().add(item);
+		}
+		
+		// Calculate the total payments made on the bill (excluding voided payments)
+		BigDecimal totalPaid = billToUpdate.getTotalPayments();
+		
+		// Check if the bill is fully paid
+		if (totalPaid.compareTo(billToUpdate.getTotal()) >= 0) {
+			billToUpdate.setStatus(BillStatus.PAID);
+		} else {
 			billToUpdate.setStatus(BillStatus.PENDING);
-			for (BillLineItem item : bill.getLineItems()) {
-				item.setBill(billToUpdate);
-				billToUpdate.getLineItems().add(item);
-			}
-			
-			// Calculate the total payments made on the bill
-			BigDecimal totalPaid = billToUpdate.getPayments().stream().map(Payment::getAmountTendered)
-			        .reduce(BigDecimal.ZERO, BigDecimal::add);
-			
-			// Check if the bill is fully paid
-			if (totalPaid.compareTo(billToUpdate.getTotal()) >= 0) {
-				billToUpdate.setStatus(BillStatus.PAID);
-			} else {
-				billToUpdate.setStatus(BillStatus.PENDING);
-			}
-			
-			// Save the updated bill
+		}			// Save the updated bill
 			return super.save(billToUpdate);
 		}
 		
