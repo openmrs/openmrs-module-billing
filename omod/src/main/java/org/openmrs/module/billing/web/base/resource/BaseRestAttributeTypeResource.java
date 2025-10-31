@@ -34,47 +34,47 @@ public abstract class BaseRestAttributeTypeResource<E extends IAttributeType>
         extends BaseRestMetadataResource<E>
         implements DelegatingSubclassHandler<IAttributeType, E>, Resource, Converter<E> {
 // @formatter:on
-@Override
-public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
-    DelegatingResourceDescription description = super.getRepresentationDescription(rep);
-    description.addProperty("attributeOrder");
-    description.addProperty("format");
-    description.addProperty("foreignKey");
-    description.addProperty("regExp");
-    description.addProperty("required");
-    description.addProperty("retired");
-
-    return description;
-}
-
-    @Override
-    public String getTypeName() {
-        return getEntityClass().getSimpleName();
-    }
-
-    @Override
-    public PageableResult getAllByType(RequestContext context) {
-        PagingInfo info = PagingUtil.getPagingInfoFromContext(context);
-
-        return new AlreadyPaged<E>(context, getService().getAll(info), info.hasMoreResults());
-    }
-
-    @Override
-    protected PageableResult doSearch(RequestContext context) {
-        if (context.getType().equals(getTypeName())) {
-            return getAllByType(context);
-        } else {
-            throw new ResourceDoesNotSupportOperationException();
-        }
-    }
-
-    @Override
-    public Class<IAttributeType> getSuperclass() {
-        return IAttributeType.class;
-    }
-
-    @Override
-    public Class<E> getSubclassHandled() {
-        return getEntityClass();
-    }
+	@Override
+	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
+		DelegatingResourceDescription description = super.getRepresentationDescription(rep);
+		description.addProperty("attributeOrder");
+		description.addProperty("format");
+		description.addProperty("foreignKey");
+		description.addProperty("regExp");
+		description.addProperty("required");
+		description.addProperty("retired");
+		
+		return description;
+	}
+	
+	@Override
+	public String getTypeName() {
+		return getEntityClass().getSimpleName();
+	}
+	
+	@Override
+	public PageableResult getAllByType(RequestContext context) {
+		PagingInfo info = PagingUtil.getPagingInfoFromContext(context);
+		
+		return new AlreadyPaged<E>(context, getService().getAll(info), info.hasMoreResults());
+	}
+	
+	@Override
+	protected PageableResult doSearch(RequestContext context) {
+		if (context.getType().equals(getTypeName())) {
+			return getAllByType(context);
+		} else {
+			throw new ResourceDoesNotSupportOperationException();
+		}
+	}
+	
+	@Override
+	public Class<IAttributeType> getSuperclass() {
+		return IAttributeType.class;
+	}
+	
+	@Override
+	public Class<E> getSubclassHandled() {
+		return getEntityClass();
+	}
 }

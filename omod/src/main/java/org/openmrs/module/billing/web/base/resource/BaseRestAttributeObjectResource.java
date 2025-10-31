@@ -36,43 +36,43 @@ public abstract class BaseRestAttributeObjectResource<
 			TAttributeType extends IAttributeType>
         extends BaseRestObjectResource<E> {
 // @formatter:on
-@Override
-public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
-    DelegatingResourceDescription description = super.getRepresentationDescription(rep);
-    if (!(rep instanceof RefRepresentation)) {
-        description.addProperty("value");
-        description.addProperty("attributeType", Representation.REF);
-        description.addProperty("order", ReflectionUtil.findMethod(getClass(), "getAttributeOrder"));
-    }
-
-    return description;
-}
-
-    @Override
-    public void setProperty(Object instance, String propertyName, Object value) throws ConversionException {
-        // Since the order property is from the attribute type and isn't modifyable, don't do anything if it's being set
-        if (propertyName.equals("order")) {
-            return;
-        }
-        super.setProperty(instance, propertyName, value);
-    }
-
-    protected Object baseGetValue(E instance) {
-        if (instance.getAttributeType().getFormat().contains("Concept")) {
-            ConceptService service = Context.getService(ConceptService.class);
-            Concept concept = service.getConcept(instance.getValue());
-
-            return concept == null ? "" : concept.getDisplayString();
-        } else {
-            return instance.getHydratedValue();
-        }
-    }
-
-    protected void baseSetAttributeType(E instance, TAttributeType attributeType) {
-        instance.setAttributeType(attributeType);
-    }
-
-    public Integer getAttributeOrder(E instance) {
-        return instance.getAttributeType().getAttributeOrder();
-    }
+	@Override
+	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
+		DelegatingResourceDescription description = super.getRepresentationDescription(rep);
+		if (!(rep instanceof RefRepresentation)) {
+			description.addProperty("value");
+			description.addProperty("attributeType", Representation.REF);
+			description.addProperty("order", ReflectionUtil.findMethod(getClass(), "getAttributeOrder"));
+		}
+		
+		return description;
+	}
+	
+	@Override
+	public void setProperty(Object instance, String propertyName, Object value) throws ConversionException {
+		// Since the order property is from the attribute type and isn't modifyable, don't do anything if it's being set
+		if (propertyName.equals("order")) {
+			return;
+		}
+		super.setProperty(instance, propertyName, value);
+	}
+	
+	protected Object baseGetValue(E instance) {
+		if (instance.getAttributeType().getFormat().contains("Concept")) {
+			ConceptService service = Context.getService(ConceptService.class);
+			Concept concept = service.getConcept(instance.getValue());
+			
+			return concept == null ? "" : concept.getDisplayString();
+		} else {
+			return instance.getHydratedValue();
+		}
+	}
+	
+	protected void baseSetAttributeType(E instance, TAttributeType attributeType) {
+		instance.setAttributeType(attributeType);
+	}
+	
+	public Integer getAttributeOrder(E instance) {
+		return instance.getAttributeType().getAttributeOrder();
+	}
 }

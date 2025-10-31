@@ -16,9 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Getter
 public class FhirInvoiceServiceImpl extends BaseFhirService<Invoice, Bill> implements FhirInvoiceService {
-
-    private final FhirInvoiceDao dao;
-
-    private final InvoiceTranslator translator;
-
+	
+	private final FhirInvoiceDao dao;
+	
+	private final InvoiceTranslator translator;
+	
 }

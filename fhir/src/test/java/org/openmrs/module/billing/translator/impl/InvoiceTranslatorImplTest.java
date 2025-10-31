@@ -22,45 +22,45 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InvoiceTranslatorImplTest {
-
-    @Mock
-    private PractitionerReferenceTranslator<Provider> practitionerTranslator;
-
-    @Mock
-    private PatientReferenceTranslator patientReferenceTranslator;
-
-    private InvoiceTranslatorImpl translator;
-
-    private Bill bill;
-
-    private Provider provider;
-
-    private Patient patient;
-
-    private static final String BILL_UUID = "4028814B39B565A20139B95D74360004";
-
-    @Before
-    public void setUp() {
-        translator = new InvoiceTranslatorImpl(practitionerTranslator, patientReferenceTranslator);
-        provider = new Provider();
-        patient = new Patient();
-        bill = new Bill();
-        bill.setUuid(BILL_UUID);
-        bill.setReceiptNumber("TEST-001");
-        bill.setStatus(BillStatus.POSTED);
-        bill.setCashier(provider);
-        bill.setPatient(patient);
-
-    }
-
-    @Test
-    public void shouldTranslateBillToInvoice() {
-        when(practitionerTranslator.toFhirResource(provider)).thenReturn(new Reference());
-        when(patientReferenceTranslator.toFhirResource(patient)).thenReturn(new Reference());
-
-        Invoice invoice = translator.toFhirResource(bill);
-        assertThat(invoice, notNullValue());
-        assertThat(invoice.getId(), equalTo(BILL_UUID));
-    }
-
+	
+	@Mock
+	private PractitionerReferenceTranslator<Provider> practitionerTranslator;
+	
+	@Mock
+	private PatientReferenceTranslator patientReferenceTranslator;
+	
+	private InvoiceTranslatorImpl translator;
+	
+	private Bill bill;
+	
+	private Provider provider;
+	
+	private Patient patient;
+	
+	private static final String BILL_UUID = "4028814B39B565A20139B95D74360004";
+	
+	@Before
+	public void setUp() {
+		translator = new InvoiceTranslatorImpl(practitionerTranslator, patientReferenceTranslator);
+		provider = new Provider();
+		patient = new Patient();
+		bill = new Bill();
+		bill.setUuid(BILL_UUID);
+		bill.setReceiptNumber("TEST-001");
+		bill.setStatus(BillStatus.POSTED);
+		bill.setCashier(provider);
+		bill.setPatient(patient);
+		
+	}
+	
+	@Test
+	public void shouldTranslateBillToInvoice() {
+		when(practitionerTranslator.toFhirResource(provider)).thenReturn(new Reference());
+		when(patientReferenceTranslator.toFhirResource(patient)).thenReturn(new Reference());
+		
+		Invoice invoice = translator.toFhirResource(bill);
+		assertThat(invoice, notNullValue());
+		assertThat(invoice.getId(), equalTo(BILL_UUID));
+	}
+	
 }

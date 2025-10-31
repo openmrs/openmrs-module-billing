@@ -31,16 +31,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 @RequestMapping(value = "/module/billing/portlets/patientBillHistory")
 public class PatientBillHistoryController {
-    private static final Logger LOG = Logger.getLogger(PatientBillHistoryController.class);
-
-    public PatientBillHistoryController() {
-
-    }
-
-    @RequestMapping(method = RequestMethod.GET)
-    public void billHistory(ModelMap model, @RequestParam(value = "patientId", required = true) int patientId) {
-        LOG.warn("In bill history controller");
-        List<Bill> bills = Context.getService(IBillService.class).getBillsByPatientId(patientId, null);
-        model.addAttribute("bills", bills);
-    }
+	
+	private static final Logger LOG = Logger.getLogger(PatientBillHistoryController.class);
+	
+	public PatientBillHistoryController() {
+		
+	}
+	
+	@RequestMapping(method = RequestMethod.GET)
+	public void billHistory(ModelMap model, @RequestParam(value = "patientId", required = true) int patientId) {
+		LOG.warn("In bill history controller");
+		List<Bill> bills = Context.getService(IBillService.class).getBillsByPatientId(patientId, null);
+		model.addAttribute("bills", bills);
+	}
 }

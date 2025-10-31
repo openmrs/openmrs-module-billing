@@ -143,18 +143,15 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 				billToUpdate.getLineItems().add(item);
 			}
 			
-			// Calculate the total payments made on the bill
-			BigDecimal totalPaid = billToUpdate.getPayments().stream().map(Payment::getAmountTendered)
-			        .reduce(BigDecimal.ZERO, BigDecimal::add);
+			// Calculate the total payments made on the bill (excluding voided payments)
+			BigDecimal totalPaid = billToUpdate.getTotalPayments();
 			
 			// Check if the bill is fully paid
 			if (totalPaid.compareTo(billToUpdate.getTotal()) >= 0) {
 				billToUpdate.setStatus(BillStatus.PAID);
 			} else {
 				billToUpdate.setStatus(BillStatus.PENDING);
-			}
-			
-			// Save the updated bill
+			} // Save the updated bill
 			return super.save(billToUpdate);
 		}
 		
@@ -267,8 +264,7 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		        .concat(patient.getFamilyName() != null ? bill.getPatient().getFamilyName() : "").concat(" ")
 		        .concat(patient.getMiddleName() != null ? bill.getPatient().getMiddleName() : "");
 		String gender = patient.getGender() != null ? patient.getGender() : "";
-		String dob = patient.getBirthdate() != null
-		        ? Utils.getSimpleDateFormat("dd-MMM-yyyy").format(patient.getBirthdate())
+		String dob = patient.getBirthdate() != null ? Utils.getSimpleDateFormat("dd-MMM-yyyy").format(patient.getBirthdate())
 		        : "";
 		
 		File returnFile;

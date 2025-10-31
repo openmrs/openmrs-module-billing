@@ -34,40 +34,41 @@ import java.util.List;
 /**
  * REST resource representing a {@link PaymentMode}.
  */
-@Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE + "/paymentMode", supportedClass = PaymentMode.class,
-        supportedOpenmrsVersions = {"2.0 - 2.*"})
+@Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
+        + "/paymentMode", supportedClass = PaymentMode.class, supportedOpenmrsVersions = { "2.0 - 2.*" })
 public class PaymentModeResource extends BaseRestInstanceTypeResource<PaymentMode, PaymentModeAttributeType> {
-    @Override
-    public PaymentMode newDelegate() {
-        return new PaymentMode();
-    }
-
-    @Override
-    protected PageableResult doGetAll(RequestContext context) {
-        return super.doGetAll(context);
-    }
-
-    @Override
-    public Class<? extends IMetadataDataService<PaymentMode>> getServiceClass() {
-        return IPaymentModeService.class;
-    }
-
-    @Override
-    public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
-        DelegatingResourceDescription description = super.getRepresentationDescription(rep);
-        if (!(rep instanceof RefRepresentation)) {
-            description.addProperty("sortOrder");
-        } else if (rep instanceof CustomRepresentation) {
-            //For custom representation, must be null
-            // - let the user decide which properties should be included in the response
-            description = null;
-        }
-
-        return description;
-    }
-
-    @PropertySetter("attributeTypes")
-    public void setAttributeTypes(PaymentMode instance, List<PaymentModeAttributeType> attributeTypes) {
-        super.baseSetAttributeTypes(instance, attributeTypes);
-    }
+	
+	@Override
+	public PaymentMode newDelegate() {
+		return new PaymentMode();
+	}
+	
+	@Override
+	protected PageableResult doGetAll(RequestContext context) {
+		return super.doGetAll(context);
+	}
+	
+	@Override
+	public Class<? extends IMetadataDataService<PaymentMode>> getServiceClass() {
+		return IPaymentModeService.class;
+	}
+	
+	@Override
+	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
+		DelegatingResourceDescription description = super.getRepresentationDescription(rep);
+		if (!(rep instanceof RefRepresentation)) {
+			description.addProperty("sortOrder");
+		} else if (rep instanceof CustomRepresentation) {
+			//For custom representation, must be null
+			// - let the user decide which properties should be included in the response
+			description = null;
+		}
+		
+		return description;
+	}
+	
+	@PropertySetter("attributeTypes")
+	public void setAttributeTypes(PaymentMode instance, List<PaymentModeAttributeType> attributeTypes) {
+		super.baseSetAttributeTypes(instance, attributeTypes);
+	}
 }
