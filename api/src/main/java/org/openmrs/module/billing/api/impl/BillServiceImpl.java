@@ -21,6 +21,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessControlException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -145,7 +146,7 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 			
 			// Calculate the total payments made on the bill
 			BigDecimal totalPaid = billToUpdate.getPayments().stream().map(Payment::getAmountTendered)
-			        .reduce(BigDecimal.ZERO, BigDecimal::add);
+					.reduce(BigDecimal.ZERO, BigDecimal::add);
 			
 			// Check if the bill is fully paid
 			if (totalPaid.compareTo(billToUpdate.getTotal()) >= 0) {
@@ -166,6 +167,17 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 	@Authorized({ PrivilegeConstants.VIEW_BILLS })
 	@Transactional(readOnly = true)
 	public Bill getBillByReceiptNumber(String receiptNumber) {
+		return getBillByReceiptNumber(receiptNumber, false);
+	}
+	
+	/**
+	 * Gets a bill by receipt number, optionally including voided line items.
+	 *
+	 * @param receiptNumber          The receipt number.
+	 * @param includeVoidedLineItems {@code true} to include voided line items, {@code false} to exclude them.
+	 * @return The bill with the specified receipt number.
+	 */
+	public Bill getBillByReceiptNumber(String receiptNumber, boolean includeVoidedLineItems) {
 		if (StringUtils.isEmpty(receiptNumber)) {
 			throw new IllegalArgumentException("The receipt number must be defined.");
 		}
@@ -192,6 +204,18 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 	
 	@Override
 	public List<Bill> getBillsByPatientId(int patientId, PagingInfo paging) {
+		return getBillsByPatientId(patientId, paging, false);
+	}
+	
+	/**
+	 * Gets all bills for the specified patient, optionally including voided line items.
+	 *
+	 * @param patientId              The patient ID.
+	 * @param paging                 The paging information.
+	 * @param includeVoidedLineItems {@code true} to include voided line items, {@code false} to exclude them.
+	 * @return All bills for the specified patient.
+	 */
+	public List<Bill> getBillsByPatientId(int patientId, PagingInfo paging, boolean includeVoidedLineItems) {
 		if (patientId < 0) {
 			throw new IllegalArgumentException("The patient id must be a valid identifier.");
 		}
@@ -201,6 +225,7 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		criteria.addOrder(Order.desc("id"));
 		
 		List<Bill> results = getRepository().select(getEntityClass(), createPagingCriteria(paging, criteria));
+		filterVoidedLineItems(results, includeVoidedLineItems);
 		removeNullLineItems(results);
 		
 		return results;
@@ -219,13 +244,20 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 			throw new NullPointerException("The bill search template must be defined.");
 		}
 		
-		return executeCriteria(Bill.class, pagingInfo, new Action1<Criteria>() {
+		List<Bill> results = executeCriteria(Bill.class, pagingInfo, new Action1<Criteria>() {
 			
 			@Override
 			public void apply(Criteria criteria) {
 				billSearch.updateCriteria(criteria);
 			}
 		});
+		
+		boolean includeVoidedLineItems = billSearch.getIncludeVoidedLineItems() != null
+				&& billSearch.getIncludeVoidedLineItems();
+		filterVoidedLineItems(results, includeVoidedLineItems);
+		removeNullLineItems(results);
+		
+		return results;
 	}
 	
 	/*
@@ -235,6 +267,7 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 	@Override
 	public List<Bill> getAll(boolean includeVoided, PagingInfo pagingInfo) {
 		List<Bill> results = super.getAll(includeVoided, pagingInfo);
+		filterVoidedLineItems(results, false);
 		removeNullLineItems(results);
 		return results;
 	}
@@ -242,6 +275,21 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 	@Override
 	public Bill getById(int entityId) {
 		Bill bill = super.getById(entityId);
+		filterVoidedLineItems(bill, false);
+		removeNullLineItems(bill);
+		return bill;
+	}
+	
+	/**
+	 * Gets a bill by ID, optionally including voided line items.
+	 *
+	 * @param entityId               The bill ID.
+	 * @param includeVoidedLineItems {@code true} to include voided line items, {@code false} to exclude them.
+	 * @return The bill with the specified ID.
+	 */
+	public Bill getById(int entityId, boolean includeVoidedLineItems) {
+		Bill bill = super.getById(entityId);
+		filterVoidedLineItems(bill, includeVoidedLineItems);
 		removeNullLineItems(bill);
 		return bill;
 	}
@@ -249,6 +297,21 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 	@Override
 	public Bill getByUuid(String uuid) {
 		Bill bill = super.getByUuid(uuid);
+		filterVoidedLineItems(bill, false);
+		removeNullLineItems(bill);
+		return bill;
+	}
+	
+	/**
+	 * Gets a bill by UUID, optionally including voided line items.
+	 *
+	 * @param uuid                   The bill UUID.
+	 * @param includeVoidedLineItems {@code true} to include voided line items, {@code false} to exclude them.
+	 * @return The bill with the specified UUID.
+	 */
+	public Bill getByUuid(String uuid, boolean includeVoidedLineItems) {
+		Bill bill = super.getByUuid(uuid);
+		filterVoidedLineItems(bill, includeVoidedLineItems);
 		removeNullLineItems(bill);
 		return bill;
 	}
@@ -507,6 +570,34 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		return results;
 	}
 	
+	private void filterVoidedLineItems(List<Bill> bills, boolean includeVoided) {
+		if (bills == null || bills.size() == 0) {
+			return;
+		}
+		
+		for (Bill bill : bills) {
+			filterVoidedLineItems(bill, includeVoided);
+		}
+	}
+	
+	private void filterVoidedLineItems(Bill bill, boolean includeVoided) {
+		if (bill == null || bill.getLineItems() == null) {
+			return;
+		}
+		
+		// Filter out voided line items if includeVoided is false
+		if (!includeVoided) {
+			bill.getLineItems().removeIf(lineItem -> lineItem != null
+					&& lineItem.getVoided() != null && lineItem.getVoided());
+		}
+		
+		// Filter out voided payments if includeVoided is false
+		if (bill.getPayments() != null && !includeVoided) {
+			bill.getPayments().removeIf(payment -> payment != null
+					&& payment.getVoided() != null && payment.getVoided());
+		}
+	}
+	
 	private void removeNullLineItems(List<Bill> bills) {
 		if (bills == null || bills.size() == 0) {
 			return;
@@ -571,6 +662,15 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		criteria.add(Restrictions.lt("dateCreated", endOfDayDate));
 		criteria.addOrder(Order.desc("id"));
 		
-		return criteria.list();
+		List<?> results = criteria.list();
+		List<Bill> bills = new ArrayList<>();
+		for (Object obj : results) {
+			if (obj instanceof Bill) {
+				bills.add((Bill) obj);
+			}
+		}
+		filterVoidedLineItems(bills, false);
+		removeNullLineItems(bills);
+		return bills;
 	}
 }
