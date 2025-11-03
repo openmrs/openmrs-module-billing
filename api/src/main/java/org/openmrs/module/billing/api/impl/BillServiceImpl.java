@@ -267,9 +267,9 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		        .concat(patient.getFamilyName() != null ? bill.getPatient().getFamilyName() : "").concat(" ")
 		        .concat(patient.getMiddleName() != null ? bill.getPatient().getMiddleName() : "");
 		String gender = patient.getGender() != null ? patient.getGender() : "";
-		String dob = patient.getBirthdate() != null ? 
-		         Utils.getSimpleDateFormat("dd-MMM-yyyy").format(patient.getBirthdate()) + " (" + patient.getAge() + " years)" 
-				 : "";
+		String dob = patient.getBirthdate() != null
+		        ? Utils.getSimpleDateFormat("dd-MMM-yyyy").format(patient.getBirthdate())
+		        : "";
 		
 		File returnFile;
 		try {
