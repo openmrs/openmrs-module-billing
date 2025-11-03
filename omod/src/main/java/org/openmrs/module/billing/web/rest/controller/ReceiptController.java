@@ -13,9 +13,7 @@
  */
 package org.openmrs.module.billing.web.rest.controller;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.IBillService;

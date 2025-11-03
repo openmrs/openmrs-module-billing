@@ -15,8 +15,6 @@ package org.openmrs.module.billing.api.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
@@ -53,7 +51,6 @@ import org.joda.time.DateTime;
 import org.openmrs.GlobalProperty;
 import org.openmrs.Patient;
 import org.openmrs.annotation.Authorized;
-import org.openmrs.api.APIException;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.IBillService;
