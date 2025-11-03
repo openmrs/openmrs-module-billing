@@ -115,5 +115,5 @@ public interface IBillService extends IEntityDataService<Bill> {
 	 */
 	@Transactional(readOnly = true)
 	@Authorized({ PrivilegeConstants.VIEW_BILLS })
-	File downloadBillReceipt(Bill bill);
+	byte[] downloadBillReceipt(Bill bill);
 }

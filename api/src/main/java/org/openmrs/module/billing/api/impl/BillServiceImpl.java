@@ -13,9 +13,8 @@
  */
 package org.openmrs.module.billing.api.impl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
@@ -45,14 +44,11 @@ import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.joda.time.DateTime;
 import org.openmrs.GlobalProperty;
-import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.api.AdministrationService;
@@ -71,6 +67,9 @@ import org.openmrs.module.billing.api.model.Payment;
 import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.module.billing.api.util.PrivilegeConstants;
 import org.openmrs.module.billing.util.Utils;
+import org.openmrs.util.OpenmrsUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -81,7 +80,7 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 	
 	private static final int MAX_LENGTH_RECEIPT_NUMBER = 255;
 	
-	private static final Log LOG = LogFactory.getLog(BillServiceImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(BillServiceImpl.class);
 	
 	private static final String GP_DEFAULT_LOCATION = "defaultLocation";
 	
@@ -260,31 +259,13 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 	 * @return
 	 */
 	@Override
-	public File downloadBillReceipt(Bill bill) {
+	public byte[] downloadBillReceipt(Bill bill) {
 		AdministrationService administrationService = Context.getAdministrationService();
 		Patient patient = bill.getPatient();
-		String fullName = patient.getGivenName().concat(" ")
-		        .concat(patient.getFamilyName() != null ? bill.getPatient().getFamilyName() : "").concat(" ")
-		        .concat(patient.getMiddleName() != null ? bill.getPatient().getMiddleName() : "");
+		String fullName = patient.getPersonName().getFullName();
 		String gender = patient.getGender() != null ? patient.getGender() : "";
-		String dob = patient.getBirthdate() != null
-		        ? Utils.getSimpleDateFormat("dd-MMM-yyyy").format(patient.getBirthdate())
+		String dob = patient.getBirthdate() != null ? Utils.getSimpleDateFormat("dd-MMM-yyyy").format(patient.getBirthdate())
 		        : "";
-		
-		File returnFile;
-		try {
-			returnFile = File.createTempFile("patientReceipt", ".pdf");
-		}
-		catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		FileOutputStream fos;
-		try {
-			fos = new FileOutputStream(returnFile);
-		}
-		catch (FileNotFoundException e) {
-			throw new RuntimeException(e);
-		}
 		
 		/**
 		 * https://kb.itextpdf.com/home/it7kb/faq/how-to-set-the-page-size-to-envelope-size-with-landscape-orientation
@@ -293,23 +274,16 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		 * doesn't use inches, but user units. By default, 1 user unit = 1 point, and 1 inch = 72 points.
 		 * Thermal printer: 4 x 10 inches paper 4 inches = 4 x 72 = 288 5 inches = 10 x 72 = 720
 		 */
-		
-		int FONT_SIZE_10 = 10;
-		int FONT_SIZE_8 = 8;
 		int FONT_SIZE_12 = 12;
-		PdfDocument pdfDoc = new PdfDocument(new PdfWriter(fos));
 		Rectangle thermalPrinterPageSize = new Rectangle(288, 14400);
-		Document doc = new Document(pdfDoc, new PageSize(thermalPrinterPageSize));
-		doc.setMargins(6, 12, 2, 12);
+		
 		PdfFont timesRoman;
-		PdfFont courier;
 		PdfFont courierBold;
 		PdfFont helvetica;
 		PdfFont helveticaBold;
 		try {
 			timesRoman = PdfFontFactory.createFont(StandardFonts.TIMES_ROMAN);
 			courierBold = PdfFontFactory.createFont(StandardFonts.COURIER_BOLD);
-			courier = PdfFontFactory.createFont(StandardFonts.COURIER);
 			helvetica = PdfFontFactory.createFont(StandardFonts.HELVETICA);
 			helveticaBold = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD);
 			
@@ -321,23 +295,34 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		PdfFont headerSectionFont = helveticaBold;
 		PdfFont billItemSectionFont = helvetica;
 		PdfFont footerSectionFont = courierBold;
-		URL logoUrl = BillServiceImpl.class.getClassLoader().getResource("img/openmrs-logo.png");
+		URL logoUrl = null;
 		
 		String logoPath = administrationService.getGlobalProperty(GP_BILL_LOGO_PATH, "");
 		if (StringUtils.isNotBlank(logoPath)) {
 			File file = new File(logoPath.trim());
+			if (!file.isAbsolute()) {
+				file = new File(OpenmrsUtil.getApplicationDataDirectory(), logoPath.trim());
+			}
+			
 			if (file.exists()) {
 				try {
 					logoUrl = file.getAbsoluteFile().toURI().toURL();
 				}
 				catch (MalformedURLException e) {
-					LOG.error("Error Loading file : " + logoUrl, e);
+					LOG.error("Error Loading file: {}", file.getAbsoluteFile(), e);
 				}
 			}
 		}
 		
-		Image logiImage = new Image(ImageDataFactory.create(logoUrl));
-		logiImage.scaleToFit(80, 80);
+		if (logoUrl == null) {
+			logoUrl = BillServiceImpl.class.getClassLoader().getResource("img/openmrs-logo.png");
+		}
+		
+		Image logoImage = null;
+		if (logoUrl != null) {
+			logoImage = new Image(ImageDataFactory.create(logoUrl));
+			logoImage.scaleToFit(80, 80);
+		}
 		Paragraph divider = new Paragraph("------------------------------------------------------------------");
 		Text billDateLabel = new Text(Utils.getSimpleDateFormat("dd-MMM-yyyy HH:mm:ss").format(bill.getDateCreated()));
 		
@@ -347,12 +332,15 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		// : bill.getCashPoint().getLocation().getName());
 		
 		//Text facilityAddressDetails = new Text(gpFacilityAddress != null && gpFacilityAddress.getValue() != null ? gpFacilityAddress.getPropertyValue(): "");
-		Paragraph logoSection = new Paragraph();
-		logoSection.setFontSize(14);
-		logoSection.add(logiImage).add("\n");
-		//logoSection.add(facilityName).add("\n");
-		logoSection.setTextAlignment(TextAlignment.CENTER);
-		logoSection.setFont(timesRoman).setBold();
+		Paragraph logoSection = null;
+		if (logoImage != null) {
+			logoSection = new Paragraph();
+			logoSection.setFontSize(14);
+			logoSection.add(logoImage).add("\n");
+			//logoSection.add(facilityName).add("\n");
+			logoSection.setTextAlignment(TextAlignment.CENTER);
+			logoSection.setFont(timesRoman).setBold();
+		}
 		
 		//Paragraph addressSection = new Paragraph();
 		//addressSection.add(facilityAddressDetails).setTextAlignment(TextAlignment.CENTER).setFont(helvetica).setFontSize(12);
@@ -454,23 +442,35 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		setInnerCellBorder(paymentSection, Border.NO_BORDER);
 		setInnerCellBorder(amountDueSection, Border.NO_BORDER);
 		setInnerCellBorder(totalsSection, Border.NO_BORDER);
-		doc.add(logoSection);
-		//doc.add(addressSection);
-		doc.add(receiptHeader);
-		doc.add(divider);
-		doc.add(billLineItemstable);
-		doc.add(divider);
-		doc.add(totalsSection);
-		doc.add(divider);
-		doc.add(paymentSection);
-		doc.add(divider);
-		doc.add(amountDueSection);
-		doc.add(divider);
-		doc.add(new Paragraph("You were served by " + bill.getCashier().getName()).setFont(footerSectionFont).setFontSize(8)
-		        .setTextAlignment(TextAlignment.CENTER));
 		
-		doc.close();
-		return returnFile;
+		try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		        PdfDocument pdfDoc = new PdfDocument(new PdfWriter(bos));
+		        Document doc = new Document(pdfDoc, new PageSize(thermalPrinterPageSize))) {
+			doc.setMargins(6, 12, 2, 12);
+			if (logoSection != null) {
+				doc.add(logoSection);
+			}
+			//doc.add(addressSection);
+			doc.add(receiptHeader);
+			doc.add(divider);
+			doc.add(billLineItemstable);
+			doc.add(divider);
+			doc.add(totalsSection);
+			doc.add(divider);
+			doc.add(paymentSection);
+			doc.add(divider);
+			doc.add(amountDueSection);
+			doc.add(divider);
+			doc.add(new Paragraph("You were served by " + bill.getCashier().getName()).setFont(footerSectionFont)
+			        .setFontSize(8).setTextAlignment(TextAlignment.CENTER));
+			
+			return bos.toByteArray();
+		}
+		catch (IOException e) {
+			LOG.error("Exception caught while writing PDF to stream", e);
+		}
+		
+		return new byte[0];
 	}
 	
 	private void setInnerCellBorder(Table table, Border border) {
