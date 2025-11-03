@@ -1,24 +1,19 @@
-package org.openmrs.module.billing.impl;
+package org.openmrs.module.billing.api.model;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
 
 import org.junit.Test;
-import org.openmrs.module.billing.api.model.Bill;
-import org.openmrs.module.billing.api.model.Payment;
 
 /**
- * Test for verifying that getTotalPayments() excludes voided payments
+ * Test for verifying Bill model methods, particularly getTotalPayments()
  */
-public class BillServiceExcludeVoidedPaymentsTest {
+public class BillTest {
 	
-	/**
-	 * @verifies exclude voided payments from total calculation
-	 */
 	@Test
-	public void getTotalPayments_shouldExcludeVoidedPayments() {
+	public void getTotalPayments_shouldExcludeVoidedPaymentsFromTotal() {
 		Bill bill = new Bill();
 		bill.setPayments(new HashSet<Payment>());
 		
@@ -38,11 +33,8 @@ public class BillServiceExcludeVoidedPaymentsTest {
 		assertEquals(BigDecimal.valueOf(50), bill.getTotalPayments());
 	}
 	
-	/**
-	 * @verifies return zero when all payments are voided
-	 */
 	@Test
-	public void getTotalPayments_shouldReturnZeroWhenAllPaymentsVoided() {
+	public void getTotalPayments_shouldReturnZeroWhenAllPaymentsAreVoided() {
 		Bill bill = new Bill();
 		bill.setPayments(new HashSet<Payment>());
 		
@@ -55,9 +47,6 @@ public class BillServiceExcludeVoidedPaymentsTest {
 		assertEquals(BigDecimal.ZERO, bill.getTotalPayments());
 	}
 	
-	/**
-	 * @verifies include all non-voided payments
-	 */
 	@Test
 	public void getTotalPayments_shouldIncludeAllNonVoidedPayments() {
 		Bill bill = new Bill();
