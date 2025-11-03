@@ -83,6 +83,7 @@ public class Bill extends BaseOpenmrsData {
 	public BigDecimal getTotal() {
 		BigDecimal total = BigDecimal.ZERO;
 		
+		List<BillLineItem> lineItems = getLineItems();
 		if (lineItems != null) {
 			for (BillLineItem line : lineItems) {
 				if (line != null && !line.getVoided()) {
@@ -97,6 +98,7 @@ public class Bill extends BaseOpenmrsData {
 	public BigDecimal getTotalPayments() {
 		BigDecimal total = BigDecimal.ZERO;
 		
+		Set<Payment> payments = getPayments();
 		if (payments != null) {
 			for (Payment payment : payments) {
 				if (payment != null && !payment.getVoided()) {
@@ -106,13 +108,6 @@ public class Bill extends BaseOpenmrsData {
 		}
 		
 		return total;
-	}
-	
-	public BigDecimal getAmountPaid() {
-		BigDecimal total = getTotal();
-		BigDecimal totalPayments = getTotalPayments();
-		
-		return total.min(totalPayments);
 	}
 	
 	@Override

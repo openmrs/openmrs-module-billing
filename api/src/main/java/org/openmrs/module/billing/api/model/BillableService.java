@@ -16,10 +16,12 @@ package org.openmrs.module.billing.api.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.openmrs.BaseChangeableOpenmrsData;
+import org.openmrs.BaseChangeableOpenmrsMetadata;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Concept;
 
-public class BillableService extends BaseOpenmrsData {
+public class BillableService extends BaseChangeableOpenmrsMetadata {
 	
 	public static final long serialVersionUID = 0L;
 	

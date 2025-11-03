@@ -17,9 +17,10 @@ import org.hibernate.Criteria;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.module.billing.api.base.entity.search.BaseDataTemplateSearch;
+import org.openmrs.module.billing.api.base.entity.search.BaseMetadataTemplateSearch;
 import org.openmrs.module.billing.api.model.BillableService;
 
-public class BillableServiceSearch extends BaseDataTemplateSearch<BillableService> {
+public class BillableServiceSearch extends BaseMetadataTemplateSearch<BillableService> {
 	
 	public BillableServiceSearch() {
 		this(new BillableService(), false);
