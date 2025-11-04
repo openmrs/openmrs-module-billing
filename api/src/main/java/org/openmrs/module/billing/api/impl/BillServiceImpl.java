@@ -103,13 +103,6 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 	protected void validate(Bill bill) {
 	}
 	
-	/**
-	 * Merges duplicate line items in a bill based on billableService UUID. Line items with the same
-	 * billableService are combined into a single line item, with quantities summed up and the first
-	 * item's other properties preserved.
-	 *
-	 * @param bill The bill whose line items should be merged.
-	 */
 	private void mergeDuplicateLineItems(Bill bill) {
 		if (bill == null || bill.getLineItems() == null || bill.getLineItems().isEmpty()) {
 			return;
@@ -117,42 +110,49 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		
 		List<BillLineItem> lineItems = bill.getLineItems();
 		List<BillLineItem> mergedItems = new ArrayList<>();
-		
-		// Track processed billableService UUIDs
-		Map<String, BillLineItem> serviceMap = new HashMap<>();
+		Map<String, BillLineItem> itemMap = new HashMap<>();
 		
 		for (BillLineItem item : lineItems) {
 			if (item == null) {
-				continue; // Skip null items
+				continue;
 			}
 			
-			// Only merge items with billableService (not regular stock items)
-			if (item.getBillableService() != null) {
-				String serviceUuid = item.getBillableService().getUuid();
+			String compositeKey = buildCompositeKey(item);
+			
+			if (itemMap.containsKey(compositeKey)) {
+				BillLineItem existingItem = itemMap.get(compositeKey);
+				int newQuantity = existingItem.getQuantity() + item.getQuantity();
+				existingItem.setQuantity(newQuantity);
 				
-				if (serviceMap.containsKey(serviceUuid)) {
-					// Duplicate found - merge quantities
-					BillLineItem existingItem = serviceMap.get(serviceUuid);
-					int newQuantity = existingItem.getQuantity() + item.getQuantity();
-					existingItem.setQuantity(newQuantity);
-					
-					// Don't add the duplicate item to mergedItems
-					LOG.debug("Merged duplicate line item for billableService UUID: " + serviceUuid + ", new quantity: "
-					        + newQuantity);
-				} else {
-					// First occurrence of this service
-					serviceMap.put(serviceUuid, item);
-					mergedItems.add(item);
-				}
+				LOG.debug("Merged duplicate line item with key: " + compositeKey + ", new quantity: " + newQuantity);
 			} else {
-				// Item without billableService - keep as is (could be a regular stock item)
+				itemMap.put(compositeKey, item);
 				mergedItems.add(item);
 			}
 		}
 		
-		// Replace the bill's line items with the merged list
 		bill.getLineItems().clear();
 		bill.getLineItems().addAll(mergedItems);
+	}
+	
+	private String buildCompositeKey(BillLineItem item) {
+		StringBuilder key = new StringBuilder();
+		
+		if (item.getBillableService() != null) {
+			key.append("service:").append(item.getBillableService().getUuid());
+		} else if (item.getItem() != null) {
+			key.append("stock:").append(item.getItem().getUuid());
+		}
+		
+		if (item.getItemPrice() != null) {
+			key.append("|price:").append(item.getItemPrice().getUuid());
+		}
+		
+		if (item.getPrice() != null) {
+			key.append("|amount:").append(item.getPrice().toPlainString());
+		}
+		
+		return key.toString();
 	}
 	
 	/**
@@ -284,7 +284,6 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		});
 	}
 	
-
 	@Override
 	public List<Bill> getAll(boolean includeVoided, PagingInfo pagingInfo) {
 		List<Bill> results = super.getAll(includeVoided, pagingInfo);
