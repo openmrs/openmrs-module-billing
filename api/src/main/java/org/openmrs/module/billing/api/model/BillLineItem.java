@@ -14,10 +14,8 @@
 package org.openmrs.module.billing.api.model;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 import org.openmrs.BaseChangeableOpenmrsData;
-import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Order;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
 
