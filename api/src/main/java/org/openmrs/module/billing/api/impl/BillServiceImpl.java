@@ -22,8 +22,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessControlException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.io.image.ImageDataFactory;
@@ -101,6 +104,58 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 	}
 	
 	/**
+	 * Merges duplicate line items in a bill based on billableService UUID. Line items with the same
+	 * billableService are combined into a single line item, with quantities summed up and the first
+	 * item's other properties preserved.
+	 *
+	 * @param bill The bill whose line items should be merged.
+	 */
+	private void mergeDuplicateLineItems(Bill bill) {
+		if (bill == null || bill.getLineItems() == null || bill.getLineItems().isEmpty()) {
+			return;
+		}
+		
+		List<BillLineItem> lineItems = bill.getLineItems();
+		List<BillLineItem> mergedItems = new ArrayList<>();
+		
+		// Track processed billableService UUIDs
+		Map<String, BillLineItem> serviceMap = new HashMap<>();
+		
+		for (BillLineItem item : lineItems) {
+			if (item == null) {
+				continue; // Skip null items
+			}
+			
+			// Only merge items with billableService (not regular stock items)
+			if (item.getBillableService() != null) {
+				String serviceUuid = item.getBillableService().getUuid();
+				
+				if (serviceMap.containsKey(serviceUuid)) {
+					// Duplicate found - merge quantities
+					BillLineItem existingItem = serviceMap.get(serviceUuid);
+					int newQuantity = existingItem.getQuantity() + item.getQuantity();
+					existingItem.setQuantity(newQuantity);
+					
+					// Don't add the duplicate item to mergedItems
+					LOG.debug("Merged duplicate line item for billableService UUID: " + serviceUuid + ", new quantity: "
+					        + newQuantity);
+				} else {
+					// First occurrence of this service
+					serviceMap.put(serviceUuid, item);
+					mergedItems.add(item);
+				}
+			} else {
+				// Item without billableService - keep as is (could be a regular stock item)
+				mergedItems.add(item);
+			}
+		}
+		
+		// Replace the bill's line items with the merged list
+		bill.getLineItems().clear();
+		bill.getLineItems().addAll(mergedItems);
+	}
+	
+	/**
 	 * Saves the bill to the database, creating a new bill or updating an existing one.
 	 *
 	 * @param bill The bill to be saved.
@@ -116,6 +171,9 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		if (bill == null) {
 			throw new NullPointerException("The bill must be defined.");
 		}
+		
+		// Merge duplicate line items before any other processing
+		mergeDuplicateLineItems(bill);
 		
 		// Check for refund.
 		// A refund is given when the total of the bill's line items is negative.
@@ -133,7 +191,6 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 				bill.setReceiptNumber(generator.generateNumber(bill));
 			}
 		}
-		// Check if there is an existing pending bill for the patient
 		List<Bill> bills = searchBill(bill.getPatient());
 		if (!bills.isEmpty()) {
 			Bill billToUpdate = bills.get(0);
@@ -143,18 +200,17 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 				billToUpdate.getLineItems().add(item);
 			}
 			
-			// Calculate the total payments made on the bill
+			mergeDuplicateLineItems(billToUpdate);
+			
 			BigDecimal totalPaid = billToUpdate.getPayments().stream().map(Payment::getAmountTendered)
 			        .reduce(BigDecimal.ZERO, BigDecimal::add);
 			
-			// Check if the bill is fully paid
 			if (totalPaid.compareTo(billToUpdate.getTotal()) >= 0) {
 				billToUpdate.setStatus(BillStatus.PAID);
 			} else {
 				billToUpdate.setStatus(BillStatus.PENDING);
 			}
 			
-			// Save the updated bill
 			return super.save(billToUpdate);
 		}
 		
@@ -228,10 +284,7 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		});
 	}
 	
-	/*
-	    These methods are overridden to ensure that any null line items (created as part of a bug in 1.7.0) are removed
-	    from the results before being returned to the caller.
-	 */
+
 	@Override
 	public List<Bill> getAll(boolean includeVoided, PagingInfo pagingInfo) {
 		List<Bill> results = super.getAll(includeVoided, pagingInfo);
@@ -267,8 +320,7 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		        .concat(patient.getFamilyName() != null ? bill.getPatient().getFamilyName() : "").concat(" ")
 		        .concat(patient.getMiddleName() != null ? bill.getPatient().getMiddleName() : "");
 		String gender = patient.getGender() != null ? patient.getGender() : "";
-		String dob = patient.getBirthdate() != null
-		        ? Utils.getSimpleDateFormat("dd-MMM-yyyy").format(patient.getBirthdate())
+		String dob = patient.getBirthdate() != null ? Utils.getSimpleDateFormat("dd-MMM-yyyy").format(patient.getBirthdate())
 		        : "";
 		
 		File returnFile;
