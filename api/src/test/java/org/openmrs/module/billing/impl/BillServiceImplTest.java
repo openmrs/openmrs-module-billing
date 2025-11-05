@@ -1,121 +1,177 @@
-///*
-// * The contents of this file are subject to the OpenMRS Public License
-// * Version 1.1 (the "License"); you may not use this file except in
-// * compliance with the License. You may obtain a copy of the License at
-// * http://license.openmrs.org
-// *
-// * Software distributed under the License is distributed on an "AS IS"
-// * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-// * License for the specific language governing rights and limitations
-// * under the License.
-// *
-// * Copyright (C) OpenMRS, LLC.  All Rights Reserved.
-// */
-//package org.openmrs.module.cashier.api.impl;
-//
-//import static org.mockito.Mockito.times;
-//import static org.mockito.Mockito.verify;
-//import static org.powermock.api.mockito.PowerMockito.mock;
-//import static org.powermock.api.mockito.PowerMockito.mockStatic;
-//import static org.powermock.api.mockito.PowerMockito.when;
-//
-//import org.junit.*;
-//import org.junit.Before;
-//import org.junit.BeforeClass;
-//import org.junit.Rule;
-//import org.junit.Test;
-//import org.openmrs.api.APIException;
-//import org.openmrs.api.context.Context;
-//import org.openmrs.module.cashier.api.IBillService;
-//import org.openmrs.module.cashier.api.IBillServiceTest;
-//import org.openmrs.module.cashier.api.IReceiptNumberGenerator;
-//import org.openmrs.module.cashier.api.ReceiptNumberGeneratorFactory;
-//import org.openmrs.module.cashier.api.model.Bill;
-//import org.powermock.core.classloader.annotations.PrepareForTest;
-//import org.powermock.modules.agent.PowerMockAgent;
-//import org.powermock.modules.junit4.rule.PowerMockRule;
-//
-//@PrepareForTest(ReceiptNumberGeneratorFactory.class)
-//public class BillServiceImplTest extends IBillServiceTest {
-//	@Rule
-//	public PowerMockRule rule = new PowerMockRule();
-//
-//	@BeforeClass
-//	public static void beforeClass() throws Exception {
-//		PowerMockAgent.initializeIfNeeded();
-//	}
-//
-//	IReceiptNumberGenerator receiptNumberGenerator;
-//
-//	@Before
-//	public void before() throws Exception {
-//		super.before();
-//
-//		mockStatic(ReceiptNumberGeneratorFactory.class);
-//		receiptNumberGenerator = mock(IReceiptNumberGenerator.class);
-//
-//		when(ReceiptNumberGeneratorFactory.getGenerator())
-//		        .thenReturn(receiptNumberGenerator);
-//	}
-//
-//	@Override
-//	protected IBillService createService() {
-//		return Context.getService(IBillService.class);
-//	}
-//
-//	/**
-//	 * @verifies Generate a new receipt number if one has not been defined.
-//	 * @see BillServiceImpl#save(Bill)
-//	 */
-//	@Test
-//	public void save_shouldGenerateANewReceiptNumberIfOneHasNotBeenDefined() throws Exception {
-//		Bill bill = createEntity(true);
-//		bill.setReceiptNumber(null);
-//
-//		String receiptNumber = "Test Number";
-//		when(receiptNumberGenerator.generateNumber(bill))
-//		        .thenReturn(receiptNumber);
-//
-//		service.save(bill);
-//		Context.flushSession();
-//
-//		Bill savedBill = service.getById(bill.getId());
-//		Assert.assertEquals(receiptNumber, savedBill.getReceiptNumber());
-//
-//		verify(receiptNumberGenerator, times(1)).generateNumber(bill);
-//	}
-//
-//	/**
-//	 * @verifies Not generate a receipt number if one has already been defined.
-//	 * @see BillServiceImpl#save(Bill)
-//	 */
-//	@Test
-//	public void save_shouldNotGenerateAReceiptNumberIfOneHasAlreadyBeenDefined() throws Exception {
-//		String receiptNumber = "Test Number";
-//		Bill bill = createEntity(true);
-//		bill.setReceiptNumber(receiptNumber);
-//
-//		service.save(bill);
-//		Context.flushSession();
-//
-//		Bill savedBill = service.getById(bill.getId());
-//		Assert.assertEquals(receiptNumber, savedBill.getReceiptNumber());
-//
-//		verify(receiptNumberGenerator, times(0)).generateNumber(bill);
-//	}
-//
-//	/**
-//	 * @verifies Throw APIException if receipt number cannot be generated.
-//	 * @see BillServiceImpl#save(Bill)
-//	 */
-//	@Test(expected = APIException.class)
-//	public void save_shouldThrowAPIExceptionIfReceiptNumberCannotBeGenerated() throws Exception {
-//		Bill bill = createEntity(true);
-//		bill.setReceiptNumber(null);
-//
-//		when(receiptNumberGenerator.generateNumber(bill))
-//		        .thenThrow(new APIException("Test exception"));
-//
-//		service.save(bill);
-//	}
-//}
+/*
+ * The contents of this file are subject to the OpenMRS Public License
+ * Version 1.1 (the "License"); you may not use this file except in
+ * compliance with the License. You may obtain a copy of the License at
+ * http://license.openmrs.org
+ *
+ * Software distributed under the License is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+ * License for the specific language governing rights and limitations
+ * under the License.
+ *
+ * Copyright (C) OpenMRS, LLC.  All Rights Reserved.
+ */
+
+package org.openmrs.module.billing.impl;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
+
+import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openmrs.Patient;
+import org.openmrs.api.context.Context;
+import org.openmrs.module.billing.TestConstants;
+import org.openmrs.module.billing.api.IBillService;
+import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
+
+public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
+	
+	private IBillService billService;
+	
+	@BeforeEach
+	public void setup() {
+		billService = Context.getService(IBillService.class);
+		executeDataSet(TestConstants.CORE_DATASET2);
+		executeDataSet(TestConstants.BASE_DATASET_DIR + "StockOperationType.xml");
+		executeDataSet(TestConstants.BASE_DATASET_DIR + "PaymentModeTest.xml");
+		executeDataSet(TestConstants.BASE_DATASET_DIR + "CashPointTest.xml");
+		executeDataSet(TestConstants.BASE_DATASET_DIR + "BillTest.xml");
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#save(Bill)
+	 */
+	@Test
+	public void save_shouldThrowNullPointerExceptionIfBillIsNull() {
+		assertThrows(NullPointerException.class, () -> billService.save(null));
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillByReceiptNumber(String)
+	 */
+	@Test
+	public void getBillByReceiptNumber_shouldThrowIllegalArgumentExceptionIfReceiptNumberIsNull() {
+		assertThrows(IllegalArgumentException.class, () -> billService.getBillByReceiptNumber(null));
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillByReceiptNumber(String)
+	 */
+	@Test
+	public void getBillByReceiptNumber_shouldThrowIllegalArgumentExceptionIfReceiptNumberIsEmpty() {
+		assertThrows(IllegalArgumentException.class, () -> billService.getBillByReceiptNumber(""));
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillByReceiptNumber(String)
+	 */
+	@Test
+	public void getBillByReceiptNumber_shouldThrowIllegalArgumentExceptionIfReceiptNumberIsTooLong() {
+		String longReceiptNumber = RandomStringUtils.randomAlphanumeric(1999);
+		assertThrows(IllegalArgumentException.class, () -> billService.getBillByReceiptNumber(longReceiptNumber));
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillsByPatient(Patient,
+	 *      org.openmrs.module.billing.api.base.PagingInfo)
+	 */
+	@Test
+	public void getBillsByPatient_shouldThrowNullPointerExceptionIfPatientIsNull() {
+		assertThrows(NullPointerException.class, () -> billService.getBillsByPatient(null, null));
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillsByPatientId(int,
+	 *      org.openmrs.module.billing.api.base.PagingInfo)
+	 */
+	@Test
+	public void getBillsByPatientId_shouldThrowIllegalArgumentExceptionIfPatientIdIsNegative() {
+		assertThrows(IllegalArgumentException.class, () -> billService.getBillsByPatientId(-1, null));
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getAll()
+	 */
+	@Test
+	public void getAll_shouldReturnAllBills() {
+		List<Bill> bills = billService.getAll();
+		assertNotNull(bills);
+		for (Bill bill : bills) {
+			if (bill.getLineItems() != null) {
+				for (Object item : bill.getLineItems()) {
+					assertNotNull(item, "Line items should not contain null values");
+				}
+			}
+		}
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillByReceiptNumber(String)
+	 */
+	@Test
+	public void getBillByReceiptNumber_shouldReturnBillWithSpecifiedReceiptNumber() {
+		Bill bill = billService.getBillByReceiptNumber("test 1 receipt number");
+		assertNotNull(bill);
+		assertEquals("test 1 receipt number", bill.getReceiptNumber());
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillByReceiptNumber(String)
+	 */
+	@Test
+	public void getBillByReceiptNumber_shouldReturnNullIfReceiptNumberNotFound() {
+		Bill bill = billService.getBillByReceiptNumber("nonexistent receipt number");
+		assertNull(bill);
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillsByPatientId(int,
+	 *      org.openmrs.module.billing.api.base.PagingInfo)
+	 */
+	@Test
+	public void getBillsByPatientId_shouldReturnBillsForPatient() {
+		List<Bill> bills = billService.getBillsByPatientId(0, null);
+		assertNotNull(bills);
+		assertFalse(bills.isEmpty());
+		assertEquals(1, bills.size());
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillsByPatientId(int,
+	 *      org.openmrs.module.billing.api.base.PagingInfo)
+	 */
+	@Test
+	public void getBillsByPatientId_shouldReturnEmptyListWhenPatientHasNoBills() {
+		List<Bill> bills = billService.getBillsByPatientId(999, null);
+		assertNotNull(bills);
+		assertEquals(0, bills.size());
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getById(int)
+	 */
+	@Test
+	public void getById_shouldReturnBillWithSpecifiedId() {
+		Bill bill = billService.getById(1);
+		assertNotNull(bill);
+		assertEquals(1, bill.getId());
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getById(int)
+	 */
+	@Test
+	public void getById_shouldRemoveNullLineItems() {
+		Bill bill = billService.getById(1);
+		assertNotNull(bill);
+		if (bill.getLineItems() != null) {
+			for (Object item : bill.getLineItems()) {
+				assertNotNull(item, "Line items should not contain null values");
+			}
+		}
+	}
+}
