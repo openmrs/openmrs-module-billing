@@ -15,7 +15,6 @@ package org.openmrs.module.billing.api;
 
 import java.util.List;
 
-import org.openmrs.module.billing.api.base.entity.IEntityDataService;
 import org.openmrs.module.billing.api.base.entity.IMetadataDataService;
 import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.search.BillableServiceSearch;

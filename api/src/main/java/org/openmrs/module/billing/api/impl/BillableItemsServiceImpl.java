@@ -17,9 +17,7 @@ import java.util.List;
 
 import org.hibernate.Criteria;
 import org.openmrs.module.billing.api.IBillableItemsService;
-import org.openmrs.module.billing.api.base.entity.impl.BaseEntityDataServiceImpl;
 import org.openmrs.module.billing.api.base.entity.impl.BaseMetadataDataServiceImpl;
-import org.openmrs.module.billing.api.base.entity.security.IEntityAuthorizationPrivileges;
 import org.openmrs.module.billing.api.base.entity.security.IMetadataAuthorizationPrivileges;
 import org.openmrs.module.billing.api.base.f.Action1;
 import org.openmrs.module.billing.api.model.BillableService;
