@@ -31,6 +31,7 @@ import org.openmrs.module.billing.ModuleSettings;
 import org.openmrs.module.billing.api.IBillService;
 import org.openmrs.module.billing.api.ICashPointService;
 import org.openmrs.module.billing.api.ITimesheetService;
+import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.base.entity.IEntityDataService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
@@ -40,7 +41,9 @@ import org.openmrs.module.billing.api.model.Payment;
 import org.openmrs.module.billing.api.model.Timesheet;
 import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.module.billing.api.util.RoundingUtil;
+import org.openmrs.module.billing.web.base.resource.AlreadyPagedWithLength;
 import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
+import org.openmrs.module.billing.web.base.resource.PagingUtil;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
@@ -186,8 +189,10 @@ public class BillResource extends BaseRestDataResource<Bill> {
             includeVoidedLineItems = Boolean.parseBoolean(includeVoidedLineItemsParam);
         }
         billSearch.includeVoidedLineItems(includeVoidedLineItems);
-        List<Bill> result = service.getBills(billSearch);
-        return new AlreadyPaged<>(context, result, false);
+        PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
+        List<Bill> result = service.getBills(billSearch, pagingInfo);
+        pagingInfo.setTotalRecordCount((long) result.size());
+        return new AlreadyPagedWithLength<>(context, result, pagingInfo.hasMoreResults(), pagingInfo.getTotalRecordCount());
     }
 
 
