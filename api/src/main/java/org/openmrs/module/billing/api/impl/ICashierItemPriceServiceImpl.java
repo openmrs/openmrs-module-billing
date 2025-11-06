@@ -14,16 +14,16 @@
 package org.openmrs.module.billing.api.impl;
 
 import org.openmrs.module.billing.api.ICashierItemPriceService;
-import org.openmrs.module.billing.api.base.entity.impl.BaseEntityDataServiceImpl;
-import org.openmrs.module.billing.api.base.entity.security.IEntityAuthorizationPrivileges;
+import org.openmrs.module.billing.api.base.entity.impl.BaseMetadataDataServiceImpl;
+import org.openmrs.module.billing.api.base.entity.security.IMetadataAuthorizationPrivileges;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
-public class ICashierItemPriceServiceImpl extends BaseEntityDataServiceImpl<CashierItemPrice> implements IEntityAuthorizationPrivileges, ICashierItemPriceService {
+public class ICashierItemPriceServiceImpl extends BaseMetadataDataServiceImpl<CashierItemPrice> implements IMetadataAuthorizationPrivileges, ICashierItemPriceService {
 	
 	@Override
-	protected IEntityAuthorizationPrivileges getPrivileges() {
+	protected IMetadataAuthorizationPrivileges getPrivileges() {
 		return this;
 	}
 	
@@ -33,7 +33,7 @@ public class ICashierItemPriceServiceImpl extends BaseEntityDataServiceImpl<Cash
 	}
 	
 	@Override
-	public String getVoidPrivilege() {
+	public String getRetirePrivilege() {
 		return null;
 	}
 	
