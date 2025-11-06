@@ -1,19 +1,45 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <dataset>
+	<!-- Stock items referenced by bill line items -->
+	<stockmgmt_stock_item stock_item_id="0" concept_id="1067" has_expiration="false" is_drug="false"
+	                      creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                      uuid="5631b434-78aa-102b-91a0-001e378eb67f"/>
+	<stockmgmt_stock_item stock_item_id="1" concept_id="1067" has_expiration="false" is_drug="false"
+	                      creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                      uuid="5631b434-78aa-102b-91a0-001e378eb680"/>
+	<stockmgmt_stock_item stock_item_id="2" concept_id="1067" has_expiration="false" is_drug="false"
+	                      creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                      uuid="5631b434-78aa-102b-91a0-001e378eb681"/>
+
+	<!-- Payment mode referenced by bill payments -->
+	<cashier_payment_mode payment_mode_id="0" name="Test Payment Mode" description="test description"
+	                      creator="1" date_created="2012-01-01 00:00:00.0" retired="false"
+	                      uuid="4028814B39B565A20139B565A2200000"/>
+	<cashier_payment_mode_attribute_type payment_mode_attribute_type_id="0" payment_mode_id="0" attribute_order="0"
+	                                     name="Test Attribute Type" description="test description"
+	                                     format="" reg_exp="" required="false"
+	                                     creator="1" date_created="2012-01-01 00:00:00.0" retired="false"
+	                                     uuid="4028814B39B565A20139B56712DD0003"/>
+	<cashier_payment_mode_attribute_type payment_mode_attribute_type_id="1" payment_mode_id="0" attribute_order="1"
+	                                     name="Test Attribute Type 2" description="test description"
+	                                     format="" reg_exp="" required="false"
+	                                     creator="1" date_created="2012-01-01 00:00:00.0" retired="false"
+	                                     uuid="4028814B39B565A20139B9A880DA000C"/>
+
 	<cashier_bill bill_id="0" receipt_number="test 1 receipt number" provider_id="0" patient_id="0"
 	              cash_point_id="0" status="POSTED"
 	              creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
 	              uuid="4028814B39B565A20139B95D74360004" receipt_printed="0"/>
 	<cashier_bill_line_item bill_line_item_id="0" bill_id="0" item_id="0" price="101.01" price_name="default"
-	                        quantity="1" line_item_order="0"
+	                        quantity="1" line_item_order="0" payment_status="PAID"
 	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
 	                        uuid="4028814B39B565A20139B95FB3440005"/>
 	<cashier_bill_line_item bill_line_item_id="1" bill_id="0" item_id="1" price="202.01" price_name="test 2 price"
-	                        quantity="3" line_item_order="1"
+	                        quantity="3" line_item_order="1" payment_status="PAID"
 	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
 	                        uuid="4028814B39B565A20139B963B13B0006"/>
 	<cashier_bill_line_item bill_line_item_id="2" bill_id="0" item_id="2" price="103.01" price_name="default"
-	                        quantity="2" line_item_order="2"
+	                        quantity="2" line_item_order="2" payment_status="PAID"
 	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
 	                        uuid="4028814B39B565A20139B9645D7B0007"/>
 	<cashier_bill_payment bill_payment_id="0" bill_id="0" payment_mode_id="0" amount="913.06" amount_tendered="1000.00"
@@ -23,4 +49,29 @@
 	                                value_reference="test 1 value" uuid="4028814B39B565A20139B96998DF0009"/>
 	<cashier_bill_payment_attribute bill_payment_attribute_id="1" bill_payment_id="0" payment_mode_attribute_type_id="1"
 	                                value_reference="test 2 value" uuid="4028814B39B565A20139B9ADE30F000F"/>
+
+	<cashier_bill bill_id="1" receipt_number="test 2 receipt number" provider_id="1" patient_id="1"
+	              cash_point_id="0" status="PAID"
+	              creator="1" date_created="2012-02-01 00:00:00.0" voided="false"
+	              uuid="5028814B39B565A20139B95D74360004" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="3" bill_id="1" item_id="0" price="150.00" price_name="default"
+	                        quantity="2" line_item_order="0" payment_status="PAID"
+	                        creator="1" date_created="2012-02-01 00:00:00.0" voided="false"
+	                        uuid="5028814B39B565A20139B95FB3440005"/>
+	<cashier_bill_payment bill_payment_id="1" bill_id="1" payment_mode_id="0" amount="300.00" amount_tendered="300.00"
+	                      creator="1" date_created="2012-02-01 00:00:00.0" voided="false"
+	                      uuid="5028814B39B565A20139B9674C510008"/>
+
+	<cashier_bill bill_id="2" receipt_number="test 3 receipt number" provider_id="0" patient_id="2"
+	              cash_point_id="0" status="PENDING"
+	              creator="1" date_created="2012-03-01 00:00:00.0" voided="false"
+	              uuid="6028814B39B565A20139B95D74360004" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="4" bill_id="2" item_id="1" price="75.50" price_name="default"
+	                        quantity="1" line_item_order="0" payment_status="PENDING"
+	                        creator="1" date_created="2012-03-01 00:00:00.0" voided="false"
+	                        uuid="6028814B39B565A20139B95FB3440005"/>
+	<cashier_bill_line_item bill_line_item_id="5" bill_id="2" item_id="2" price="50.00" price_name="default"
+	                        quantity="1" line_item_order="1" payment_status="PENDING"
+	                        creator="1" date_created="2012-03-01 00:00:00.0" voided="false"
+	                        uuid="6028814B39B565A20139B95FB3440006"/>
 </dataset>
