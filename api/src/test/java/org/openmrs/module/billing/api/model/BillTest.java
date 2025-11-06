@@ -17,20 +17,27 @@ public class BillTest {
 		Bill bill = new Bill();
 		bill.setPayments(new HashSet<Payment>());
 		
-		// Add valid payment of 50
-		Payment validPayment = new Payment();
-		validPayment.setAmountTendered(BigDecimal.valueOf(50));
-		validPayment.setVoided(false);
-		bill.getPayments().add(validPayment);
+		Payment validPayment1 = new Payment();
+		validPayment1.setAmountTendered(BigDecimal.valueOf(50));
+		validPayment1.setVoided(false);
+		bill.getPayments().add(validPayment1);
 		
-		// Add voided payment of 30 (should be excluded)
-		Payment voidedPayment = new Payment();
-		voidedPayment.setAmountTendered(BigDecimal.valueOf(30));
-		voidedPayment.setVoided(true);
-		bill.getPayments().add(voidedPayment);
+		Payment validPayment2 = new Payment();
+		validPayment2.setAmountTendered(BigDecimal.valueOf(30));
+		validPayment2.setVoided(false);
+		bill.getPayments().add(validPayment2);
 		
-		// Total should be 50, not 80
-		assertEquals(BigDecimal.valueOf(50), bill.getTotalPayments());
+		Payment voidedPayment1 = new Payment();
+		voidedPayment1.setAmountTendered(BigDecimal.valueOf(20));
+		voidedPayment1.setVoided(true);
+		bill.getPayments().add(voidedPayment1);
+		
+		Payment voidedPayment2 = new Payment();
+		voidedPayment2.setAmountTendered(BigDecimal.valueOf(40));
+		voidedPayment2.setVoided(true);
+		bill.getPayments().add(voidedPayment2);
+		
+		assertEquals(BigDecimal.valueOf(80), bill.getTotalPayments());
 	}
 	
 	@Test
@@ -47,22 +54,5 @@ public class BillTest {
 		assertEquals(BigDecimal.ZERO, bill.getTotalPayments());
 	}
 	
-	@Test
-	public void getTotalPayments_shouldIncludeAllNonVoidedPayments() {
-		Bill bill = new Bill();
-		bill.setPayments(new HashSet<Payment>());
-		
-		// Add multiple valid payments
-		Payment payment1 = new Payment();
-		payment1.setAmountTendered(BigDecimal.valueOf(30));
-		payment1.setVoided(false);
-		bill.getPayments().add(payment1);
-		
-		Payment payment2 = new Payment();
-		payment2.setAmountTendered(BigDecimal.valueOf(70));
-		payment2.setVoided(false);
-		bill.getPayments().add(payment2);
-		
-		assertEquals(BigDecimal.valueOf(100), bill.getTotalPayments());
-	}
+
 }
