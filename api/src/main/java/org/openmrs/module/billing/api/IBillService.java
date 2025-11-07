@@ -115,7 +115,6 @@ public interface IBillService extends IEntityDataService<Bill> {
 	 * them.
 	 * @return The bill with the specified UUID.
 	 */
-	@Transactional(readOnly = true)
 	@Authorized({ PrivilegeConstants.VIEW_BILLS })
 	Bill getByUuid(String uuid, boolean includeVoidedLineItems);
 	

@@ -303,6 +303,7 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 	 * them.
 	 * @return The bill with the specified UUID.
 	 */
+	@Transactional(readOnly = true)
 	@Override
 	public Bill getByUuid(String uuid, boolean includeVoidedLineItems) {
 		Bill bill = super.getByUuid(uuid);
