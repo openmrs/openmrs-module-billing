@@ -45,7 +45,9 @@ import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.PropertySetter;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
+import org.openmrs.module.webservices.rest.web.representation.CustomRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
+import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.impl.AlreadyPaged;
@@ -61,7 +63,7 @@ public class BillResource extends BaseRestDataResource<Bill> {
     @Override
     public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
         DelegatingResourceDescription description = super.getRepresentationDescription(rep);
-        if (!(rep instanceof RefRepresentation)) {
+        if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
             description.addProperty("adjustedBy", Representation.REF);
             description.addProperty("billAdjusted", Representation.REF);
             description.addProperty("cashPoint", Representation.REF);
@@ -74,8 +76,9 @@ public class BillResource extends BaseRestDataResource<Bill> {
             description.addProperty("status");
             description.addProperty("adjustmentReason");
             description.addProperty("id");
+            return description;
         }
-        return description;
+        return null;
     }
 
     @Override
