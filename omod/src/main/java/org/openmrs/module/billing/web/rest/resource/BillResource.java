@@ -171,7 +171,7 @@ public class BillResource extends BaseRestDataResource<Bill> {
         String patientUuid = context.getRequest().getParameter("patientUuid");
         String status = context.getRequest().getParameter("status");
         String cashPointUuid = context.getRequest().getParameter("cashPointUuid");
-        String includeVoidedLineItemsParam = context.getRequest().getParameter("includeVoidedLineItems");
+        String includeVoidedLineItemsParam = context.getRequest().getParameter("includeAll");
 
         Patient patient = Strings.isNotEmpty(patientUuid) ? Context.getPatientService().getPatientByUuid(patientUuid) : null;
         BillStatus billStatus = Strings.isNotEmpty(status) ? BillStatus.valueOf(status.toUpperCase()) : null;
@@ -209,9 +209,8 @@ public class BillResource extends BaseRestDataResource<Bill> {
 
         boolean includeVoidedLineItems = false;
 
-
         if (attributes != null && attributes.getRequest() != null) {
-            String includeVoidedLineItemsParam = attributes.getRequest().getParameter("includeVoidedLineItems");
+            String includeVoidedLineItemsParam = attributes.getRequest().getParameter("includeAll");
             if (StringUtils.isNotBlank(includeVoidedLineItemsParam)) {
                 includeVoidedLineItems = Boolean.parseBoolean(includeVoidedLineItemsParam);
             }
