@@ -112,7 +112,7 @@ public interface IBillService extends IEntityDataService<Bill> {
 	 *
 	 * @param uuid The bill UUID.
 	 * @param includeVoidedLineItems {@code true} to include voided line items, {@code false} to exclude
-	 * them.
+	 *            them.
 	 * @return The bill with the specified UUID.
 	 */
 	@Authorized({ PrivilegeConstants.VIEW_BILLS })

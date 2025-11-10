@@ -174,7 +174,7 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 	 *
 	 * @param receiptNumber The receipt number.
 	 * @param includeVoidedLineItems {@code true} to include voided line items, {@code false} to exclude
-	 * them.
+	 *            them.
 	 * @return The bill with the specified receipt number.
 	 */
 	public Bill getBillByReceiptNumber(String receiptNumber, boolean includeVoidedLineItems) {
@@ -213,7 +213,7 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 	 * @param patientId The patient ID.
 	 * @param paging The paging information.
 	 * @param includeVoidedLineItems {@code true} to include voided line items, {@code false} to exclude
-	 * them.
+	 *            them.
 	 * @return All bills for the specified patient.
 	 */
 	public List<Bill> getBillsByPatientId(int patientId, PagingInfo paging, boolean includeVoidedLineItems) {
@@ -279,7 +279,7 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 	 *
 	 * @param entityId The bill ID.
 	 * @param includeVoidedLineItems {@code true} to include voided line items, {@code false} to exclude
-	 * them.
+	 *            them.
 	 * @return The bill with the specified ID.
 	 */
 	public Bill getById(int entityId, boolean includeVoidedLineItems) {
@@ -300,7 +300,7 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 	 *
 	 * @param uuid The bill UUID.
 	 * @param includeVoidedLineItems {@code true} to include voided line items, {@code false} to exclude
-	 * them.
+	 *            them.
 	 * @return The bill with the specified UUID.
 	 */
 	@Transactional(readOnly = true)
@@ -583,7 +583,8 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		// Search for any null line items (due to a bug in 1.7.0) and remove them from
 		// the line items
 		if (bill.getLineItems() != null) {
-			bill.getLineItems().removeIf(lineItem -> lineItem == null || (!includeVoidedLineItems && Boolean.TRUE.equals(lineItem.getVoided())));
+			bill.getLineItems().removeIf(
+			    lineItem -> lineItem == null || (!includeVoidedLineItems && Boolean.TRUE.equals(lineItem.getVoided())));
 		}
 	}
 	

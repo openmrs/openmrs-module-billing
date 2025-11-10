@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
@@ -185,7 +186,7 @@ public class BillResource extends BaseRestDataResource<Bill> {
         BillSearch billSearch = new BillSearch(searchTemplate, false);
         // Default to false (exclude voided line items) unless explicitly set to true
         boolean includeVoidedLineItems = false;
-        if (Strings.isNotEmpty(includeVoidedLineItemsParam)) {
+        if (StringUtils.isNotBlank(includeVoidedLineItemsParam)) {
             includeVoidedLineItems = Boolean.parseBoolean(includeVoidedLineItemsParam);
         }
         billSearch.includeVoidedLineItems(includeVoidedLineItems);
@@ -195,10 +196,11 @@ public class BillResource extends BaseRestDataResource<Bill> {
 
     @Override
     public Bill getByUniqueId(String uniqueId) {
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        if (Strings.isEmpty(uniqueId)) {
+        if (StringUtils.isBlank(uniqueId)) {
             return null;
         }
+
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 
         IBillService service = Context.getService(IBillService.class);
         if (service == null) {
@@ -210,16 +212,12 @@ public class BillResource extends BaseRestDataResource<Bill> {
 
         if (attributes != null && attributes.getRequest() != null) {
             String includeVoidedLineItemsParam = attributes.getRequest().getParameter("includeVoidedLineItems");
-            if (Strings.isNotEmpty(includeVoidedLineItemsParam)) {
+            if (StringUtils.isNotBlank(includeVoidedLineItemsParam)) {
                 includeVoidedLineItems = Boolean.parseBoolean(includeVoidedLineItemsParam);
             }
         }
 
-        if (includeVoidedLineItems) {
-            return service.getByUuid(uniqueId, includeVoidedLineItems);
-        } else {
-            return service.getByUuid(uniqueId);
-        }
+        return service.getByUuid(uniqueId, includeVoidedLineItems);
     }
 
     @SuppressWarnings("unchecked")

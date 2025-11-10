@@ -43,7 +43,7 @@ public class BillSearch extends BaseDataTemplateSearch<Bill> {
 	 * Sets whether voided line items should be included in the results.
 	 * 
 	 * @param includeVoidedLineItems {@code true} to include voided line items, {@code false} to exclude
-	 * them.
+	 *            them.
 	 * @return This BillSearch instance for method chaining.
 	 */
 	public BillSearch includeVoidedLineItems(boolean includeVoidedLineItems) {
