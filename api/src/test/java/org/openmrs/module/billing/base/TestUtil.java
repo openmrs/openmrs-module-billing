@@ -28,10 +28,7 @@ public class TestUtil {
 		// try to load the file if its a straight up path to the file or
 		// if its a classpath path to the file
 		if (!datasetFile.exists()) {
-			java.net.URL resource = TestUtil.class.getClassLoader().getResource(datasetFileName);
-			if (resource != null) {
-				datasetFile = new File(resource.getPath());
-			}
+			datasetFile = new File(TestUtil.class.getClassLoader().getResource(datasetFileName).getPath());
 			// If it doesn't exist, we'll let the OpenMRS class throw the error
 			if (!datasetFile.exists()) {
 				return datasetFileName;
