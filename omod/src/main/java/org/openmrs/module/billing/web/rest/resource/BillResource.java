@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.User;
@@ -41,7 +40,6 @@ import org.openmrs.module.billing.api.model.Payment;
 import org.openmrs.module.billing.api.model.Timesheet;
 import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.module.billing.api.util.RoundingUtil;
-import org.openmrs.module.billing.web.base.resource.AlreadyPagedWithLength;
 import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
 import org.openmrs.module.billing.web.base.resource.PagingUtil;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
@@ -172,9 +170,9 @@ public class BillResource extends BaseRestDataResource<Bill> {
         String cashPointUuid = context.getRequest().getParameter("cashPointUuid");
         String includeVoidedLineItemsParam = context.getRequest().getParameter("includeAll");
 
-        Patient patient = Strings.isNotEmpty(patientUuid) ? Context.getPatientService().getPatientByUuid(patientUuid) : null;
-        BillStatus billStatus = Strings.isNotEmpty(status) ? BillStatus.valueOf(status.toUpperCase()) : null;
-        CashPoint cashPoint = Strings.isNotEmpty(cashPointUuid) ? Context.getService(ICashPointService.class).getByUuid(cashPointUuid) : null;
+        Patient patient = StringUtils.isNotBlank(patientUuid) ? Context.getPatientService().getPatientByUuid(patientUuid) : null;
+        BillStatus billStatus = StringUtils.isNotBlank(status) ? BillStatus.valueOf(status.toUpperCase()) : null;
+        CashPoint cashPoint = StringUtils.isNotBlank(cashPointUuid) ? Context.getService(ICashPointService.class).getByUuid(cashPointUuid) : null;
 
         Bill searchTemplate = new Bill();
         searchTemplate.setPatient(patient);
@@ -190,9 +188,9 @@ public class BillResource extends BaseRestDataResource<Bill> {
         }
         billSearch.includeVoidedLineItems(includeVoidedLineItems);
         PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
-        List<Bill> result = service.getBills(billSearch, pagingInfo);
-        pagingInfo.setTotalRecordCount((long) result.size());
-        return new AlreadyPagedWithLength<>(context, result, pagingInfo.hasMoreResults(), pagingInfo.getTotalRecordCount());
+
+        List<Bill> result = service.getBills(new BillSearch(searchTemplate, false), pagingInfo);
+        return new AlreadyPaged<>(context, result, pagingInfo.hasMoreResults(), pagingInfo.getTotalRecordCount());
     }
 
 
