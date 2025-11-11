@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
@@ -45,10 +46,8 @@ import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.PropertySetter;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
-import org.openmrs.module.webservices.rest.web.representation.CustomRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
-import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.impl.AlreadyPaged;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
@@ -168,6 +167,7 @@ public class BillResource extends BaseRestDataResource<Bill> {
         String patientUuid = context.getRequest().getParameter("patientUuid");
         String status = context.getRequest().getParameter("status");
         String cashPointUuid = context.getRequest().getParameter("cashPointUuid");
+        String includeVoidedLineItemsParam = context.getRequest().getParameter("includeAll");
 
         Patient patient = Strings.isNotEmpty(patientUuid) ? Context.getPatientService().getPatientByUuid(patientUuid) : null;
         BillStatus billStatus = Strings.isNotEmpty(status) ? BillStatus.valueOf(status.toUpperCase()) : null;
@@ -179,8 +179,31 @@ public class BillResource extends BaseRestDataResource<Bill> {
         searchTemplate.setCashPoint(cashPoint);
         IBillService service = Context.getService(IBillService.class);
 
-        List<Bill> result = service.getBills(new BillSearch(searchTemplate, false));
+        BillSearch billSearch = new BillSearch(searchTemplate, false);
+        // Default to false (exclude voided line items) unless explicitly set to true
+        boolean includeVoidedLineItems = false;
+        if (StringUtils.isNotBlank(includeVoidedLineItemsParam)) {
+            includeVoidedLineItems = Boolean.parseBoolean(includeVoidedLineItemsParam);
+        }
+        billSearch.includeVoidedLineItems(includeVoidedLineItems);
+        List<Bill> result = service.getBills(billSearch);
         return new AlreadyPaged<>(context, result, false);
+    }
+
+
+    /**
+     * Gets a bill by UUID
+     *
+     * @param uuid The bill UUID.
+     * @return The bill with the specified UUID without voided line items.
+     */
+    @Override
+    public Bill getByUniqueId(String uniqueId) {
+        if (StringUtils.isBlank(uniqueId)) {
+            return null;
+        }
+
+        return Context.getService(IBillService.class).getByUuid(uniqueId, false);
     }
 
     @SuppressWarnings("unchecked")
