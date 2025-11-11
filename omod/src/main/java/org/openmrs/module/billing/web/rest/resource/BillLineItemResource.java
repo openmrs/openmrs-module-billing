@@ -67,6 +67,10 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
     public void setItem(BillLineItem instance, Object item) {
         StockManagementService service = Context.getService(StockManagementService.class);
         String itemUuid = (String) item;
+        StockItem stockItem = service.getStockItemByUuid(itemUuid);
+        if (stockItem == null) {
+            throw new IllegalArgumentException("A stock item with the given uuid does not exist: " + itemUuid);
+        }
         instance.setItem(service.getStockItemByUuid(itemUuid));
     }
 
@@ -74,7 +78,11 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
     public void setBillableService(BillLineItem instance, Object item) {
         IBillableItemsService service = Context.getService(IBillableItemsService.class);
         String serviceUuid = (String) item;
-        instance.setBillableService(service.getByUuid(serviceUuid));
+        BillableService billableService = service.getByUuid(serviceUuid);
+        if (billableService == null) {
+            throw new IllegalArgumentException("A billable service with the given uuid does not exist: " + serviceUuid);
+        }
+        instance.setBillableService(billableService);
     }
 
     @PropertyGetter(value = "item")
