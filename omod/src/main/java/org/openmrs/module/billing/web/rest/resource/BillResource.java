@@ -192,7 +192,7 @@ public class BillResource extends BaseRestDataResource<Bill> {
 
 
     /**
-     * Gets a bill by UUID, optionally including voided line items.
+     * Gets a bill by UUID
      *
      * @param uuid The bill UUID.
      * @return The bill with the specified UUID without voided line items.
