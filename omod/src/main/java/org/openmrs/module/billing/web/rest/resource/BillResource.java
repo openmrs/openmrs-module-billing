@@ -44,14 +44,10 @@ import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.openmrs.module.webservices.rest.web.annotation.PropertySetter;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
-import org.openmrs.module.webservices.rest.web.representation.CustomRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
-import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.impl.AlreadyPaged;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
@@ -194,29 +190,20 @@ public class BillResource extends BaseRestDataResource<Bill> {
         return new AlreadyPaged<>(context, result, false);
     }
 
+
+    /**
+     * Gets a bill by UUID, optionally including voided line items.
+     *
+     * @param uuid The bill UUID.
+     * @return The bill with the specified UUID without voided line items.
+     */
     @Override
     public Bill getByUniqueId(String uniqueId) {
         if (StringUtils.isBlank(uniqueId)) {
             return null;
         }
 
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-
-        IBillService service = Context.getService(IBillService.class);
-        if (service == null) {
-            return null;
-        }
-
-        boolean includeVoidedLineItems = false;
-
-        if (attributes != null && attributes.getRequest() != null) {
-            String includeVoidedLineItemsParam = attributes.getRequest().getParameter("includeAll");
-            if (StringUtils.isNotBlank(includeVoidedLineItemsParam)) {
-                includeVoidedLineItems = Boolean.parseBoolean(includeVoidedLineItemsParam);
-            }
-        }
-
-        return service.getByUuid(uniqueId, includeVoidedLineItems);
+        return Context.getService(IBillService.class).getByUuid(uniqueId, false);
     }
 
     @SuppressWarnings("unchecked")
