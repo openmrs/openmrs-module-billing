@@ -151,6 +151,7 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 					billToUpdate.getLineItems().add(item);
 				}
 			}
+			
 			// Calculate the total payments made on the bill
 			BigDecimal totalPaid = BigDecimal.ZERO;
 			if (billToUpdate.getPayments() != null) {

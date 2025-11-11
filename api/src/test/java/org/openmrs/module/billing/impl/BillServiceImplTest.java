@@ -174,7 +174,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#save(Bill)
 	 */
 	@Test
-	public void save_shouldSaveNewBillWhenNoExistingPendingBillFound() {
+	public void save_shouldCreateNewBillWithNewItem() {
 		Patient patient = patientService.getPatient(1);
 		assertNotNull(patient);
 		
@@ -214,7 +214,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#save(Bill)
 	 */
 	@Test
-	public void save_shouldHaveBillAndBillToUpdateAsSameObjectWhenUpdating() {
+	public void save_shouldUpdateExistingBillWithUpdatedBillItem() {
 		Bill pendingBill = billService.getById(2);
 		assertNotNull(pendingBill);
 		assertEquals(BillStatus.PENDING, pendingBill.getStatus());
@@ -230,7 +230,6 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		assertSame(pendingBill, updatedBill);
 		assertEquals(updatedPrice, updatedBill.getLineItems().get(0).getPrice());
 	}
-	
 	
 	/**
 	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getById(int)

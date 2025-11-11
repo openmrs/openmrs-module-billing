@@ -154,7 +154,6 @@ public class BillLineItem extends BaseChangeableOpenmrsData {
 	 * Compares line items for equality based on UUID only. Two items are equal only if they have the
 	 * same UUID.
 	 */
-	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
@@ -176,10 +175,8 @@ public class BillLineItem extends BaseChangeableOpenmrsData {
 		return thisUuid.equals(otherUuid);
 	}
 	
-	@Override
 	public int hashCode() {
-		// Use UUID for hash code - items without UUID will all have hash 0
-		String uuid = this.getUuid();
-		return uuid != null ? Objects.hash(uuid) : 0;
+		return Objects.hash(getUuid(), getId(), getBill(), getItem(), getBillableService(), getPrice(), getQuantity(),
+		    getLineItemOrder());
 	}
 }
