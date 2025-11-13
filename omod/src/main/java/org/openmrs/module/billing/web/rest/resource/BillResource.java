@@ -189,7 +189,7 @@ public class BillResource extends BaseRestDataResource<Bill> {
         billSearch.includeVoidedLineItems(includeVoidedLineItems);
         PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
 
-        List<Bill> result = service.getBills(new BillSearch(searchTemplate, false), pagingInfo);
+        List<Bill> result = service.getBills(billSearch, pagingInfo);
         return new AlreadyPaged<>(context, result, pagingInfo.hasMoreResults(), pagingInfo.getTotalRecordCount());
     }
 
@@ -197,7 +197,7 @@ public class BillResource extends BaseRestDataResource<Bill> {
     /**
      * Gets a bill by UUID
      *
-     * @param uuid The bill UUID.
+     * @param uniqueId The bill UUID.
      * @return The bill with the specified UUID without voided line items.
      */
     @Override
