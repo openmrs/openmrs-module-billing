@@ -23,7 +23,9 @@ import java.security.AccessControlException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.io.image.ImageDataFactory;
@@ -99,6 +101,58 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 	protected void validate(Bill bill) {
 	}
 	
+	private void mergeDuplicateLineItems(Bill bill) {
+		if (bill == null || bill.getLineItems() == null || bill.getLineItems().isEmpty()) {
+			return;
+		}
+		
+		List<BillLineItem> lineItems = bill.getLineItems();
+		List<BillLineItem> mergedItems = new ArrayList<>();
+		Map<String, BillLineItem> itemMap = new HashMap<>();
+		
+		for (BillLineItem item : lineItems) {
+			if (item == null) {
+				continue;
+			}
+			
+			String compositeKey = buildCompositeKey(item);
+			
+			if (itemMap.containsKey(compositeKey)) {
+				BillLineItem existingItem = itemMap.get(compositeKey);
+				int newQuantity = existingItem.getQuantity() + item.getQuantity();
+				existingItem.setQuantity(newQuantity);
+				
+				LOG.debug("Merged duplicate line item with key: " + compositeKey + ", new quantity: " + newQuantity);
+			} else {
+				itemMap.put(compositeKey, item);
+				mergedItems.add(item);
+			}
+		}
+		
+		bill.getLineItems().clear();
+		bill.getLineItems().addAll(mergedItems);
+	}
+	
+	private String buildCompositeKey(BillLineItem item) {
+		StringBuilder key = new StringBuilder();
+		
+		if (item.getBillableService() != null) {
+			key.append("service:").append(item.getBillableService().getUuid());
+		} else if (item.getItem() != null) {
+			key.append("stock:").append(item.getItem().getUuid());
+		}
+		
+		if (item.getItemPrice() != null) {
+			key.append("|price:").append(item.getItemPrice().getUuid());
+		}
+		
+		if (item.getPrice() != null) {
+			key.append("|amount:").append(item.getPrice().toPlainString());
+		}
+		
+		return key.toString();
+	}
+	
 	/**
 	 * Saves the bill to the database, creating a new bill or updating an existing one.
 	 *
@@ -116,6 +170,9 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 			throw new NullPointerException("The bill must be defined.");
 		}
 		
+		// Merge duplicate line items before any other processing
+		mergeDuplicateLineItems(bill);
+		
 		// Check for refund.
 		// A refund is given when the total of the bill's line items is negative.
 		if (bill.getTotal().compareTo(BigDecimal.ZERO) < 0 && !Context.hasPrivilege(PrivilegeConstants.REFUND_MONEY)) {
@@ -132,7 +189,6 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 				bill.setReceiptNumber(generator.generateNumber(bill));
 			}
 		}
-		// Check if there is an existing pending bill for the patient
 		List<Bill> bills = searchBill(bill.getPatient());
 		if (!bills.isEmpty()) {
 			Bill billToUpdate = bills.get(0);
@@ -142,18 +198,17 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 				billToUpdate.getLineItems().add(item);
 			}
 			
-			// Calculate the total payments made on the bill
+			mergeDuplicateLineItems(billToUpdate);
+			
 			BigDecimal totalPaid = billToUpdate.getPayments().stream().map(Payment::getAmountTendered)
 			        .reduce(BigDecimal.ZERO, BigDecimal::add);
 			
-			// Check if the bill is fully paid
 			if (totalPaid.compareTo(billToUpdate.getTotal()) >= 0) {
 				billToUpdate.setStatus(BillStatus.PAID);
 			} else {
 				billToUpdate.setStatus(BillStatus.PENDING);
 			}
 			
-			// Save the updated bill
 			return super.save(billToUpdate);
 		}
 		
@@ -255,10 +310,6 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		return results;
 	}
 	
-	/*
-	    These methods are overridden to ensure that any null line items (created as part of a bug in 1.7.0) are removed
-	    from the results before being returned to the caller.
-	 */
 	@Override
 	public List<Bill> getAll(boolean includeVoided, PagingInfo pagingInfo) {
 		List<Bill> results = super.getAll(includeVoided, pagingInfo);

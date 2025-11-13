@@ -869,6 +869,71 @@
 		</createIndex>
 	</changeSet>
 
+	<changeSet id="openmrs.billing-001-v3.0.0-20251110-01" author="Raj Prakash">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<indexExists indexName="unique_bill_line_item_idx"/>
+			</not>
+		</preConditions>
+		<comment>Add unique constraint to prevent duplicate line items with same service, price, and item price</comment>
+		
+		<!-- First, clean up any existing duplicates in the database -->
+		<sql>
+			CREATE TEMPORARY TABLE IF NOT EXISTS temp_duplicates AS
+			SELECT 
+				bill_id,
+				COALESCE(service_id, -1) as service_id_val,
+				COALESCE(item_id, -1) as item_id_val,
+				COALESCE(price_id, -1) as price_id_val,
+				price,
+				MIN(bill_line_item_id) as keep_id,
+				SUM(quantity) as total_quantity
+			FROM cashier_bill_line_item
+			WHERE voided = 0
+			GROUP BY bill_id, COALESCE(service_id, -1), COALESCE(item_id, -1), COALESCE(price_id, -1), price
+			HAVING COUNT(*) > 1;
+		</sql>
+		
+		<!-- Update quantities for the line items we're keeping -->
+		<sql>
+			UPDATE cashier_bill_line_item bli
+			INNER JOIN temp_duplicates td ON bli.bill_line_item_id = td.keep_id
+			SET bli.quantity = td.total_quantity;
+		</sql>
+		
+		<!-- Soft delete the duplicate line items (keep the first occurrence) -->
+		<sql>
+			UPDATE cashier_bill_line_item bli
+			INNER JOIN temp_duplicates td ON 
+				bli.bill_id = td.bill_id 
+				AND COALESCE(bli.service_id, -1) = td.service_id_val
+				AND COALESCE(bli.item_id, -1) = td.item_id_val
+				AND COALESCE(bli.price_id, -1) = td.price_id_val
+				AND bli.price = td.price
+				AND bli.bill_line_item_id != td.keep_id
+			SET bli.voided = 1,
+				bli.void_reason = 'Duplicate line item merged during database migration',
+				bli.date_voided = NOW(),
+				bli.voided_by = 1
+			WHERE bli.voided = 0;
+		</sql>
+		
+		<!-- Drop temporary table -->
+		<sql>
+			DROP TEMPORARY TABLE IF EXISTS temp_duplicates;
+		</sql>
+		
+		<!-- Create the unique index that handles NULL values properly -->
+		<createIndex indexName="unique_bill_line_item_idx" tableName="cashier_bill_line_item" unique="true">
+			<column name="bill_id"/>
+			<column name="service_id"/>
+			<column name="item_id"/>
+			<column name="price_id"/>
+			<column name="price"/>
+			<column name="voided"/>
+		</createIndex>
+	</changeSet>
+
 	<changeSet id="openmrs.billing-001-v3.0.0-20251007" author="Wikum Weerakutti">
 		<comment>Migrate global properties from 'cashier.*' prefix to 'billing.*'</comment>
 
