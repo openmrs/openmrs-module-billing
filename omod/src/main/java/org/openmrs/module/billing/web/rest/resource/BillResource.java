@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.User;
@@ -31,6 +30,7 @@ import org.openmrs.module.billing.ModuleSettings;
 import org.openmrs.module.billing.api.IBillService;
 import org.openmrs.module.billing.api.ICashPointService;
 import org.openmrs.module.billing.api.ITimesheetService;
+import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.base.entity.IEntityDataService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
@@ -41,6 +41,7 @@ import org.openmrs.module.billing.api.model.Timesheet;
 import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.module.billing.api.util.RoundingUtil;
 import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
+import org.openmrs.module.billing.web.base.resource.PagingUtil;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
@@ -169,9 +170,9 @@ public class BillResource extends BaseRestDataResource<Bill> {
         String cashPointUuid = context.getRequest().getParameter("cashPointUuid");
         String includeVoidedLineItemsParam = context.getRequest().getParameter("includeAll");
 
-        Patient patient = Strings.isNotEmpty(patientUuid) ? Context.getPatientService().getPatientByUuid(patientUuid) : null;
-        BillStatus billStatus = Strings.isNotEmpty(status) ? BillStatus.valueOf(status.toUpperCase()) : null;
-        CashPoint cashPoint = Strings.isNotEmpty(cashPointUuid) ? Context.getService(ICashPointService.class).getByUuid(cashPointUuid) : null;
+        Patient patient = StringUtils.isNotBlank(patientUuid) ? Context.getPatientService().getPatientByUuid(patientUuid) : null;
+        BillStatus billStatus = StringUtils.isNotBlank(status) ? BillStatus.valueOf(status.toUpperCase()) : null;
+        CashPoint cashPoint = StringUtils.isNotBlank(cashPointUuid) ? Context.getService(ICashPointService.class).getByUuid(cashPointUuid) : null;
 
         Bill searchTemplate = new Bill();
         searchTemplate.setPatient(patient);
@@ -186,15 +187,17 @@ public class BillResource extends BaseRestDataResource<Bill> {
             includeVoidedLineItems = Boolean.parseBoolean(includeVoidedLineItemsParam);
         }
         billSearch.includeVoidedLineItems(includeVoidedLineItems);
-        List<Bill> result = service.getBills(billSearch);
-        return new AlreadyPaged<>(context, result, false);
+        PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
+
+        List<Bill> result = service.getBills(billSearch, pagingInfo);
+        return new AlreadyPaged<>(context, result, pagingInfo.hasMoreResults(), pagingInfo.getTotalRecordCount());
     }
 
 
     /**
      * Gets a bill by UUID
      *
-     * @param uuid The bill UUID.
+     * @param uniqueId The bill UUID.
      * @return The bill with the specified UUID without voided line items.
      */
     @Override
