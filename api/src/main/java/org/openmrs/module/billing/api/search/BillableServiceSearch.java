@@ -53,5 +53,11 @@ public class BillableServiceSearch extends BaseDataTemplateSearch<BillableServic
 		if (billableService.getName() != null) {
 			criteria.add(Restrictions.like("name", billableService.getName(), MatchMode.ANYWHERE));
 		}
+		if (billableService.getProvider() != null) {
+			criteria.add(Restrictions.eq("provider", billableService.getProvider()));
+		}
+		if (billableService.getLocation() != null) {
+			criteria.add(Restrictions.eq("location", billableService.getLocation()));
+		}
 	}
 }

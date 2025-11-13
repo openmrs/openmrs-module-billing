@@ -18,6 +18,8 @@ import java.util.List;
 
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Concept;
+import org.openmrs.Location;
+import org.openmrs.Provider;
 
 public class BillableService extends BaseOpenmrsData {
 	
@@ -38,6 +40,10 @@ public class BillableService extends BaseOpenmrsData {
 	private List<CashierItemPrice> servicePrices;
 	
 	private BillableServiceStatus serviceStatus = BillableServiceStatus.ENABLED;
+	
+	private Provider provider;
+	
+	private Location location;
 	
 	public int getBillableServiceId() {
 		return billableServiceId;
@@ -124,5 +130,21 @@ public class BillableService extends BaseOpenmrsData {
 		
 		this.servicePrices.add(price);
 		price.setBillableService(this);
+	}
+	
+	public Provider getProvider() {
+		return provider;
+	}
+	
+	public void setProvider(Provider provider) {
+		this.provider = provider;
+	}
+	
+	public Location getLocation() {
+		return location;
+	}
+	
+	public void setLocation(Location location) {
+		this.location = location;
 	}
 }
