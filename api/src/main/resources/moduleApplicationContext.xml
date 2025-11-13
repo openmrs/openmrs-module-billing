@@ -94,6 +94,8 @@
 		</property>
 	</bean>
 
+
+
 	<!-- Service Bean Definitions -->
 	<bean id="itemPriceService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager" ref="transactionManager"/>
@@ -210,4 +212,42 @@
 	      class="org.openmrs.module.billing.api.base.entity.db.hibernate.BaseHibernateRepositoryImpl">
 		<constructor-arg name="sessionFactory" ref="dbSessionFactory"/>
 	</bean>
+
+	<bean parent="serviceContext">
+		<property name="moduleService">
+			<list merge="true">
+				<value>org.openmrs.module.billing.api.BillExemptionService</value>
+				<ref bean="billingExemptionService"/>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="billingExemptionService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target">
+			<bean class="org.openmrs.module.billing.api.impl.BillExemptionServiceImpl">
+				<constructor-arg name="billExemptionDAO" ref="billExemptionDAO"/>
+			</bean>
+		</property>
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+	</bean>
+
+	<bean id="billExemptionDAO"
+		  class="org.openmrs.module.billing.api.db.hibernate.BillExemptionDAOImpl">
+		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+
+	<bean id="javascriptRuleEvaluator"
+		  class="org.openmrs.module.billing.api.evaluator.impl.JSExemptionEvaluator"/>
+
+	<bean id="ruleEngine"
+		  class="org.openmrs.module.billing.api.evaluator.ExemptionRuleEngine">
+		<constructor-arg>
+			<list>
+				<ref bean="javascriptRuleEvaluator"/>
+			</list>
+		</constructor-arg>
+	</bean>
+
 </beans>

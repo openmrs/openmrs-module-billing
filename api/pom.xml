@@ -87,6 +87,16 @@
 			<groupId>com.itextpdf</groupId>
 			<artifactId>font-asian</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>org.graalvm.js</groupId>
+			<artifactId>js</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.graalvm.js</groupId>
+			<artifactId>js-scriptengine</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
