@@ -51,6 +51,8 @@
 		<property name="name" type="java.lang.String" column="name" not-null="true" length="255"/>
 		<property name="shortName" type="java.lang.String" column="short_name" length="255"/>
 		<many-to-one name="concept" class="org.openmrs.Concept" not-null="false" column="concept_id"/>
+        <many-to-one name="provider" class="org.openmrs.Provider" not-null="false" column="provider_id"/>
+        <many-to-one name="location" class="org.openmrs.Location" not-null="false" column="location_id"/>
 
 		<many-to-one name="serviceType" class="org.openmrs.Concept" not-null="false" column="service_type"/>
 		<many-to-one name="serviceCategory" class="org.openmrs.Concept" not-null="false" column="service_category"/>

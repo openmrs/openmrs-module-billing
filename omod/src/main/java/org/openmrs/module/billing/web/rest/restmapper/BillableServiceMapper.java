@@ -28,6 +28,8 @@ public class BillableServiceMapper {
     private String concept;
     private String serviceType;
     private String serviceCategory;
+    private String provider;
+    private String location;
     private List<CashierItemPriceMapper> servicePrices;
     private BillableServiceStatus serviceStatus = BillableServiceStatus.ENABLED;
 
@@ -87,6 +89,23 @@ public class BillableServiceMapper {
         this.concept = concept;
     }
 
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
     public BillableService billableServiceMapper(BillableServiceMapper mapper) {
         BillableService service = new BillableService();
         List<CashierItemPrice> servicePrices = new ArrayList<>();
@@ -96,6 +115,8 @@ public class BillableServiceMapper {
         service.setServiceType(Context.getConceptService().getConceptByUuid(mapper.getServiceType()));
         service.setServiceCategory(Context.getConceptService().getConceptByUuid(mapper.getServiceCategory()));
         service.setServiceStatus(mapper.getServiceStatus());
+        service.setProvider(Context.getProviderService().getProviderByUuid(mapper.getProvider()));
+        service.setLocation(Context.getLocationService().getLocationByUuid(mapper.getLocation()));
         for (CashierItemPriceMapper itemPrice : mapper.getServicePrices()) {
             CashierItemPrice price = new CashierItemPrice();
             price.setName(itemPrice.getName());

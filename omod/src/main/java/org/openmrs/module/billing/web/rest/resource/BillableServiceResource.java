@@ -70,6 +70,8 @@ public class BillableServiceResource extends BaseRestDataResource<BillableServic
                 context.getParameter("serviceCategory")) : null;
         String serviceStatus = context.getParameter("isDisabled");
         String serviceName = context.getParameter("serviceName");
+        String locationUuid = context.getParameter("location");
+        String providerUuid = context.getParameter("provider");
         BillableServiceStatus status = BillableServiceStatus.ENABLED;
         if (Strings.isNotEmpty(serviceStatus)) {
             if (serviceStatus.equalsIgnoreCase("yes") || serviceStatus.equalsIgnoreCase("1")) {
@@ -81,6 +83,14 @@ public class BillableServiceResource extends BaseRestDataResource<BillableServic
         searchTemplate.setServiceCategory(serviceCategory);
         searchTemplate.setServiceStatus(status);
         searchTemplate.setName(serviceName);
+
+        if (Strings.isNotEmpty(locationUuid)) {
+            searchTemplate.setLocation(Context.getLocationService().getLocationByUuid(locationUuid));
+        }
+
+        if (Strings.isNotEmpty(providerUuid)) {
+            searchTemplate.setProvider(Context.getProviderService().getProviderByUuid(providerUuid));
+        }
 
         IBillableItemsService service = Context.getService(IBillableItemsService.class);
         return new AlreadyPaged<>(context, service.findServices(new BillableServiceSearch(searchTemplate, false)), false);
@@ -97,6 +107,8 @@ public class BillableServiceResource extends BaseRestDataResource<BillableServic
             description.addProperty("serviceCategory");
             description.addProperty("servicePrices");
             description.addProperty("serviceStatus");
+            description.addProperty("provider");
+            description.addProperty("location");
         } else if (rep instanceof CustomRepresentation) {
             //For custom representation, must be null
             // - let the user decide which properties should be included in the response
@@ -118,6 +130,26 @@ public class BillableServiceResource extends BaseRestDataResource<BillableServic
         BaseRestDataResource.syncCollection(instance.getServicePrices(), itemPrices);
         for (CashierItemPrice itemPrice : instance.getServicePrices()) {
             itemPrice.setBillableService(instance);
+        }
+    }
+
+    @PropertySetter("provider")
+    public void setProvider(BillableService instance, Object value) {
+        if (value != null) {
+            String uuid = value.toString();
+            instance.setProvider(Context.getProviderService().getProviderByUuid(uuid));
+        } else {
+            instance.setProvider(null);
+        }
+    }
+
+    @PropertySetter("location")
+    public void setLocation(BillableService instance, Object value) {
+        if (value != null) {
+            String uuid = value.toString();
+            instance.setLocation(Context.getLocationService().getLocationByUuid(uuid));
+        } else {
+            instance.setLocation(null);
         }
     }
 

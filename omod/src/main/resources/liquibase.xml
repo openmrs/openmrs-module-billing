@@ -945,4 +945,21 @@
 			<where>property = 'cashier.receipt.logoPath'</where>
 		</update>
 	</changeSet>
+    <changeSet id="openhmis.cashier-001-v3.0.0-02" author="mutajonathan">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="cashier_billable_service"/>
+        </preConditions>
+        <addColumn tableName="cashier_billable_service">
+            <column name="location_id" type="int"/>
+        </addColumn>
+        <addColumn tableName="cashier_billable_service">
+            <column name="provider_id" type="int"/>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="cashier_billable_service"
+                                 baseColumnNames="location_id" referencedTableName="location"
+                                 referencedColumnNames="location_id" constraintName="fk_billable_service_location"/>
+        <addForeignKeyConstraint baseTableName="cashier_billable_service"
+                                 baseColumnNames="provider_id" referencedTableName="provider"
+                                 referencedColumnNames="provider_id" constraintName="fk_billable_service_provider"/>
+    </changeSet>
 </databaseChangeLog>
