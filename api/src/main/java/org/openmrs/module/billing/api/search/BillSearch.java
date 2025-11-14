@@ -13,11 +13,13 @@
  */
 package org.openmrs.module.billing.api.search;
 
+import java.util.Arrays;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.module.billing.api.base.entity.search.BaseDataTemplateSearch;
 import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.module.billing.api.model.BillStatus;
 
 /**
  * A search template class for the {@link Bill} model.
@@ -25,6 +27,8 @@ import org.openmrs.module.billing.api.model.Bill;
 public class BillSearch extends BaseDataTemplateSearch<Bill> {
 	
 	private Boolean includeVoidedLineItems;
+	
+	private String statusFilter;
 	
 	public BillSearch() {
 		this(new Bill(), false);
@@ -55,6 +59,17 @@ public class BillSearch extends BaseDataTemplateSearch<Bill> {
 		return includeVoidedLineItems;
 	}
 	
+	/**
+	 * Sets a status filter string (e.g., "UNPAID" for filtering by PENDING or POSTED).
+	 * 
+	 * @param statusFilter The status filter string.
+	 * @return This BillSearch instance for method chaining.
+	 */
+	public BillSearch setStatusFilter(String statusFilter) {
+		this.statusFilter = statusFilter;
+		return this;
+	}
+	
 	@Override
 	public void updateCriteria(Criteria criteria) {
 		super.updateCriteria(criteria);
@@ -68,6 +83,12 @@ public class BillSearch extends BaseDataTemplateSearch<Bill> {
 		}
 		if (bill.getPatient() != null) {
 			criteria.add(Restrictions.eq("patient", bill.getPatient()));
+		}
+		if (statusFilter != null) {
+			if ("UNPAID".equalsIgnoreCase(statusFilter)) {
+				// Filter for bills with PENDING or POSTED status
+				criteria.add(Restrictions.in("status", Arrays.asList(BillStatus.PENDING, BillStatus.POSTED)));
+			}
 		}
 		if (bill.getStatus() != null) {
 			criteria.add(Restrictions.eq("status", bill.getStatus()));

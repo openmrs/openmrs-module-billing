@@ -171,7 +171,15 @@ public class BillResource extends BaseRestDataResource<Bill> {
         String includeVoidedLineItemsParam = context.getRequest().getParameter("includeAll");
 
         Patient patient = StringUtils.isNotBlank(patientUuid) ? Context.getPatientService().getPatientByUuid(patientUuid) : null;
-        BillStatus billStatus = StringUtils.isNotBlank(status) ? BillStatus.valueOf(status.toUpperCase()) : null;
+        BillStatus billStatus = null;
+        if (StringUtils.isNotBlank(status)) {
+            if ("UNPAID".equalsIgnoreCase(status)) {
+                // Leave billStatus as null - BillSearch will handle filtering by multiple statuses
+                billStatus = null;
+            } else {
+                billStatus = BillStatus.valueOf(status.toUpperCase());
+            }
+        }
         CashPoint cashPoint = StringUtils.isNotBlank(cashPointUuid) ? Context.getService(ICashPointService.class).getByUuid(cashPointUuid) : null;
 
         Bill searchTemplate = new Bill();
@@ -181,6 +189,10 @@ public class BillResource extends BaseRestDataResource<Bill> {
         IBillService service = Context.getService(IBillService.class);
 
         BillSearch billSearch = new BillSearch(searchTemplate, false);
+        // Pass original status string to handle filtering by multiple statuses
+        if ("UNPAID".equalsIgnoreCase(status)) {
+            billSearch.setStatusFilter("UNPAID");
+        }
         // Default to false (exclude voided line items) unless explicitly set to true
         boolean includeVoidedLineItems = false;
         if (StringUtils.isNotBlank(includeVoidedLineItemsParam)) {
