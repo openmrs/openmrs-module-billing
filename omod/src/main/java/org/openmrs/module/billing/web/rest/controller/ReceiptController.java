@@ -16,6 +16,8 @@ package org.openmrs.module.billing.web.rest.controller;
 import java.io.IOException;
 
 import org.openmrs.api.context.Context;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openmrs.module.billing.api.IBillService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.webservices.rest.web.RestConstants;
@@ -36,23 +38,30 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/billing/receipt")
 public class ReceiptController extends BaseRestController {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ReceiptController.class);
+
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<byte[]> get(@RequestParam(value = "billId", required = false) Integer billId) throws IOException {
+    public ResponseEntity<byte[]> get(@RequestParam(value = "billId", required = false) Integer billId)
+            throws IOException {
         IBillService service = Context.getService(IBillService.class);
         Bill bill = service.getById(billId);
+        LOG.debug("Fetching receipt for billId={}", billId);
 
         if (bill == null) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         byte[] pdfFile = service.downloadBillReceipt(bill);
-        if (pdfFile.length > 0) {
+        if (pdfFile != null && pdfFile.length > 0) {
+            LOG.debug("Generated receipt PDF for billId={} with bytes={}", bill.getId(), pdfFile.length);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentLength(pdfFile.length);
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"receipt-" + bill.getId() + ".pdf\"");
 
             return new ResponseEntity<>(pdfFile, headers, HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
 

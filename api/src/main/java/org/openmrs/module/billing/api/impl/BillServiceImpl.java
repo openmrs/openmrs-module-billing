@@ -501,8 +501,8 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		setInnerCellBorder(amountDueSection, Border.NO_BORDER);
 		setInnerCellBorder(totalsSection, Border.NO_BORDER);
 		
-		try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		        PdfDocument pdfDoc = new PdfDocument(new PdfWriter(bos));
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		try (PdfDocument pdfDoc = new PdfDocument(new PdfWriter(bos));
 		        Document doc = new Document(pdfDoc, new PageSize(thermalPrinterPageSize))) {
 			doc.setMargins(6, 12, 2, 12);
 			if (logoSection != null) {
@@ -521,14 +521,12 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 			doc.add(divider);
 			doc.add(new Paragraph("You were served by " + bill.getCashier().getName()).setFont(footerSectionFont)
 			        .setFontSize(8).setTextAlignment(TextAlignment.CENTER));
-			
-			return bos.toByteArray();
 		}
-		catch (IOException e) {
+		catch (Exception e) {
 			LOG.error("Exception caught while writing PDF to stream", e);
 		}
 		
-		return new byte[0];
+		return bos.toByteArray();
 	}
 	
 	private void setInnerCellBorder(Table table, Border border) {
