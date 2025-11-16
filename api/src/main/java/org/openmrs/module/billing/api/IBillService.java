@@ -108,6 +108,17 @@ public interface IBillService extends IEntityDataService<Bill> {
 	Bill getByUuid(String uuid);
 	
 	/**
+	 * Gets a bill by UUID, optionally including voided line items.
+	 *
+	 * @param uuid The bill UUID.
+	 * @param includeVoidedLineItems {@code true} to include voided line items, {@code false} to exclude
+	 *            them.
+	 * @return The bill with the specified UUID.
+	 */
+	@Authorized({ PrivilegeConstants.VIEW_BILLS })
+	Bill getByUuid(String uuid, boolean includeVoidedLineItems);
+	
+	/**
 	 * Gets bill receipt using the specified {@link Bill} settings.
 	 *
 	 * @param bill The bill search settings.
@@ -115,5 +126,5 @@ public interface IBillService extends IEntityDataService<Bill> {
 	 */
 	@Transactional(readOnly = true)
 	@Authorized({ PrivilegeConstants.VIEW_BILLS })
-	File downloadBillReceipt(Bill bill);
+	byte[] downloadBillReceipt(Bill bill);
 }
