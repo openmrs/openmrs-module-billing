@@ -41,11 +41,11 @@ public class ReceiptController extends BaseRestController {
     private static final Logger LOG = LoggerFactory.getLogger(ReceiptController.class);
 
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<byte[]> get(@RequestParam(value = "billId", required = false) Integer billId)
+    public ResponseEntity<byte[]> get(@RequestParam(value = "billUuid", required = false) String billUuid)
             throws IOException {
         IBillService service = Context.getService(IBillService.class);
-        Bill bill = service.getById(billId);
-        LOG.debug("Fetching receipt for billId={}", billId);
+        Bill bill = service.getByUuid(billUuid);
+        LOG.debug("Fetching receipt for billId={}", billUuid);
 
         if (bill == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
