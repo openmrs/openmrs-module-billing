@@ -53,6 +53,4 @@ public class BillTest {
 		
 		assertEquals(BigDecimal.ZERO, bill.getTotalPayments());
 	}
-	
-
 }
