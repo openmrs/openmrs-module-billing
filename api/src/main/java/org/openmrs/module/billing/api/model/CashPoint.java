@@ -27,12 +27,22 @@ public class CashPoint extends BaseOpenmrsMetadata {
 	
 	private Location location;
 	
+	private boolean isDefault = false;
+	
 	public Location getLocation() {
 		return location;
 	}
 	
 	public void setLocation(Location location) {
 		this.location = location;
+	}
+	
+	public boolean getIsDefault() {
+		return isDefault;
+	}
+	
+	public void setIsDefault(boolean isDefault) {
+		this.isDefault = isDefault;
 	}
 	
 	@Override

@@ -962,4 +962,19 @@
                                  baseColumnNames="provider_id" referencedTableName="provider"
                                  referencedColumnNames="provider_id" constraintName="fk_billable_service_provider"/>
     </changeSet>
+    <changeSet id="indiemr-add-is-default-paymentmode-cashpoint" author="mutajonathan">
+        <comment>Adding is_default column to both cashier_payment_mode and cashier_cash_point</comment>
+        <addColumn tableName="cashier_payment_mode">
+            <column name="is_default" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <addColumn tableName="cashier_cash_point">
+            <column name="is_default" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

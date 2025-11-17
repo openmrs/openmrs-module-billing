@@ -57,6 +57,7 @@ public class PaymentModeResource extends BaseRestInstanceTypeResource<PaymentMod
         DelegatingResourceDescription description = super.getRepresentationDescription(rep);
         if (!(rep instanceof RefRepresentation)) {
             description.addProperty("sortOrder");
+            description.addProperty("isDefault");
         } else if (rep instanceof CustomRepresentation) {
             //For custom representation, must be null
             // - let the user decide which properties should be included in the response
@@ -69,5 +70,12 @@ public class PaymentModeResource extends BaseRestInstanceTypeResource<PaymentMod
     @PropertySetter("attributeTypes")
     public void setAttributeTypes(PaymentMode instance, List<PaymentModeAttributeType> attributeTypes) {
         super.baseSetAttributeTypes(instance, attributeTypes);
+    }
+
+    @PropertySetter("isDefault")
+    public void setIsDefault(PaymentMode instance, Boolean isDefault) {
+        if (isDefault != null) {
+            instance.setIsDefault(isDefault);
+        }
     }
 }

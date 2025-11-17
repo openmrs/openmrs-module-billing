@@ -19,6 +19,7 @@ import org.openmrs.module.billing.api.ICashPointService;
 import org.openmrs.module.billing.api.base.entity.IMetadataDataService;
 import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.webservices.rest.web.RestConstants;
+import org.openmrs.module.webservices.rest.web.annotation.PropertySetter;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
@@ -33,6 +34,7 @@ public class CashPointResource extends BaseRestMetadataResource<CashPoint> {
     public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
         DelegatingResourceDescription description = super.getRepresentationDescription(rep);
         description.addProperty("location", Representation.REF);
+        description.addProperty("isDefault");
         return description;
     }
 
@@ -40,6 +42,7 @@ public class CashPointResource extends BaseRestMetadataResource<CashPoint> {
     public DelegatingResourceDescription getCreatableProperties() {
         DelegatingResourceDescription description = super.getCreatableProperties();
         description.addProperty("location");
+        description.addProperty("isDefault");
         return description;
     }
 
@@ -51,5 +54,12 @@ public class CashPointResource extends BaseRestMetadataResource<CashPoint> {
     @Override
     public Class<? extends IMetadataDataService<CashPoint>> getServiceClass() {
         return ICashPointService.class;
+    }
+
+    @PropertySetter("isDefault")
+    public void setIsDefault(CashPoint instance, Boolean isDefault) {
+        if (isDefault != null) {
+            instance.setIsDefault(isDefault);
+        }
     }
 }

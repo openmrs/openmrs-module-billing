@@ -24,12 +24,22 @@ public class PaymentMode extends BaseInstanceCustomizableType<PaymentModeAttribu
 	
 	private Integer sortOrder;
 	
+	private boolean isDefault;
+	
 	public Integer getSortOrder() {
 		return sortOrder;
 	}
 	
 	public void setSortOrder(Integer sortOrder) {
 		this.sortOrder = sortOrder;
+	}
+	
+	public boolean getIsDefault() {
+		return isDefault;
+	}
+	
+	public void setIsDefault(boolean isDefault) {
+		this.isDefault = isDefault;
 	}
 	
 	public PaymentModeAttributeType addAttributeType(String name, String format, String regExp, boolean required) {
