@@ -45,6 +45,7 @@ import java.util.Set;
 @SubResource(parent = BillResource.class, path = "payment", supportedClass = Payment.class,
         supportedOpenmrsVersions = {"2.0 - 2.*"})
 public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillResource> {
+    
     @Override
     public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
         DelegatingResourceDescription description = new DelegatingResourceDescription();
@@ -100,28 +101,14 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
 
     @PropertySetter("amount")
     public void setPaymentAmount(Payment instance, Object price) {
-        // TODO Conversion logic
-        double amount;
-        if (price instanceof Integer) {
-            int rawAmount = (Integer) price;
-            amount = Double.valueOf(rawAmount);
-            instance.setAmount(BigDecimal.valueOf(amount));
-        } else {
-            instance.setAmount(BigDecimal.valueOf((Double) price));
-        }
+        BigDecimal amount = convertToAmount(price, "amount");
+        instance.setAmount(amount);
     }
 
     @PropertySetter("amountTendered")
     public void setPaymentAmountTendered(Payment instance, Object price) {
-        // TODO Conversion logic
-        double amount;
-        if (price instanceof Integer) {
-            int rawAmount = (Integer) price;
-            amount = Double.valueOf(rawAmount);
-            instance.setAmountTendered(BigDecimal.valueOf(amount));
-        } else {
-            instance.setAmountTendered(BigDecimal.valueOf((Double) price));
-        }
+        BigDecimal amount = convertToAmount(price, "amountTendered");
+        instance.setAmountTendered(amount);
     }
 
     @PropertyGetter("dateCreated")
@@ -133,6 +120,9 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
     public Payment save(Payment delegate) {
         IBillService service = Context.getService(IBillService.class);
         Bill bill = delegate.getBill();
+		if (bill == null) {
+			throw new IllegalArgumentException("Payment must be associated with a bill");
+		}
         bill.addPayment(delegate);
         service.save(bill);
 
@@ -197,6 +187,40 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
         return new Payment();
     }
 
+    /**
+     * Converts various numeric types to BigDecimal for payment amounts.
+     * 
+     * @param price the value to convert
+     * @param fieldName the field name for error messages
+     * @return BigDecimal representation of the amount
+     * @throws IllegalArgumentException if the value cannot be converted
+     */
+    private BigDecimal convertToAmount(Object price, String fieldName) {
+        if (price == null) {
+            return null;
+        }
+
+        try {
+            if (price instanceof BigDecimal) {
+                return (BigDecimal) price;
+            } else if (price instanceof Number) {
+                return new BigDecimal(price.toString());
+            } else if (price instanceof String) {
+                return new BigDecimal((String) price);
+            } else {
+                throw new IllegalArgumentException(
+                    String.format("Invalid %s type: %s. Expected a numeric value.", 
+                        fieldName, price.getClass().getSimpleName())
+                );
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(
+                String.format("Invalid %s format: %s. Must be a valid number.", 
+                    fieldName, price.toString()), e
+            );
+        }
+    }
+
     private Bill findBill(IBillService service, String billUUID) {
         Bill bill = service.getByUuid(billUUID);
         if (bill == null) {
@@ -207,7 +231,6 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
     }
 
     private Payment findPayment(Bill bill, final String paymentUUID) {
-
         for (Payment payment : bill.getPayments()) {
             if (payment != null && payment.getUuid().equals(paymentUUID)) {
                 return payment;
