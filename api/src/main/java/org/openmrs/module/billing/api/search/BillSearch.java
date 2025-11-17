@@ -13,11 +13,13 @@
  */
 package org.openmrs.module.billing.api.search;
 
+import java.util.List;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.module.billing.api.base.entity.search.BaseDataTemplateSearch;
 import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.module.billing.api.model.BillStatus;
 
 /**
  * A search template class for the {@link Bill} model.
@@ -25,6 +27,8 @@ import org.openmrs.module.billing.api.model.Bill;
 public class BillSearch extends BaseDataTemplateSearch<Bill> {
 	
 	private Boolean includeVoidedLineItems;
+	
+	private List<BillStatus> statuses;
 	
 	public BillSearch() {
 		this(new Bill(), false);
@@ -55,6 +59,18 @@ public class BillSearch extends BaseDataTemplateSearch<Bill> {
 		return includeVoidedLineItems;
 	}
 	
+	/**
+	 * Sets multiple statuses to filter by. When multiple statuses are provided, bills matching any of
+	 * the specified statuses will be returned.
+	 * 
+	 * @param statuses The list of statuses to filter by.
+	 * @return This BillSearch instance.
+	 */
+	public BillSearch setStatuses(List<BillStatus> statuses) {
+		this.statuses = statuses;
+		return this;
+	}
+	
 	@Override
 	public void updateCriteria(Criteria criteria) {
 		super.updateCriteria(criteria);
@@ -69,7 +85,10 @@ public class BillSearch extends BaseDataTemplateSearch<Bill> {
 		if (bill.getPatient() != null) {
 			criteria.add(Restrictions.eq("patient", bill.getPatient()));
 		}
-		if (bill.getStatus() != null) {
+		if (statuses != null && !statuses.isEmpty()) {
+			// Filter by multiple statuses using IN clause
+			criteria.add(Restrictions.in("status", statuses));
+		} else if (bill.getStatus() != null) {
 			criteria.add(Restrictions.eq("status", bill.getStatus()));
 		}
 		criteria.addOrder(Order.desc("id"));
