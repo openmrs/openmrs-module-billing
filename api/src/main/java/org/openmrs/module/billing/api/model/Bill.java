@@ -271,6 +271,8 @@ public class Bill extends BaseOpenmrsData {
 			throw new NullPointerException("The payment to add must be defined.");
 		}
 		
+		validatePayment(payment);
+		
 		if (this.payments == null) {
 			this.payments = new HashSet<Payment>();
 		}
@@ -289,6 +291,59 @@ public class Bill extends BaseOpenmrsData {
 			} else if (!billFullySettled) {
 				this.setStatus(BillStatus.POSTED);
 			}
+		}
+	}
+	
+	/**
+	 * Validates a payment amount against bill business rules.
+	 * 
+	 * @param payment the payment to validate
+	 * @throws IllegalArgumentException if the payment amount violates business rules
+	 */
+	public void validatePayment(Payment payment) {
+		if (payment == null) {
+			throw new NullPointerException("The payment to validate must be defined.");
+		}
+		
+		if (payment.getAmount() == null) {
+			throw new IllegalArgumentException("Payment amount cannot be null");
+		}
+		
+		BigDecimal amount = payment.getAmount();
+		if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+			throw new IllegalArgumentException("Payment amount must be greater than 0");
+		}
+		
+		BigDecimal billTotal = getTotal();
+		if (billTotal == null) {
+			billTotal = BigDecimal.ZERO;
+		}
+		
+		BigDecimal existingPaymentsTotal = BigDecimal.ZERO;
+		if (this.payments != null) {
+			for (Payment existingPayment : this.payments) {
+				if (existingPayment == null) {
+					continue;
+				}
+				
+				if (Boolean.TRUE.equals(existingPayment.getVoided())) {
+					continue;
+				}
+				
+				if (existingPayment == payment) {
+					continue;
+				}
+				
+				if (existingPayment.getAmount() != null) {
+					existingPaymentsTotal = existingPaymentsTotal.add(existingPayment.getAmount());
+				}
+			}
+		}
+		
+		BigDecimal remainingBalance = billTotal.subtract(existingPaymentsTotal);
+		if (amount.compareTo(remainingBalance) > 0) {
+			throw new IllegalArgumentException(String.format("Payment amount (%s) cannot exceed remaining balance (%s)",
+			    amount.toString(), remainingBalance.toString()));
 		}
 	}
 	
