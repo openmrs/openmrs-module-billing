@@ -14,10 +14,12 @@
 package org.openmrs.module.billing.web.rest.resource;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Patient;
@@ -172,12 +174,18 @@ public class BillResource extends BaseRestDataResource<Bill> {
 
         Patient patient = StringUtils.isNotBlank(patientUuid) ? Context.getPatientService().getPatientByUuid(patientUuid) : null;
         BillStatus billStatus = null;
+        List<BillStatus> statusList = null;
         if (StringUtils.isNotBlank(status)) {
-            if ("UNPAID".equalsIgnoreCase(status)) {
-                // Leave billStatus as null - BillSearch will handle filtering by multiple statuses
-                billStatus = null;
+            // Support comma-separated statuses: status=PENDING,POSTED
+            String[] statusArray = status.split(",");
+            if (statusArray.length > 1) {
+                // Multiple statuses provided
+                statusList = Arrays.stream(statusArray)
+                    .map(s -> BillStatus.valueOf(s.trim().toUpperCase()))
+                    .collect(Collectors.toList());
             } else {
-                billStatus = BillStatus.valueOf(status.toUpperCase());
+                // Single status
+                billStatus = BillStatus.valueOf(status.trim().toUpperCase());
             }
         }
         CashPoint cashPoint = StringUtils.isNotBlank(cashPointUuid) ? Context.getService(ICashPointService.class).getByUuid(cashPointUuid) : null;
@@ -189,9 +197,9 @@ public class BillResource extends BaseRestDataResource<Bill> {
         IBillService service = Context.getService(IBillService.class);
 
         BillSearch billSearch = new BillSearch(searchTemplate, false);
-        // Pass original status string to handle filtering by multiple statuses
-        if ("UNPAID".equalsIgnoreCase(status)) {
-            billSearch.setStatusFilter("UNPAID");
+        // Set multiple statuses if provided, otherwise single status from template will be used
+        if (statusList != null && !statusList.isEmpty()) {
+            billSearch.setStatuses(statusList);
         }
         // Default to false (exclude voided line items) unless explicitly set to true
         boolean includeVoidedLineItems = false;
