@@ -48,18 +48,18 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
     @Override
     public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
         DelegatingResourceDescription description = new DelegatingResourceDescription();
-        description.addProperty("uuid");
-
         if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
+            description.addProperty("uuid");
             description.addProperty("instanceType", Representation.REF);
             description.addProperty("attributes");
             description.addProperty("amount");
             description.addProperty("amountTendered");
             description.addProperty("dateCreated");
             description.addProperty("voided");
+            return description;
         }
 
-        return description;
+        return null;
     }
 
     @Override
