@@ -16,6 +16,7 @@ package org.openmrs.module.billing.api.impl;
 import org.openmrs.module.billing.api.BillLineItemService;
 import org.openmrs.module.billing.api.base.entity.impl.BaseEntityDataServiceImpl;
 import org.openmrs.module.billing.api.base.entity.security.IEntityAuthorizationPrivileges;
+import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,5 +51,43 @@ public class BillLineItemServiceImpl extends BaseEntityDataServiceImpl<BillLineI
 	@Override
 	public String getGetPrivilege() {
 		return null;
+	}
+	
+	@Override
+	public BillLineItem voidEntity(BillLineItem entity, String reason) {
+		BillLineItem voidedLineItem = super.voidEntity(entity, reason);
+		
+		if (voidedLineItem != null && voidedLineItem.getBill() != null) {
+			Bill bill = voidedLineItem.getBill();
+			bill.synchronizeBillStatus();
+		}
+		
+		return voidedLineItem;
+	}
+	
+	@Override
+	public BillLineItem unvoidEntity(BillLineItem entity) {
+		BillLineItem unvoidedLineItem = super.unvoidEntity(entity);
+		
+		if (unvoidedLineItem != null && unvoidedLineItem.getBill() != null) {
+			Bill bill = unvoidedLineItem.getBill();
+			bill.synchronizeBillStatus();
+		}
+		
+		return unvoidedLineItem;
+	}
+	
+	@Override
+	public void purge(BillLineItem entity) {
+		Bill bill = null;
+		if (entity != null && entity.getBill() != null) {
+			bill = entity.getBill();
+		}
+		
+		super.purge(entity);
+		
+		if (bill != null) {
+			bill.synchronizeBillStatus();
+		}
 	}
 }
