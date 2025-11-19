@@ -57,6 +57,7 @@
 		<stockmanagementVersion>1.4.0</stockmanagementVersion>
 		<fhir2Version>2.0.0</fhir2Version>
 		<lombokVersion>1.18.38</lombokVersion>
+		<graalvmVersion>19.0.0</graalvmVersion>
 	</properties>
 
 	<dependencyManagement>
@@ -322,6 +323,18 @@
 				<artifactId>lombok</artifactId>
 				<version>${lombokVersion}</version>
 				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.graalvm.js</groupId>
+				<artifactId>js</artifactId>
+				<version>${graalvmVersion}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.graalvm.js</groupId>
+				<artifactId>js-scriptengine</artifactId>
+				<version>${graalvmVersion}</version>
 			</dependency>
 
 		</dependencies>
