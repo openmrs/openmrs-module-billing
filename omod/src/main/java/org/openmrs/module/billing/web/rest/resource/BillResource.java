@@ -90,6 +90,7 @@ public class BillResource extends BaseRestDataResource<Bill> {
 
     @PropertySetter("lineItems")
     public void setBillLineItems(Bill instance, List<BillLineItem> lineItems) {
+        instance.checkBillIsPending();
         if (instance.getLineItems() == null) {
             instance.setLineItems(new ArrayList<BillLineItem>(lineItems.size()));
         }
