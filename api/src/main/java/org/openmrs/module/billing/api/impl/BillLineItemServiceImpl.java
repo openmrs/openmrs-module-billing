@@ -13,10 +13,13 @@
  */
 package org.openmrs.module.billing.api.impl;
 
+import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillLineItemService;
+import org.openmrs.module.billing.api.IBillableItemsService;
 import org.openmrs.module.billing.api.base.entity.impl.BaseEntityDataServiceImpl;
 import org.openmrs.module.billing.api.base.entity.security.IEntityAuthorizationPrivileges;
 import org.openmrs.module.billing.api.model.BillLineItem;
+import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
@@ -29,7 +32,31 @@ public class BillLineItemServiceImpl extends BaseEntityDataServiceImpl<BillLineI
 	
 	@Override
 	protected void validate(BillLineItem object) {
+		if (object == null) {
+			throw new IllegalArgumentException("The bill line item must be defined.");
+		}
 		
+		// Validate that if item is set, it exists in the database
+		if (object.getItem() != null) {
+			StockManagementService stockService = Context.getService(StockManagementService.class);
+			if (object.getItem().getUuid() != null) {
+				if (stockService.getStockItemByUuid(object.getItem().getUuid()) == null) {
+					throw new IllegalArgumentException(
+					        "A stock item with the given uuid does not exist: " + object.getItem().getUuid());
+				}
+			}
+		}
+		
+		// Validate that if billableService is set, it exists in the database
+		if (object.getBillableService() != null) {
+			IBillableItemsService billableService = Context.getService(IBillableItemsService.class);
+			if (object.getBillableService().getUuid() != null) {
+				if (billableService.getByUuid(object.getBillableService().getUuid()) == null) {
+					throw new IllegalArgumentException("A billable service with the given uuid does not exist: "
+					        + object.getBillableService().getUuid());
+				}
+			}
+		}
 	}
 	
 	@Override
