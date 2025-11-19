@@ -13,12 +13,13 @@
  */
 package org.openmrs.module.billing.api.impl;
 
+import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillLineItemService;
+import org.openmrs.module.billing.api.IBillService;
 import org.openmrs.module.billing.api.base.entity.impl.BaseEntityDataServiceImpl;
 import org.openmrs.module.billing.api.base.entity.security.IEntityAuthorizationPrivileges;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
-import org.openmrs.module.billing.api.model.BillStatus;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
@@ -104,7 +105,12 @@ public class BillLineItemServiceImpl extends BaseEntityDataServiceImpl<BillLineI
 		super.purge(entity);
 		
 		if (bill != null) {
+			// Remove the line item from the bill's collection
+			bill.removeLineItem(entity);
 			bill.synchronizeBillStatus();
+			// Save the bill to persist the collection change
+			IBillService billService = Context.getService(IBillService.class);
+			billService.save(bill);
 		}
 	}
 }
