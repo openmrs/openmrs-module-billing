@@ -87,6 +87,10 @@
 			<groupId>com.itextpdf</groupId>
 			<artifactId>font-asian</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
 	</dependencies>
 
 	<build>

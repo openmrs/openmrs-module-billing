@@ -1,0 +1,89 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+	<!-- Concepts for testing -->
+	<concept concept_id="100" retired="false" datatype_id="4"
+	         class_id="1" is_set="false" creator="1" date_created="2005-01-01 00:00:00.0" changed_by="1"
+	         date_changed="2005-01-01 00:00:00.0" uuid="0cbe2ed4-cd5f-3f46-9459-26127c9265ab"/>
+	<concept_name concept_id="100" name="Test Service 1" locale="en" creator="1" date_created="2005-01-01 00:00:00.0"
+	              concept_name_id="100" voided="false" uuid="9bc5493a-f528-40c111177-145a4b119ca7" concept_name_type="FULLY_SPECIFIED"
+	              locale_preferred="1"/>
+
+	<concept concept_id="101" retired="false" datatype_id="4"
+	         class_id="1" is_set="false" creator="1" date_created="2005-01-01 00:00:00.0" changed_by="1"
+	         date_changed="2005-01-01 00:00:00.0" uuid="0cbe2ed3-cd5f-4f46-9459-26127c9265ac"/>
+
+	<concept_name concept_id="101" name="Test Service 2" locale="en" creator="1" date_created="2005-01-01 00:00:00.0"
+	              concept_name_id="101" voided="false" uuid="9bc5693a-f558-40c9-8177-145a4b119ca8" concept_name_type="FULLY_SPECIFIED"
+	              locale_preferred="1"/>
+
+	<concept concept_id="102" retired="false" datatype_id="4"
+	         class_id="1" is_set="false" creator="1" date_created="2005-01-01 00:00:00.0" changed_by="1"
+	         date_changed="2005-01-01 00:00:00.0" uuid="0cbe2ed3-cd5f-4f46-9459-26127c9265ad"/>
+	<concept_name concept_id="102" name="Test Commodity 1" locale="en" creator="1" date_created="2005-01-01 00:00:00.0"
+	              concept_name_id="102" voided="false" uuid="9bc5693a-f558-40c9-8177-145a4b119ca9" concept_name_type="FULLY_SPECIFIED"
+	              locale_preferred="1"/>
+
+	<concept concept_id="103" retired="false" datatype_id="4"
+	         class_id="1" is_set="false" creator="1" date_created="2005-01-01 00:00:00.0" changed_by="1"
+	         date_changed="2005-01-01 00:00:00.0" uuid="0cbe2ed3-cd5f-4f46-9459-26127c9265ae"/>
+	<concept_name concept_id="103" name="Test Service 3" locale="en" creator="1" date_created="2005-01-01 00:00:00.0"
+	              concept_name_id="103" voided="false" uuid="9bc5693a-f558-40c9-8177-145a4b119c10" concept_name_type="FULLY_SPECIFIED"
+	              locale_preferred="1"/>
+
+	<!-- Billing Exemption Categories -->
+	<!-- Active SERVICE category for children -->
+	<billing_exemption_category exemption_category_id="0" category_type="SERVICE" exemption_key="CHILD_0_5"
+	                            name="Children 0-5 Service Exemption" description="Service exemptions for children aged 0-5"
+	                            creator="1" date_created="2012-01-01 00:00:00.0" retired="false"
+	                            uuid="550e8400-e29b-41d4-a716-446655440001"/>
+
+	<!-- Active SERVICE category for elderly -->
+	<billing_exemption_category exemption_category_id="1" category_type="SERVICE" exemption_key="ELDERLY_65_PLUS"
+	                            name="Elderly 65+ Service Exemption" description="Service exemptions for elderly aged 65+"
+	                            creator="1" date_created="2012-01-01 00:00:00.0" retired="false"
+	                            uuid="550e8400-e29b-41d4-a716-446655440002"/>
+
+	<!-- Active COMMODITY category -->
+	<billing_exemption_category exemption_category_id="2" category_type="COMMODITY" exemption_key="CHILD_0_5"
+	                            name="Children 0-5 Commodity Exemption" description="Commodity exemptions for children aged 0-5"
+	                            creator="1" date_created="2012-01-01 00:00:00.0" retired="false"
+	                            uuid="550e8400-e29b-41d4-a716-446655440003"/>
+
+	<!-- Retired category -->
+	<billing_exemption_category exemption_category_id="3" category_type="SERVICE" exemption_key="PREGNANT_WOMEN"
+	                            name="Pregnant Women Service Exemption" description="Service exemptions for pregnant women"
+	                            creator="1" date_created="2012-01-01 00:00:00.0" retired="true"
+	                            retired_by="1" date_retired="2013-01-01 00:00:00.0" retire_reason="No longer in use"
+	                            uuid="550e8400-e29b-41d4-a716-446655440004"/>
+
+	<!-- Billing Exemption Concepts -->
+	<!-- Active exemption concepts for category 0 (CHILD_0_5 SERVICE) -->
+	<billing_exemption_concept exemption_concept_id="0" exemption_category_id="0" concept_id="100"
+	                           creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                           uuid="660e8400-e29b-41d4-a716-446655440001"/>
+
+	<billing_exemption_concept exemption_concept_id="1" exemption_category_id="0" concept_id="101"
+	                           creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                           uuid="660e8400-e29b-41d4-a716-446655440002"/>
+
+	<!-- Active exemption concept for category 1 (ELDERLY_65_PLUS SERVICE) -->
+	<billing_exemption_concept exemption_concept_id="2" exemption_category_id="1" concept_id="100"
+	                           creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                           uuid="660e8400-e29b-41d4-a716-446655440003"/>
+
+	<!-- Active exemption concept for category 2 (CHILD_0_5 COMMODITY) -->
+	<billing_exemption_concept exemption_concept_id="3" exemption_category_id="2" concept_id="102"
+	                           creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                           uuid="660e8400-e29b-41d4-a716-446655440004"/>
+
+	<!-- Voided exemption concept -->
+	<billing_exemption_concept exemption_concept_id="4" exemption_category_id="0" concept_id="103"
+	                           creator="1" date_created="2012-01-01 00:00:00.0" voided="true"
+	                           voided_by="1" date_voided="2013-01-01 00:00:00.0" void_reason="Test void reason"
+	                           uuid="660e8400-e29b-41d4-a716-446655440005"/>
+
+	<!-- Exemption concept for retired category -->
+	<billing_exemption_concept exemption_concept_id="5" exemption_category_id="3" concept_id="101"
+	                           creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                           uuid="660e8400-e29b-41d4-a716-446655440006"/>
+</dataset>
