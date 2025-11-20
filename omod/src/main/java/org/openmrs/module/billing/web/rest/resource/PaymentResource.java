@@ -13,6 +13,7 @@
  */
 package org.openmrs.module.billing.web.rest.resource;
 
+import org.openmrs.User;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
 import org.openmrs.module.billing.api.IBillService;
@@ -54,6 +55,7 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
             description.addProperty("attributes");
             description.addProperty("amount");
             description.addProperty("amountTendered");
+            description.addProperty("cashier", Representation.REF);
             description.addProperty("dateCreated");
             description.addProperty("voided");
             return description;
@@ -69,6 +71,7 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
         description.addProperty("attributes");
         description.addProperty("amount");
         description.addProperty("amountTendered");
+        description.addProperty("cashier");
 
         return description;
     }
@@ -124,6 +127,17 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
         }
     }
 
+    @PropertySetter("cashier")
+    public void setCashier(Payment instance, String uuid) {
+        if (uuid != null) {
+            User cashier = Context.getUserService().getUserByUuid(uuid);
+            if (cashier == null) {
+                throw new ObjectNotFoundException();
+            }
+            instance.setCashier(cashier);
+        }
+    }
+
     @PropertyGetter("dateCreated")
     public Long getPaymentDate(Payment instance) {
         return instance.getDateCreated().getTime();
@@ -131,6 +145,11 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
 
     @Override
     public Payment save(Payment delegate) {
+        // Auto-assign cashier if not set
+        if (delegate.getCashier() == null) {
+            delegate.setCashier(Context.getAuthenticatedUser());
+        }
+        
         IBillService service = Context.getService(IBillService.class);
         Bill bill = delegate.getBill();
         bill.addPayment(delegate);
