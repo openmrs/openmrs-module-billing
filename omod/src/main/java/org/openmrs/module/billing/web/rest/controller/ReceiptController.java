@@ -16,8 +16,6 @@ package org.openmrs.module.billing.web.rest.controller;
 import java.io.IOException;
 
 import org.openmrs.api.context.Context;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.openmrs.module.billing.api.IBillService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.webservices.rest.web.RestConstants;
@@ -38,14 +36,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/billing/receipt")
 public class ReceiptController extends BaseRestController {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ReceiptController.class);
-
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<byte[]> get(@RequestParam(value = "billUuid", required = false) String billUuid)
             throws IOException {
         IBillService service = Context.getService(IBillService.class);
         Bill bill = service.getByUuid(billUuid);
-        LOG.debug("Fetching receipt for billId={}", billUuid);
 
         if (bill == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -53,7 +48,6 @@ public class ReceiptController extends BaseRestController {
 
         byte[] pdfFile = service.downloadBillReceipt(bill);
         if (pdfFile != null && pdfFile.length > 0) {
-            LOG.debug("Generated receipt PDF for billId={} with bytes={}", bill.getId(), pdfFile.length);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
             headers.setContentLength(pdfFile.length);

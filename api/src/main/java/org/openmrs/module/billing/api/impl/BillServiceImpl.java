@@ -333,7 +333,7 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		 * Thermal printer: 4 x 10 inches paper 4 inches = 4 x 72 = 288 5 inches = 10 x 72 = 720
 		 */
 		int FONT_SIZE_12 = 12;
-		Rectangle thermalPrinterPageSize = new Rectangle(288, 14400);
+		Rectangle thermalPrinterPageSize = new Rectangle(288, 720);
 		
 		PdfFont timesRoman;
 		PdfFont courierBold;
@@ -524,6 +524,7 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		}
 		catch (Exception e) {
 			LOG.error("Exception caught while writing PDF to stream", e);
+			return bos.toByteArray();
 		}
 		
 		return bos.toByteArray();
