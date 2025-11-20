@@ -262,6 +262,7 @@
 
 			<column name="bill_id" type="int"><constraints nullable="false" /></column>
 			<column name="payment_mode_id" type="int"><constraints nullable="false"/></column>
+			<column name="cashier_id" type="int"><constraints nullable="false"/></column>
 
 			<column name="amount" type="decimal(10,2)"><constraints nullable="false"/></column>
 
@@ -534,6 +535,9 @@
 		<addForeignKeyConstraint constraintName="cashier_bill_payment_payment_mode_id_fk"
 								 baseTableName="cashier_bill_payment" baseColumnNames="payment_mode_id"
 								 referencedTableName="cashier_payment_mode" referencedColumnNames="payment_mode_id"/>
+		<addForeignKeyConstraint constraintName="cashier_bill_payment_cashier_fk"
+								 baseTableName="cashier_bill_payment" baseColumnNames="cashier_id"
+								 referencedTableName="users" referencedColumnNames="user_id"/>
 		<addForeignKeyConstraint constraintName="cashier_bill_payment_creator_fk"
 								 baseTableName="cashier_bill_payment" baseColumnNames="creator"
 								 referencedTableName="users" referencedColumnNames="user_id"/>
@@ -978,13 +982,30 @@
 				<columnExists tableName="cashier_bill_payment" columnName="cashier_id"/>
 			</not>
 		</preConditions>
-		<comment>Add cashier_id column to cashier_bill_payment table to track which user processed each payment</comment>
+		<comment>Add cashier_id column to cashier_bill_payment table for existing installations</comment>
+		<comment>This changeset handles migration for databases that were created before the cashier_id field was added to the initial schema</comment>
 		
 		<addColumn tableName="cashier_bill_payment">
 			<column name="cashier_id" type="int">
 				<constraints nullable="true"/>
 			</column>
 		</addColumn>
+		
+		<comment>Set cashier_id to creator for existing payments (data migration)</comment>
+		<sql>
+			UPDATE cashier_bill_payment SET cashier_id = creator WHERE cashier_id IS NULL
+		</sql>
+		
+		<addNotNullConstraint tableName="cashier_bill_payment" columnName="cashier_id" columnDataType="int"/>
+	</changeSet>
+
+	<changeSet id="openmrs.billing-003-v3.1.0-20251120" author="OpenMRS">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<foreignKeyConstraintExists foreignKeyName="cashier_bill_payment_cashier_fk"/>
+			</not>
+		</preConditions>
+		<comment>Add foreign key constraint for cashier_id if it doesn't exist (for existing installations)</comment>
 		
 		<addForeignKeyConstraint constraintName="cashier_bill_payment_cashier_fk"
 								 baseTableName="cashier_bill_payment" baseColumnNames="cashier_id"
@@ -993,12 +1014,5 @@
 		<createIndex indexName="cashier_bill_payment_cashier_idx" tableName="cashier_bill_payment">
 			<column name="cashier_id"/>
 		</createIndex>
-		
-		<comment>Set cashier_id to creator for existing payments (data migration)</comment>
-		<sql>
-			UPDATE cashier_bill_payment SET cashier_id = creator WHERE cashier_id IS NULL
-		</sql>
-		
-		<addNotNullConstraint tableName="cashier_bill_payment" columnName="cashier_id" columnDataType="int"/>
 	</changeSet>
 </databaseChangeLog>
