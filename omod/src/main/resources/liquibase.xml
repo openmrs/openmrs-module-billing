@@ -1002,4 +1002,3 @@
 		<addNotNullConstraint tableName="cashier_bill_payment" columnName="cashier_id" columnDataType="int"/>
 	</changeSet>
 </databaseChangeLog>
-</databaseChangeLog>
