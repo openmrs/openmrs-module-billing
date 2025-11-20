@@ -945,4 +945,34 @@
 			<where>property = 'cashier.receipt.logoPath'</where>
 		</update>
 	</changeSet>
+
+	<changeSet id="openmrs.billing-002-v3.1.0-20251120" author="OpenMRS">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<columnExists tableName="cashier_bill_payment" columnName="cashier_id"/>
+			</not>
+		</preConditions>
+		<comment>Add cashier_id column to cashier_bill_payment table to track which user processed each payment</comment>
+		
+		<addColumn tableName="cashier_bill_payment">
+			<column name="cashier_id" type="int">
+				<constraints nullable="true"/>
+			</column>
+		</addColumn>
+		
+		<addForeignKeyConstraint constraintName="cashier_bill_payment_cashier_fk"
+								 baseTableName="cashier_bill_payment" baseColumnNames="cashier_id"
+								 referencedTableName="users" referencedColumnNames="user_id"/>
+		
+		<createIndex indexName="cashier_bill_payment_cashier_idx" tableName="cashier_bill_payment">
+			<column name="cashier_id"/>
+		</createIndex>
+		
+		<comment>Set cashier_id to creator for existing payments (data migration)</comment>
+		<sql>
+			UPDATE cashier_bill_payment SET cashier_id = creator WHERE cashier_id IS NULL
+		</sql>
+		
+		<addNotNullConstraint tableName="cashier_bill_payment" columnName="cashier_id" columnDataType="int"/>
+	</changeSet>
 </databaseChangeLog>
