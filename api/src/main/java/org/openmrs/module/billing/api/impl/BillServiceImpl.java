@@ -245,9 +245,7 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		boolean includeVoidedLineItems = billSearch.getIncludeVoidedLineItems() != null
 		        && billSearch.getIncludeVoidedLineItems();
 		
-		List<Bill> results = executeCriteria(Bill.class, pagingInfo, (Criteria criteria) -> {
-			billSearch.updateCriteria(criteria);
-		});
+		List<Bill> results = executeCriteria(Bill.class, pagingInfo, billSearch::updateCriteria);
 		
 		removeNullLineItems(results, includeVoidedLineItems);
 		

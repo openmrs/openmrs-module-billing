@@ -171,6 +171,7 @@ public class BillResource extends BaseRestDataResource<Bill> {
         String status = context.getRequest().getParameter("status");
         String cashPointUuid = context.getRequest().getParameter("cashPointUuid");
         String includeVoidedLineItemsParam = context.getRequest().getParameter("includeAll");
+        String patientName = context.getRequest().getParameter("patientName");
 
         Patient patient = StringUtils.isNotBlank(patientUuid) ? Context.getPatientService().getPatientByUuid(patientUuid) : null;
         BillStatus billStatus = null;
@@ -197,6 +198,11 @@ public class BillResource extends BaseRestDataResource<Bill> {
         IBillService service = Context.getService(IBillService.class);
 
         BillSearch billSearch = new BillSearch(searchTemplate, false);
+
+        if (StringUtils.isNotBlank(patientName)) {
+            billSearch.setPatientName(patientName);
+        }
+
         // Set multiple statuses if provided, otherwise single status from template will be used
         if (statusList != null && !statusList.isEmpty()) {
             billSearch.setStatuses(statusList);
