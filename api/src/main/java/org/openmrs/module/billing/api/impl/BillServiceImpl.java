@@ -332,7 +332,7 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		 * Thermal printer: 4 x 10 inches paper 4 inches = 4 x 72 = 288 5 inches = 10 x 72 = 720
 		 */
 		int FONT_SIZE_12 = 12;
-		Rectangle thermalPrinterPageSize = new Rectangle(288, 14400);
+		Rectangle thermalPrinterPageSize = new Rectangle(288, 720);
 		
 		PdfFont timesRoman;
 		PdfFont courierBold;
@@ -500,8 +500,8 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		setInnerCellBorder(amountDueSection, Border.NO_BORDER);
 		setInnerCellBorder(totalsSection, Border.NO_BORDER);
 		
-		try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		        PdfDocument pdfDoc = new PdfDocument(new PdfWriter(bos));
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		try (PdfDocument pdfDoc = new PdfDocument(new PdfWriter(bos));
 		        Document doc = new Document(pdfDoc, new PageSize(thermalPrinterPageSize))) {
 			doc.setMargins(6, 12, 2, 12);
 			if (logoSection != null) {
@@ -520,14 +520,13 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 			doc.add(divider);
 			doc.add(new Paragraph("You were served by " + bill.getCashier().getName()).setFont(footerSectionFont)
 			        .setFontSize(8).setTextAlignment(TextAlignment.CENTER));
-			
+		}
+		catch (Exception e) {
+			LOG.error("Exception caught while writing PDF to stream", e);
 			return bos.toByteArray();
 		}
-		catch (IOException e) {
-			LOG.error("Exception caught while writing PDF to stream", e);
-		}
 		
-		return new byte[0];
+		return bos.toByteArray();
 	}
 	
 	private void setInnerCellBorder(Table table, Border border) {
