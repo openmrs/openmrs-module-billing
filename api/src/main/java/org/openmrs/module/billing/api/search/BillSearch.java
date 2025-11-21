@@ -14,9 +14,13 @@
 package org.openmrs.module.billing.api.search;
 
 import java.util.List;
+
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.openmrs.Patient;
+import org.openmrs.api.context.Context;
+import org.openmrs.api.db.hibernate.HibernatePatientDAO;
 import org.openmrs.module.billing.api.base.entity.search.BaseDataTemplateSearch;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillStatus;
@@ -29,6 +33,8 @@ public class BillSearch extends BaseDataTemplateSearch<Bill> {
 	private Boolean includeVoidedLineItems;
 	
 	private List<BillStatus> statuses;
+	
+	private String patientName;
 	
 	public BillSearch() {
 		this(new Bill(), false);
@@ -85,6 +91,17 @@ public class BillSearch extends BaseDataTemplateSearch<Bill> {
 		if (bill.getPatient() != null) {
 			criteria.add(Restrictions.eq("patient", bill.getPatient()));
 		}
+		
+		if (patientName != null && !patientName.trim().isEmpty()) {
+			List<Patient> matchingPatients = Context.getRegisteredComponent("patientDAO", HibernatePatientDAO.class)
+			        .getPatients(patientName, 0, null);
+			if (matchingPatients != null && !matchingPatients.isEmpty()) {
+				criteria.add(Restrictions.in("patient", matchingPatients));
+			} else {
+                criteria.add(Restrictions.sqlRestriction("1 = 2"));
+			}
+		}
+		
 		if (statuses != null && !statuses.isEmpty()) {
 			// Filter by multiple statuses using IN clause
 			criteria.add(Restrictions.in("status", statuses));
@@ -92,5 +109,13 @@ public class BillSearch extends BaseDataTemplateSearch<Bill> {
 			criteria.add(Restrictions.eq("status", bill.getStatus()));
 		}
 		criteria.addOrder(Order.desc("id"));
+	}
+	
+	public String getPatientName() {
+		return patientName;
+	}
+	
+	public void setPatientName(String patientName) {
+		this.patientName = patientName;
 	}
 }
