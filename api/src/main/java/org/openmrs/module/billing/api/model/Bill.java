@@ -177,6 +177,12 @@ public class Bill extends BaseOpenmrsData {
 	}
 	
 	public void setLineItems(List<BillLineItem> lineItems) {
+		// Only validate if bill already exists (has an ID) and lineItems is already initialized
+		// This prevents validation during Hibernate entity loading (when lineItems is null)
+		// but still validates user modifications (when lineItems is already set)
+		if (this.getId() != null && this.lineItems != null) {
+			checkBillIsPending();
+		}
 		this.lineItems = lineItems;
 	}
 	
@@ -215,6 +221,8 @@ public class Bill extends BaseOpenmrsData {
 			throw new NullPointerException("The list item to add must be defined.");
 		}
 		
+		checkBillIsPending();
+		
 		if (this.lineItems == null) {
 			this.lineItems = new ArrayList<BillLineItem>();
 		}
@@ -225,6 +233,7 @@ public class Bill extends BaseOpenmrsData {
 	
 	public void removeLineItem(BillLineItem item) {
 		if (item != null) {
+			checkBillIsPending();
 			if (this.lineItems != null) {
 				this.lineItems.remove(item);
 			}
@@ -329,6 +338,21 @@ public class Bill extends BaseOpenmrsData {
 	private void checkAuthorizedToAdjust() {
 		if (!Context.hasPrivilege(PrivilegeConstants.ADJUST_BILLS)) {
 			throw new AccessControlException("Access denied to adjust bill.");
+		}
+	}
+	
+	/**
+	 * Checks if the bill is in PENDING state. Throws an exception if the bill exists and is not
+	 * PENDING.
+	 * 
+	 * @throws IllegalStateException if the bill is not in PENDING state
+	 */
+	public void checkBillIsPending() {
+		// Only check if bill already exists (has an ID)
+		if (this.getId() != null && this.getStatus() != BillStatus.PENDING) {
+			throw new IllegalStateException(
+			        "Line items can only be modified when the bill is in PENDING state. Current status: "
+			                + this.getStatus());
 		}
 	}
 	

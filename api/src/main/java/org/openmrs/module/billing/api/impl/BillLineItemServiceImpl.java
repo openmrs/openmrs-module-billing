@@ -13,7 +13,9 @@
  */
 package org.openmrs.module.billing.api.impl;
 
+import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillLineItemService;
+import org.openmrs.module.billing.api.IBillService;
 import org.openmrs.module.billing.api.base.entity.impl.BaseEntityDataServiceImpl;
 import org.openmrs.module.billing.api.base.entity.security.IEntityAuthorizationPrivileges;
 import org.openmrs.module.billing.api.model.Bill;
@@ -31,6 +33,16 @@ public class BillLineItemServiceImpl extends BaseEntityDataServiceImpl<BillLineI
 	@Override
 	protected void validate(BillLineItem object) {
 		
+	}
+	
+	@Override
+	public BillLineItem save(BillLineItem entity) {
+		// Check if the line item's bill is PENDING before saving
+		if (entity != null && entity.getBill() != null) {
+			Bill bill = entity.getBill();
+			bill.checkBillIsPending();
+		}
+		return super.save(entity);
 	}
 	
 	@Override
@@ -55,6 +67,11 @@ public class BillLineItemServiceImpl extends BaseEntityDataServiceImpl<BillLineI
 	
 	@Override
 	public BillLineItem voidEntity(BillLineItem entity, String reason) {
+		// Check if the line item's bill is PENDING before voiding
+		if (entity != null && entity.getBill() != null) {
+			Bill bill = entity.getBill();
+			bill.checkBillIsPending();
+		}
 		BillLineItem voidedLineItem = super.voidEntity(entity, reason);
 		
 		if (voidedLineItem != null && voidedLineItem.getBill() != null) {
@@ -82,12 +99,18 @@ public class BillLineItemServiceImpl extends BaseEntityDataServiceImpl<BillLineI
 		Bill bill = null;
 		if (entity != null && entity.getBill() != null) {
 			bill = entity.getBill();
+			bill.checkBillIsPending();
 		}
 		
 		super.purge(entity);
 		
 		if (bill != null) {
+			// Remove the line item from the bill's collection
+			bill.removeLineItem(entity);
 			bill.synchronizeBillStatus();
+			// Save the bill to persist the collection change
+			IBillService billService = Context.getService(IBillService.class);
+			billService.save(bill);
 		}
 	}
 }
