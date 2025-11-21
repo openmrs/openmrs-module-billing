@@ -54,6 +54,7 @@ import org.openmrs.Patient;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
+import org.openmrs.validator.ValidateUtil;
 import org.openmrs.module.billing.api.IBillService;
 import org.openmrs.module.billing.api.IReceiptNumberGenerator;
 import org.openmrs.module.billing.api.ReceiptNumberGeneratorFactory;
@@ -95,8 +96,18 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 	
 	DecimalFormat df = new DecimalFormat("0.00");
 	
+	/**
+	 * Validates a Bill object using the registered BillValidator. This method is called before
+	 * persisting a Bill to the database.
+	 * 
+	 * @param bill the Bill to validate
+	 * @throws org.openmrs.api.ValidationException if validation fails
+	 */
 	@Override
 	protected void validate(Bill bill) {
+		// Validate using OpenMRS validation framework
+		// This will invoke all registered validators for the Bill class (BillValidator)
+		ValidateUtil.validate(bill);
 	}
 	
 	/**
