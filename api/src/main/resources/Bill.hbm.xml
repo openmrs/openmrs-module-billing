@@ -196,6 +196,7 @@
 		<many-to-one name="bill" class="org.openmrs.module.billing.api.model.Bill" column="bill_id" not-null="true"/>
 		<many-to-one name="instanceType" class="org.openmrs.module.billing.api.model.PaymentMode"
 		             column="payment_mode_id" not-null="true"/>
+		<many-to-one name="cashier" class="org.openmrs.User" column="cashier_id" not-null="true"/>
 
 		<property name="amount" type="java.math.BigDecimal" column="amount" not-null="true"/>
 		<property name="amountTendered" type="java.math.BigDecimal" column="amount_tendered" not-null="true"/>
