@@ -32,16 +32,18 @@ public class BillLineItemServiceImpl extends BaseEntityDataServiceImpl<BillLineI
 	
 	@Override
 	protected void validate(BillLineItem object) {
-		
+		if (object != null && object.getBill() != null) {
+			Bill bill = object.getBill();
+			if (!bill.isPending()) {
+				throw new IllegalStateException(
+				        "Line items can only be modified when the bill is in PENDING state. Current status: "
+				                + bill.getStatus());
+			}
+		}
 	}
 	
 	@Override
 	public BillLineItem save(BillLineItem entity) {
-		// Check if the line item's bill is PENDING before saving
-		if (entity != null && entity.getBill() != null) {
-			Bill bill = entity.getBill();
-			bill.checkBillIsPending();
-		}
 		return super.save(entity);
 	}
 	
@@ -67,11 +69,6 @@ public class BillLineItemServiceImpl extends BaseEntityDataServiceImpl<BillLineI
 	
 	@Override
 	public BillLineItem voidEntity(BillLineItem entity, String reason) {
-		// Check if the line item's bill is PENDING before voiding
-		if (entity != null && entity.getBill() != null) {
-			Bill bill = entity.getBill();
-			bill.checkBillIsPending();
-		}
 		BillLineItem voidedLineItem = super.voidEntity(entity, reason);
 		
 		if (voidedLineItem != null && voidedLineItem.getBill() != null) {
@@ -99,7 +96,12 @@ public class BillLineItemServiceImpl extends BaseEntityDataServiceImpl<BillLineI
 		Bill bill = null;
 		if (entity != null && entity.getBill() != null) {
 			bill = entity.getBill();
-			bill.checkBillIsPending();
+			// Validate before purging (purge doesn't call validate())
+			if (!bill.isPending()) {
+				throw new IllegalStateException(
+				        "Line items can only be modified when the bill is in PENDING state. Current status: "
+				                + bill.getStatus());
+			}
 		}
 		
 		super.purge(entity);
