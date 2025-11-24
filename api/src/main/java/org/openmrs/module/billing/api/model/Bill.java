@@ -177,6 +177,14 @@ public class Bill extends BaseOpenmrsData {
 	}
 	
 	public void setLineItems(List<BillLineItem> lineItems) {
+		// Only validate if lineItems is already initialized
+		// This prevents validation during Hibernate entity loading (when lineItems is null)
+		// but still validates user modifications (when lineItems is already set)
+		if (this.lineItems != null && !isPending()) {
+			throw new IllegalStateException(
+			        "Line items can only be modified when the bill is in PENDING state. Current status: "
+			                + this.getStatus());
+		}
 		this.lineItems = lineItems;
 	}
 	
@@ -215,6 +223,12 @@ public class Bill extends BaseOpenmrsData {
 			throw new NullPointerException("The list item to add must be defined.");
 		}
 		
+		if (!isPending()) {
+			throw new IllegalStateException(
+			        "Line items can only be modified when the bill is in PENDING state. Current status: "
+			                + this.getStatus());
+		}
+		
 		if (this.lineItems == null) {
 			this.lineItems = new ArrayList<BillLineItem>();
 		}
@@ -225,6 +239,11 @@ public class Bill extends BaseOpenmrsData {
 	
 	public void removeLineItem(BillLineItem item) {
 		if (item != null) {
+			if (!isPending()) {
+				throw new IllegalStateException(
+				        "Line items can only be modified when the bill is in PENDING state. Current status: "
+				                + this.getStatus());
+			}
 			if (this.lineItems != null) {
 				this.lineItems.remove(item);
 			}
@@ -330,6 +349,16 @@ public class Bill extends BaseOpenmrsData {
 		if (!Context.hasPrivilege(PrivilegeConstants.ADJUST_BILLS)) {
 			throw new AccessControlException("Access denied to adjust bill.");
 		}
+	}
+	
+	/**
+	 * Checks if the bill is in PENDING state.
+	 * 
+	 * @return {@code true} if the bill is new (no ID) or is in PENDING state, {@code false} otherwise
+	 */
+	public boolean isPending() {
+		// New bills (no ID) are considered pending, existing bills must be in PENDING state
+		return this.getId() == null || this.getStatus() == BillStatus.PENDING;
 	}
 	
 	public void recalculateLineItemOrder() {

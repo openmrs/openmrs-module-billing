@@ -13,7 +13,9 @@
  */
 package org.openmrs.module.billing.api.impl;
 
+import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillLineItemService;
+import org.openmrs.module.billing.api.IBillService;
 import org.openmrs.module.billing.api.base.entity.impl.BaseEntityDataServiceImpl;
 import org.openmrs.module.billing.api.base.entity.security.IEntityAuthorizationPrivileges;
 import org.openmrs.module.billing.api.model.Bill;
@@ -30,7 +32,14 @@ public class BillLineItemServiceImpl extends BaseEntityDataServiceImpl<BillLineI
 	
 	@Override
 	protected void validate(BillLineItem object) {
-		
+		if (object != null && object.getBill() != null) {
+			Bill bill = object.getBill();
+			if (!bill.isPending()) {
+				throw new IllegalStateException(
+				        "Line items can only be modified when the bill is in PENDING state. Current status: "
+				                + bill.getStatus());
+			}
+		}
 	}
 	
 	@Override
@@ -82,12 +91,23 @@ public class BillLineItemServiceImpl extends BaseEntityDataServiceImpl<BillLineI
 		Bill bill = null;
 		if (entity != null && entity.getBill() != null) {
 			bill = entity.getBill();
+			// Validate before purging (purge doesn't call validate())
+			if (!bill.isPending()) {
+				throw new IllegalStateException(
+				        "Line items can only be modified when the bill is in PENDING state. Current status: "
+				                + bill.getStatus());
+			}
 		}
 		
 		super.purge(entity);
 		
 		if (bill != null) {
+			// Remove the line item from the bill's collection
+			bill.removeLineItem(entity);
 			bill.synchronizeBillStatus();
+			// Save the bill to persist the collection change
+			IBillService billService = Context.getService(IBillService.class);
+			billService.save(bill);
 		}
 	}
 }
