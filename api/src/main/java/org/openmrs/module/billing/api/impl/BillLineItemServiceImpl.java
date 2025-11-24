@@ -43,11 +43,6 @@ public class BillLineItemServiceImpl extends BaseEntityDataServiceImpl<BillLineI
 	}
 	
 	@Override
-	public BillLineItem save(BillLineItem entity) {
-		return super.save(entity);
-	}
-	
-	@Override
 	public String getVoidPrivilege() {
 		return null;
 	}
