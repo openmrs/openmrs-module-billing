@@ -13,9 +13,12 @@
  */
 package org.openmrs.module.billing.api.impl;
 
+import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillLineItemService;
+import org.openmrs.module.billing.api.IBillService;
 import org.openmrs.module.billing.api.base.entity.impl.BaseEntityDataServiceImpl;
 import org.openmrs.module.billing.api.base.entity.security.IEntityAuthorizationPrivileges;
+import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.validator.ValidateUtil;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,15 +32,27 @@ public class BillLineItemServiceImpl extends BaseEntityDataServiceImpl<BillLineI
 	}
 	
 	/**
-	 * Validates a BillLineItem object using the registered BillLineItemValidator. This method is called
-	 * before persisting a BillLineItem to the database.
+	 * Validates a BillLineItem object. This method performs two types of validation:
+	 * 1. Business rule validation - ensures line items are only modified when bill is PENDING
+	 * 2. Entity validation using OpenMRS framework - validates entity properties
 	 * 
 	 * @param billLineItem the BillLineItem to validate
-	 * @throws org.openmrs.api.ValidationException if validation fails
+	 * @throws IllegalStateException if bill is not in PENDING state
+	 * @throws org.openmrs.api.ValidationException if entity validation fails
 	 */
 	@Override
 	protected void validate(BillLineItem billLineItem) {
-		// Validate using OpenMRS validation framework
+		// Business rule validation: Check bill status before allowing modifications
+		if (billLineItem != null && billLineItem.getBill() != null) {
+			Bill bill = billLineItem.getBill();
+			if (!bill.isPending()) {
+				throw new IllegalStateException(
+				        "Line items can only be modified when the bill is in PENDING state. Current status: "
+				                + bill.getStatus());
+			}
+		}
+		
+		// Entity validation: Validate using OpenMRS validation framework
 		// This will invoke all registered validators for the BillLineItem class (BillLineItemValidator)
 		ValidateUtil.validate(billLineItem);
 	}
@@ -60,5 +75,54 @@ public class BillLineItemServiceImpl extends BaseEntityDataServiceImpl<BillLineI
 	@Override
 	public String getGetPrivilege() {
 		return null;
+	}
+	
+	@Override
+	public BillLineItem voidEntity(BillLineItem entity, String reason) {
+		BillLineItem voidedLineItem = super.voidEntity(entity, reason);
+		
+		if (voidedLineItem != null && voidedLineItem.getBill() != null) {
+			Bill bill = voidedLineItem.getBill();
+			bill.synchronizeBillStatus();
+		}
+		
+		return voidedLineItem;
+	}
+	
+	@Override
+	public BillLineItem unvoidEntity(BillLineItem entity) {
+		BillLineItem unvoidedLineItem = super.unvoidEntity(entity);
+		
+		if (unvoidedLineItem != null && unvoidedLineItem.getBill() != null) {
+			Bill bill = unvoidedLineItem.getBill();
+			bill.synchronizeBillStatus();
+		}
+		
+		return unvoidedLineItem;
+	}
+	
+	@Override
+	public void purge(BillLineItem entity) {
+		Bill bill = null;
+		if (entity != null && entity.getBill() != null) {
+			bill = entity.getBill();
+			// Validate before purging (purge doesn't call validate())
+			if (!bill.isPending()) {
+				throw new IllegalStateException(
+				        "Line items can only be modified when the bill is in PENDING state. Current status: "
+				                + bill.getStatus());
+			}
+		}
+		
+		super.purge(entity);
+		
+		if (bill != null) {
+			// Remove the line item from the bill's collection
+			bill.removeLineItem(entity);
+			bill.synchronizeBillStatus();
+			// Save the bill to persist the collection change
+			IBillService billService = Context.getService(IBillService.class);
+			billService.save(bill);
+		}
 	}
 }

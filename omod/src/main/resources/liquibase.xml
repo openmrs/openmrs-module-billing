@@ -945,4 +945,30 @@
 			<where>property = 'cashier.receipt.logoPath'</where>
 		</update>
 	</changeSet>
+
+    <changeSet id="openmrs.billing-001-20251014-migrate-billable-services-to-metadata" author="ibacher">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="cashier_billable_service" />
+            <not>
+                <columnExists tableName="cashier_billable_service" columnName="retired" />
+            </not>
+        </preConditions>
+        <renameColumn tableName="cashier_billable_service" oldColumnName="voided" newColumnName="retired" columnDataType="boolean" />
+        <renameColumn tableName="cashier_billable_service" oldColumnName="voided_by" newColumnName="retired_by" columnDataType="int" />
+        <renameColumn tableName="cashier_billable_service" oldColumnName="date_voided" newColumnName="date_retired" columnDataType="datetime" />
+        <renameColumn tableName="cashier_billable_service" oldColumnName="void_reason" newColumnName="retire_reason" columnDataType="varchar(255)" />
+    </changeSet>
+
+    <changeSet id="openmrs.billing-002-20251014-migrate-item-prices-to-metadata" author="ibacher">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="cashier_item_price" />
+            <not>
+                <columnExists tableName="cashier_item_price" columnName="retired" />
+            </not>
+        </preConditions>
+        <renameColumn tableName="cashier_item_price" oldColumnName="voided" newColumnName="retired" columnDataType="boolean" />
+        <renameColumn tableName="cashier_item_price" oldColumnName="voided_by" newColumnName="retired_by" columnDataType="int" />
+        <renameColumn tableName="cashier_item_price" oldColumnName="date_voided" newColumnName="date_retired" columnDataType="datetime" />
+        <renameColumn tableName="cashier_item_price" oldColumnName="void_reason" newColumnName="retire_reason" columnDataType="varchar(255)" />
+    </changeSet>
 </databaseChangeLog>

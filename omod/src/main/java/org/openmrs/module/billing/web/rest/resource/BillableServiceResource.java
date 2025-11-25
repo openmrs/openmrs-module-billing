@@ -16,11 +16,14 @@ package org.openmrs.module.billing.web.rest.resource;
 import org.apache.logging.log4j.util.Strings;
 import org.openmrs.Concept;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.billing.api.base.entity.IMetadataDataService;
+import org.openmrs.module.billing.api.model.BillableService;
+import org.openmrs.module.billing.api.model.BillableServiceStatus;
+import org.openmrs.module.billing.api.model.CashierItemPrice;
 import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
+import org.openmrs.module.billing.web.base.resource.BaseRestMetadataResource;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
 import org.openmrs.module.billing.api.IBillableItemsService;
-import org.openmrs.module.billing.api.base.entity.IEntityDataService;
-import org.openmrs.module.billing.api.model.*;
 import org.openmrs.module.billing.api.search.BillableServiceSearch;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
@@ -40,7 +43,7 @@ import java.util.List;
 
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE + "/billableService", supportedClass = BillableService.class,
         supportedOpenmrsVersions = {"2.0 - 2.*"})
-public class BillableServiceResource extends BaseRestDataResource<BillableService> {
+public class BillableServiceResource extends BaseRestMetadataResource<BillableService> {
 
     @Override
     public BillableService newDelegate() {
@@ -48,7 +51,7 @@ public class BillableServiceResource extends BaseRestDataResource<BillableServic
     }
 
     @Override
-    public Class<? extends IEntityDataService<BillableService>> getServiceClass() {
+    public Class<? extends IMetadataDataService<BillableService>> getServiceClass() {
         return IBillableItemsService.class;
     }
 
