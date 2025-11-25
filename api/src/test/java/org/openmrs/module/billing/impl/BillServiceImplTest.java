@@ -105,7 +105,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		when(ReceiptNumberGeneratorFactory.getGenerator()).thenReturn(receiptNumberGenerator);
 		// Default behavior for tests that expect a generated number with standard prefix
 		final int[] genCounter = { 1 };
-		when(receiptNumberGenerator.generateNumber(any(Bill.class))).thenAnswer(invocation -> "TEST-RECEIPT-" + (genCounter[0]++));
+		when(receiptNumberGenerator.generateNumber(any(Bill.class))).thenAnswer(() -> "TEST-RECEIPT-" + (genCounter[0]++));
 
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "CoreTest-2.0.xml");
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "StockOperationType.xml");
