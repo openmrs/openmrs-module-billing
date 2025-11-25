@@ -37,22 +37,25 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class ReceiptController extends BaseRestController {
 
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<byte[]> get(@RequestParam(value = "billId", required = false) Integer billId) throws IOException {
+    public ResponseEntity<byte[]> get(@RequestParam(value = "billUuid", required = false) String billUuid)
+            throws IOException {
         IBillService service = Context.getService(IBillService.class);
-        Bill bill = service.getById(billId);
+        Bill bill = service.getByUuid(billUuid);
 
         if (bill == null) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         byte[] pdfFile = service.downloadBillReceipt(bill);
-        if (pdfFile.length > 0) {
+        if (pdfFile != null && pdfFile.length > 0) {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentLength(pdfFile.length);
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"receipt-" + bill.getId() + ".pdf\"");
 
             return new ResponseEntity<>(pdfFile, headers, HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
 
