@@ -57,6 +57,7 @@
 		<stockmanagementVersion>1.4.0</stockmanagementVersion>
 		<fhir2Version>2.0.0</fhir2Version>
 		<lombokVersion>1.18.38</lombokVersion>
+		<mockitoVersion>4.11.0</mockitoVersion>
 	</properties>
 
 	<dependencyManagement>
@@ -322,6 +323,27 @@
 				<artifactId>lombok</artifactId>
 				<version>${lombokVersion}</version>
 				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-inline</artifactId>
+				<version>${mockitoVersion}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>net.bytebuddy</groupId>
+				<artifactId>byte-buddy-agent</artifactId>
+				<version>1.14.11</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>net.java.dev.jna</groupId>
+				<artifactId>jna</artifactId>
+				<version>5.13.0</version>
+				<scope>test</scope>
 			</dependency>
 
 		</dependencies>
