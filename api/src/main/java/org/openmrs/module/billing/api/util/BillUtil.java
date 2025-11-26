@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.openmrs.BaseOpenmrsObject;
 import org.openmrs.module.billing.api.model.BillLineItem;
 
 /**
@@ -52,10 +53,10 @@ public class BillUtil {
 		
 		// Extract UUID sets for comparison (similar to syncCollection pattern)
 		Set<String> existingUuids = existingItems.stream().filter(item -> item != null && item.getUuid() != null)
-		        .map(item -> item.getUuid()).collect(Collectors.toSet());
+		        .map(BaseOpenmrsObject::getUuid).collect(Collectors.toSet());
 		
 		Set<String> newUuids = newItems.stream().filter(item -> item != null && item.getUuid() != null)
-		        .map(item -> item.getUuid()).collect(Collectors.toSet());
+		        .map(BaseOpenmrsObject::getUuid).collect(Collectors.toSet());
 		
 		// Compare UUID sets - if they're equal, collections contain the same items (by UUID)
 		return !existingUuids.equals(newUuids);
