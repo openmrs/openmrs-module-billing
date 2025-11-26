@@ -161,6 +161,7 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 			} else {
 				billToUpdate.setStatus(BillStatus.PENDING);
 			}
+            
 			// Save the updated bill
 			return super.save(billToUpdate);
 		}

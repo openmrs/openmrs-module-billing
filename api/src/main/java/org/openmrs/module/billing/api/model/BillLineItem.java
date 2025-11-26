@@ -149,34 +149,4 @@ public class BillLineItem extends BaseChangeableOpenmrsData {
 	public void setOrder(Order order) {
 		this.order = order;
 	}
-	
-	/**
-	 * Compares line items for equality based on UUID only. Two items are equal only if they have the
-	 * same UUID.
-	 */
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null || getClass() != obj.getClass()) {
-			return false;
-		}
-		
-		BillLineItem other = (BillLineItem) obj;
-		
-		// Only compare by UUID - both must have UUIDs and they must match
-		String thisUuid = this.getUuid();
-		String otherUuid = other.getUuid();
-		
-		if (thisUuid == null || otherUuid == null) {
-			return false;
-		}
-		
-		return thisUuid.equals(otherUuid);
-	}
-	
-	public int hashCode() {
-		return Objects.hash(getUuid(), getId(), getBill(), getItem(), getBillableService(), getPrice(), getQuantity(),
-		    getLineItemOrder());
-	}
 }

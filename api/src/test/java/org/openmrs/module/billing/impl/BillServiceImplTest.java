@@ -224,10 +224,13 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		BigDecimal updatedPrice = firstItem.getPrice().add(BigDecimal.TEN);
 		firstItem.setPrice(updatedPrice);
 		
-		Bill updatedBill = billService.save(pendingBill);
+		billService.save(pendingBill);
 		Context.flushSession();
+        Context.clearSession();
+
+        Bill updatedBill = billService.getById(2);
 		
-		assertSame(pendingBill, updatedBill);
+		assertEquals(pendingBill, updatedBill);
 		assertEquals(updatedPrice, updatedBill.getLineItems().get(0).getPrice());
 	}
 	
