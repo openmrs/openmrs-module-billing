@@ -57,8 +57,7 @@ public class BillUtil {
 		
 		Set<String> newUuids = newItems.stream().filter(item -> item != null && item.getUuid() != null)
 		        .map(BaseOpenmrsObject::getUuid).collect(Collectors.toSet());
-		
-		// Compare UUID sets - if they're equal, collections contain the same items (by UUID)
+
 		return !existingUuids.equals(newUuids);
 	}
 }
