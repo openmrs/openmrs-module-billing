@@ -177,15 +177,54 @@ public class Bill extends BaseOpenmrsData {
 	}
 	
 	public void setLineItems(List<BillLineItem> lineItems) {
-		// Only validate if lineItems is already initialized
-		// This prevents validation during Hibernate entity loading (when lineItems is null)
-		// but still validates user modifications (when lineItems is already set)
-		if (this.lineItems != null && !isPending()) {
+		// If collections contain the same items, skip validation (likely Hibernate sync)
+		// Only validate if items are actually different (user modification)
+		if (areLineItemsDifferent(this.lineItems, lineItems) && !isPending()) {
 			throw new IllegalStateException(
 			        "Line items can only be modified when the bill is in PENDING state. Current status: "
 			                + this.getStatus());
 		}
 		this.lineItems = lineItems;
+	}
+	
+	/**
+	 * Checks if two line item collections contain different items.
+	 * Returns false if collections are the same, null, or contain the same items.
+	 * Returns true only if collections actually differ in content.
+	 * 
+	 * @param existingItems The current line items collection
+	 * @param newItems The new line items collection to compare
+	 * @return true if collections are different, false if they're the same
+	 */
+	private boolean areLineItemsDifferent(List<BillLineItem> existingItems, List<BillLineItem> newItems) {
+		if (existingItems == null || newItems == null) {
+			return false;
+		}
+		
+		if (existingItems == newItems) {
+			return false;
+		}
+		
+		if (existingItems.size() != newItems.size()) {
+			return true;
+		}
+		
+		// Same size - compare items by ID (if persisted) or by reference
+		for (int i = 0; i < existingItems.size(); i++) {
+			BillLineItem existingItem = existingItems.get(i);
+			BillLineItem newItem = newItems.get(i);
+			
+			// If both have IDs, compare by ID
+			if (existingItem.getId() != null && newItem.getId() != null) {
+				if (!existingItem.getId().equals(newItem.getId())) {
+					return true; // Different items
+				}
+			} else if (existingItem != newItem) {
+				return true; // Different items
+			}
+		}
+		
+		return false;
 	}
 	
 	public BillLineItem addLineItem(StockItem item, CashierItemPrice price, int quantity) {
