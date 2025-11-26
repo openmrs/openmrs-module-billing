@@ -61,11 +61,18 @@ public class BillLineItem extends BaseOpenmrsData {
 	}
 	
 	/**
-	 * Get the total price for the line item
+	 * Get the total price for the line item. Calculates the total by multiplying price by quantity.
 	 *
-	 * @return double the total price for the line item
+	 * @return BigDecimal the total price for the line item
+	 * @throws IllegalStateException if price or quantity is null
 	 */
 	public BigDecimal getTotal() {
+		if (price == null || quantity == null) {
+			String nullFields = (price == null && quantity == null) ? "price and quantity are"
+			        : (price == null ? "price is" : "quantity is");
+			throw new IllegalStateException(
+			        "Cannot calculate total: price and quantity must not be null. Currently " + nullFields + " null");
+		}
 		return price.multiply(BigDecimal.valueOf(quantity));
 	}
 	
