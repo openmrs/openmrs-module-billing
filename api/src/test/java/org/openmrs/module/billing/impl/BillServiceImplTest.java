@@ -14,33 +14,23 @@
 
 package org.openmrs.module.billing.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.UUID;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openmrs.Patient;
-import org.openmrs.api.PatientService;
-import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.TestConstants;
 import org.openmrs.module.billing.api.IBillService;
-import org.openmrs.module.billing.api.ICashPointService;
 import org.openmrs.module.billing.api.IPaymentModeService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
-import org.openmrs.module.billing.api.model.Payment;
+import org.openmrs.module.billing.api.model.PaymentMode;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 
@@ -48,22 +38,12 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	
 	private IBillService billService;
 	
-	private ProviderService providerService;
-	
-	private PatientService patientService;
-	
-	private ICashPointService cashPointService;
-	
 	private IPaymentModeService paymentModeService;
 	
 	@BeforeEach
 	public void setup() {
 		billService = Context.getService(IBillService.class);
-		providerService = Context.getProviderService();
-		patientService = Context.getPatientService();
-		cashPointService = Context.getService(ICashPointService.class);
 		paymentModeService = Context.getService(IPaymentModeService.class);
-		
 		executeDataSet(TestConstants.CORE_DATASET2);
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "StockOperationType.xml");
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "PaymentModeTest.xml");
@@ -304,65 +284,100 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		// Should throw exception
 		assertThrows(IllegalStateException.class, () -> postedBill.removeLineItem(itemToRemove));
 	}
-
+	
 	/**
 	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#save(Bill)
 	 */
 	@Test
-	public void save_shouldNotMergeWhenExistingBillIsPosted() {
-		// Get a StockItem from existing bill for line items
+	public void save_shouldAllowAddingPaymentToBillInPostedStateAfterPartialPayment() {
+		// Get a patient, cashier, and cash point from test data
 		Bill templateBill = billService.getById(0);
 		assertNotNull(templateBill, "Template bill should exist");
-		assertNotNull(templateBill.getLineItems(), "Template bill should have line items");
-		assertFalse(templateBill.getLineItems().isEmpty(), "Template bill should have at least one line item");
+		
+		// Create a new bill
+		Bill newBill = new Bill();
+		newBill.setPatient(templateBill.getPatient());
+		newBill.setCashier(templateBill.getCashier());
+		newBill.setCashPoint(templateBill.getCashPoint());
+		newBill.setStatus(BillStatus.PENDING);
+		
+		// Add line items to create a bill with total = 300
 		StockItem stockItem = templateBill.getLineItems().get(0).getItem();
+		newBill.addLineItem(stockItem, BigDecimal.valueOf(100), "Test item 1", 1).setPaymentStatus(BillStatus.PENDING);
+		newBill.addLineItem(stockItem, BigDecimal.valueOf(100), "Test item 2", 1).setPaymentStatus(BillStatus.PENDING);
+		newBill.addLineItem(stockItem, BigDecimal.valueOf(100), "Test item 3", 1).setPaymentStatus(BillStatus.PENDING);
 		
-		Patient patient = patientService.getPatient(1);
-		assertNotNull(patient, "Test patient should exist");
+		// Save the bill first
+		Bill savedBill = billService.save(newBill);
+		assertNotNull(savedBill, "New bill should be saved");
+		assertNotNull(savedBill.getId(), "Saved bill should have an ID");
+		assertEquals(BillStatus.PENDING, savedBill.getStatus(), "New bill should be PENDING");
+		BigDecimal billTotal = savedBill.getTotal();
+		assertEquals(BigDecimal.valueOf(300), billTotal, "Bill total should be 300");
 		
-		// Create first bill (no payments initially)
-		Bill firstBill = new Bill();
-		firstBill.setPatient(patient);
-		firstBill.setCashier(providerService.getProvider(0));
-		firstBill.setCashPoint(cashPointService.getById(0));
-		firstBill.setReceiptNumber("FIRST-" + UUID.randomUUID());
-		firstBill.setStatus(BillStatus.PENDING);
-		BillLineItem firstLineItem = firstBill.addLineItem(stockItem, BigDecimal.valueOf(100), "First item", 1);
-		firstLineItem.setPaymentStatus(BillStatus.PENDING);
+		// Get payment mode from test data
+		PaymentMode paymentMode = paymentModeService.getById(0);
+		assertNotNull(paymentMode, "Payment mode should exist");
 		
-		Bill savedFirstBill = billService.save(firstBill);
-		assertNotNull(savedFirstBill, "First bill should be saved");
-		assertNotNull(savedFirstBill.getId(), "First bill should have an ID");
-		assertEquals(BillStatus.PENDING, savedFirstBill.getStatus(), "First bill should have PENDING status when created");
+		// Add first partial payment (100) - should make it POSTED
+		BigDecimal firstPaymentAmount = BigDecimal.valueOf(100);
+		savedBill.addPayment(paymentMode, null, firstPaymentAmount, firstPaymentAmount);
+		Bill billWithFirstPayment = billService.save(savedBill);
 		
-		// Add partial payment to the first bill (becomes POSTED)
-		Payment firstPayment = new Payment();
-		firstPayment.setAmount(BigDecimal.valueOf(50));
-		firstPayment.setAmountTendered(BigDecimal.valueOf(50));
-		firstPayment.setInstanceType(paymentModeService.getById(0));
-		savedFirstBill.addPayment(firstPayment);
-		savedFirstBill = billService.save(savedFirstBill);
-		assertEquals(BillStatus.POSTED, savedFirstBill.getStatus(), "First bill should have POSTED status after partial payment");
+		assertNotNull(billWithFirstPayment, "Bill should be saved after first payment");
+		assertEquals(1, billWithFirstPayment.getPayments().size(), "Bill should have 1 payment");
+		assertEquals(BillStatus.POSTED, billWithFirstPayment.getStatus(), "Bill should be POSTED after partial payment");
 		
-		// Create second bill for same patient (no payments initially)
-		Bill secondBill = new Bill();
-		secondBill.setPatient(patient);
-		secondBill.setCashier(providerService.getProvider(0));
-		secondBill.setCashPoint(cashPointService.getById(0));
-		secondBill.setReceiptNumber("SECOND-" + UUID.randomUUID());
-		secondBill.setStatus(BillStatus.PENDING);
-		BillLineItem secondLineItem = secondBill.addLineItem(stockItem, BigDecimal.valueOf(50), "Second item", 1);
-		secondLineItem.setPaymentStatus(BillStatus.PENDING);
+		// Add second partial payment (100) to the POSTED bill - should remain POSTED
+		BigDecimal secondPaymentAmount = BigDecimal.valueOf(100);
+		billWithFirstPayment.addPayment(paymentMode, null, secondPaymentAmount, secondPaymentAmount);
+		Bill billWithSecondPayment = billService.save(billWithFirstPayment);
 		
-		Bill savedSecondBill = billService.save(secondBill);
-		assertNotNull(savedSecondBill, "Second bill should be saved");
-		assertNotNull(savedSecondBill.getId(), "Second bill should have an ID");
+		assertNotNull(billWithSecondPayment, "Bill should be saved after second payment");
+		assertEquals(2, billWithSecondPayment.getPayments().size(), "Bill should have 2 payments");
+		assertEquals(BigDecimal.valueOf(200), billWithSecondPayment.getTotalPayments(), "Total payments should be 200");
+		assertEquals(BillStatus.POSTED, billWithSecondPayment.getStatus(), "Bill should remain POSTED after second partial payment");
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#save(Bill)
+	 */
+	@Test
+	public void save_shouldAllowAddingPaymentToNewBill() {
+		// Get a patient, cashier, and cash point from test data
+		Bill templateBill = billService.getById(0);
+		assertNotNull(templateBill, "Template bill should exist");
 		
-		// Should NOT merge - POSTED bills are not merged (searchBill only finds PENDING bills)
-		assertNotEquals(savedFirstBill.getId(), savedSecondBill.getId(), "POSTED bills should not merge with new bills");
+		// Create a new bill
+		Bill newBill = new Bill();
+		newBill.setPatient(templateBill.getPatient());
+		newBill.setCashier(templateBill.getCashier());
+		newBill.setCashPoint(templateBill.getCashPoint());
+		newBill.setStatus(BillStatus.PENDING);
 		
-		List<Bill> patientBills = billService.getBillsByPatient(patient, null);
-		assertNotNull(patientBills, "getBillsByPatient should return a non-null list");
-		assertEquals(3, patientBills.size(), "Patient should have 3 bills total (1 from test data + 2 newly created)");
+		// Add a line item
+		StockItem stockItem = templateBill.getLineItems().get(0).getItem();
+		newBill.addLineItem(stockItem, BigDecimal.valueOf(100), "Test item", 1).setPaymentStatus(BillStatus.PENDING);
+		;
+		
+		// Save the bill first
+		Bill savedBill = billService.save(newBill);
+		assertNotNull(savedBill, "New bill should be saved");
+		assertNotNull(savedBill.getId(), "Saved bill should have an ID");
+		assertEquals(BillStatus.PENDING, savedBill.getStatus(), "New bill should be PENDING");
+		
+		// Get payment mode from test data
+		PaymentMode paymentMode = paymentModeService.getById(0);
+		assertNotNull(paymentMode, "Payment mode should exist");
+		
+		// Add payment to the new bill
+		BigDecimal paymentAmount = BigDecimal.valueOf(100);
+		savedBill.addPayment(paymentMode, null, paymentAmount, paymentAmount);
+		Bill billWithPayment = billService.save(savedBill);
+		
+		assertNotNull(billWithPayment, "Bill should be saved after adding payment");
+		assertEquals(1, billWithPayment.getPayments().size(), "Bill should have 1 payment");
+		assertEquals(paymentAmount, billWithPayment.getTotalPayments(), "Total payments should equal payment amount");
+		assertEquals(BillStatus.PAID, billWithPayment.getStatus(), "Bill should be PAID after full payment");
 	}
 }

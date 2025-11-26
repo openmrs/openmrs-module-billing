@@ -21,6 +21,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.openmrs.module.billing.api.util.BillUtil;
+
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
@@ -177,54 +179,17 @@ public class Bill extends BaseOpenmrsData {
 	}
 	
 	public void setLineItems(List<BillLineItem> lineItems) {
-		// If collections contain the same items, skip validation (likely Hibernate sync)
-		// Only validate if items are actually different (user modification)
-		if (areLineItemsDifferent(this.lineItems, lineItems) && !isPending()) {
-			throw new IllegalStateException(
-			        "Line items can only be modified when the bill is in PENDING state. Current status: "
-			                + this.getStatus());
-		}
-		this.lineItems = lineItems;
-	}
-	
-	/**
-	 * Checks if two line item collections contain different items.
-	 * Returns false if collections are the same, null, or contain the same items.
-	 * Returns true only if collections actually differ in content.
-	 * 
-	 * @param existingItems The current line items collection
-	 * @param newItems The new line items collection to compare
-	 * @return true if collections are different, false if they're the same
-	 */
-	private boolean areLineItemsDifferent(List<BillLineItem> existingItems, List<BillLineItem> newItems) {
-		if (existingItems == null || newItems == null) {
-			return false;
-		}
-		
-		if (existingItems == newItems) {
-			return false;
-		}
-		
-		if (existingItems.size() != newItems.size()) {
-			return true;
-		}
-		
-		// Same size - compare items by ID (if persisted) or by reference
-		for (int i = 0; i < existingItems.size(); i++) {
-			BillLineItem existingItem = existingItems.get(i);
-			BillLineItem newItem = newItems.get(i);
-			
-			// If both have IDs, compare by ID
-			if (existingItem.getId() != null && newItem.getId() != null) {
-				if (!existingItem.getId().equals(newItem.getId())) {
-					return true; // Different items
-				}
-			} else if (existingItem != newItem) {
-				return true; // Different items
+		// Skip validation only for Hibernate initialization (when existing items are null)
+		// For all other cases on non-PENDING bills, validate only if line items are actually different
+		if (!isPending() && this.lineItems != null) {
+			// Check if the line items are actually different using UUID-based comparison
+			if (BillUtil.areLineItemsDifferent(this.lineItems, lineItems)) {
+				throw new IllegalStateException(
+				        "Line items can only be modified when the bill is in PENDING state. Current status: "
+				                + this.getStatus());
 			}
 		}
-		
-		return false;
+		this.lineItems = lineItems;
 	}
 	
 	public BillLineItem addLineItem(StockItem item, CashierItemPrice price, int quantity) {
