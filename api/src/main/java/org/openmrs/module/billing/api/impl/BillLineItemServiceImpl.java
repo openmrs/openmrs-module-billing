@@ -20,6 +20,7 @@ import org.openmrs.module.billing.api.base.entity.impl.BaseEntityDataServiceImpl
 import org.openmrs.module.billing.api.base.entity.security.IEntityAuthorizationPrivileges;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
+import org.openmrs.validator.ValidateUtil;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
@@ -30,16 +31,30 @@ public class BillLineItemServiceImpl extends BaseEntityDataServiceImpl<BillLineI
 		return this;
 	}
 	
+	/**
+	 * Validates a BillLineItem object. This method performs two types of validation:
+	 * 1. Business rule validation - ensures line items are only modified when bill is PENDING
+	 * 2. Entity validation using OpenMRS framework - validates entity properties
+	 * 
+	 * @param billLineItem the BillLineItem to validate
+	 * @throws IllegalStateException if bill is not in PENDING state
+	 * @throws org.openmrs.api.ValidationException if entity validation fails
+	 */
 	@Override
-	protected void validate(BillLineItem object) {
-		if (object != null && object.getBill() != null) {
-			Bill bill = object.getBill();
+	protected void validate(BillLineItem billLineItem) {
+		// Business rule validation: Check bill status before allowing modifications
+		if (billLineItem != null && billLineItem.getBill() != null) {
+			Bill bill = billLineItem.getBill();
 			if (!bill.isPending()) {
 				throw new IllegalStateException(
 				        "Line items can only be modified when the bill is in PENDING state. Current status: "
 				                + bill.getStatus());
 			}
 		}
+		
+		// Entity validation: Validate using OpenMRS validation framework
+		// This will invoke all registered validators for the BillLineItem class (BillLineItemValidator)
+		ValidateUtil.validate(billLineItem);
 	}
 	
 	@Override
