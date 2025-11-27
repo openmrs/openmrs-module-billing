@@ -41,6 +41,7 @@ import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.model.Payment;
 import org.openmrs.module.billing.api.model.Timesheet;
 import org.openmrs.module.billing.api.search.BillSearch;
+import org.openmrs.module.billing.api.util.BillUtil;
 import org.openmrs.module.billing.api.util.RoundingUtil;
 import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
 import org.openmrs.module.billing.web.base.resource.PagingUtil;
@@ -90,7 +91,8 @@ public class BillResource extends BaseRestDataResource<Bill> {
 
     @PropertySetter("lineItems")
     public void setBillLineItems(Bill instance, List<BillLineItem> lineItems) {
-        if (!instance.isPending()) {
+        // Only validate if line items are actually different (not just REST framework re-setting same values)
+        if (!instance.isPending() && BillUtil.areLineItemsDifferent(instance.getLineItems(), lineItems)) {
             throw new IllegalStateException(
                     "Line items can only be modified when the bill is in PENDING state. Current status: "
                             + instance.getStatus());
