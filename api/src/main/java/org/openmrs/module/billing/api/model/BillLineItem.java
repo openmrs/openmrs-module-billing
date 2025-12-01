@@ -149,4 +149,80 @@ public class BillLineItem extends BaseChangeableOpenmrsData {
 	public void setOrder(Order order) {
 		this.order = order;
 	}
+	
+	/**
+	 * Compares this line item with another based on key properties (quantity, price, item, etc.). This
+	 * is used to detect actual changes in line items, not just object identity.
+	 * 
+	 * @param obj The object to compare with
+	 * @return true if the line items have the same key properties, false otherwise
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		BillLineItem that = (BillLineItem) obj;
+		
+		// Compare UUID (if both have UUIDs, they should match for same item)
+		if (this.getUuid() != null && that.getUuid() != null) {
+			if (!Objects.equals(this.getUuid(), that.getUuid())) {
+				return false;
+			}
+		}
+		
+		// Compare key properties that determine if line items are actually different
+		return Objects.equals(quantity, that.quantity) && areBigDecimalsEqual(price, that.price)
+		        && Objects.equals(getItemUuid(), that.getItemUuid())
+		        && Objects.equals(getBillableServiceUuid(), that.getBillableServiceUuid())
+		        && Objects.equals(getVoided(), that.getVoided());
+	}
+	
+	/**
+	 * Returns hash code based on key properties.
+	 * 
+	 * @return hash code
+	 */
+	@Override
+	public int hashCode() {
+		return Objects.hash(getUuid(), quantity, price, getItemUuid(), getBillableServiceUuid(), getVoided());
+	}
+	
+	/**
+	 * Gets the UUID of the item, handling null cases.
+	 * 
+	 * @return item UUID or null
+	 */
+	private String getItemUuid() {
+		return item != null ? item.getUuid() : null;
+	}
+	
+	/**
+	 * Gets the UUID of the billable service, handling null cases.
+	 * 
+	 * @return billable service UUID or null
+	 */
+	private String getBillableServiceUuid() {
+		return billableService != null ? billableService.getUuid() : null;
+	}
+	
+	/**
+	 * Compares two BigDecimal values for equality, handling null cases.
+	 * 
+	 * @param bd1 First BigDecimal
+	 * @param bd2 Second BigDecimal
+	 * @return true if both are null or equal, false otherwise
+	 */
+	private boolean areBigDecimalsEqual(BigDecimal bd1, BigDecimal bd2) {
+		if (bd1 == null && bd2 == null) {
+			return true;
+		}
+		if (bd1 == null || bd2 == null) {
+			return false;
+		}
+		return bd1.compareTo(bd2) == 0;
+	}
 }

@@ -21,8 +21,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.openmrs.module.billing.api.util.BillUtil;
-
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
@@ -179,16 +177,6 @@ public class Bill extends BaseOpenmrsData {
 	}
 	
 	public void setLineItems(List<BillLineItem> lineItems) {
-		// Skip validation only for Hibernate initialization (when existing items are null)
-		// For all other cases on non-PENDING bills, validate only if line items are actually different
-		if (!isPending() && this.lineItems != null) {
-			// Check if the line items are actually different using UUID-based comparison
-			if (BillUtil.areLineItemsDifferent(this.lineItems, lineItems)) {
-				throw new IllegalStateException(
-				        "Line items can only be modified when the bill is in PENDING state. Current status: "
-				                + this.getStatus());
-			}
-		}
 		this.lineItems = lineItems;
 	}
 	

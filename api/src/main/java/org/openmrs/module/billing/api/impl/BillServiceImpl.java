@@ -140,12 +140,9 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 			Bill billToUpdate = bills.get(0);
 			billToUpdate.setStatus(BillStatus.PENDING);
 			
-			// Handle the case where bill and billToUpdate are the same object reference
-			// (Hibernate session cache returns same managed instance)
 			Set<BillLineItem> existingItemsSet = new HashSet<>(billToUpdate.getLineItems());
 			
 			for (BillLineItem item : bill.getLineItems()) {
-				// Only add if not already present (BillLineItem.equals() handles comparison)
 				if (!existingItemsSet.contains(item)) {
 					item.setBill(billToUpdate);
 					billToUpdate.getLineItems().add(item);
@@ -161,7 +158,7 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 			} else {
 				billToUpdate.setStatus(BillStatus.PENDING);
 			}
-            
+			
 			// Save the updated bill
 			return super.save(billToUpdate);
 		}
