@@ -115,11 +115,12 @@ public class BillResource extends BaseRestDataResource<Bill> {
                 
                 if (originalBill != null && originalBill.getLineItems() != null) {
                     // Compare line items using equals() method in BillLineItem
-                    List<BillLineItem> originalLineItems = originalBill.getLineItems();
-                    List<BillLineItem> incomingLineItems = (lineItems != null) ? lineItems : new ArrayList<>();
+                    // Use Set comparison to ignore order - only check if same items exist
+                    Set<BillLineItem> originalSet = new HashSet<>(originalBill.getLineItems());
+                    Set<BillLineItem> incomingSet = new HashSet<>((lineItems != null) ? lineItems : new ArrayList<>());
                     
-                    // Simple comparison: check if lists are equal using BillLineItem.equals()
-                    if (!originalLineItems.equals(incomingLineItems)) {
+                    // Check if sets contain the same items (ignoring order)
+                    if (!originalSet.equals(incomingSet)) {
                         throw new IllegalStateException(
                                 "Line items can only be modified when the bill is in PENDING state. Current status: "
                                         + instance.getStatus());
