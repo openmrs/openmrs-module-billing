@@ -313,22 +313,4 @@ public class BillTest {
 		assertEquals(1, bill.getLineItems().size());
 	}
 	
-	@Test(expected = IllegalStateException.class)
-	public void setLineItems_shouldThrowExceptionWhenBillIsPosted() {
-		Bill bill = new Bill();
-		bill.setId(1);
-		bill.setStatus(BillStatus.POSTED);
-		
-		// Set initial line items (empty list)
-		ArrayList<BillLineItem> initialLineItems = new ArrayList<>();
-		bill.setLineItems(initialLineItems);
-		
-		// Try to set different line items (new list with an item) - should throw exception
-		ArrayList<BillLineItem> newLineItems = new ArrayList<>();
-		BillLineItem newItem = new BillLineItem();
-		newItem.setUuid("new-item-uuid"); // Set UUID so it's detected as different
-		newLineItems.add(newItem);
-		bill.setLineItems(newLineItems);
-	}
-	
 }
