@@ -12,7 +12,6 @@
  * Copyright (C) OpenMRS, LLC.  All Rights Reserved.
  */
 
-
 package org.openmrs.module.billing.impl;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -44,7 +43,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	private IBillService billService;
 	
 	private IPaymentModeService paymentModeService;
-  
+	
 	private ProviderService providerService;
 	
 	private PatientService patientService;
@@ -231,9 +230,9 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		
 		billService.save(pendingBill);
 		Context.flushSession();
-        Context.clearSession();
-
-        Bill updatedBill = billService.getById(2);
+		Context.clearSession();
+		
+		Bill updatedBill = billService.getById(2);
 		
 		assertEquals(pendingBill, updatedBill);
 		assertEquals(updatedPrice, updatedBill.getLineItems().get(0).getPrice());
@@ -415,7 +414,8 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		assertNotNull(billWithSecondPayment, "Bill should be saved after second payment");
 		assertEquals(2, billWithSecondPayment.getPayments().size(), "Bill should have 2 payments");
 		assertEquals(BigDecimal.valueOf(200), billWithSecondPayment.getTotalPayments(), "Total payments should be 200");
-		assertEquals(BillStatus.POSTED, billWithSecondPayment.getStatus(), "Bill should remain POSTED after second partial payment");
+		assertEquals(BillStatus.POSTED, billWithSecondPayment.getStatus(),
+		    "Bill should remain POSTED after second partial payment");
 	}
 	
 	/**

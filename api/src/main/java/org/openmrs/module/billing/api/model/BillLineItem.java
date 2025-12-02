@@ -188,7 +188,11 @@ public class BillLineItem extends BaseChangeableOpenmrsData {
 	 */
 	@Override
 	public int hashCode() {
-		return Objects.hash(getUuid(), quantity, price, getItemUuid(), getBillableServiceUuid(), getVoided());
+		// Base hashCode on business properties that are always compared in equals()
+		// IMPORTANT: Normalize BigDecimal to ensure 100.00 and 100.0 produce same hash code
+		// This matches the compareTo() logic used in equals() via areBigDecimalsEqual()
+		BigDecimal normalizedPrice = (price != null) ? price.stripTrailingZeros() : null;
+		return Objects.hash(getUuid(), quantity, normalizedPrice, getItemUuid(), getBillableServiceUuid(), getVoided());
 	}
 	
 	/**
