@@ -437,7 +437,6 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		// Add a line item
 		StockItem stockItem = templateBill.getLineItems().get(0).getItem();
 		newBill.addLineItem(stockItem, BigDecimal.valueOf(100), "Test item", 1).setPaymentStatus(BillStatus.PENDING);
-		;
 		
 		// Save the bill first
 		Bill savedBill = billService.save(newBill);
