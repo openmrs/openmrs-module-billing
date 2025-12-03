@@ -13,7 +13,7 @@
  */
 package org.openmrs.module.billing.api.model;
 
-import org.openmrs.User;
+import org.openmrs.Provider;
 import org.openmrs.module.billing.api.base.entity.model.BaseInstanceCustomizableData;
 
 import java.math.BigDecimal;
@@ -29,7 +29,7 @@ public class Payment extends BaseInstanceCustomizableData<PaymentMode, PaymentAt
 	
 	private Bill bill;
 	
-	private User cashier;
+	private Provider cashier;
 	
 	private BigDecimal amount;
 	
@@ -84,11 +84,11 @@ public class Payment extends BaseInstanceCustomizableData<PaymentMode, PaymentAt
 		this.bill = bill;
 	}
 	
-	public User getCashier() {
+	public Provider getCashier() {
 		return cashier;
 	}
 	
-	public void setCashier(User cashier) {
+	public void setCashier(Provider cashier) {
 		this.cashier = cashier;
 	}
 }

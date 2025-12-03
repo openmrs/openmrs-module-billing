@@ -262,7 +262,6 @@
 
 			<column name="bill_id" type="int"><constraints nullable="false" /></column>
 			<column name="payment_mode_id" type="int"><constraints nullable="false"/></column>
-			<column name="cashier_id" type="int"><constraints nullable="false"/></column>
 
 			<column name="amount" type="decimal(10,2)"><constraints nullable="false"/></column>
 
@@ -535,9 +534,6 @@
 		<addForeignKeyConstraint constraintName="cashier_bill_payment_payment_mode_id_fk"
 								 baseTableName="cashier_bill_payment" baseColumnNames="payment_mode_id"
 								 referencedTableName="cashier_payment_mode" referencedColumnNames="payment_mode_id"/>
-		<addForeignKeyConstraint constraintName="cashier_bill_payment_cashier_fk"
-								 baseTableName="cashier_bill_payment" baseColumnNames="cashier_id"
-								 referencedTableName="users" referencedColumnNames="user_id"/>
 		<addForeignKeyConstraint constraintName="cashier_bill_payment_creator_fk"
 								 baseTableName="cashier_bill_payment" baseColumnNames="creator"
 								 referencedTableName="users" referencedColumnNames="user_id"/>
@@ -950,31 +946,31 @@
 		</update>
 	</changeSet>
 
-	<changeSet id="openmrs.billing-001-20251014-migrate-billable-services-to-metadata" author="ibacher">
-		<preConditions onFail="MARK_RAN">
-			<tableExists tableName="cashier_billable_service" />
-			<not>
-				<columnExists tableName="cashier_billable_service" columnName="retired" />
-			</not>
-		</preConditions>
-		<renameColumn tableName="cashier_billable_service" oldColumnName="voided" newColumnName="retired" columnDataType="boolean" />
-		<renameColumn tableName="cashier_billable_service" oldColumnName="voided_by" newColumnName="retired_by" columnDataType="int" />
-		<renameColumn tableName="cashier_billable_service" oldColumnName="date_voided" newColumnName="date_retired" columnDataType="datetime" />
-		<renameColumn tableName="cashier_billable_service" oldColumnName="void_reason" newColumnName="retire_reason" columnDataType="varchar(255)" />
-	</changeSet>
+    <changeSet id="openmrs.billing-001-20251014-migrate-billable-services-to-metadata" author="ibacher">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="cashier_billable_service" />
+            <not>
+                <columnExists tableName="cashier_billable_service" columnName="retired" />
+            </not>
+        </preConditions>
+        <renameColumn tableName="cashier_billable_service" oldColumnName="voided" newColumnName="retired" columnDataType="boolean" />
+        <renameColumn tableName="cashier_billable_service" oldColumnName="voided_by" newColumnName="retired_by" columnDataType="int" />
+        <renameColumn tableName="cashier_billable_service" oldColumnName="date_voided" newColumnName="date_retired" columnDataType="datetime" />
+        <renameColumn tableName="cashier_billable_service" oldColumnName="void_reason" newColumnName="retire_reason" columnDataType="varchar(255)" />
+    </changeSet>
 
-	<changeSet id="openmrs.billing-002-20251014-migrate-item-prices-to-metadata" author="ibacher">
-		<preConditions onFail="MARK_RAN">
-			<tableExists tableName="cashier_item_price" />
-			<not>
-				<columnExists tableName="cashier_item_price" columnName="retired" />
-			</not>
-		</preConditions>
-		<renameColumn tableName="cashier_item_price" oldColumnName="voided" newColumnName="retired" columnDataType="boolean" />
-		<renameColumn tableName="cashier_item_price" oldColumnName="voided_by" newColumnName="retired_by" columnDataType="int" />
-		<renameColumn tableName="cashier_item_price" oldColumnName="date_voided" newColumnName="date_retired" columnDataType="datetime" />
-		<renameColumn tableName="cashier_item_price" oldColumnName="void_reason" newColumnName="retire_reason" columnDataType="varchar(255)" />
-	</changeSet>
+    <changeSet id="openmrs.billing-002-20251014-migrate-item-prices-to-metadata" author="ibacher">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="cashier_item_price" />
+            <not>
+                <columnExists tableName="cashier_item_price" columnName="retired" />
+            </not>
+        </preConditions>
+        <renameColumn tableName="cashier_item_price" oldColumnName="voided" newColumnName="retired" columnDataType="boolean" />
+        <renameColumn tableName="cashier_item_price" oldColumnName="voided_by" newColumnName="retired_by" columnDataType="int" />
+        <renameColumn tableName="cashier_item_price" oldColumnName="date_voided" newColumnName="date_retired" columnDataType="datetime" />
+        <renameColumn tableName="cashier_item_price" oldColumnName="void_reason" newColumnName="retire_reason" columnDataType="varchar(255)" />
+    </changeSet>
 
 	<changeSet id="openmrs.billing-002-v3.1.0-20251120" author="OpenMRS">
 		<preConditions onFail="MARK_RAN">
