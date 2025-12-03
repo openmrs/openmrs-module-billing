@@ -44,7 +44,6 @@ import org.openmrs.module.billing.api.model.BillableServiceStatus;
 import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
 import org.openmrs.module.billing.api.search.BillableServiceSearch;
-import org.openmrs.module.billing.util.Utils;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
 import org.springframework.aop.MethodBeforeAdvice;
@@ -158,7 +157,7 @@ public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 				activeBill.setCashPoint(cashPoints.get(0));
 				activeBill.addLineItem(billLineItem);
 				activeBill.setStatus(BillStatus.PENDING);
-				billService.save(activeBill);
+				billService.saveBill(activeBill);
 			}
 			
 		}

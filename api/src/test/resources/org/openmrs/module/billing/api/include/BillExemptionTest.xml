@@ -1,0 +1,107 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+	<!-- Billing Exemption Test Data -->
+
+	<!-- Test concepts for exemptions -->
+	<concept concept_id="100" retired="false" datatype_id="4"
+	         class_id="1" is_set="false" creator="1" date_created="2005-01-01 00:00:00.0" changed_by="1"
+	         date_changed="2005-01-01 00:00:00.0" uuid="0cbe2ed4-cd5f-3f46-9459-26127c9265ab"/>
+	<concept_name concept_id="100" name="Test Service 1" locale="en" creator="1" date_created="2005-01-01 00:00:00.0"
+	              concept_name_id="100" voided="false" uuid="9bc5493a-f528-40c111177-145a4b119ca7" concept_name_type="FULLY_SPECIFIED"
+	              locale_preferred="1"/>
+
+	<concept concept_id="101" retired="false" datatype_id="4"
+	         class_id="1" is_set="false" creator="1" date_created="2005-01-01 00:00:00.0" changed_by="1"
+	         date_changed="2005-01-01 00:00:00.0" uuid="0cbe2ed3-cd5f-4f46-9459-26127c9265ac"/>
+	<concept_name concept_id="101" name="Test Service 2" locale="en" creator="1" date_created="2005-01-01 00:00:00.0"
+	              concept_name_id="101" voided="false" uuid="9bc5693a-f558-40c9-8177-145a4b119ca8" concept_name_type="FULLY_SPECIFIED"
+	              locale_preferred="1"/>
+
+	<concept concept_id="102" retired="false" datatype_id="4"
+	         class_id="1" is_set="false" creator="1" date_created="2005-01-01 00:00:00.0" changed_by="1"
+	         date_changed="2005-01-01 00:00:00.0" uuid="0cbe2ed3-cd5f-4f46-9459-26127c9265ad"/>
+	<concept_name concept_id="102" name="Test Commodity 1" locale="en" creator="1" date_created="2005-01-01 00:00:00.0"
+	              concept_name_id="102" voided="false" uuid="9bc5693a-f558-40c9-8177-145a4b119ca9" concept_name_type="FULLY_SPECIFIED"
+	              locale_preferred="1"/>
+
+	<concept concept_id="103" retired="false" datatype_id="4"
+	         class_id="1" is_set="false" creator="1" date_created="2005-01-01 00:00:00.0" changed_by="1"
+	         date_changed="2005-01-01 00:00:00.0" uuid="0cbe2ed3-cd5f-4f46-9459-26127c9265ae"/>
+	<concept_name concept_id="103" name="Test Service 3" locale="en" creator="1" date_created="2005-01-01 00:00:00.0"
+	              concept_name_id="103" voided="false" uuid="9bc5693a-f558-40c9-8177-145a4b119c10" concept_name_type="FULLY_SPECIFIED"
+	              locale_preferred="1"/>
+
+	<!-- Billing exemptions with different exemption types -->
+	<bill_exemption exemption_id="1"
+	                name="Service Exemption 1"
+	                description="Test service exemption for Test Service 1"
+	                concept_id="100"
+	                exemption_type="SERVICE"
+	                creator="1"
+	                date_created="2012-01-01 00:00:00.0"
+	                retired="false"
+	                uuid="3386610d-d272-43a9-9083-6c2a5272ade9"/>
+
+	<bill_exemption exemption_id="2"
+	                name="Commodity Exemption 1"
+	                description="Test commodity exemption for Test Commodity 1"
+	                concept_id="102"
+	                exemption_type="COMMODITY"
+	                creator="1"
+	                date_created="2012-01-02 00:00:00.0"
+	                retired="false"
+	                uuid="3386610d-d272-43a9-9043-6c2a5272ade9"/>
+
+	<bill_exemption exemption_id="3"
+	                name="Both Type Exemption"
+	                description="Test exemption for both service and commodity"
+	                concept_id="101"
+	                exemption_type="BOTH"
+	                creator="1"
+	                date_created="2012-01-03 00:00:00.0"
+	                retired="false"
+	                uuid="3386620d-d272-43a9-9083-6c2a5272ade9"/>
+
+	<!-- Retired exemption for testing includeRetired flag -->
+	<bill_exemption exemption_id="4"
+	                name="Retired Service Exemption"
+	                description="Test retired service exemption"
+	                concept_id="103"
+	                exemption_type="SERVICE"
+	                creator="1"
+	                date_created="2012-01-04 00:00:00.0"
+	                retired="true"
+	                retired_by="1"
+	                date_retired="2012-06-01 00:00:00.0"
+	                retire_reason="Test retirement"
+	                uuid="3386610d-d272-43a9-9083-652a5272ade9"/>
+
+	<!-- Billing exemption rules for testing rule evaluation -->
+	<bill_exemption_rule rule_id="1"
+	                     exemption_id="1"
+	                     script_type="JAVASCRIPT"
+	                     script="patientAge &lt; 5"
+	                     creator="1"
+	                     date_created="2012-01-01 00:00:00.0"
+	                     voided="false"
+	                     uuid="3386a10d-d272-4329-9083-652a5272ade9"/>
+
+	<bill_exemption_rule rule_id="2"
+	                     exemption_id="2"
+	                     script_type="JAVASCRIPT"
+	                     script="patientAge >= 65"
+	                     creator="1"
+	                     date_created="2012-01-02 00:00:00.0"
+	                     voided="false"
+	                     uuid="3386610d-d272-43a9-9083-652a4272ade9"/>
+
+	<bill_exemption_rule rule_id="3"
+	                     exemption_id="3"
+	                     script_type="JAVASCRIPT"
+	                     script="true"
+	                     creator="1"
+	                     date_created="2012-01-03 00:00:00.0"
+	                     voided="false"
+	                     uuid="3486610d-d272-43a9-9483-65555272ade9"/>
+
+</dataset>

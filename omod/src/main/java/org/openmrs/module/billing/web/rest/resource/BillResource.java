@@ -14,12 +14,14 @@
 package org.openmrs.module.billing.web.rest.resource;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.util.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.User;
@@ -30,6 +32,7 @@ import org.openmrs.module.billing.ModuleSettings;
 import org.openmrs.module.billing.api.IBillService;
 import org.openmrs.module.billing.api.ICashPointService;
 import org.openmrs.module.billing.api.ITimesheetService;
+import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.base.entity.IEntityDataService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
@@ -40,13 +43,14 @@ import org.openmrs.module.billing.api.model.Timesheet;
 import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.module.billing.api.util.RoundingUtil;
 import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
+import org.openmrs.module.billing.web.base.resource.PagingUtil;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.PropertySetter;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
-import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
+import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.impl.AlreadyPaged;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
@@ -61,7 +65,7 @@ public class BillResource extends BaseRestDataResource<Bill> {
     @Override
     public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
         DelegatingResourceDescription description = super.getRepresentationDescription(rep);
-        if (!(rep instanceof RefRepresentation)) {
+        if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
             description.addProperty("adjustedBy", Representation.REF);
             description.addProperty("billAdjusted", Representation.REF);
             description.addProperty("cashPoint", Representation.REF);
@@ -74,8 +78,9 @@ public class BillResource extends BaseRestDataResource<Bill> {
             description.addProperty("status");
             description.addProperty("adjustmentReason");
             description.addProperty("id");
+            return description;
         }
-        return description;
+        return null;
     }
 
     @Override
@@ -85,6 +90,11 @@ public class BillResource extends BaseRestDataResource<Bill> {
 
     @PropertySetter("lineItems")
     public void setBillLineItems(Bill instance, List<BillLineItem> lineItems) {
+        if (!instance.isPending()) {
+            throw new IllegalStateException(
+                    "Line items can only be modified when the bill is in PENDING state. Current status: "
+                            + instance.getStatus());
+        }
         if (instance.getLineItems() == null) {
             instance.setLineItems(new ArrayList<BillLineItem>(lineItems.size()));
         }
@@ -165,10 +175,26 @@ public class BillResource extends BaseRestDataResource<Bill> {
         String patientUuid = context.getRequest().getParameter("patientUuid");
         String status = context.getRequest().getParameter("status");
         String cashPointUuid = context.getRequest().getParameter("cashPointUuid");
+        String includeVoidedLineItemsParam = context.getRequest().getParameter("includeAll");
+        String patientName = context.getRequest().getParameter("patientName");
 
-        Patient patient = Strings.isNotEmpty(patientUuid) ? Context.getPatientService().getPatientByUuid(patientUuid) : null;
-        BillStatus billStatus = Strings.isNotEmpty(status) ? BillStatus.valueOf(status.toUpperCase()) : null;
-        CashPoint cashPoint = Strings.isNotEmpty(cashPointUuid) ? Context.getService(ICashPointService.class).getByUuid(cashPointUuid) : null;
+        Patient patient = StringUtils.isNotBlank(patientUuid) ? Context.getPatientService().getPatientByUuid(patientUuid) : null;
+        BillStatus billStatus = null;
+        List<BillStatus> statusList = null;
+        if (StringUtils.isNotBlank(status)) {
+            // Support comma-separated statuses: status=PENDING,POSTED
+            String[] statusArray = status.split(",");
+            if (statusArray.length > 1) {
+                // Multiple statuses provided
+                statusList = Arrays.stream(statusArray)
+                    .map(s -> BillStatus.valueOf(s.trim().toUpperCase()))
+                    .collect(Collectors.toList());
+            } else {
+                // Single status
+                billStatus = BillStatus.valueOf(status.trim().toUpperCase());
+            }
+        }
+        CashPoint cashPoint = StringUtils.isNotBlank(cashPointUuid) ? Context.getService(ICashPointService.class).getByUuid(cashPointUuid) : null;
 
         Bill searchTemplate = new Bill();
         searchTemplate.setPatient(patient);
@@ -176,8 +202,42 @@ public class BillResource extends BaseRestDataResource<Bill> {
         searchTemplate.setCashPoint(cashPoint);
         IBillService service = Context.getService(IBillService.class);
 
-        List<Bill> result = service.getBills(new BillSearch(searchTemplate, false));
-        return new AlreadyPaged<>(context, result, false);
+        BillSearch billSearch = new BillSearch(searchTemplate, false);
+
+        if (StringUtils.isNotBlank(patientName)) {
+            billSearch.setPatientName(patientName);
+        }
+
+        // Set multiple statuses if provided, otherwise single status from template will be used
+        if (statusList != null && !statusList.isEmpty()) {
+            billSearch.setStatuses(statusList);
+        }
+        // Default to false (exclude voided line items) unless explicitly set to true
+        boolean includeVoidedLineItems = false;
+        if (StringUtils.isNotBlank(includeVoidedLineItemsParam)) {
+            includeVoidedLineItems = Boolean.parseBoolean(includeVoidedLineItemsParam);
+        }
+        billSearch.includeVoidedLineItems(includeVoidedLineItems);
+        PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
+
+        List<Bill> result = service.getBills(billSearch, pagingInfo);
+        return new AlreadyPaged<>(context, result, pagingInfo.hasMoreResults(), pagingInfo.getTotalRecordCount());
+    }
+
+
+    /**
+     * Gets a bill by UUID
+     *
+     * @param uniqueId The bill UUID.
+     * @return The bill with the specified UUID without voided line items.
+     */
+    @Override
+    public Bill getByUniqueId(String uniqueId) {
+        if (StringUtils.isBlank(uniqueId)) {
+            return null;
+        }
+
+        return Context.getService(IBillService.class).getByUuid(uniqueId, false);
     }
 
     @SuppressWarnings("unchecked")
