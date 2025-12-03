@@ -15,7 +15,7 @@ package org.openmrs.module.billing.api.model;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openmrs.User;
+import org.openmrs.Provider;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 
 import java.math.BigDecimal;
@@ -27,21 +27,21 @@ public class PaymentTest extends BaseModuleContextSensitiveTest {
 	
 	/**
 	 * @verifies set and get cashier correctly
-	 * @see Payment#setCashier(User)
+	 * @see Payment#setCashier(Provider)
 	 * @see Payment#getCashier()
 	 */
 	@Test
 	public void setCashier_shouldSetAndGetCashierCorrectly() throws Exception {
 		Payment payment = new Payment();
-		User cashier = new User();
-		cashier.setUserId(1);
-		cashier.setUsername("admin");
+		Provider cashier = new Provider();
+		cashier.setProviderId(1);
+		cashier.setName("admin");
 		
 		payment.setCashier(cashier);
 		
 		Assert.assertNotNull(payment.getCashier());
 		Assert.assertEquals(cashier, payment.getCashier());
-		Assert.assertEquals("admin", payment.getCashier().getUsername());
+		Assert.assertEquals("admin", payment.getCashier().getName());
 	}
 	
 	/**
@@ -57,7 +57,7 @@ public class PaymentTest extends BaseModuleContextSensitiveTest {
 	
 	/**
 	 * @verifies maintain payment amount when cashier is set
-	 * @see Payment#setCashier(User)
+	 * @see Payment#setCashier(Provider)
 	 */
 	@Test
 	public void setCashier_shouldMaintainPaymentAmountWhenCashierIsSet() throws Exception {
@@ -65,8 +65,8 @@ public class PaymentTest extends BaseModuleContextSensitiveTest {
 		BigDecimal amount = new BigDecimal("100.50");
 		payment.setAmount(amount);
 		
-		User cashier = new User();
-		cashier.setUserId(2);
+		Provider cashier = new Provider();
+		cashier.setProviderId(2);
 		payment.setCashier(cashier);
 		
 		Assert.assertEquals(amount, payment.getAmount());
