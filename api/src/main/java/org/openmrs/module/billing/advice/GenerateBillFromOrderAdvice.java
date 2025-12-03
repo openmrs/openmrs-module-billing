@@ -209,7 +209,7 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 				activeBill.setCashPoint(cashPoints.get(0));
 				activeBill.addLineItem(billLineItem);
 				activeBill.setStatus(BillStatus.PENDING);
-				billService.save(activeBill);
+				billService.saveBill(activeBill);
 			} else {
 				LOG.error("User is not a provider");
 			}

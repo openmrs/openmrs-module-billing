@@ -107,7 +107,7 @@ public class BillLineItemServiceImpl extends BaseEntityDataServiceImpl<BillLineI
 			bill.synchronizeBillStatus();
 			// Save the bill to persist the collection change
 			IBillService billService = Context.getService(IBillService.class);
-			billService.save(bill);
+			billService.saveBill(bill);
 		}
 	}
 }
