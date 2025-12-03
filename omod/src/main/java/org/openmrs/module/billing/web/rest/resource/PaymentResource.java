@@ -13,7 +13,9 @@
  */
 package org.openmrs.module.billing.web.rest.resource;
 
+import org.openmrs.Provider;
 import org.openmrs.User;
+import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
 import org.openmrs.module.billing.api.IBillService;
@@ -130,7 +132,7 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
     @PropertySetter("cashier")
     public void setCashier(Payment instance, String uuid) {
         if (uuid != null) {
-            User cashier = Context.getUserService().getUserByUuid(uuid);
+            Provider cashier = Context.getProviderService().getProviderByUuid(uuid);
             if (cashier == null) {
                 throw new ObjectNotFoundException();
             }
@@ -147,7 +149,13 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
     public Payment save(Payment delegate) {
         // Auto-assign cashier if not set
         if (delegate.getCashier() == null) {
-            delegate.setCashier(Context.getAuthenticatedUser());
+            Provider cashier = getCurrentCashier();
+            if (cashier == null) {
+                User currentUser = Context.getAuthenticatedUser();
+                throw new ObjectNotFoundException("Couldn't find Provider for the current user ("
+                        + currentUser.getUsername() + ")");
+            }
+            delegate.setCashier(cashier);
         }
         
         IBillService service = Context.getService(IBillService.class);
@@ -233,5 +241,15 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
             }
         }
         throw new ObjectNotFoundException();
+    }
+
+    private Provider getCurrentCashier() {
+        User currentUser = Context.getAuthenticatedUser();
+        ProviderService service = Context.getProviderService();
+        java.util.Collection<Provider> providers = service.getProvidersByPerson(currentUser.getPerson());
+        if (!providers.isEmpty()) {
+            return providers.iterator().next();
+        }
+        return null;
     }
 }
