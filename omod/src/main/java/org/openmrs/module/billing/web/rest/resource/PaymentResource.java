@@ -13,6 +13,9 @@
  */
 package org.openmrs.module.billing.web.rest.resource;
 
+import org.openmrs.Provider;
+import org.openmrs.User;
+import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
 import org.openmrs.module.billing.api.IBillService;
@@ -54,6 +57,7 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
             description.addProperty("attributes");
             description.addProperty("amount");
             description.addProperty("amountTendered");
+            description.addProperty("cashier", Representation.REF);
             description.addProperty("dateCreated");
             description.addProperty("voided");
             return description;
@@ -69,6 +73,7 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
         description.addProperty("attributes");
         description.addProperty("amount");
         description.addProperty("amountTendered");
+        description.addProperty("cashier");
 
         return description;
     }
@@ -124,6 +129,17 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
         }
     }
 
+    @PropertySetter("cashier")
+    public void setCashier(Payment instance, String uuid) {
+        if (uuid != null) {
+            Provider cashier = Context.getProviderService().getProviderByUuid(uuid);
+            if (cashier == null) {
+                throw new ObjectNotFoundException();
+            }
+            instance.setCashier(cashier);
+        }
+    }
+
     @PropertyGetter("dateCreated")
     public Long getPaymentDate(Payment instance) {
         return instance.getDateCreated().getTime();
@@ -131,6 +147,17 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
 
     @Override
     public Payment save(Payment delegate) {
+        // Auto-assign cashier if not set
+        if (delegate.getCashier() == null) {
+            Provider cashier = getCurrentCashier();
+            if (cashier == null) {
+                User currentUser = Context.getAuthenticatedUser();
+                throw new ObjectNotFoundException("Couldn't find Provider for the current user ("
+                        + currentUser.getUsername() + ")");
+            }
+            delegate.setCashier(cashier);
+        }
+        
         IBillService service = Context.getService(IBillService.class);
         Bill bill = delegate.getBill();
         bill.addPayment(delegate);
@@ -214,5 +241,15 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
             }
         }
         throw new ObjectNotFoundException();
+    }
+
+    private Provider getCurrentCashier() {
+        User currentUser = Context.getAuthenticatedUser();
+        ProviderService service = Context.getProviderService();
+        java.util.Collection<Provider> providers = service.getProvidersByPerson(currentUser.getPerson());
+        if (!providers.isEmpty()) {
+            return providers.iterator().next();
+        }
+        return null;
     }
 }
