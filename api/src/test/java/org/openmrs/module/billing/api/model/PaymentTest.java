@@ -15,6 +15,8 @@ package org.openmrs.module.billing.api.model;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.openmrs.Person;
+import org.openmrs.PersonName;
 import org.openmrs.Provider;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 
@@ -33,9 +35,16 @@ public class PaymentTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void setCashier_shouldSetAndGetCashierCorrectly() throws Exception {
 		Payment payment = new Payment();
+		
 		Provider cashier = new Provider();
 		cashier.setProviderId(1);
-		cashier.setName("admin");
+		
+		// Link a Person with a PersonName to the Provider (Provider.getName() reads from linked Person)
+		Person person = new Person();
+		PersonName personName = new PersonName();
+		personName.setGivenName("admin");
+		person.addName(personName);
+		cashier.setPerson(person);
 		
 		payment.setCashier(cashier);
 		
