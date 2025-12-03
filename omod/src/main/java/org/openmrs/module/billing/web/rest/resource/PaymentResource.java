@@ -134,7 +134,7 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
         IBillService service = Context.getService(IBillService.class);
         Bill bill = delegate.getBill();
         bill.addPayment(delegate);
-        service.save(bill);
+        service.saveBill(bill);
 
         return delegate;
     }
@@ -154,7 +154,7 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
         payment.setVoidReason(reason);
         payment.setVoidedBy(Context.getAuthenticatedUser());
 
-        service.save(bill);
+        service.saveBill(bill);
     }
 
     @Override
@@ -169,7 +169,7 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
         Payment payment = findPayment(bill, uuid);
 
         bill.removePayment(payment);
-        service.save(bill);
+        service.saveBill(bill);
     }
 
     @Override

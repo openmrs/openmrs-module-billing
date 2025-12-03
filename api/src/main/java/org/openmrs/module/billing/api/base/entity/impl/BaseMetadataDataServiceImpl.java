@@ -78,7 +78,7 @@ public abstract class BaseMetadataDataServiceImpl<E extends OpenmrsMetadata> ext
 		if (!updatedObjects.isEmpty()) {
 			return saveAll(entity, updatedObjects);
 		} else {
-			return save(entity);
+			return saveBill(entity);
 		}
 	}
 	
@@ -122,7 +122,7 @@ public abstract class BaseMetadataDataServiceImpl<E extends OpenmrsMetadata> ext
 		if (!updatedObjects.isEmpty()) {
 			return saveAll(entity, updatedObjects);
 		} else {
-			return save(entity);
+			return saveBill(entity);
 		}
 	}
 	
