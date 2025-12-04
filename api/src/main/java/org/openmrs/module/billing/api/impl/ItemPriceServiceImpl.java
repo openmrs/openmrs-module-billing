@@ -44,9 +44,9 @@ public class ItemPriceServiceImpl extends BaseMetadataDataServiceImpl<CashierIte
 	}
 	
 	@Override
-	public CashierItemPrice saveBill(CashierItemPrice object) {
+	public CashierItemPrice save(CashierItemPrice object) {
 		LOG.debug("Processing save Price");
-		return super.saveBill(object);
+		return super.save(object);
 	}
 	
 	@Override

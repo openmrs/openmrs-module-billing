@@ -71,7 +71,7 @@ public abstract class BaseRestObjectResource<E extends OpenmrsObject> extends De
         }
 
         IObjectDataService<E> service = Context.getService(clazz);
-        service.saveBill(delegate);
+        service.save(delegate);
 
         return delegate;
     }

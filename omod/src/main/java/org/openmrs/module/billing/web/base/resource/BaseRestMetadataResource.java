@@ -66,7 +66,7 @@ public abstract class BaseRestMetadataResource<E extends OpenmrsMetadata> extend
     @Override
     public E save(E entity) {
         try {
-            return getService().saveBill(entity);
+            return getService().save(entity);
         } catch (PrivilegeException p) {
             LOG.error("Exception occured when trying to save entity <" + entity.getName() + "> as privilege is missing", p);
             throw new PrivilegeException("Can't save entity with name <" + entity.getName() + "> as privilege is missing");

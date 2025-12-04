@@ -157,7 +157,7 @@ public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 				activeBill.setCashPoint(cashPoints.get(0));
 				activeBill.addLineItem(billLineItem);
 				activeBill.setStatus(BillStatus.PENDING);
-				billService.saveBill(activeBill);
+				billService.save(activeBill);
 			}
 			
 		}

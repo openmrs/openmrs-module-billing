@@ -50,7 +50,7 @@ public interface IObjectDataService<E extends OpenmrsObject> extends OpenmrsServ
 	 * @should update the object successfully
 	 * @should create the object successfully
 	 */
-	E saveBill(E object);
+	E save(E object);
 	
 	/**
 	 * Saves an object to the database along with the specified related {@link OpenmrsObject}'s within a

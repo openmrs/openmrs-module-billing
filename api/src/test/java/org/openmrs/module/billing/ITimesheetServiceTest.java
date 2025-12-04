@@ -123,7 +123,7 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 		Timesheet timesheet = createEntity(true);
 		timesheet.setClockOut(null);
 		
-		timesheet = service.saveBill(timesheet);
+		timesheet = service.save(timesheet);
 		Context.flushSession();
 		
 		Timesheet current = service.getCurrentTimesheet(timesheet.getCashier());
@@ -161,7 +161,7 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 		timesheet.setCashier(cashier);
 		timesheet.setClockOut(null);
 		
-		service.saveBill(timesheet);
+		service.save(timesheet);
 		Context.flushSession();
 		
 		Timesheet current = service.getCurrentTimesheet(cashier);
