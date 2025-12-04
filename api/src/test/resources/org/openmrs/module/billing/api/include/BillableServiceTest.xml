@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+	<!-- Billable Services -->
+	<cashier_billable_service service_id="0" name="General Consultation" short_name="GC" 
+	                          service_status="ENABLED" 
+	                          creator="1" date_created="2005-01-01 00:00:00.0" 
+	                          voided="false" uuid="d707fad8-dbe4-40bb-bd25-321477ca18c0"/>
+	
+	<cashier_billable_service service_id="1" name="Emergency Consultation" short_name="EC" 
+	                          service_status="ENABLED" 
+	                          creator="1" date_created="2005-01-01 00:00:00.0" 
+	                          voided="false" uuid="d707fad8-dbe4-40bb-bd25-321477ca18c1"/>
+	
+	<cashier_billable_service service_id="2" name="Blood Test" short_name="BT" 
+	                          service_status="ENABLED" 
+	                          creator="1" date_created="2005-01-01 00:00:00.0" 
+	                          voided="false" uuid="d707fad8-dbe4-40bb-bd25-321477ca18c2"/>
+</dataset>
