@@ -177,6 +177,14 @@ public class Bill extends BaseOpenmrsData {
 	}
 	
 	public void setLineItems(List<BillLineItem> lineItems) {
+		// Only validate if lineItems is already initialized
+		// This prevents validation during Hibernate entity loading (when lineItems is null)
+		// but still validates user modifications (when lineItems is already set)
+		if (this.lineItems != null && !isPending()) {
+			throw new IllegalStateException(
+			        "Line items can only be modified when the bill is in PENDING state. Current status: "
+			                + this.getStatus());
+		}
 		this.lineItems = lineItems;
 	}
 	

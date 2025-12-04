@@ -113,7 +113,7 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 	@Override
 	@Authorized({ PrivilegeConstants.MANAGE_BILLS })
 	@Transactional
-	public Bill saveBill(Bill bill) {
+	public Bill save(Bill bill) {
 		if (bill == null) {
 			throw new NullPointerException("The bill must be defined.");
 		}
@@ -161,13 +161,13 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 			} else {
 				billToUpdate.setStatus(BillStatus.PENDING);
 			}
-			
+            
 			// Save the updated bill
-			return super.saveBill(billToUpdate);
+			return super.save(billToUpdate);
 		}
 		
 		// If no pending bill exists, just save the new bill as it is
-		return super.saveBill(bill);
+		return super.save(bill);
 	}
 	
 	@Override

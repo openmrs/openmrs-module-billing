@@ -313,4 +313,15 @@ public class BillTest {
 		assertEquals(1, bill.getLineItems().size());
 	}
 	
+	@Test(expected = IllegalStateException.class)
+	public void setLineItems_shouldThrowExceptionWhenBillIsPosted() {
+		Bill bill = new Bill();
+		bill.setId(1);
+		bill.setStatus(BillStatus.POSTED);
+		ArrayList<BillLineItem> existingLineItems = new ArrayList<>();
+		bill.setLineItems(existingLineItems);
+		existingLineItems.add(new BillLineItem());
+		bill.setLineItems(existingLineItems);
+	}
+	
 }
