@@ -15,7 +15,7 @@ package org.openmrs.module.billing.web.rest.resource;
 
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
-import org.openmrs.module.billing.api.IBillService;
+import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.IPaymentModeService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.Payment;
@@ -131,7 +131,7 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
 
     @Override
     public Payment save(Payment delegate) {
-        IBillService service = Context.getService(IBillService.class);
+        BillService service = Context.getService(BillService.class);
         Bill bill = delegate.getBill();
         bill.addPayment(delegate);
         service.saveBill(bill);
@@ -146,7 +146,7 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
 
     @Override
     public void delete(String parentUniqueId, final String uuid, String reason, RequestContext context) {
-        IBillService service = Context.getService(IBillService.class);
+        BillService service = Context.getService(BillService.class);
         Bill bill = findBill(service, parentUniqueId);
         Payment payment = findPayment(bill, uuid);
 
@@ -164,7 +164,7 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
 
     @Override
     public void purge(String parentUniqueId, String uuid, RequestContext context) {
-        IBillService service = Context.getService(IBillService.class);
+        BillService service = Context.getService(BillService.class);
         Bill bill = findBill(service, parentUniqueId);
         Payment payment = findPayment(bill, uuid);
 
@@ -197,7 +197,7 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
         return new Payment();
     }
 
-    private Bill findBill(IBillService service, String billUUID) {
+    private Bill findBill(BillService service, String billUUID) {
         Bill bill = service.getByUuid(billUUID);
         if (bill == null) {
             throw new ObjectNotFoundException();

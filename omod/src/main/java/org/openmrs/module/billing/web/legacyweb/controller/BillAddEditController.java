@@ -26,7 +26,7 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.ModuleSettings;
-import org.openmrs.module.billing.api.IBillService;
+import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.ICashierOptionsService;
 import org.openmrs.module.billing.api.base.util.UrlUtil;
 import org.openmrs.module.billing.api.model.Bill;
@@ -166,7 +166,7 @@ public class BillAddEditController {
     }
 
     private Bill getBillFromService(String billUuid) {
-        IBillService service = Context.getService(IBillService.class);
+        BillService service = Context.getService(BillService.class);
         Bill bill;
 
         try {

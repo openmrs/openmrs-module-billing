@@ -28,7 +28,7 @@ import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.TestConstants;
-import org.openmrs.module.billing.api.IBillService;
+import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.ICashPointService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
@@ -38,7 +38,7 @@ import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 
 public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	
-	private IBillService billService;
+	private BillService billService;
 	
 	private ProviderService providerService;
 	
@@ -48,7 +48,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	
 	@BeforeEach
 	public void setup() {
-		billService = Context.getService(IBillService.class);
+		billService = Context.getService(BillService.class);
 		providerService = Context.getProviderService();
 		patientService = Context.getPatientService();
 		cashPointService = Context.getService(ICashPointService.class);

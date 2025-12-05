@@ -181,8 +181,18 @@
 
 	<privilege>
 		<name>Manage Cashier Bills</name>
-		<description>Able to add/edit/delete bills</description>
+		<description>Able to add or edit bills</description>
 	</privilege>
+
+    <privilege>
+        <name>Delete Cashier Bills</name>
+        <description>Able to delete bills</description>
+    </privilege>
+
+    <privilege>
+        <name>Purge Cashier Bills</name>
+        <description>Able to purge bills</description>
+    </privilege>
 
 	<privilege>
 		<name>Adjust Cashier Bills</name>
@@ -197,11 +207,6 @@
 	<privilege>
 		<name>Reprint Receipt</name>
 		<description>Able to print bill receipts more than once.</description>
-	</privilege>
-
-	<privilege>
-		<name>Purge Cashier Bills</name>
-		<description>Able to purge bills</description>
 	</privilege>
 
 	<!--  Metadata  -->

@@ -20,7 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.TestConstants;
-import org.openmrs.module.billing.api.IBillService;
+import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
@@ -34,12 +34,12 @@ public class BillValidatorTest extends BaseModuleContextSensitiveTest {
 	
 	private BillValidator billValidator;
 	
-	private IBillService billService;
+	private BillService billService;
 	
 	@BeforeEach
 	public void setup() throws Exception {
 		billValidator = new BillValidator();
-		billService = Context.getService(IBillService.class);
+		billService = Context.getService(BillService.class);
 		
 		executeDataSet(TestConstants.CORE_DATASET2);
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "StockOperationType.xml");

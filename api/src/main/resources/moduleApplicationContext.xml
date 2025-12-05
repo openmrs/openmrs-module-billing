@@ -24,7 +24,7 @@
 	<bean parent="serviceContext">
 		<property name="moduleService">
 			<list merge="true">
-				<value>org.openmrs.module.billing.api.IBillService</value>
+				<value>org.openmrs.module.billing.api.BillService</value>
 				<ref bean="cashierBillService"/>
 			</list>
 		</property>

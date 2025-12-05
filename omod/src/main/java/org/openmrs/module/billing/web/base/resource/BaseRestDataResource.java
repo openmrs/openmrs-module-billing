@@ -15,6 +15,7 @@ package org.openmrs.module.billing.web.base.resource;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +24,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.OpenmrsData;
 import org.openmrs.OpenmrsObject;
+import org.openmrs.Retireable;
+import org.openmrs.Voidable;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.base.entity.IEntityDataService;
 import org.openmrs.module.billing.api.base.exception.PrivilegeException;
@@ -64,18 +67,13 @@ public abstract class BaseRestDataResource<E extends OpenmrsData> extends DataDe
             public void apply(Collection<E> collection, E entity) {
                 collection.add(entity);
             }
-        }, new Action2<Collection<E>, E>() {
-            @Override
-            public void apply(Collection<E> collection, E entity) {
-                collection.remove(entity);
-            }
         });
     }
 
     public static <E extends OpenmrsObject> void syncCollection(Collection<E> base, Collection<E> sync,
-                                                                Action2<Collection<E>, E> add, Action2<Collection<E>, E> remove) {
-        Map<String, E> baseMap = new HashMap<String, E>(base.size());
-        Map<String, E> syncMap = new HashMap<String, E>(sync.size());
+                                                                Action2<Collection<E>, E> add) {
+        Map<String, E> baseMap = new HashMap<>(base.size());
+        Map<String, E> syncMap = new HashMap<>(sync.size());
         for (E item : base) {
             baseMap.put(item.getUuid(), item);
         }
@@ -91,8 +89,20 @@ public abstract class BaseRestDataResource<E extends OpenmrsData> extends DataDe
 
                 BeanUtils.copyProperties(syncItem, item);
             } else {
-                // Delete item that is not in the sync collection
-                remove.apply(base, item);
+                // Void item that is not in the sync collection
+                if (item instanceof Voidable) {
+                    Voidable voidable = (Voidable) item;
+                    voidable.setVoided(true);
+                    voidable.setDateVoided(new Date());
+                    voidable.setVoidReason("Voided via REST request to parent");
+                    voidable.setVoidedBy(Context.getAuthenticatedUser());
+                } else if (item instanceof Retireable) {
+                    Retireable retireable = (Retireable) item;
+                    retireable.setRetired(true);
+                    retireable.setDateRetired(new Date());
+                    retireable.setRetireReason("Retired via REST request to parent");
+                    retireable.setRetiredBy(Context.getAuthenticatedUser());
+                }
             }
         }
 
@@ -112,7 +122,7 @@ public abstract class BaseRestDataResource<E extends OpenmrsData> extends DataDe
 
     @Override
     public E save(E delegate) {
-        return getService().saveBill(delegate);
+        return getService().save(delegate);
     }
 
     @Override

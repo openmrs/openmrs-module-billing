@@ -16,7 +16,7 @@ package org.openmrs.module.billing.web.rest.controller;
 import java.io.IOException;
 
 import org.openmrs.api.context.Context;
-import org.openmrs.module.billing.api.IBillService;
+import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
@@ -39,7 +39,7 @@ public class ReceiptController extends BaseRestController {
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<byte[]> get(@RequestParam(value = "billUuid", required = false) String billUuid)
             throws IOException {
-        IBillService service = Context.getService(IBillService.class);
+        BillService service = Context.getService(BillService.class);
         Bill bill = service.getByUuid(billUuid);
 
         if (bill == null) {

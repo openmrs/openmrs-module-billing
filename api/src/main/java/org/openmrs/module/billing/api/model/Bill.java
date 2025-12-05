@@ -187,6 +187,7 @@ public class Bill extends BaseOpenmrsData {
 		if (price == null) {
 			throw new NullPointerException("The item price must be defined.");
 		}
+
 		return addLineItem(item, price.getPrice(), "", quantity);
 	}
 	
@@ -358,14 +359,5 @@ public class Bill extends BaseOpenmrsData {
 		for (BillLineItem lineItem : this.getLineItems()) {
 			lineItem.setLineItemOrder(orderCounter++);
 		}
-	}
-	
-	public String getLastUpdated() {
-		SimpleDateFormat ft = Context.getDateTimeFormat();
-		String changedStr = (this.getDateChanged() != null) ? ft.format(this.getDateChanged()) : null;
-		String createdStr = (this.getDateCreated() != null) ? ft.format(this.getDateCreated()) : "";
-		String dateString = (changedStr != null) ? changedStr : createdStr;
-		
-		return dateString;
 	}
 }

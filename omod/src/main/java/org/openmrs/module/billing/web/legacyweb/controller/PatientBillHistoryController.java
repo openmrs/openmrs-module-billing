@@ -17,7 +17,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.billing.api.IBillService;
+import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -40,7 +40,7 @@ public class PatientBillHistoryController {
     @RequestMapping(method = RequestMethod.GET)
     public void billHistory(ModelMap model, @RequestParam(value = "patientId", required = true) int patientId) {
         LOG.warn("In bill history controller");
-        List<Bill> bills = Context.getService(IBillService.class).getBillsByPatientId(patientId, null);
+        List<Bill> bills = Context.getService(BillService.class).getBillsByPatientId(patientId, null);
         model.addAttribute("bills", bills);
     }
 }

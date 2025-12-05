@@ -15,7 +15,7 @@ package org.openmrs.module.billing.api.impl;
 
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillLineItemService;
-import org.openmrs.module.billing.api.IBillService;
+import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.base.entity.impl.BaseEntityDataServiceImpl;
 import org.openmrs.module.billing.api.base.entity.security.IEntityAuthorizationPrivileges;
 import org.openmrs.module.billing.api.model.Bill;
@@ -106,7 +106,7 @@ public class BillLineItemServiceImpl extends BaseEntityDataServiceImpl<BillLineI
 			bill.removeLineItem(entity);
 			bill.synchronizeBillStatus();
 			// Save the bill to persist the collection change
-			IBillService billService = Context.getService(IBillService.class);
+			BillService billService = Context.getService(BillService.class);
 			billService.saveBill(bill);
 		}
 	}

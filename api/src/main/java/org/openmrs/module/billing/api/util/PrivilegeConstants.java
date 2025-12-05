@@ -39,6 +39,8 @@ public class PrivilegeConstants {
 	public static final String ADJUST_BILLS = "Adjust Cashier Bills";
 	
 	public static final String VIEW_BILLS = "View Cashier Bills";
+
+    public static final String DELETE_BILLS = "Delete Cashier Bills";
 	
 	public static final String PURGE_BILLS = "Purge Cashier Bills";
 	

@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.TestConstants;
 import org.openmrs.module.billing.api.BillLineItemService;
-import org.openmrs.module.billing.api.IBillService;
+import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
@@ -33,12 +33,12 @@ public class BillLineItemServiceImplTest extends BaseModuleContextSensitiveTest 
 	
 	private BillLineItemService billLineItemService;
 	
-	private IBillService billService;
+	private BillService billService;
 	
 	@BeforeEach
 	public void setup() {
 		billLineItemService = Context.getService(BillLineItemService.class);
-		billService = Context.getService(IBillService.class);
+		billService = Context.getService(BillService.class);
 		executeDataSet(TestConstants.CORE_DATASET2);
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "StockOperationType.xml");
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "PaymentModeTest.xml");

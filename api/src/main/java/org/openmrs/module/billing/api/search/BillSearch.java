@@ -15,6 +15,8 @@ package org.openmrs.module.billing.api.search;
 
 import java.util.List;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -33,7 +35,9 @@ public class BillSearch extends BaseDataTemplateSearch<Bill> {
 	private Boolean includeVoidedLineItems;
 	
 	private List<BillStatus> statuses;
-	
+
+    @Getter
+    @Setter
 	private String patientName;
 	
 	public BillSearch() {
@@ -109,13 +113,5 @@ public class BillSearch extends BaseDataTemplateSearch<Bill> {
 			criteria.add(Restrictions.eq("status", bill.getStatus()));
 		}
 		criteria.addOrder(Order.desc("id"));
-	}
-	
-	public String getPatientName() {
-		return patientName;
-	}
-	
-	public void setPatientName(String patientName) {
-		this.patientName = patientName;
 	}
 }

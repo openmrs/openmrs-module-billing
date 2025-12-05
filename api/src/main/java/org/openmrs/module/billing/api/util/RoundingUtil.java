@@ -51,35 +51,6 @@ public class RoundingUtil {
 	}
 	
 	/**
-	 * public static void setupRoundingDeptAndItem(Log log) { AdministrationService adminService =
-	 * Context.getService(AdministrationService.class); String nearest =
-	 * adminService.getGlobalProperty(ModuleSettings.ROUND_TO_NEAREST_PROPERTY); if (nearest != null &&
-	 * !nearest.isEmpty() && !nearest.equals("0")) { MessageSourceService msgService =
-	 * Context.getMessageSourceService(); // IDepartmentDataService deptService =
-	 * Context.getService(IDepartmentDataService.class); IItemDataService itemService =
-	 * Context.getService(IItemDataService.class); Integer deptId = parseDepartmentId(adminService);
-	 * Integer itemId = parseItemId(adminService); String name =
-	 * msgService.getMessage("openhmis.cashier.rounding.itemName"); String description =
-	 * msgService.getMessage("openhmis.cashier.rounding.itemDescription"); // Department department =
-	 * null; if (deptId == null) { // department = new Department(); // department.setName(name); //
-	 * department.setDescription(description); // department.setRetired(true); //
-	 * department.setRetireReason("Used by Cashier Module for rounding adjustments."); //
-	 * deptService.save(department); log.info("Created department for rounding item (ID = " +
-	 * department.getId() + ")..."); adminService.saveGlobalProperty(new
-	 * GlobalProperty(ModuleSettings.ROUNDING_DEPT_ID, department.getId() .toString())); } if (itemId ==
-	 * null) { StockItem item = new StockItem(); item.setCommonName(name); // item.se(description); //
-	 * if (department == null) { // department =
-	 * Context.getService(IDepartmentDataService.class).getById(deptId); // if (department == null) { //
-	 * throw new APIException( // "Department with id " + deptId + " doesn't exist."); // } // } // //
-	 * item.setDepartment(department); item.setHasExpiration(false); ItemPrice price = new
-	 * ItemPrice(BigDecimal.ZERO, name); item.setDefaultPrice(price); itemService.save(item);
-	 * ItemPriceService itemPriceService = Context.getService(ItemPriceService.class);
-	 * itemPriceService.save(price); log.info("Created item for rounding (ID = " + item.getId() +
-	 * ")..."); adminService .saveGlobalProperty(new GlobalProperty(ModuleSettings.ROUNDING_ITEM_ID,
-	 * item.getId().toString())); } } }
-	 */
-	
-	/**
 	 * Add a rounding line item to a bill if necessary
 	 *
 	 * @param bill
@@ -117,6 +88,7 @@ public class RoundingUtil {
 		} else if (!difference.equals(BigDecimal.ZERO)) {
 			updateRoundingItem(bill, difference, roundingLineItem);
 		}
+
 		bill.recalculateLineItemOrder();
 	}
 	

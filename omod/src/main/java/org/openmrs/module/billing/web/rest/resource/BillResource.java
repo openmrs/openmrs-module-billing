@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -29,7 +30,7 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.ModuleSettings;
-import org.openmrs.module.billing.api.IBillService;
+import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.ICashPointService;
 import org.openmrs.module.billing.api.ITimesheetService;
 import org.openmrs.module.billing.api.base.PagingInfo;
@@ -47,13 +48,16 @@ import org.openmrs.module.billing.web.base.resource.PagingUtil;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
+import org.openmrs.module.webservices.rest.web.annotation.PropertyGetter;
 import org.openmrs.module.webservices.rest.web.annotation.PropertySetter;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.impl.AlreadyPaged;
+import org.openmrs.module.webservices.rest.web.resource.impl.DataDelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
+import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.springframework.web.client.RestClientException;
 
 /**
@@ -61,11 +65,12 @@ import org.springframework.web.client.RestClientException;
  */
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE + "/bill", supportedClass = Bill.class,
         supportedOpenmrsVersions = {"2.0 - 2.*"})
-public class BillResource extends BaseRestDataResource<Bill> {
+public class BillResource extends DataDelegatingCrudResource<Bill> {
+
     @Override
     public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
-        DelegatingResourceDescription description = super.getRepresentationDescription(rep);
-        if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
+        DelegatingResourceDescription description = new DelegatingResourceDescription();
+        if (rep instanceof DefaultRepresentation) {
             description.addProperty("adjustedBy", Representation.REF);
             description.addProperty("billAdjusted", Representation.REF);
             description.addProperty("cashPoint", Representation.REF);
@@ -79,6 +84,19 @@ public class BillResource extends BaseRestDataResource<Bill> {
             description.addProperty("adjustmentReason");
             description.addProperty("id");
             return description;
+        } else if (rep instanceof FullRepresentation) {
+            description.addProperty("adjustedBy", Representation.FULL);
+            description.addProperty("billAdjusted", Representation.FULL);
+            description.addProperty("cashPoint", Representation.FULL);
+            description.addProperty("cashier", Representation.FULL);
+            description.addProperty("dateCreated");
+            description.addProperty("lineItems");
+            description.addProperty("patient", Representation.FULL);
+            description.addProperty("payments", Representation.FULL);
+            description.addProperty("receiptNumber");
+            description.addProperty("status");
+            description.addProperty("adjustmentReason");
+            description.addProperty("id");
         }
         return null;
     }
@@ -86,6 +104,25 @@ public class BillResource extends BaseRestDataResource<Bill> {
     @Override
     public DelegatingResourceDescription getCreatableProperties() {
         return getRepresentationDescription(new DefaultRepresentation());
+    }
+
+    @Override
+    public Bill newDelegate() {
+        return new Bill();
+    }
+
+    @PropertyGetter("lineItems")
+    public List<BillLineItem> getBillLineItems(Bill instance) {
+        List<BillLineItem> results = new ArrayList<>();
+        for (BillLineItem item : instance.getLineItems()) {
+            if (item.getVoided()) {
+                continue;
+            }
+
+            results.add(item);
+        }
+
+        return results;
     }
 
     @PropertySetter("lineItems")
@@ -98,10 +135,25 @@ public class BillResource extends BaseRestDataResource<Bill> {
         if (instance.getLineItems() == null) {
             instance.setLineItems(new ArrayList<BillLineItem>(lineItems.size()));
         }
+
         BaseRestDataResource.syncCollection(instance.getLineItems(), lineItems);
         for (BillLineItem item : instance.getLineItems()) {
             item.setBill(instance);
         }
+    }
+
+    @PropertyGetter("payments")
+    public Set<Payment> getBillPayments(Bill instance) {
+        Set<Payment> payments = new LinkedHashSet<>();
+        for (Payment payment : instance.getPayments()) {
+            if (payment.getVoided()) {
+                continue;
+            }
+
+            payments.add(payment);
+        }
+
+        return payments;
     }
 
     @PropertySetter("payments")
@@ -109,6 +161,7 @@ public class BillResource extends BaseRestDataResource<Bill> {
         if (instance.getPayments() == null) {
             instance.setPayments(new HashSet<Payment>(payments.size()));
         }
+
         BaseRestDataResource.syncCollection(instance.getPayments(), payments);
         for (Payment payment : instance.getPayments()) {
             instance.addPayment(payment);
@@ -128,6 +181,7 @@ public class BillResource extends BaseRestDataResource<Bill> {
         } else if (instance.getStatus() == BillStatus.PENDING && status == BillStatus.POSTED) {
             instance.setStatus(status);
         }
+
         if (status == BillStatus.POSTED) {
             RoundingUtil.handleRoundingLineItem(instance);
         }
@@ -142,32 +196,7 @@ public class BillResource extends BaseRestDataResource<Bill> {
 
     @Override
     public Bill save(Bill bill) {
-        //TODO: Test all the ways that this could fail
-
-        if (bill.getId() == null) {
-            if (bill.getCashier() == null) {
-                Provider cashier = getCurrentCashier(bill);
-                if (cashier == null) {
-                    throw new RestClientException("Couldn't find Provider for the current user ("
-                            + Context.getAuthenticatedUser().getUsername() + ")");
-                }
-
-                bill.setCashier(cashier);
-            }
-
-            if (bill.getCashPoint() == null) {
-                loadBillCashPoint(bill);
-            }
-
-            // Now that all all attributes have been set (i.e., payments and bill status) we can check to see if the bill
-            // is fully paid.
-            bill.synchronizeBillStatus();
-            if (bill.getStatus() == null) {
-                bill.setStatus(BillStatus.PENDING);
-            }
-        }
-
-        return super.save(bill);
+        return Context.getService(BillService.class).saveBill(bill);
     }
 
     @Override
@@ -200,7 +229,8 @@ public class BillResource extends BaseRestDataResource<Bill> {
         searchTemplate.setPatient(patient);
         searchTemplate.setStatus(billStatus);
         searchTemplate.setCashPoint(cashPoint);
-        IBillService service = Context.getService(IBillService.class);
+
+        BillService service = Context.getService(BillService.class);
 
         BillSearch billSearch = new BillSearch(searchTemplate, false);
 
@@ -237,61 +267,17 @@ public class BillResource extends BaseRestDataResource<Bill> {
             return null;
         }
 
-        return Context.getService(IBillService.class).getByUuid(uniqueId, false);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Class<IEntityDataService<Bill>> getServiceClass() {
-        return (Class<IEntityDataService<Bill>>) (Object) IBillService.class;
-    }
-
-    public String getDisplayString(Bill instance) {
-        return instance.getReceiptNumber();
+        return Context.getService(BillService.class).getBillByUuid(uniqueId);
     }
 
     @Override
-    public Bill newDelegate() {
-        return new Bill();
+    protected void delete(Bill bill, String s, RequestContext requestContext) throws ResponseException {
+        Context.getService(BillService.class).voidBill(bill, s);
     }
 
-    private Provider getCurrentCashier(Bill bill) {
-        User currentUser = Context.getAuthenticatedUser();
-        ProviderService service = Context.getProviderService();
-        Collection<Provider> providers = service.getProvidersByPerson(currentUser.getPerson());
-        if (!providers.isEmpty()) {
-            return providers.iterator().next();
-        }
-        return null;
+    @Override
+    public void purge(Bill bill, RequestContext requestContext) throws ResponseException {
+        Context.getService(BillService.class).purgeBill(bill);
     }
 
-    private void loadBillCashPoint(Bill bill) {
-        ITimesheetService service = Context.getService(ITimesheetService.class);
-        Timesheet timesheet = service.getCurrentTimesheet(bill.getCashier());
-        if (timesheet == null) {
-            AdministrationService adminService = Context.getAdministrationService();
-            boolean timesheetRequired;
-            try {
-                timesheetRequired =
-                        Boolean.parseBoolean(adminService.getGlobalProperty(ModuleSettings.TIMESHEET_REQUIRED_PROPERTY));
-            } catch (Exception e) {
-                timesheetRequired = false;
-            }
-
-            if (timesheetRequired) {
-                throw new RestClientException("A current timesheet does not exist for cashier " + bill.getCashier());
-            } else if (bill.getBillAdjusted() != null) {
-                // If this is an adjusting bill, copy cash point from billAdjusted
-                bill.setCashPoint(bill.getBillAdjusted().getCashPoint());
-            } else {
-                throw new RestClientException("Cash point cannot be null!");
-            }
-        } else {
-            CashPoint cashPoint = timesheet.getCashPoint();
-            if (cashPoint == null) {
-                throw new RestClientException("No cash points defined for the current timesheet!");
-            }
-            bill.setCashPoint(cashPoint);
-        }
-    }
 }
