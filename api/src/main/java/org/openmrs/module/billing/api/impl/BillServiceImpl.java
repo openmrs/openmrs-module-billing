@@ -48,6 +48,10 @@ import com.itextpdf.layout.properties.UnitValue;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 import org.hibernate.Criteria;
+import org.hibernate.FlushMode;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.StatelessSession;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.joda.time.DateTime;
@@ -72,6 +76,7 @@ import org.openmrs.module.billing.util.Utils;
 import org.openmrs.util.OpenmrsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -101,6 +106,15 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 	protected void validate(Bill bill) {
 	}
 	
+	@Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+	public BillStatus getBillStatus(String uuid) {
+		SessionFactory sf = Context.getRegisteredComponent("sessionFactory", SessionFactory.class);
+		Session session = sf.getCurrentSession();
+		
+		return session.createQuery("select b.status from Bill b where b.uuid = :uuid", BillStatus.class)
+		        .setParameter("uuid", uuid).setReadOnly(true).uniqueResult();
+	}
+	
 	/**
 	 * Saves the bill to the database, creating a new bill or updating an existing one.
 	 *
@@ -111,6 +125,12 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 	 * @should Throw APIException if receipt number cannot be generated.
 	 */
 	@Override
+	@Authorized({ PrivilegeConstants.MANAGE_BILLS })
+	@Transactional
+	public Bill save(Bill bill) {
+		return saveBill(bill);
+	}
+	
 	@Authorized({ PrivilegeConstants.MANAGE_BILLS })
 	@Transactional
 	public Bill saveBill(Bill bill) {
@@ -163,11 +183,11 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 			}
 			
 			// Save the updated bill
-			return super.saveBill(billToUpdate);
+			return super.save(billToUpdate);
 		}
 		
 		// If no pending bill exists, just save the new bill as it is
-		return super.saveBill(bill);
+		return super.save(bill);
 	}
 	
 	@Override

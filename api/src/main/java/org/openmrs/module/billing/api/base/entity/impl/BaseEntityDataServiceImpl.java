@@ -68,7 +68,7 @@ public abstract class BaseEntityDataServiceImpl<E extends OpenmrsData> extends B
 		if (!updatedObjects.isEmpty()) {
 			return saveAll(entity, updatedObjects);
 		} else {
-			return saveBill(entity);
+			return save(entity);
 		}
 	}
 	
@@ -104,7 +104,7 @@ public abstract class BaseEntityDataServiceImpl<E extends OpenmrsData> extends B
 		if (!updatedObjects.isEmpty()) {
 			return saveAll(entity, updatedObjects);
 		} else {
-			return saveBill(entity);
+			return save(entity);
 		}
 	}
 	

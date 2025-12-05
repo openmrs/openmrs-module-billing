@@ -14,7 +14,6 @@
 
 package org.openmrs.module.billing.api;
 
-import java.io.File;
 import java.util.List;
 
 import org.openmrs.Patient;
@@ -22,8 +21,10 @@ import org.openmrs.annotation.Authorized;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.base.entity.IEntityDataService;
 import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.module.billing.api.util.PrivilegeConstants;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -31,6 +32,9 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional
 public interface IBillService extends IEntityDataService<Bill> {
+	
+	@Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+	BillStatus getBillStatus(String uuid);
 	
 	/**
 	 * Gets the {@link Bill} with the specified receipt number or {@code null} if not found.

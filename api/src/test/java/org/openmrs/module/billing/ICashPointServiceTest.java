@@ -105,7 +105,7 @@ public class ICashPointServiceTest extends IMetadataDataServiceTest<ICashPointSe
 		CashPoint cashPoint = service.getById(0);
 		cashPoint.setRetired(true);
 		cashPoint.setRetireReason("reason");
-		service.saveBill(cashPoint);
+		service.save(cashPoint);
 		Location location = Context.getLocationService().getLocation(0);
 		
 		Context.flushSession();
@@ -188,7 +188,7 @@ public class ICashPointServiceTest extends IMetadataDataServiceTest<ICashPointSe
 		CashPoint cashPoint = service.getById(0);
 		cashPoint.setRetired(true);
 		cashPoint.setRetireReason("reason");
-		service.saveBill(cashPoint);
+		service.save(cashPoint);
 		Location location = Context.getLocationService().getLocation(0);
 		
 		Context.flushSession();
