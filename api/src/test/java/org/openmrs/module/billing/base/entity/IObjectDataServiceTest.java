@@ -89,7 +89,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	 */
 	@Test(expected = NullPointerException.class)
 	public void save_Bill_shouldThrowNullPointerExceptionIfTheObjectIsNull() throws Exception {
-		service.saveBill(null);
+		service.save(null);
 	}
 	
 	/**
@@ -100,7 +100,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	public void save_Bill_shouldValidateTheObjectBeforeSaving() throws Exception {
 		E entity = createEntity(false);
 		
-		service.saveBill(entity);
+		service.save(entity);
 	}
 	
 	/**
@@ -111,7 +111,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	public void save_Bill_shouldReturnSavedObject() throws Exception {
 		E entity = createEntity(true);
 		
-		E result = service.saveBill(entity);
+		E result = service.save(entity);
 		Context.flushSession();
 		
 		Assert.assertNotNull(result);
@@ -129,7 +129,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 		
 		updateEntityFields(entity);
 		
-		service.saveBill(entity);
+		service.save(entity);
 		Context.flushSession();
 		
 		E updatedEntity = service.getById(entity.getId());
@@ -144,7 +144,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	public void save_Bill_shouldCreateTheObjectSuccessfully() throws Exception {
 		E entity = createEntity(true);
 		
-		entity = service.saveBill(entity);
+		entity = service.save(entity);
 		Context.flushSession();
 		
 		E result = service.getById(entity.getId());
@@ -168,7 +168,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	public void purge_shouldDeleteTheSpecifiedObject() throws Exception {
 		E entity = createEntity(true);
 		
-		service.saveBill(entity);
+		service.save(entity);
 		Context.flushSession();
 		
 		E result = service.getById(entity.getId());

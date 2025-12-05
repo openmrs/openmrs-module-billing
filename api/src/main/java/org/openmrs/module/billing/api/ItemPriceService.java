@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public interface ItemPriceService extends IMetadataDataService<CashierItemPrice> {
 	
-	CashierItemPrice saveBill(CashierItemPrice price);
+	CashierItemPrice save(CashierItemPrice price);
 	
 	List<CashierItemPrice> getItemPrice(StockItem stockItem);
 	

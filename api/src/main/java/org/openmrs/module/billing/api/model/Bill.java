@@ -215,12 +215,6 @@ public class Bill extends BaseOpenmrsData {
 			throw new NullPointerException("The list item to add must be defined.");
 		}
 		
-		if (!isPending()) {
-			throw new IllegalStateException(
-			        "Line items can only be modified when the bill is in PENDING state. Current status: "
-			                + this.getStatus());
-		}
-		
 		if (this.lineItems == null) {
 			this.lineItems = new ArrayList<BillLineItem>();
 		}
@@ -231,11 +225,6 @@ public class Bill extends BaseOpenmrsData {
 	
 	public void removeLineItem(BillLineItem item) {
 		if (item != null) {
-			if (!isPending()) {
-				throw new IllegalStateException(
-				        "Line items can only be modified when the bill is in PENDING state. Current status: "
-				                + this.getStatus());
-			}
 			if (this.lineItems != null) {
 				this.lineItems.remove(item);
 			}
@@ -350,7 +339,7 @@ public class Bill extends BaseOpenmrsData {
 	 */
 	public boolean isPending() {
 		// New bills (no ID) are considered pending, existing bills must be in PENDING state
-		return this.getId() == null || this.getStatus() == BillStatus.PENDING;
+		return this.getId() == null || (this.getStatus() == BillStatus.PENDING || this.getStatus() == BillStatus.POSTED);
 	}
 	
 	public void recalculateLineItemOrder() {

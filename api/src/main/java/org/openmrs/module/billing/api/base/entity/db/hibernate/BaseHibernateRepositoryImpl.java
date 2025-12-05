@@ -17,6 +17,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
+import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.openmrs.OpenmrsObject;
@@ -141,7 +142,9 @@ public class BaseHibernateRepositoryImpl implements BaseHibernateRepository {
 	@SuppressWarnings("unchecked")
 	public <E extends OpenmrsObject> E selectSingle(Class<E> cls, Criteria criteria) {
 		E result = null;
+		CacheMode cacheMode = sessionFactory.getCurrentSession().getCacheMode();
 		try {
+			sessionFactory.getCurrentSession().setCacheMode(CacheMode.IGNORE);
 			List<E> results = criteria.list();
 			
 			if (!results.isEmpty()) {
@@ -151,6 +154,9 @@ public class BaseHibernateRepositoryImpl implements BaseHibernateRepository {
 		catch (Exception ex) {
 			throw new APIException(
 			        "An exception occurred while attempting to select a single " + cls.getSimpleName() + " entity.", ex);
+		}
+		finally {
+			sessionFactory.getCurrentSession().setCacheMode(cacheMode);
 		}
 		return result;
 	}

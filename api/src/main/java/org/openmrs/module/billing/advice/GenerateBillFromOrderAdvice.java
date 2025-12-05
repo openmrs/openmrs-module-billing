@@ -84,10 +84,10 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 					Integer drugID = drugOrder.getDrug() != null ? drugOrder.getDrug().getDrugId() : 0;
 					double drugQuantity = drugOrder.getQuantity() != null ? drugOrder.getQuantity() : 0.0;
 					List<StockItem> stockItems = stockService.getStockItemByDrug(drugID);
-
+					
 					if (!stockItems.isEmpty()) {
 						// check from the list for all exemptions
-                        boolean isExempted = checkIfOrderIsExempted(workflowService, order, ExemptionType.COMMODITY);
+						boolean isExempted = checkIfOrderIsExempted(workflowService, order, ExemptionType.COMMODITY);
 						BillStatus lineItemStatus = isExempted ? BillStatus.EXEMPTED : BillStatus.PENDING;
 						addBillItemToBill(order, patient, cashierUUID, stockItems.get(0), null, (int) drugQuantity,
 						    order.getDateActivated(), lineItemStatus);
@@ -163,8 +163,8 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 		
 		return variables;
 	}
-
-    /**
+	
+	/**
 	 * Adds a bill item to the cashier module
 	 *
 	 * @param patient
@@ -213,7 +213,7 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 				activeBill.setCashPoint(cashPoints.get(0));
 				activeBill.addLineItem(billLineItem);
 				activeBill.setStatus(BillStatus.PENDING);
-				billService.saveBill(activeBill);
+				billService.save(activeBill);
 			} else {
 				LOG.error("User is not a provider");
 			}
