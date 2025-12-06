@@ -1095,4 +1095,36 @@
                                  baseTableName="bill_exemption_rule" baseColumnNames="voided_by"
                                  referencedTableName="users" referencedColumnNames="user_id"/>
     </changeSet>
+
+    <changeSet id="openmrs.billing-004-20251206-add-cashpoint-to-payment" author="RajPrakash681">
+        <comment>O3-5198: Add cash_point_id column to cashier_bill_payment table to track where each payment was taken</comment>
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="cashier_bill_payment" columnName="cash_point_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="cashier_bill_payment">
+            <column name="cash_point_id" type="int">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <addForeignKeyConstraint constraintName="cashier_bill_payment_cash_point_id_fk"
+                                 baseTableName="cashier_bill_payment" baseColumnNames="cash_point_id"
+                                 referencedTableName="cashier_cash_point" referencedColumnNames="cash_point_id"/>
+        <createIndex tableName="cashier_bill_payment" indexName="cashier_bill_payment_cash_point_id_idx">
+            <column name="cash_point_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="openmrs.billing-005-20251206-migrate-existing-payment-cashpoints" author="RajPrakash681">
+        <comment>O3-5198: Migrate existing payments to use the cash_point_id from their associated bill</comment>
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="cashier_bill_payment" columnName="cash_point_id"/>
+        </preConditions>
+        <sql>
+            UPDATE cashier_bill_payment bp
+            SET cash_point_id = (SELECT b.cash_point_id FROM cashier_bill b WHERE b.bill_id = bp.bill_id)
+            WHERE bp.cash_point_id IS NULL
+        </sql>
+    </changeSet>
 </databaseChangeLog>

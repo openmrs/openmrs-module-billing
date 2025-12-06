@@ -199,6 +199,7 @@
 
 		<property name="amount" type="java.math.BigDecimal" column="amount" not-null="true"/>
 		<property name="amountTendered" type="java.math.BigDecimal" column="amount_tendered" not-null="true"/>
+		<many-to-one name="cashPoint" class="org.openmrs.module.billing.api.model.CashPoint" column="cash_point_id" not-null="false"/>
 
 		<set name="attributes" lazy="false" inverse="true" cascade="all-delete-orphan">
 			<key column="bill_payment_id"/>

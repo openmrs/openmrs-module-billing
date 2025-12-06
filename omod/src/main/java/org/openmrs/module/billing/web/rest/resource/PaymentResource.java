@@ -13,14 +13,20 @@
  */
 package org.openmrs.module.billing.web.rest.resource;
 
+import org.openmrs.Provider;
+import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
 import org.openmrs.module.billing.api.IBillService;
+import org.openmrs.module.billing.api.ICashPointService;
 import org.openmrs.module.billing.api.IPaymentModeService;
+import org.openmrs.module.billing.api.ITimesheetService;
 import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.model.Payment;
 import org.openmrs.module.billing.api.model.PaymentAttribute;
 import org.openmrs.module.billing.api.model.PaymentMode;
+import org.openmrs.module.billing.api.model.Timesheet;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.annotation.PropertyGetter;
 import org.openmrs.module.webservices.rest.web.annotation.PropertySetter;
@@ -36,6 +42,7 @@ import org.openmrs.module.webservices.rest.web.response.ObjectNotFoundException;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -54,6 +61,7 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
             description.addProperty("attributes");
             description.addProperty("amount");
             description.addProperty("amountTendered");
+            description.addProperty("cashPoint", Representation.REF);
             description.addProperty("dateCreated");
             description.addProperty("voided");
             return description;
@@ -69,6 +77,7 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
         description.addProperty("attributes");
         description.addProperty("amount");
         description.addProperty("amountTendered");
+        description.addProperty("cashPoint");
 
         return description;
     }
@@ -84,6 +93,16 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
         }
 
         instance.setInstanceType(mode);
+    }
+
+    @PropertySetter("cashPoint")
+    public void setCashPoint(Payment instance, String uuid) {
+        ICashPointService service = Context.getService(ICashPointService.class);
+        CashPoint cashPoint = service.getByUuid(uuid);
+        if (cashPoint == null) {
+            throw new ObjectNotFoundException();
+        }
+        instance.setCashPoint(cashPoint);
     }
 
     @PropertySetter("attributes")
@@ -131,12 +150,51 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
 
     @Override
     public Payment save(Payment delegate) {
+        // Auto-load CashPoint if not explicitly provided
+        if (delegate.getCashPoint() == null) {
+            loadPaymentCashPoint(delegate);
+        }
+        
         IBillService service = Context.getService(IBillService.class);
         Bill bill = delegate.getBill();
         bill.addPayment(delegate);
         service.saveBill(bill);
 
         return delegate;
+    }
+
+    /**
+     * Loads the CashPoint for a payment from the current user's timesheet.
+     * Falls back to the bill's CashPoint if no timesheet is found.
+     */
+    private void loadPaymentCashPoint(Payment payment) {
+        Provider currentProvider = getCurrentProvider();
+        if (currentProvider != null) {
+            ITimesheetService timesheetService = Context.getService(ITimesheetService.class);
+            Timesheet timesheet = timesheetService.getCurrentTimesheet(currentProvider);
+            if (timesheet != null && timesheet.getCashPoint() != null) {
+                payment.setCashPoint(timesheet.getCashPoint());
+                return;
+            }
+        }
+        // Fallback: use the bill's CashPoint
+        Bill bill = payment.getBill();
+        if (bill != null && bill.getCashPoint() != null) {
+            payment.setCashPoint(bill.getCashPoint());
+        }
+    }
+
+    /**
+     * Gets the Provider associated with the current authenticated user.
+     */
+    private Provider getCurrentProvider() {
+        ProviderService providerService = Context.getProviderService();
+        Collection<Provider> providers = providerService.getProvidersByPerson(
+                Context.getAuthenticatedUser().getPerson());
+        if (!providers.isEmpty()) {
+            return providers.iterator().next();
+        }
+        return null;
     }
 
     @Override
