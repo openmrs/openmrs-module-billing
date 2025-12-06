@@ -24,14 +24,6 @@
 	<bean parent="serviceContext">
 		<property name="moduleService">
 			<list merge="true">
-				<value>org.openmrs.module.billing.api.IBillService</value>
-				<ref bean="cashierBillService"/>
-			</list>
-		</property>
-	</bean>
-	<bean parent="serviceContext">
-		<property name="moduleService">
-			<list merge="true">
 				<value>org.openmrs.module.billing.api.IPaymentModeService</value>
 				<ref bean="cashierPaymentModeService"/>
 			</list>
@@ -111,16 +103,6 @@
 		<property name="transactionManager" ref="transactionManager"/>
 		<property name="target">
 			<bean class="org.openmrs.module.billing.api.impl.BillLineItemServiceImpl">
-				<property name="repository" ref="genericRepositoryDao"/>
-			</bean>
-		</property>
-		<property name="preInterceptors" ref="serviceInterceptors"/>
-		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
-	</bean>
-	<bean id="cashierBillService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager" ref="transactionManager"/>
-		<property name="target">
-			<bean class="org.openmrs.module.billing.api.impl.BillServiceImpl">
 				<property name="repository" ref="genericRepositoryDao"/>
 			</bean>
 		</property>
@@ -216,10 +198,30 @@
 	<bean parent="serviceContext">
 		<property name="moduleService">
 			<list merge="true">
+				<value>org.openmrs.module.billing.api.BillService</value>
+				<ref bean="billService"/>
+			</list>
+		</property>
+	</bean>
+
+	<bean parent="serviceContext">
+		<property name="moduleService">
+			<list merge="true">
 				<value>org.openmrs.module.billing.api.BillExemptionService</value>
 				<ref bean="billingExemptionService"/>
 			</list>
 		</property>
+	</bean>
+
+	<bean id="billService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target">
+			<bean class="org.openmrs.module.billing.api.impl.BillServiceImpl">
+				<property name="billDAO" ref="billDAO"/>
+			</bean>
+		</property>
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
 	</bean>
 
 	<bean id="billingExemptionService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
@@ -232,6 +234,9 @@
 		<property name="preInterceptors" ref="serviceInterceptors"/>
 		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
 	</bean>
+
+	<bean id="billDAO"
+		  class="org.openmrs.module.billing.api.db.hibernate.HibernateBillDAOImpl"/>
 
 	<bean id="billExemptionDAO"
 		  class="org.openmrs.module.billing.api.db.hibernate.BillExemptionDAOImpl">

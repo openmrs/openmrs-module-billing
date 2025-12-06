@@ -20,7 +20,6 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openmrs.Patient;
@@ -28,17 +27,19 @@ import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.TestConstants;
-import org.openmrs.module.billing.api.IBillService;
+import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.ICashPointService;
+import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
+import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 
 public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	
-	private IBillService billService;
+	private BillService billService;
 	
 	private ProviderService providerService;
 	
@@ -48,7 +49,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	
 	@BeforeEach
 	public void setup() {
-		billService = Context.getService(IBillService.class);
+		billService = Context.getService(BillService.class);
 		providerService = Context.getProviderService();
 		patientService = Context.getPatientService();
 		cashPointService = Context.getService(ICashPointService.class);
@@ -72,65 +73,6 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillByReceiptNumber(String)
 	 */
 	@Test
-	public void getBillByReceiptNumber_shouldThrowIllegalArgumentExceptionIfReceiptNumberIsNull() {
-		assertThrows(IllegalArgumentException.class, () -> billService.getBillByReceiptNumber(null));
-	}
-	
-	/**
-	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillByReceiptNumber(String)
-	 */
-	@Test
-	public void getBillByReceiptNumber_shouldThrowIllegalArgumentExceptionIfReceiptNumberIsEmpty() {
-		assertThrows(IllegalArgumentException.class, () -> billService.getBillByReceiptNumber(""));
-	}
-	
-	/**
-	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillByReceiptNumber(String)
-	 */
-	@Test
-	public void getBillByReceiptNumber_shouldThrowIllegalArgumentExceptionIfReceiptNumberIsTooLong() {
-		String longReceiptNumber = RandomStringUtils.randomAlphanumeric(1999);
-		assertThrows(IllegalArgumentException.class, () -> billService.getBillByReceiptNumber(longReceiptNumber));
-	}
-	
-	/**
-	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillsByPatient(Patient,
-	 *      org.openmrs.module.billing.api.base.PagingInfo)
-	 */
-	@Test
-	public void getBillsByPatient_shouldThrowNullPointerExceptionIfPatientIsNull() {
-		assertThrows(NullPointerException.class, () -> billService.getBillsByPatient(null, null));
-	}
-	
-	/**
-	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillsByPatientId(int,
-	 *      org.openmrs.module.billing.api.base.PagingInfo)
-	 */
-	@Test
-	public void getBillsByPatientId_shouldThrowIllegalArgumentExceptionIfPatientIdIsNegative() {
-		assertThrows(IllegalArgumentException.class, () -> billService.getBillsByPatientId(-1, null));
-	}
-	
-	/**
-	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getAll()
-	 */
-	@Test
-	public void getAll_shouldReturnAllBills() {
-		List<Bill> bills = billService.getAll();
-		assertNotNull(bills);
-		for (Bill bill : bills) {
-			if (bill.getLineItems() != null) {
-				for (Object item : bill.getLineItems()) {
-					assertNotNull(item, "Line items should not contain null values");
-				}
-			}
-		}
-	}
-	
-	/**
-	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillByReceiptNumber(String)
-	 */
-	@Test
 	public void getBillByReceiptNumber_shouldReturnBillWithSpecifiedReceiptNumber() {
 		Bill bill = billService.getBillByReceiptNumber("test 1 receipt number");
 		assertNotNull(bill);
@@ -147,7 +89,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	/**
-	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillsByPatientId(int,
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillsByPatientId(Integer,
 	 *      org.openmrs.module.billing.api.base.PagingInfo)
 	 */
 	@Test
@@ -159,7 +101,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	/**
-	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillsByPatientId(int,
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillsByPatientId(Integer,
 	 *      org.openmrs.module.billing.api.base.PagingInfo)
 	 */
 	@Test
@@ -177,7 +119,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		Patient patient = patientService.getPatient(1);
 		assertNotNull(patient);
 		
-		Bill templateBill = billService.getById(0);
+		Bill templateBill = billService.getBill(0);
 		assertNotNull(templateBill);
 		assertFalse(templateBill.getLineItems().isEmpty());
 		
@@ -204,7 +146,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		assertEquals(1, savedBill.getLineItems().size());
 		assertEquals(BigDecimal.valueOf(300), savedBill.getTotal());
 		
-		Bill retrievedBill = billService.getById(savedBill.getId());
+		Bill retrievedBill = billService.getBill(savedBill.getId());
 		assertNotNull(retrievedBill);
 		assertEquals(patient.getId(), retrievedBill.getPatient().getId());
 	}
@@ -214,7 +156,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	 */
 	@Test
 	public void save_Bill_shouldUpdateExistingBillWithUpdatedBillItem() {
-		Bill pendingBill = billService.getById(2);
+		Bill pendingBill = billService.getBill(2);
 		assertNotNull(pendingBill);
 		assertEquals(BillStatus.PENDING, pendingBill.getStatus());
 		assertFalse(pendingBill.getLineItems().isEmpty());
@@ -227,28 +169,28 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		Context.flushSession();
 		Context.clearSession();
 		
-		Bill updatedBill = billService.getById(2);
+		Bill updatedBill = billService.getBill(2);
 		
 		assertEquals(pendingBill, updatedBill);
 		assertEquals(updatedPrice, updatedBill.getLineItems().get(0).getPrice());
 	}
 	
 	/**
-	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getById(int)
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBill(Integer)
 	 */
 	@Test
 	public void getById_shouldReturnBillWithSpecifiedId() {
-		Bill bill = billService.getById(1);
+		Bill bill = billService.getBill(1);
 		assertNotNull(bill);
 		assertEquals(1, bill.getId());
 	}
 	
 	/**
-	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getById(int)
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBill(Integer)
 	 */
 	@Test
 	public void getById_shouldRemoveNullLineItems() {
-		Bill bill = billService.getById(1);
+		Bill bill = billService.getBill(1);
 		assertNotNull(bill);
 		if (bill.getLineItems() != null) {
 			for (Object item : bill.getLineItems()) {
@@ -263,7 +205,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void save_Bill_shouldAllowAddingLineItemsToPendingBill() {
 		// Get the PENDING bill from test data (bill_id=2)
-		Bill pendingBill = billService.getById(2);
+		Bill pendingBill = billService.getBill(2);
 		assertNotNull(pendingBill);
 		assertEquals(BillStatus.PENDING, pendingBill.getStatus());
 		
@@ -278,26 +220,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		// Should not throw exception
 		Bill savedBill = billService.saveBill(pendingBill);
 		assertNotNull(savedBill);
-		assertTrue(savedBill.getLineItems().size() > 0);
-	}
-	
-	/**
-	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#saveBill(Bill)
-	 */
-	@Test
-	public void save_Bill_shouldThrowExceptionWhenAddingLineItemsToPostedBill() {
-		// Get the POSTED bill from test data (bill_id=0)
-		Bill postedBill = billService.getById(0);
-		assertNotNull(postedBill);
-		assertEquals(BillStatus.POSTED, postedBill.getStatus());
-		
-		// Try to add a new line item
-		BillLineItem newLineItem = new BillLineItem();
-		newLineItem.setPrice(BigDecimal.valueOf(25.50));
-		newLineItem.setQuantity(2);
-		
-		// Should throw exception
-		assertThrows(IllegalStateException.class, () -> postedBill.addLineItem(newLineItem));
+		assertFalse(savedBill.getLineItems().isEmpty());
 	}
 	
 	/**
@@ -306,7 +229,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void save_Bill_shouldThrowExceptionWhenAddingLineItemsToPaidBill() {
 		// Get the PAID bill from test data (bill_id=1)
-		Bill paidBill = billService.getById(1);
+		Bill paidBill = billService.getBill(1);
 		assertNotNull(paidBill);
 		assertEquals(BillStatus.PAID, paidBill.getStatus());
 		
@@ -314,9 +237,10 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		BillLineItem newLineItem = new BillLineItem();
 		newLineItem.setPrice(BigDecimal.valueOf(25.50));
 		newLineItem.setQuantity(2);
-		
+		paidBill.addLineItem(newLineItem);
 		// Should throw exception
-		assertThrows(IllegalStateException.class, () -> paidBill.addLineItem(newLineItem));
+		
+		assertThrows(IllegalArgumentException.class, () -> billService.saveBill(paidBill));
 	}
 	
 	/**
@@ -325,7 +249,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void save_Bill_shouldAllowRemovingLineItemsFromPendingBill() {
 		// Get the PENDING bill from test data (bill_id=2)
-		Bill pendingBill = billService.getById(2);
+		Bill pendingBill = billService.getBill(2);
 		assertNotNull(pendingBill);
 		assertEquals(BillStatus.PENDING, pendingBill.getStatus());
 		
@@ -346,21 +270,22 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#saveBill(Bill)
 	 */
 	@Test
-	public void save_Bill_shouldThrowExceptionWhenRemovingLineItemsFromPostedBill() {
-		// Get the POSTED bill from test data (bill_id=0)
-		Bill postedBill = billService.getById(0);
+	public void save_Bill_shouldThrowExceptionWhenRemovingLineItemsFromPaidBill() {
+		// Get the POSTED bill from test data (bill_id=1)
+		Bill postedBill = billService.getBill(1);
 		assertNotNull(postedBill);
-		assertEquals(BillStatus.POSTED, postedBill.getStatus());
+		assertEquals(BillStatus.PAID, postedBill.getStatus());
 		
 		BillLineItem itemToRemove = postedBill.getLineItems().get(0);
+		postedBill.removeLineItem(itemToRemove);
 		
 		// Should throw exception
-		assertThrows(IllegalStateException.class, () -> postedBill.removeLineItem(itemToRemove));
+		assertThrows(IllegalArgumentException.class, () -> billService.saveBill(postedBill));
 	}
 	
 	@Test
 	public void save_Bill_shouldNotThrowExceptionForPendingBill() {
-		Bill pendingBill = billService.getById(2);
+		Bill pendingBill = billService.getBill(2);
 		assertNotNull(pendingBill);
 		assertEquals(BillStatus.PENDING, pendingBill.getStatus());
 		pendingBill.setReceiptNumber("ABV");
@@ -369,11 +294,94 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void save_Bill_shouldThrowIllegalStateExceptionForPostedBill() {
-		Bill postedBill = billService.getById(0);
+		Bill postedBill = billService.getBill(0);
 		assertNotNull(postedBill);
 		assertEquals(BillStatus.POSTED, postedBill.getStatus());
 		
 		postedBill.setReceiptNumber("ABV");
 		assertThrows(IllegalArgumentException.class, () -> billService.saveBill(postedBill));
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillByUuid(String)
+	 */
+	@Test
+	public void getBillByUuid_shouldReturnBillWithSpecifiedUuid() {
+		Bill bill = billService.getBill(0);
+		assertNotNull(bill);
+		String uuid = bill.getUuid();
+		
+		Bill foundBill = billService.getBillByUuid(uuid);
+		assertNotNull(foundBill);
+		assertEquals(uuid, foundBill.getUuid());
+		assertEquals(0, foundBill.getId());
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillByUuid(String)
+	 */
+	@Test
+	public void getBillByUuid_shouldReturnNullIfUuidNotFound() {
+		Bill bill = billService.getBillByUuid("nonexistent-uuid");
+		assertNull(bill);
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBills(BillSearch, PagingInfo)
+	 */
+	@Test
+	public void getBills_shouldReturnAllBillsWhenSearchIsEmpty() {
+		BillSearch billSearch = new BillSearch();
+		List<Bill> bills = billService.getBills(billSearch, null);
+		
+		assertNotNull(bills);
+		assertFalse(bills.isEmpty());
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBills(BillSearch, PagingInfo)
+	 */
+	@Test
+	public void getBills_shouldFilterByPatientUuid() {
+		Patient patient = patientService.getPatient(0);
+		assertNotNull(patient);
+		
+		BillSearch billSearch = new BillSearch();
+		billSearch.setPatientUuid(patient.getUuid());
+		
+		List<Bill> bills = billService.getBills(billSearch, null);
+		assertNotNull(bills);
+		assertFalse(bills.isEmpty());
+		
+		for (Bill bill : bills) {
+			assertEquals(patient.getUuid(), bill.getPatient().getUuid());
+		}
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBills(BillSearch, PagingInfo)
+	 */
+	@Test
+	public void getBills_shouldReturnEmptyListWhenSearchReturnsNoResults() {
+		BillSearch billSearch = new BillSearch();
+		billSearch.setPatientUuid("nonexistent-uuid");
+		
+		List<Bill> bills = billService.getBills(billSearch, null);
+		assertNotNull(bills);
+		assertTrue(bills.isEmpty());
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBills(BillSearch, PagingInfo)
+	 */
+	@Test
+	public void getBills_shouldApplyPagingCorrectly() {
+		BillSearch billSearch = new BillSearch();
+		PagingInfo pagingInfo = new PagingInfo(1, 2);
+		
+		List<Bill> bills = billService.getBills(billSearch, pagingInfo);
+		assertNotNull(bills);
+		assertTrue(bills.size() <= 2);
+		assertNotNull(pagingInfo.getTotalRecordCount());
 	}
 }

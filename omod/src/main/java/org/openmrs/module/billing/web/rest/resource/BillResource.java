@@ -29,11 +29,10 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.ModuleSettings;
-import org.openmrs.module.billing.api.IBillService;
+import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.ICashPointService;
 import org.openmrs.module.billing.api.ITimesheetService;
 import org.openmrs.module.billing.api.base.PagingInfo;
-import org.openmrs.module.billing.api.base.entity.IEntityDataService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
@@ -52,8 +51,12 @@ import org.openmrs.module.webservices.rest.web.annotation.Resource;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
+import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.AlreadyPaged;
+import org.openmrs.module.webservices.rest.web.resource.impl.DataDelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
+import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
+import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.springframework.web.client.RestClientException;
 
 /**
@@ -61,11 +64,11 @@ import org.springframework.web.client.RestClientException;
  */
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE + "/bill", supportedClass = Bill.class,
         supportedOpenmrsVersions = {"2.0 - 2.*"})
-public class BillResource extends BaseRestDataResource<Bill> {
+public class BillResource extends DataDelegatingCrudResource<Bill> {
     @Override
     public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
-        DelegatingResourceDescription description = super.getRepresentationDescription(rep);
         if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
+            DelegatingResourceDescription description = new DelegatingResourceDescription();
             description.addProperty("adjustedBy", Representation.REF);
             description.addProperty("billAdjusted", Representation.REF);
             description.addProperty("cashPoint", Representation.REF);
@@ -90,13 +93,8 @@ public class BillResource extends BaseRestDataResource<Bill> {
 
     @PropertySetter("lineItems")
     public void setBillLineItems(Bill instance, List<BillLineItem> lineItems) {
-        if (!instance.isPending()) {
-            throw new IllegalStateException(
-                    "Line items can only be modified when the bill is in PENDING state. Current status: "
-                            + instance.getStatus());
-        }
         if (instance.getLineItems() == null) {
-            instance.setLineItems(new ArrayList<BillLineItem>(lineItems.size()));
+            instance.setLineItems(new ArrayList<>(lineItems.size()));
         }
         BaseRestDataResource.syncCollection(instance.getLineItems(), lineItems);
         for (BillLineItem item : instance.getLineItems()) {
@@ -146,7 +144,7 @@ public class BillResource extends BaseRestDataResource<Bill> {
 
         if (bill.getId() == null) {
             if (bill.getCashier() == null) {
-                Provider cashier = getCurrentCashier(bill);
+                Provider cashier = getCurrentCashier();
                 if (cashier == null) {
                     throw new RestClientException("Couldn't find Provider for the current user ("
                             + Context.getAuthenticatedUser().getUsername() + ")");
@@ -167,61 +165,54 @@ public class BillResource extends BaseRestDataResource<Bill> {
             }
         }
 
-        return super.save(bill);
+        return Context.getService(BillService.class).saveBill(bill);
     }
 
     @Override
     protected AlreadyPaged<Bill> doSearch(RequestContext context) {
+        BillSearch billSearch = buildBillSearchFromRequest(context);
+        PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
+
+        BillService service = Context.getService(BillService.class);
+        List<Bill> result = service.getBills(billSearch, pagingInfo);
+
+        return new AlreadyPaged<>(context, result, pagingInfo.hasMoreResults(), pagingInfo.getTotalRecordCount());
+    }
+
+    private BillSearch buildBillSearchFromRequest(RequestContext context) {
+        BillSearch billSearch = new BillSearch();
+
         String patientUuid = context.getRequest().getParameter("patientUuid");
-        String status = context.getRequest().getParameter("status");
-        String cashPointUuid = context.getRequest().getParameter("cashPointUuid");
-        String includeVoidedLineItemsParam = context.getRequest().getParameter("includeAll");
-        String patientName = context.getRequest().getParameter("patientName");
-
-        Patient patient = StringUtils.isNotBlank(patientUuid) ? Context.getPatientService().getPatientByUuid(patientUuid) : null;
-        BillStatus billStatus = null;
-        List<BillStatus> statusList = null;
-        if (StringUtils.isNotBlank(status)) {
-            // Support comma-separated statuses: status=PENDING,POSTED
-            String[] statusArray = status.split(",");
-            if (statusArray.length > 1) {
-                // Multiple statuses provided
-                statusList = Arrays.stream(statusArray)
-                    .map(s -> BillStatus.valueOf(s.trim().toUpperCase()))
-                    .collect(Collectors.toList());
-            } else {
-                // Single status
-                billStatus = BillStatus.valueOf(status.trim().toUpperCase());
-            }
+        if (StringUtils.isNotBlank(patientUuid)) {
+            billSearch.setPatientUuid(patientUuid);
         }
-        CashPoint cashPoint = StringUtils.isNotBlank(cashPointUuid) ? Context.getService(ICashPointService.class).getByUuid(cashPointUuid) : null;
 
-        Bill searchTemplate = new Bill();
-        searchTemplate.setPatient(patient);
-        searchTemplate.setStatus(billStatus);
-        searchTemplate.setCashPoint(cashPoint);
-        IBillService service = Context.getService(IBillService.class);
-
-        BillSearch billSearch = new BillSearch(searchTemplate, false);
-
+        String patientName = context.getRequest().getParameter("patientName");
         if (StringUtils.isNotBlank(patientName)) {
             billSearch.setPatientName(patientName);
         }
 
-        // Set multiple statuses if provided, otherwise single status from template will be used
-        if (statusList != null && !statusList.isEmpty()) {
-            billSearch.setStatuses(statusList);
+        String status = context.getRequest().getParameter("status");
+        if (StringUtils.isNotBlank(status)) {
+            List<BillStatus> statuses = Arrays.stream(status.split(","))
+                    .map(String::trim)
+                    .filter(StringUtils::isNotBlank)
+                    .map(s -> BillStatus.valueOf(s.toUpperCase()))
+                    .collect(Collectors.toList());
+            billSearch.setStatuses(statuses);
         }
-        // Default to false (exclude voided line items) unless explicitly set to true
-        boolean includeVoidedLineItems = false;
-        if (StringUtils.isNotBlank(includeVoidedLineItemsParam)) {
-            includeVoidedLineItems = Boolean.parseBoolean(includeVoidedLineItemsParam);
-        }
-        billSearch.includeVoidedLineItems(includeVoidedLineItems);
-        PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
 
-        List<Bill> result = service.getBills(billSearch, pagingInfo);
-        return new AlreadyPaged<>(context, result, pagingInfo.hasMoreResults(), pagingInfo.getTotalRecordCount());
+        String cashPointUuid = context.getRequest().getParameter("cashPointUuid");
+        if (StringUtils.isNotBlank(cashPointUuid)) {
+            billSearch.setCashPointUuid(cashPointUuid);
+        }
+
+        String includeAll = context.getRequest().getParameter("includeAll");
+        if (StringUtils.isNotBlank(includeAll)) {
+            billSearch.setIncludeVoidedLineItems(Boolean.parseBoolean(includeAll));
+        }
+
+        return billSearch;
     }
 
 
@@ -237,17 +228,23 @@ public class BillResource extends BaseRestDataResource<Bill> {
             return null;
         }
 
-        return Context.getService(IBillService.class).getByUuid(uniqueId, false);
+        return Context.getService(BillService.class).getBillByUuid(uniqueId);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public Class<IEntityDataService<Bill>> getServiceClass() {
-        return (Class<IEntityDataService<Bill>>) (Object) IBillService.class;
+    protected void delete(Bill bill, String s, RequestContext requestContext) throws ResponseException {
+        Context.getService(BillService.class).voidBill(bill, s);
     }
 
-    public String getDisplayString(Bill instance) {
-        return instance.getReceiptNumber();
+    @Override
+    public void purge(Bill bill, RequestContext requestContext) throws ResponseException {
+        Context.getService(BillService.class).purgeBill(bill);
+    }
+
+    @Override
+    protected PageableResult doGetAll(RequestContext context) throws ResponseException {
+        List<Bill> bills = Context.getService(BillService.class).getBills(new BillSearch(), null);
+        return new NeedsPaging<>(bills, context);
     }
 
     @Override
@@ -255,7 +252,7 @@ public class BillResource extends BaseRestDataResource<Bill> {
         return new Bill();
     }
 
-    private Provider getCurrentCashier(Bill bill) {
+    private Provider getCurrentCashier() {
         User currentUser = Context.getAuthenticatedUser();
         ProviderService service = Context.getProviderService();
         Collection<Provider> providers = service.getProvidersByPerson(currentUser.getPerson());
