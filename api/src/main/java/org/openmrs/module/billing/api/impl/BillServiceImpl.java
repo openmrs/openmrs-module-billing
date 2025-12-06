@@ -23,7 +23,9 @@ import java.security.AccessControlException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.io.image.ImageDataFactory;
@@ -122,7 +124,7 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 	@Override
 	@Authorized({ PrivilegeConstants.MANAGE_BILLS })
 	@Transactional
-	public Bill save(Bill bill) {
+	public Bill saveBill(Bill bill) {
 		if (bill == null) {
 			throw new NullPointerException("The bill must be defined.");
 		}
@@ -148,9 +150,17 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 		if (!bills.isEmpty()) {
 			Bill billToUpdate = bills.get(0);
 			billToUpdate.setStatus(BillStatus.PENDING);
+			
+			// Handle the case where bill and billToUpdate are the same object reference
+			// (Hibernate session cache returns same managed instance)
+			Set<BillLineItem> existingItemsSet = new HashSet<>(billToUpdate.getLineItems());
+			
 			for (BillLineItem item : bill.getLineItems()) {
-				item.setBill(billToUpdate);
-				billToUpdate.getLineItems().add(item);
+				// Only add if not already present (BillLineItem.equals() handles comparison)
+				if (!existingItemsSet.contains(item)) {
+					item.setBill(billToUpdate);
+					billToUpdate.getLineItems().add(item);
+				}
 			}
 			
 			// Calculate the total payments made on the bill (excluding voided payments)
@@ -164,11 +174,11 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 			}
 			
 			// Save the updated bill
-			return super.save(billToUpdate);
+			return super.saveBill(billToUpdate);
 		}
 		
 		// If no pending bill exists, just save the new bill as it is
-		return super.save(bill);
+		return super.saveBill(bill);
 	}
 	
 	@Override

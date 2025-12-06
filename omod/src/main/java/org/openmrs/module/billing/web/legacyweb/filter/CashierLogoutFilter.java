@@ -81,7 +81,7 @@ public class CashierLogoutFilter implements Filter {
 
         if (cashierIsClockedIn(timesheet)) {
             timesheet.setClockOut(new Date());
-            timesheetService.save(timesheet);
+            timesheetService.saveBill(timesheet);
         }
     }
 

@@ -62,7 +62,7 @@ public abstract class AbstractSequentialReceiptNumberGenerator {
         }
 
         // Save the generator settings
-        getService().save(generator);
+        getService().saveBill(generator);
 
         // Set the system generator
         ReceiptNumberGeneratorFactory.setGenerator(new SequentialReceiptNumberGenerator());

@@ -127,7 +127,7 @@ public class CashierController {
             return null;
         }
 
-        Context.getService(ITimesheetService.class).save(timesheet);
+        Context.getService(ITimesheetService.class).saveBill(timesheet);
 
         if (StringUtils.isEmpty(returnUrl)) {
             returnUrl = "redirect:";

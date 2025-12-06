@@ -88,8 +88,8 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#save(OpenmrsObject)
 	 */
 	@Test(expected = NullPointerException.class)
-	public void save_shouldThrowNullPointerExceptionIfTheObjectIsNull() throws Exception {
-		service.save(null);
+	public void save_Bill_shouldThrowNullPointerExceptionIfTheObjectIsNull() throws Exception {
+		service.saveBill(null);
 	}
 	
 	/**
@@ -97,10 +97,10 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#save(OpenmrsObject)
 	 */
 	@Test(expected = APIException.class)
-	public void save_shouldValidateTheObjectBeforeSaving() throws Exception {
+	public void save_Bill_shouldValidateTheObjectBeforeSaving() throws Exception {
 		E entity = createEntity(false);
 		
-		service.save(entity);
+		service.saveBill(entity);
 	}
 	
 	/**
@@ -108,10 +108,10 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#save(OpenmrsObject)
 	 */
 	@Test
-	public void save_shouldReturnSavedObject() throws Exception {
+	public void save_Bill_shouldReturnSavedObject() throws Exception {
 		E entity = createEntity(true);
 		
-		E result = service.save(entity);
+		E result = service.saveBill(entity);
 		Context.flushSession();
 		
 		Assert.assertNotNull(result);
@@ -123,13 +123,13 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#save(OpenmrsObject)
 	 */
 	@Test
-	public void save_shouldUpdateTheObjectSuccessfully() throws Exception {
+	public void save_Bill_shouldUpdateTheObjectSuccessfully() throws Exception {
 		E entity = service.getById(0);
 		Assert.assertNotNull(entity);
 		
 		updateEntityFields(entity);
 		
-		service.save(entity);
+		service.saveBill(entity);
 		Context.flushSession();
 		
 		E updatedEntity = service.getById(entity.getId());
@@ -141,10 +141,10 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#save(OpenmrsObject)
 	 */
 	@Test
-	public void save_shouldCreateTheObjectSuccessfully() throws Exception {
+	public void save_Bill_shouldCreateTheObjectSuccessfully() throws Exception {
 		E entity = createEntity(true);
 		
-		entity = service.save(entity);
+		entity = service.saveBill(entity);
 		Context.flushSession();
 		
 		E result = service.getById(entity.getId());
@@ -168,7 +168,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	public void purge_shouldDeleteTheSpecifiedObject() throws Exception {
 		E entity = createEntity(true);
 		
-		service.save(entity);
+		service.saveBill(entity);
 		Context.flushSession();
 		
 		E result = service.getById(entity.getId());

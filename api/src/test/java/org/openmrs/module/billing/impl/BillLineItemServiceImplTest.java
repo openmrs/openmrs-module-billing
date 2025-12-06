@@ -64,7 +64,7 @@ public class BillLineItemServiceImplTest extends BaseModuleContextSensitiveTest 
 		lineItem.setPrice(BigDecimal.valueOf(99.99));
 		
 		// Should not throw exception
-		BillLineItem savedItem = billLineItemService.save(lineItem);
+		BillLineItem savedItem = billLineItemService.saveBill(lineItem);
 		assertNotNull(savedItem);
 		assertEquals(BigDecimal.valueOf(99.99), savedItem.getPrice());
 	}
@@ -87,7 +87,7 @@ public class BillLineItemServiceImplTest extends BaseModuleContextSensitiveTest 
 		lineItem.setPrice(BigDecimal.valueOf(99.99));
 		
 		// Should throw exception
-		assertThrows(IllegalStateException.class, () -> billLineItemService.save(lineItem));
+		assertThrows(IllegalStateException.class, () -> billLineItemService.saveBill(lineItem));
 	}
 	
 	/**
@@ -108,7 +108,7 @@ public class BillLineItemServiceImplTest extends BaseModuleContextSensitiveTest 
 		lineItem.setPrice(BigDecimal.valueOf(99.99));
 		
 		// Should throw exception
-		assertThrows(IllegalStateException.class, () -> billLineItemService.save(lineItem));
+		assertThrows(IllegalStateException.class, () -> billLineItemService.saveBill(lineItem));
 	}
 	
 	/**

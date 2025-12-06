@@ -112,7 +112,7 @@ public abstract class BaseRestDataResource<E extends OpenmrsData> extends DataDe
 
     @Override
     public E save(E delegate) {
-        return getService().save(delegate);
+        return getService().saveBill(delegate);
     }
 
     @Override

@@ -102,7 +102,7 @@ public abstract class BaseObjectDataServiceImpl<E extends OpenmrsObject, P exten
 	
 	@Override
 	@Transactional
-	public E save(E object) {
+	public E saveBill(E object) {
 		P privileges = getPrivileges();
 		if (privileges != null && !StringUtils.isEmpty(privileges.getSavePrivilege())) {
 			PrivilegeUtil.requirePrivileges(Context.getAuthenticatedUser(), privileges.getSavePrivilege());
