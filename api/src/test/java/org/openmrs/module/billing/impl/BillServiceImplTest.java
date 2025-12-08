@@ -89,24 +89,24 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	/**
-	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillsByPatientId(Integer,
-	 *      org.openmrs.module.billing.api.base.PagingInfo)
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillsByPatientUuid(String,
+	 *      PagingInfo)
 	 */
 	@Test
-	public void getBillsByPatientId_shouldReturnBillsForPatient() {
-		List<Bill> bills = billService.getBillsByPatientId(0, null);
+	public void getBillsByPatientUuid_shouldReturnBillsForPatient() {
+		List<Bill> bills = billService.getBillsByPatientUuid("5631b434-78aa-102b-91a0-001e378eb67e", null);
 		assertNotNull(bills);
 		assertFalse(bills.isEmpty());
 		assertEquals(1, bills.size());
 	}
 	
 	/**
-	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillsByPatientId(Integer,
-	 *      org.openmrs.module.billing.api.base.PagingInfo)
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillsByPatientUuid(String,
+	 *      PagingInfo)
 	 */
 	@Test
 	public void getBillsByPatientId_shouldReturnEmptyListWhenPatientHasNoBills() {
-		List<Bill> bills = billService.getBillsByPatientId(999, null);
+		List<Bill> bills = billService.getBillsByPatientUuid("abc", null);
 		assertNotNull(bills);
 		assertEquals(0, bills.size());
 	}

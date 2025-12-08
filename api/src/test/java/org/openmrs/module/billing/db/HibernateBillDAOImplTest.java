@@ -140,7 +140,7 @@ public class HibernateBillDAOImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void getBillsByPatientId_shouldReturnBillsForPatient() {
-		List<Bill> bills = billDAO.getBillsByPatientId(0, null);
+		List<Bill> bills = billDAO.getBillsByPatientUuid("5631b434-78aa-102b-91a0-001e378eb67e", null);
 		assertNotNull(bills);
 		assertFalse(bills.isEmpty());
 		assertEquals(1, bills.size());
@@ -148,7 +148,7 @@ public class HibernateBillDAOImplTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void getBillsByPatientId_shouldReturnEmptyListWhenPatientHasNoBills() {
-		List<Bill> bills = billDAO.getBillsByPatientId(999, null);
+		List<Bill> bills = billDAO.getBillsByPatientUuid("abc", null);
 		assertNotNull(bills);
 		assertTrue(bills.isEmpty());
 	}
@@ -156,7 +156,7 @@ public class HibernateBillDAOImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void getBillsByPatientId_shouldApplyPagingCorrectly() {
 		PagingInfo pagingInfo = new PagingInfo(1, 5);
-		List<Bill> bills = billDAO.getBillsByPatientId(0, pagingInfo);
+		List<Bill> bills = billDAO.getBillsByPatientUuid("5631b434-78aa-102b-91a0-001e378eb67e", pagingInfo);
 		
 		assertNotNull(bills);
 		assertTrue(bills.size() <= 5);

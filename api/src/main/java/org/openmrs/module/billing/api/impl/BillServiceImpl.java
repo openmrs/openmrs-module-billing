@@ -71,11 +71,11 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 	}
 	
 	@Override
-	public List<Bill> getBillsByPatientId(Integer patientId, PagingInfo pagingInfo) {
-		if (patientId == null) {
+	public List<Bill> getBillsByPatientUuid(String patientUuid, PagingInfo pagingInfo) {
+		if (StringUtils.isEmpty(patientUuid)) {
 			return Collections.emptyList();
 		}
-		return billDAO.getBillsByPatientId(patientId, pagingInfo);
+		return billDAO.getBillsByPatientUuid(patientUuid, pagingInfo);
 	}
 	
 	@Override
@@ -107,20 +107,11 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		if (StringUtils.isBlank(voidReason)) {
 			throw new IllegalArgumentException("voidReason cannot be null or empty");
 		}
-		
-		bill.setVoided(true);
-		bill.setVoidReason(voidReason);
 		return billDAO.saveBill(bill);
 	}
 	
 	@Override
 	public Bill unvoidBill(Bill bill) {
-		Date voidDate = bill.getDateVoided();
-		bill.setVoided(false);
-		
-		bill.setVoidedBy(null);
-		bill.setVoidReason(null);
-		bill.setDateVoided(voidDate);
 		return billDAO.saveBill(bill);
 	}
 	

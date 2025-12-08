@@ -23,7 +23,7 @@ public interface BillDAO {
 	Bill getBillByReceiptNumber(@Nonnull String receiptNumber);
 	
 	@Transactional(readOnly = true)
-	List<Bill> getBillsByPatientId(@Nonnull Integer patient, PagingInfo pagingInfo);
+	List<Bill> getBillsByPatientUuid(@Nonnull String patientUuid, PagingInfo pagingInfo);
 	
 	@Transactional(readOnly = true)
 	List<Bill> getBills(@Nonnull BillSearch billSearch, PagingInfo pagingInfo);

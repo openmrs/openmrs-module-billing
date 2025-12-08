@@ -20,17 +20,13 @@ public interface BillService extends OpenmrsService {
 	@Authorized(PrivilegeConstants.VIEW_BILLS)
 	Bill getBillByUuid(String uuid);
 	
-	@Transactional
-	@Authorized(PrivilegeConstants.MANAGE_BILLS)
-	Bill saveBill(Bill bill);
-	
 	@Transactional(readOnly = true)
 	@Authorized(PrivilegeConstants.VIEW_BILLS)
 	Bill getBillByReceiptNumber(String receiptNumber);
 	
 	@Transactional(readOnly = true)
 	@Authorized(PrivilegeConstants.VIEW_BILLS)
-	List<Bill> getBillsByPatientId(Integer patientId, PagingInfo pagingInfo);
+	List<Bill> getBillsByPatientUuid(String patientUuid, PagingInfo pagingInfo);
 	
 	@Transactional(readOnly = true)
 	@Authorized(PrivilegeConstants.VIEW_BILLS)
@@ -39,6 +35,10 @@ public interface BillService extends OpenmrsService {
 	@Transactional(readOnly = true)
 	@Authorized(PrivilegeConstants.VIEW_BILLS)
 	byte[] downloadBillReceipt(Bill bill);
+	
+	@Transactional
+	@Authorized(PrivilegeConstants.MANAGE_BILLS)
+	Bill saveBill(Bill bill);
 	
 	@Authorized(PrivilegeConstants.PURGE_BILLS)
 	void purgeBill(Bill bill);

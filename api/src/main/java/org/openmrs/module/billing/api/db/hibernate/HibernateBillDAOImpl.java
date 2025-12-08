@@ -55,14 +55,13 @@ public class HibernateBillDAOImpl implements BillDAO {
 	}
 	
 	@Override
-	public List<Bill> getBillsByPatientId(@Nonnull Integer patientId, PagingInfo pagingInfo) {
+	public List<Bill> getBillsByPatientUuid(@Nonnull String patientUuid, PagingInfo pagingInfo) {
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Bill> cq = cb.createQuery(Bill.class);
 		Root<Bill> root = cq.from(Bill.class);
 		
-		Predicate predicate = cb.equal(root.get("patient").get("patientId"), patientId);
+		Predicate predicate = cb.equal(root.get("patient").get("uuid"), patientUuid);
 		cq.where(predicate);
-		cq.orderBy(cb.desc(root.get("id")));
 		
 		TypedQuery<Bill> query = entityManager.createQuery(cq);
 		
@@ -84,8 +83,6 @@ public class HibernateBillDAOImpl implements BillDAO {
 		if (!predicates.isEmpty()) {
 			cq.where(predicates.toArray(new Predicate[0]));
 		}
-		
-		cq.orderBy(cb.desc(root.get("id")));
 		
 		TypedQuery<Bill> query = entityManager.createQuery(cq);
 		
@@ -127,10 +124,11 @@ public class HibernateBillDAOImpl implements BillDAO {
 		if (billSearch.getStatuses() != null && !billSearch.getStatuses().isEmpty()) {
 			predicates.add(root.get("status").in(billSearch.getStatuses()));
 		}
-		
-		if (!billSearch.getIncludeVoided()) {
-			predicates.add(cb.equal(root.get("voided"), false));
-		}
+
+        if (!Boolean.TRUE.equals(billSearch.getIncludeVoided())) {
+            predicates.add(cb.equal(root.get("voided"), false));
+        }
+
 		
 		return predicates;
 	}
@@ -148,7 +146,7 @@ public class HibernateBillDAOImpl implements BillDAO {
 			query.setFirstResult(offset);
 			query.setMaxResults(pagingInfo.getPageSize());
 			
-			if (pagingInfo.isLoadRecordCount()) {
+			if (pagingInfo.getLoadRecordCount()) {
 				CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 				CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
 				Root<Bill> countRoot = countQuery.from(Bill.class);
