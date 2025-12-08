@@ -26,18 +26,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 /**
- * Data service implementation class for {@link Bill}s.
+ * Default implementation of {@link BillService}.
+ * <p>
+ * This class delegates to {@link BillDAO} for persistence operations. For detailed
+ * documentation of each method, see the interface {@link BillService}.
+ * </p>
+ *
+ * @see BillService
+ * @see BillDAO
  */
 @Transactional
 public class BillServiceImpl extends BaseOpenmrsService implements BillService {
-	
+
 	@Setter(onMethod_ = { @Autowired })
 	private BillDAO billDAO;
-	
+
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Bill getBill(Integer id) {
 		if (id == null) {
@@ -45,7 +54,10 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		}
 		return billDAO.getBill(id);
 	}
-	
+
+    /**
+     * {@inheritDoc}
+     */
 	@Override
 	public Bill getBillByUuid(String uuid) {
 		if (uuid == null) {
@@ -53,7 +65,10 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		}
 		return billDAO.getBillByUuid(uuid);
 	}
-	
+
+    /**
+     * {@inheritDoc}
+     */
 	@Override
 	public Bill saveBill(Bill bill) {
 		if (bill == null) {
@@ -61,7 +76,10 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		}
 		return billDAO.saveBill(bill);
 	}
-	
+
+    /**
+     * {@inheritDoc}
+     */
 	@Override
 	public Bill getBillByReceiptNumber(String receiptNumber) {
 		if (receiptNumber == null) {
@@ -69,7 +87,10 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		}
 		return billDAO.getBillByReceiptNumber(receiptNumber);
 	}
-	
+
+    /**
+     * {@inheritDoc}
+     */
 	@Override
 	public List<Bill> getBillsByPatientUuid(String patientUuid, PagingInfo pagingInfo) {
 		if (StringUtils.isEmpty(patientUuid)) {
@@ -77,7 +98,10 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		}
 		return billDAO.getBillsByPatientUuid(patientUuid, pagingInfo);
 	}
-	
+
+    /**
+     * {@inheritDoc}
+     */
 	@Override
 	public List<Bill> getBills(BillSearch billSearch, PagingInfo pagingInfo) {
 		if (billSearch == null) {
@@ -85,7 +109,10 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		}
 		return billDAO.getBills(billSearch, pagingInfo);
 	}
-	
+
+    /**
+     * {@inheritDoc}
+     */
 	@Override
 	public byte[] downloadBillReceipt(Bill bill) {
 		if (bill == null) {
@@ -93,7 +120,10 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		}
 		return ReceiptGenerator.createBillReceipt(bill);
 	}
-	
+
+    /**
+     * {@inheritDoc}
+     */
 	@Override
 	public void purgeBill(Bill bill) {
 		if (bill == null) {
@@ -101,7 +131,10 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		}
 		billDAO.purgeBill(bill);
 	}
-	
+
+    /**
+     * {@inheritDoc}
+     */
 	@Override
 	public Bill voidBill(Bill bill, String voidReason) {
 		if (StringUtils.isBlank(voidReason)) {
@@ -109,7 +142,10 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		}
 		return billDAO.saveBill(bill);
 	}
-	
+
+    /**
+     * {@inheritDoc}
+     */
 	@Override
 	public Bill unvoidBill(Bill bill) {
 		return billDAO.saveBill(bill);

@@ -20,23 +20,38 @@ import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Hibernate implementation of {@link BillDAO}.
+ *
+ * @see BillDAO
+ * @see Bill
+ */
 public class HibernateBillDAOImpl implements BillDAO {
-	
+
 	@PersistenceContext
 	private EntityManager entityManager;
-	
+
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Bill getBill(@Nonnull Integer id) {
 		return entityManager.find(Bill.class, id);
 	}
-	
+
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Bill getBillByUuid(@Nonnull String uuid) {
 		TypedQuery<Bill> query = entityManager.createQuery("select b from Bill b where b.uuid = :uuid", Bill.class);
 		query.setParameter("uuid", uuid);
 		return query.getResultStream().findFirst().orElse(null);
 	}
-	
+
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Bill saveBill(@Nonnull Bill bill) {
 		if (bill.getId() == null) {
@@ -45,7 +60,10 @@ public class HibernateBillDAOImpl implements BillDAO {
 		}
 		return entityManager.merge(bill);
 	}
-	
+
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Bill getBillByReceiptNumber(@Nonnull String receiptNumber) {
 		TypedQuery<Bill> query = entityManager.createQuery("select b from Bill b where b.receiptNumber = :receiptNumber",
@@ -53,44 +71,53 @@ public class HibernateBillDAOImpl implements BillDAO {
 		query.setParameter("receiptNumber", receiptNumber);
 		return query.getResultStream().findFirst().orElse(null);
 	}
-	
+
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<Bill> getBillsByPatientUuid(@Nonnull String patientUuid, PagingInfo pagingInfo) {
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Bill> cq = cb.createQuery(Bill.class);
 		Root<Bill> root = cq.from(Bill.class);
-		
+
 		Predicate predicate = cb.equal(root.get("patient").get("uuid"), patientUuid);
 		cq.where(predicate);
-		
+
 		TypedQuery<Bill> query = entityManager.createQuery(cq);
-		
+
 		List<Predicate> predicates = new ArrayList<>();
 		predicates.add(predicate);
 		applyPaging(query, pagingInfo, predicates);
-		
+
 		return query.getResultList();
 	}
-	
+
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<Bill> getBills(@Nonnull BillSearch billSearch, PagingInfo pagingInfo) {
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Bill> cq = cb.createQuery(Bill.class);
 		Root<Bill> root = cq.from(Bill.class);
-		
+
 		List<Predicate> predicates = buildBillSearchPredicate(cb, root, billSearch);
-		
+
 		if (!predicates.isEmpty()) {
 			cq.where(predicates.toArray(new Predicate[0]));
 		}
-		
+
 		TypedQuery<Bill> query = entityManager.createQuery(cq);
-		
+
 		applyPaging(query, pagingInfo, predicates);
-		
+
 		return query.getResultList();
 	}
-	
+
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void purgeBill(@Nonnull Bill bill) {
 		entityManager.remove(bill);
@@ -124,11 +151,10 @@ public class HibernateBillDAOImpl implements BillDAO {
 		if (billSearch.getStatuses() != null && !billSearch.getStatuses().isEmpty()) {
 			predicates.add(root.get("status").in(billSearch.getStatuses()));
 		}
-
-        if (!Boolean.TRUE.equals(billSearch.getIncludeVoided())) {
-            predicates.add(cb.equal(root.get("voided"), false));
-        }
-
+		
+		if (!Boolean.TRUE.equals(billSearch.getIncludeVoided())) {
+			predicates.add(cb.equal(root.get("voided"), false));
+		}
 		
 		return predicates;
 	}
