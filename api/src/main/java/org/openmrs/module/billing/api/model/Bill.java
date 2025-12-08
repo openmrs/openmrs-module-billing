@@ -36,7 +36,7 @@ import org.openmrs.module.stockmanagement.api.model.StockItem;
 @Getter
 @Setter
 public class Bill extends BaseOpenmrsData {
-
+	
 	private static final long serialVersionUID = 0L;
 	
 	private Integer billId;
@@ -62,8 +62,8 @@ public class Bill extends BaseOpenmrsData {
 	private Boolean receiptPrinted = false;
 	
 	private String adjustmentReason;
-
-    public BigDecimal getTotal() {
+	
+	public BigDecimal getTotal() {
 		BigDecimal total = BigDecimal.ZERO;
 		
 		List<BillLineItem> lineItems = getLineItems();
@@ -97,22 +97,22 @@ public class Bill extends BaseOpenmrsData {
 	public Integer getId() {
 		return this.getBillId();
 	}
-
+	
 	@Override
 	public void setId(Integer id) {
 		this.setBillId(id);
 	}
-
+	
 	// Custom setter - updates adjusted bill status
 	public void setBillAdjusted(Bill billAdjusted) {
 		this.billAdjusted = billAdjusted;
-
+		
 		if (billAdjusted != null) {
 			billAdjusted.setStatus(BillStatus.ADJUSTED);
 		}
 	}
-
-    public BillLineItem addLineItem(StockItem item, BigDecimal price, String priceName, int quantity) {
+	
+	public BillLineItem addLineItem(StockItem item, BigDecimal price, String priceName, int quantity) {
 		if (item == null) {
 			throw new IllegalArgumentException("The item to add must be defined.");
 		}
@@ -152,8 +152,8 @@ public class Bill extends BaseOpenmrsData {
 			}
 		}
 	}
-
-    public void addPayment(Payment payment) {
+	
+	public void addPayment(Payment payment) {
 		if (payment == null) {
 			throw new NullPointerException("The payment to add must be defined.");
 		}
@@ -184,7 +184,7 @@ public class Bill extends BaseOpenmrsData {
 			this.payments.remove(payment);
 		}
 	}
-
+	
 	public void addAdjustedBy(Bill adjustedBill) {
 		checkAuthorizedToAdjust();
 		if (adjustedBill == null) {
@@ -198,8 +198,8 @@ public class Bill extends BaseOpenmrsData {
 		adjustedBill.setBillAdjusted(this);
 		this.adjustedBy.add(adjustedBill);
 	}
-
-    private void checkAuthorizedToAdjust() {
+	
+	private void checkAuthorizedToAdjust() {
 		if (!Context.hasPrivilege(PrivilegeConstants.ADJUST_BILLS)) {
 			throw new AccessControlException("Access denied to adjust bill.");
 		}
@@ -223,5 +223,5 @@ public class Bill extends BaseOpenmrsData {
 			lineItem.setLineItemOrder(orderCounter++);
 		}
 	}
-
+	
 }

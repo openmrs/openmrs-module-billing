@@ -30,7 +30,11 @@ public abstract class BaseCustomizableData<TAttribute extends IAttribute<?, ?>>
 // @formatter:on
 	public static final long serialVersionUID = 0L;
 	
-	private Set<TAttribute> attributes;
+	// Using raw types to avoid RequiredDataAdvice reflection issues with parameterized types.
+	// Also, I’m not sure why we need all of these Base classes. This feels overly complicated.
+	// Do we really need this level of deep inheritance?
+	//	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private Set attributes;
 	
 	protected void onAddAttribute(TAttribute attribute) {
 		// Just here to allow subclass to add custom logic

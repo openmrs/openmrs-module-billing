@@ -22,7 +22,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.User;
 import org.openmrs.api.AdministrationService;
@@ -30,7 +29,6 @@ import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.ModuleSettings;
 import org.openmrs.module.billing.api.BillService;
-import org.openmrs.module.billing.api.ICashPointService;
 import org.openmrs.module.billing.api.ITimesheetService;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.model.Bill;
@@ -157,7 +155,7 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
                 loadBillCashPoint(bill);
             }
 
-            // Now that all all attributes have been set (i.e., payments and bill status) we can check to see if the bill
+            // Now that all attributes have been set (i.e., payments and bill status) we can check to see if the bill
             // is fully paid.
             bill.synchronizeBillStatus();
             if (bill.getStatus() == null) {
