@@ -320,7 +320,7 @@ public abstract class BaseObjectDataServiceImpl<E extends OpenmrsObject, P exten
 				criteria = repository.createCriteria(getEntityClass());
 			}
 			
-			if (pagingInfo.shouldLoadRecordCount()) {
+			if (pagingInfo.getLoadRecordCount()) {
 				// Copy the current projection and transformer which requires getting access to the underlying criteria
 				// implementation
 				Projection projection = null;

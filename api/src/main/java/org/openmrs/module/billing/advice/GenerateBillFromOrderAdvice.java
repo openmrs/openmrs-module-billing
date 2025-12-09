@@ -13,7 +13,7 @@ import org.openmrs.api.OrderService;
 import org.openmrs.api.ProgramWorkflowService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillExemptionService;
-import org.openmrs.module.billing.api.IBillService;
+import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.IBillableItemsService;
 import org.openmrs.module.billing.api.ICashPointService;
 import org.openmrs.module.billing.api.ItemPriceService;
@@ -47,7 +47,7 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 	
 	OrderService orderService = Context.getOrderService();
 	
-	IBillService billService = Context.getService(IBillService.class);
+	BillService billService = Context.getService(BillService.class);
 	
 	StockManagementService stockService = Context.getService(StockManagementService.class);
 	
@@ -84,10 +84,10 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 					Integer drugID = drugOrder.getDrug() != null ? drugOrder.getDrug().getDrugId() : 0;
 					double drugQuantity = drugOrder.getQuantity() != null ? drugOrder.getQuantity() : 0.0;
 					List<StockItem> stockItems = stockService.getStockItemByDrug(drugID);
-
+					
 					if (!stockItems.isEmpty()) {
 						// check from the list for all exemptions
-                        boolean isExempted = checkIfOrderIsExempted(workflowService, order, ExemptionType.COMMODITY);
+						boolean isExempted = checkIfOrderIsExempted(workflowService, order, ExemptionType.COMMODITY);
 						BillStatus lineItemStatus = isExempted ? BillStatus.EXEMPTED : BillStatus.PENDING;
 						addBillItemToBill(order, patient, cashierUUID, stockItems.get(0), null, (int) drugQuantity,
 						    order.getDateActivated(), lineItemStatus);
@@ -163,8 +163,8 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 		
 		return variables;
 	}
-
-    /**
+	
+	/**
 	 * Adds a bill item to the cashier module
 	 *
 	 * @param patient
