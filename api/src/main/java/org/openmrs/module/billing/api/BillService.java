@@ -17,7 +17,7 @@ import java.util.List;
  * @see BillSearch
  */
 public interface BillService extends OpenmrsService {
-
+	
 	/**
 	 * Retrieves a bill by its database ID.
 	 *
@@ -28,7 +28,7 @@ public interface BillService extends OpenmrsService {
 	@Transactional(readOnly = true)
 	@Authorized(PrivilegeConstants.VIEW_BILLS)
 	Bill getBill(Integer id);
-
+	
 	/**
 	 * Retrieves a bill by its UUID.
 	 *
@@ -39,7 +39,7 @@ public interface BillService extends OpenmrsService {
 	@Transactional(readOnly = true)
 	@Authorized(PrivilegeConstants.VIEW_BILLS)
 	Bill getBillByUuid(String uuid);
-
+	
 	/**
 	 * Retrieves a bill by its receipt number.
 	 *
@@ -50,7 +50,7 @@ public interface BillService extends OpenmrsService {
 	@Transactional(readOnly = true)
 	@Authorized(PrivilegeConstants.VIEW_BILLS)
 	Bill getBillByReceiptNumber(String receiptNumber);
-
+	
 	/**
 	 * Retrieves all bills for a specific patient.
 	 *
@@ -62,12 +62,12 @@ public interface BillService extends OpenmrsService {
 	@Transactional(readOnly = true)
 	@Authorized(PrivilegeConstants.VIEW_BILLS)
 	List<Bill> getBillsByPatientUuid(String patientUuid, PagingInfo pagingInfo);
-
+	
 	/**
 	 * Searches for bills using the specified search criteria.
 	 * <p>
-	 * By default, voided bills are excluded from search results unless explicitly included
-	 * via {@link BillSearch#setIncludeVoided(Boolean)}.
+	 * By default, voided bills are excluded from search results unless explicitly included via
+	 * {@link BillSearch#setIncludeVoided(Boolean)}.
 	 * </p>
 	 *
 	 * @param billSearch the search criteria
@@ -79,7 +79,7 @@ public interface BillService extends OpenmrsService {
 	@Transactional(readOnly = true)
 	@Authorized(PrivilegeConstants.VIEW_BILLS)
 	List<Bill> getBills(BillSearch billSearch, PagingInfo pagingInfo);
-
+	
 	/**
 	 * Generates and downloads a receipt for the specified bill.
 	 *
@@ -90,12 +90,12 @@ public interface BillService extends OpenmrsService {
 	@Transactional(readOnly = true)
 	@Authorized(PrivilegeConstants.VIEW_BILLS)
 	byte[] downloadBillReceipt(Bill bill);
-
+	
 	/**
 	 * Saves a bill to the database.
 	 * <p>
-	 * If the bill is new (no ID), it will be created. If it already exists, it will be updated.
-	 * The bill's status will be synchronized based on its payments.
+	 * If the bill is new (no ID), it will be created. If it already exists, it will be updated. The
+	 * bill's status will be synchronized based on its payments.
 	 * </p>
 	 *
 	 * @param bill the bill to save
@@ -106,7 +106,7 @@ public interface BillService extends OpenmrsService {
 	@Transactional
 	@Authorized(PrivilegeConstants.MANAGE_BILLS)
 	Bill saveBill(Bill bill);
-
+	
 	/**
 	 * Permanently deletes a bill from the database.
 	 * <p>
@@ -119,12 +119,12 @@ public interface BillService extends OpenmrsService {
 	 */
 	@Authorized(PrivilegeConstants.PURGE_BILLS)
 	void purgeBill(Bill bill);
-
+	
 	/**
 	 * Voids (soft deletes) a bill with a specified reason.
 	 * <p>
-	 * Voided bills are hidden from normal queries but remain in the database for audit purposes.
-	 * Voided bills can be restored using {@link #unvoidBill(Bill)}.
+	 * Voided bills are hidden from normal queries but remain in the database for audit purposes. Voided
+	 * bills can be restored using {@link #unvoidBill(Bill)}.
 	 * </p>
 	 *
 	 * @param bill the bill to void
@@ -135,7 +135,7 @@ public interface BillService extends OpenmrsService {
 	 */
 	@Authorized(PrivilegeConstants.DELETE_BILLS)
 	Bill voidBill(Bill bill, String voidReason);
-
+	
 	/**
 	 * Restores a previously voided bill.
 	 * <p>
@@ -148,5 +148,5 @@ public interface BillService extends OpenmrsService {
 	 */
 	@Authorized(PrivilegeConstants.DELETE_BILLS)
 	Bill unvoidBill(Bill bill);
-
+	
 }

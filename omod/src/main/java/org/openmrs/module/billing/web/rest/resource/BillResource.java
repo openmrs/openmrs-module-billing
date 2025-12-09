@@ -177,42 +177,6 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
         return new AlreadyPaged<>(context, result, pagingInfo.hasMoreResults(), pagingInfo.getTotalRecordCount());
     }
 
-    private BillSearch buildBillSearchFromRequest(RequestContext context) {
-        BillSearch billSearch = new BillSearch();
-
-        String patientUuid = context.getRequest().getParameter("patientUuid");
-        if (StringUtils.isNotBlank(patientUuid)) {
-            billSearch.setPatientUuid(patientUuid);
-        }
-
-        String patientName = context.getRequest().getParameter("patientName");
-        if (StringUtils.isNotBlank(patientName)) {
-            billSearch.setPatientName(patientName);
-        }
-
-        String status = context.getRequest().getParameter("status");
-        if (StringUtils.isNotBlank(status)) {
-            List<BillStatus> statuses = Arrays.stream(status.split(","))
-                    .map(String::trim)
-                    .filter(StringUtils::isNotBlank)
-                    .map(s -> BillStatus.valueOf(s.toUpperCase()))
-                    .collect(Collectors.toList());
-            billSearch.setStatuses(statuses);
-        }
-
-        String cashPointUuid = context.getRequest().getParameter("cashPointUuid");
-        if (StringUtils.isNotBlank(cashPointUuid)) {
-            billSearch.setCashPointUuid(cashPointUuid);
-        }
-
-        String includeAll = context.getRequest().getParameter("includeAll");
-        if (StringUtils.isNotBlank(includeAll)) {
-            billSearch.setIncludeVoidedLineItems(Boolean.parseBoolean(includeAll));
-        }
-
-        return billSearch;
-    }
-
 
     /**
      * Gets a bill by UUID
@@ -238,13 +202,6 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
     public void purge(Bill bill, RequestContext requestContext) throws ResponseException {
         Context.getService(BillService.class).purgeBill(bill);
     }
-
-    @Override
-    protected PageableResult doGetAll(RequestContext context) throws ResponseException {
-        List<Bill> bills = Context.getService(BillService.class).getBills(new BillSearch(), null);
-        return new NeedsPaging<>(bills, context);
-    }
-
     @Override
     public Bill newDelegate() {
         return new Bill();
@@ -288,5 +245,42 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
             }
             bill.setCashPoint(cashPoint);
         }
+    }
+
+
+    private BillSearch buildBillSearchFromRequest(RequestContext context) {
+        BillSearch billSearch = new BillSearch();
+
+        String patientUuid = context.getRequest().getParameter("patientUuid");
+        if (StringUtils.isNotBlank(patientUuid)) {
+            billSearch.setPatientUuid(patientUuid);
+        }
+
+        String patientName = context.getRequest().getParameter("patientName");
+        if (StringUtils.isNotBlank(patientName)) {
+            billSearch.setPatientName(patientName);
+        }
+
+        String status = context.getRequest().getParameter("status");
+        if (StringUtils.isNotBlank(status)) {
+            List<BillStatus> statuses = Arrays.stream(status.split(","))
+                    .map(String::trim)
+                    .filter(StringUtils::isNotBlank)
+                    .map(s -> BillStatus.valueOf(s.toUpperCase()))
+                    .collect(Collectors.toList());
+            billSearch.setStatuses(statuses);
+        }
+
+        String cashPointUuid = context.getRequest().getParameter("cashPointUuid");
+        if (StringUtils.isNotBlank(cashPointUuid)) {
+            billSearch.setCashPointUuid(cashPointUuid);
+        }
+
+        String includeAll = context.getRequest().getParameter("includeAll");
+        if (StringUtils.isNotBlank(includeAll)) {
+            billSearch.setIncludeVoidedLineItems(Boolean.parseBoolean(includeAll));
+        }
+
+        return billSearch;
     }
 }

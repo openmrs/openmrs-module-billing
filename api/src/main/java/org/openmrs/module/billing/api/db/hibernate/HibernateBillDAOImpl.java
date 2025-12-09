@@ -27,10 +27,10 @@ import java.util.List;
  * @see Bill
  */
 public class HibernateBillDAOImpl implements BillDAO {
-
+	
 	@PersistenceContext
 	private EntityManager entityManager;
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -38,7 +38,7 @@ public class HibernateBillDAOImpl implements BillDAO {
 	public Bill getBill(@Nonnull Integer id) {
 		return entityManager.find(Bill.class, id);
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -48,7 +48,7 @@ public class HibernateBillDAOImpl implements BillDAO {
 		query.setParameter("uuid", uuid);
 		return query.getResultStream().findFirst().orElse(null);
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -60,7 +60,7 @@ public class HibernateBillDAOImpl implements BillDAO {
 		}
 		return entityManager.merge(bill);
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -71,7 +71,7 @@ public class HibernateBillDAOImpl implements BillDAO {
 		query.setParameter("receiptNumber", receiptNumber);
 		return query.getResultStream().findFirst().orElse(null);
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -80,19 +80,19 @@ public class HibernateBillDAOImpl implements BillDAO {
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Bill> cq = cb.createQuery(Bill.class);
 		Root<Bill> root = cq.from(Bill.class);
-
+		
 		Predicate predicate = cb.equal(root.get("patient").get("uuid"), patientUuid);
 		cq.where(predicate);
-
+		
 		TypedQuery<Bill> query = entityManager.createQuery(cq);
-
+		
 		List<Predicate> predicates = new ArrayList<>();
 		predicates.add(predicate);
 		applyPaging(query, pagingInfo, predicates);
-
+		
 		return query.getResultList();
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -101,20 +101,20 @@ public class HibernateBillDAOImpl implements BillDAO {
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 		CriteriaQuery<Bill> cq = cb.createQuery(Bill.class);
 		Root<Bill> root = cq.from(Bill.class);
-
+		
 		List<Predicate> predicates = buildBillSearchPredicate(cb, root, billSearch);
-
+		
 		if (!predicates.isEmpty()) {
 			cq.where(predicates.toArray(new Predicate[0]));
 		}
-
+		
 		TypedQuery<Bill> query = entityManager.createQuery(cq);
-
+		
 		applyPaging(query, pagingInfo, predicates);
-
+		
 		return query.getResultList();
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
