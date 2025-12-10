@@ -17,16 +17,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
 import org.openmrs.module.billing.api.BillLineItemService;
 import org.openmrs.module.billing.api.IBillableItemsService;
 import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
-import org.openmrs.module.billing.api.base.entity.IEntityDataService;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
+import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.PropertyGetter;
 import org.openmrs.module.webservices.rest.web.annotation.PropertySetter;
@@ -34,7 +33,9 @@ import org.openmrs.module.webservices.rest.web.annotation.Resource;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
+import org.openmrs.module.webservices.rest.web.resource.impl.DataDelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
+import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
 import java.math.BigDecimal;
 
@@ -43,13 +44,13 @@ import java.math.BigDecimal;
  */
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE + "/billLineItem", supportedClass = BillLineItem.class,
         supportedOpenmrsVersions = {"2.0 - 2.*"})
-public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
+public class BillLineItemResource extends DataDelegatingCrudResource<BillLineItem> {
 
     private static final Log LOG = LogFactory.getLog(BillLineItemResource.class);
 
     @Override
     public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
-        DelegatingResourceDescription description = super.getRepresentationDescription(rep);
+        DelegatingResourceDescription description = new DelegatingResourceDescription();
         if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
             description.addProperty("item");
             description.addProperty("billableService", Representation.REF);
@@ -121,9 +122,10 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
     }
 
     @PropertySetter(value = "priceUuid")
-    public void setItemPrice(BillLineItem instance, String uuid) {
+    public void setItemPrice(BillLineItem instance) {
         StockManagementService itemDataService = Context.getService(StockManagementService.class);
         CashierItemPrice itemPrice = null;
+        // This doesn't make sense at all. Do we need this?
         if (itemPrice != null) {
             instance.setItemPrice(itemPrice);
             instance.setPriceName("");
@@ -131,6 +133,7 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
     }
 
     @PropertyGetter(value = "priceUuid")
+    // Do we need this???
     public String getItemPriceUuid(BillLineItem instance) {
         try {
             CashierItemPrice itemPrice = instance.getItemPrice();
@@ -143,7 +146,18 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
 
     @Override
     public BillLineItem getByUniqueId(String uuid) {
-        return getService().getByUuid(uuid);
+        return Context.getService(BillLineItemService.class).getBillLineItemByUuid(uuid);
+    }
+
+    @Override
+    protected void delete(BillLineItem billLineItem, String s, RequestContext requestContext) throws ResponseException {
+        Context.getService(BillLineItemService.class).voidBillLineItem(billLineItem, s);
+
+    }
+
+    @Override
+    public void purge(BillLineItem billLineItem, RequestContext requestContext) throws ResponseException {
+        Context.getService(BillLineItemService.class).purgeBillLineItem(billLineItem);
     }
 
     @Override
@@ -152,7 +166,8 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
     }
 
     @Override
-    public Class<IEntityDataService<BillLineItem>> getServiceClass() {
-        return (Class<IEntityDataService<BillLineItem>>) (Object) BillLineItemService.class;
+    public BillLineItem save(BillLineItem billLineItem) {
+        return Context.getService(BillLineItemService.class).saveBillLineItem(billLineItem);
     }
+
 }

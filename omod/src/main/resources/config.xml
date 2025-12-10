@@ -190,6 +190,11 @@
 	</privilege>
 
 	<privilege>
+		<name>Delete Cashier Bills</name>
+		<description>Able to delete bills</description>
+	</privilege>
+
+	<privilege>
 		<name>Refund Money</name>
 		<description>Able to create/adjust a bill so that it refunds money.</description>
 	</privilege>

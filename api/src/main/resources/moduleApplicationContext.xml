@@ -103,7 +103,7 @@
 		<property name="transactionManager" ref="transactionManager"/>
 		<property name="target">
 			<bean class="org.openmrs.module.billing.api.impl.BillLineItemServiceImpl">
-				<property name="repository" ref="genericRepositoryDao"/>
+				<constructor-arg name="billLineItemDAO" ref="billLineItemDAO"/>
 			</bean>
 		</property>
 		<property name="preInterceptors" ref="serviceInterceptors"/>
@@ -237,6 +237,9 @@
 
 	<bean id="billDAO"
 		  class="org.openmrs.module.billing.api.db.hibernate.HibernateBillDAOImpl"/>
+
+	<bean id="billLineItemDAO"
+		  class="org.openmrs.module.billing.api.db.hibernate.HibernateBillLineItemDAO"/>
 
 	<bean id="billExemptionDAO"
 		  class="org.openmrs.module.billing.api.db.hibernate.BillExemptionDAOImpl">

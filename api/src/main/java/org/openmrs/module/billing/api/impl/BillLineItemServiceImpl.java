@@ -13,88 +13,85 @@
  */
 package org.openmrs.module.billing.api.impl;
 
-import org.openmrs.api.context.Context;
+import lombok.RequiredArgsConstructor;
+import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.billing.api.BillLineItemService;
-import org.openmrs.module.billing.api.BillService;
-import org.openmrs.module.billing.api.base.entity.impl.BaseEntityDataServiceImpl;
-import org.openmrs.module.billing.api.base.entity.security.IEntityAuthorizationPrivileges;
-import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.module.billing.api.db.BillLineItemDAO;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Standard implementation of the {@link BillLineItemService} interface.
+ * <p>
+ * This implementation delegates data access operations to the {@link BillLineItemDAO} and provides
+ * business logic for managing bill line items.
+ * </p>
+ *
+ * @see BillLineItemService
+ */
 @Transactional
-public class BillLineItemServiceImpl extends BaseEntityDataServiceImpl<BillLineItem> implements IEntityAuthorizationPrivileges, BillLineItemService {
+@RequiredArgsConstructor
+public class BillLineItemServiceImpl extends BaseOpenmrsService implements BillLineItemService {
 	
-	@Override
-	protected IEntityAuthorizationPrivileges getPrivileges() {
-		return this;
-	}
+	private final BillLineItemDAO billLineItemDAO;
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	protected void validate(BillLineItem object) {
-	}
-	
-	@Override
-	public String getVoidPrivilege() {
-		return null;
-	}
-	
-	@Override
-	public String getSavePrivilege() {
-		return null;
-	}
-	
-	@Override
-	public String getPurgePrivilege() {
-		return null;
-	}
-	
-	@Override
-	public String getGetPrivilege() {
-		return null;
-	}
-	
-	@Override
-	public BillLineItem voidEntity(BillLineItem entity, String reason) {
-		BillLineItem voidedLineItem = super.voidEntity(entity, reason);
-		
-		if (voidedLineItem != null && voidedLineItem.getBill() != null) {
-			Bill bill = voidedLineItem.getBill();
-			bill.synchronizeBillStatus();
+	public BillLineItem getBillLineItem(Integer id) {
+		if (id == null) {
+			return null;
 		}
-		
-		return voidedLineItem;
+		return billLineItemDAO.getBillLineItem(id);
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public BillLineItem unvoidEntity(BillLineItem entity) {
-		BillLineItem unvoidedLineItem = super.unvoidEntity(entity);
-		
-		if (unvoidedLineItem != null && unvoidedLineItem.getBill() != null) {
-			Bill bill = unvoidedLineItem.getBill();
-			bill.synchronizeBillStatus();
+	public BillLineItem getBillLineItemByUuid(String uuid) {
+		if (uuid == null) {
+			return null;
 		}
-		
-		return unvoidedLineItem;
+		return billLineItemDAO.getBillLineItemByUuid(uuid);
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public void purge(BillLineItem entity) {
-		Bill bill = null;
-		if (entity != null && entity.getBill() != null) {
-			bill = entity.getBill();
-			// Validate before purging (purge doesn't call validate())
+	public BillLineItem saveBillLineItem(BillLineItem billLineItem) {
+		if (billLineItem == null) {
+			throw new NullPointerException("The bill must be defined.");
 		}
-		
-		super.purge(entity);
-		
-		if (bill != null) {
-			// Remove the line item from the bill's collection
-			bill.removeLineItem(entity);
-			bill.synchronizeBillStatus();
-			// Save the bill to persist the collection change
-			BillService billService = Context.getService(BillService.class);
-			billService.saveBill(bill);
+		return billLineItemDAO.saveBillLineItem(billLineItem);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public BillLineItem voidBillLineItem(BillLineItem billLineItem, String voidReason) {
+		if (voidReason == null) {
+			throw new NullPointerException("The void reason must be defined.");
 		}
+		return billLineItemDAO.saveBillLineItem(billLineItem);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public BillLineItem unvoidBillLineItem(BillLineItem billLineItem) {
+		return billLineItemDAO.saveBillLineItem(billLineItem);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void purgeBillLineItem(BillLineItem billLineItem) {
+		billLineItemDAO.purgeBillLineItem(billLineItem);
 	}
 }
