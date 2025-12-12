@@ -153,7 +153,10 @@
 		</description>
 	</globalProperty>
 
-
+    <globalProperty>
+        <property>${project.parent.artifactId}.disableDrugOrderBillAutoCreation</property>
+        <description>Disable automatic bill creation for drug orders</description>
+    </globalProperty>
 	<!-- Extensions -->
 	<!--	<extension>-->
 	<!--		<point>org.openmrs.admin.list</point>-->

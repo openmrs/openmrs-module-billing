@@ -44,6 +44,8 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 	
 	private static final Log LOG = LogFactory.getLog(GenerateBillFromOrderAdvice.class);
 	
+	private static final String DISABLE_DRUG_ORDER_BILL_AUTO_CREATION = "billing.disableDrugOrderBillAutoCreation";
+	
 	OrderService orderService = Context.getOrderService();
 	
 	IBillService billService = Context.getService(IBillService.class);
@@ -75,6 +77,12 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 				String cashierUUID = Context.getAuthenticatedUser().getUuid();
 				
 				if (order instanceof DrugOrder) {
+					// Check if drug order bill autocreation is disabled
+					boolean disableAutoBillCreation = Boolean.parseBoolean(
+					    Context.getAdministrationService().getGlobalProperty(DISABLE_DRUG_ORDER_BILL_AUTO_CREATION));
+					if (disableAutoBillCreation) {
+						return; // Skip drug order bill processing
+					}
 					DrugOrder drugOrder = (DrugOrder) order;
 					Integer drugID = drugOrder.getDrug() != null ? drugOrder.getDrug().getDrugId() : 0;
 					double drugQuantity = drugOrder.getQuantity() != null ? drugOrder.getQuantity() : 0.0;
