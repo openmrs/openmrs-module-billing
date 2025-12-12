@@ -40,13 +40,9 @@ import org.joda.time.Days;
 import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.EncounterType;
-import org.openmrs.GlobalProperty;
-import org.openmrs.Location;
-import org.openmrs.LocationAttribute;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.api.context.Context;
-import org.openmrs.util.PrivilegeConstants;
 
 public class Utils {
 	

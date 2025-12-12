@@ -59,12 +59,7 @@ public abstract class BaseRestDataResource<E extends OpenmrsData> extends DataDe
      * @param <E>  The {@link OpenmrsObject} stored in the collection.
      */
     public static <E extends OpenmrsObject> void syncCollection(Collection<E> base, Collection<E> sync) {
-        syncCollection(base, sync, new Action2<Collection<E>, E>() {
-            @Override
-            public void apply(Collection<E> collection, E entity) {
-                collection.add(entity);
-            }
-        }, new Action2<Collection<E>, E>() {
+        syncCollection(base, sync, (collection, entity) -> collection.add(entity), new Action2<Collection<E>, E>() {
             @Override
             public void apply(Collection<E> collection, E entity) {
                 collection.remove(entity);
@@ -112,7 +107,7 @@ public abstract class BaseRestDataResource<E extends OpenmrsData> extends DataDe
 
     @Override
     public E save(E delegate) {
-        return getService().save(delegate);
+        return getService().saveBill(delegate);
     }
 
     @Override

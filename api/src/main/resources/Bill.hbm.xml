@@ -29,10 +29,10 @@
 		<many-to-one name="changedBy" class="org.openmrs.User" column="changed_by"/>
 		<property name="dateChanged" type="java.util.Date" column="date_changed" length="19"/>
 
-		<property name="voided" type="java.lang.Boolean" column="voided" length="1" not-null="true"/>
-		<many-to-one name="voidedBy" class="org.openmrs.User" column="voided_by"/>
-		<property name="dateVoided" type="java.util.Date" column="date_voided" length="19"/>
-		<property name="voidReason" type="java.lang.String" column="void_reason" length="255"/>
+		<property name="retired" type="java.lang.Boolean" column="retired" length="1" not-null="true"/>
+		<many-to-one name="retiredBy" class="org.openmrs.User" column="retired_by"/>
+		<property name="dateRetired" type="java.util.Date" column="date_retired" length="19"/>
+		<property name="retireReason" type="java.lang.String" column="retire_reason" length="255"/>
 
 		<property name="uuid" type="java.lang.String" column="uuid" length="38" unique="true"/>
 	</class>
@@ -61,6 +61,7 @@
 			<key column="service_id"/>
 			<one-to-many class="org.openmrs.module.billing.api.model.CashierItemPrice"/>
 		</bag>
+
 		<property name="serviceStatus" column="service_status" not-null="true">
 			<type name="org.hibernate.type.EnumType">
 				<param name="enumClass">org.openmrs.module.billing.api.model.BillableServiceStatus</param>
@@ -74,11 +75,10 @@
 		<many-to-one name="changedBy" class="org.openmrs.User" column="changed_by"/>
 		<property name="dateChanged" type="java.util.Date" column="date_changed" length="19"/>
 
-		<property name="voided" type="java.lang.Boolean" column="voided" length="1" not-null="true"/>
-		<many-to-one name="voidedBy" class="org.openmrs.User" column="voided_by"/>
-
-		<property name="dateVoided" type="java.util.Date" column="date_voided" length="19"/>
-		<property name="voidReason" type="java.lang.String" column="void_reason" length="255"/>
+		<property name="retired" type="java.lang.Boolean" column="retired" length="1" not-null="true"/>
+		<many-to-one name="retiredBy" class="org.openmrs.User" column="retired_by"/>
+		<property name="dateRetired" type="java.util.Date" column="date_retired" length="19"/>
+		<property name="retireReason" type="java.lang.String" column="retire_reason" length="255"/>
 
 		<property name="uuid" type="java.lang.String" column="uuid" length="38" unique="true"/>
 	</class>
@@ -112,10 +112,12 @@
 			<list-index column="line_item_order"/>
 			<one-to-many class="org.openmrs.module.billing.api.model.BillLineItem"/>
 		</list>
+
 		<set name="payments" lazy="false" inverse="true" cascade="all-delete-orphan">
 			<key column="bill_id"/>
 			<one-to-many class="org.openmrs.module.billing.api.model.Payment"/>
 		</set>
+
 		<set name="adjustedBy" lazy="true" inverse="true">
 			<key column="adjusted_bill_id"/>
 			<one-to-many class="org.openmrs.module.billing.api.model.Bill"/>

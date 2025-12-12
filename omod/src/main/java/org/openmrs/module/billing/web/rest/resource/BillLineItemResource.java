@@ -59,8 +59,9 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
             description.addProperty("priceUuid");
             description.addProperty("lineItemOrder");
             description.addProperty("paymentStatus");
+            return description;
         }
-        return description;
+        return null;
     }
 
     @PropertySetter(value = "item")
