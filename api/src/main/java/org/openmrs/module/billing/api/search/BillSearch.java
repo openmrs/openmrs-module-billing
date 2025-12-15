@@ -13,36 +13,46 @@
  */
 package org.openmrs.module.billing.api.search;
 
-import java.util.List;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.openmrs.module.billing.api.model.BillStatus;
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
+import org.openmrs.module.billing.api.base.entity.search.BaseDataTemplateSearch;
+import org.openmrs.module.billing.api.model.Bill;
 
 /**
- * A search criteria holder for {@link org.openmrs.module.billing.api.model.Bill} queries. This
- * class holds search parameters that are used by the DAO layer to build queries. Uses Lombok's
- * builder pattern for fluent API.
+ * A search template class for the {@link Bill} model.
  */
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class BillSearch {
+public class BillSearch extends BaseDataTemplateSearch<Bill> {
 	
-	private String patientUuid;
+	public BillSearch() {
+		this(new Bill(), false);
+	}
 	
-	private String cashierUuid;
+	public BillSearch(Bill template) {
+		this(template, false);
+	}
 	
-	private String cashPointUuid;
+	public BillSearch(Bill template, Boolean includeRetired) {
+		super(template, includeRetired);
+	}
 	
-	private List<BillStatus> statuses;
-	
-	private String patientName;
-	
-	private Boolean includeVoided = false;
-	
-	private Boolean includeVoidedLineItems = false;
+	@Override
+	public void updateCriteria(Criteria criteria) {
+		super.updateCriteria(criteria);
+		
+		Bill bill = getTemplate();
+		if (bill.getCashier() != null) {
+			criteria.add(Restrictions.eq("cashier", bill.getCashier()));
+		}
+		if (bill.getCashPoint() != null) {
+			criteria.add(Restrictions.eq("cashPoint", bill.getCashPoint()));
+		}
+		if (bill.getPatient() != null) {
+			criteria.add(Restrictions.eq("patient", bill.getPatient()));
+		}
+		if (bill.getStatus() != null) {
+			criteria.add(Restrictions.eq("status", bill.getStatus()));
+		}
+		criteria.addOrder(Order.desc("id"));
+	}
 }

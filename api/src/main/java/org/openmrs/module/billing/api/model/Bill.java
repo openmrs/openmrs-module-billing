@@ -15,13 +15,12 @@ package org.openmrs.module.billing.api.model;
 
 import java.math.BigDecimal;
 import java.security.AccessControlException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
@@ -33,11 +32,9 @@ import org.openmrs.module.stockmanagement.api.model.StockItem;
  * Model class that represents a list of {@link BillLineItem}s and {@link Payment}s created by a
  * cashier for a patient.
  */
-@Getter
-@Setter
 public class Bill extends BaseOpenmrsData {
 	
-	private static final long serialVersionUID = 0L;
+	public static final long serialVersionUID = 0L;
 	
 	private Integer billId;
 	
@@ -63,10 +60,29 @@ public class Bill extends BaseOpenmrsData {
 	
 	private String adjustmentReason;
 	
+	public String getAdjustmentReason() {
+		return adjustmentReason;
+	}
+	
+	public void setAdjustmentReason(String adjustmentReason) {
+		this.adjustmentReason = adjustmentReason;
+	}
+	
+	public Boolean isReceiptPrinted() {
+		return receiptPrinted;
+	}
+	
+	public void setReceiptPrinted(Boolean receiptPrinted) {
+		this.receiptPrinted = receiptPrinted;
+	}
+	
+	public Boolean getReceiptPrinted() {
+		return receiptPrinted;
+	}
+	
 	public BigDecimal getTotal() {
 		BigDecimal total = BigDecimal.ZERO;
 		
-		List<BillLineItem> lineItems = getLineItems();
 		if (lineItems != null) {
 			for (BillLineItem line : lineItems) {
 				if (line != null && !line.getVoided()) {
@@ -81,7 +97,6 @@ public class Bill extends BaseOpenmrsData {
 	public BigDecimal getTotalPayments() {
 		BigDecimal total = BigDecimal.ZERO;
 		
-		Set<Payment> payments = getPayments();
 		if (payments != null) {
 			for (Payment payment : payments) {
 				if (payment != null && !payment.getVoided()) {
@@ -93,23 +108,91 @@ public class Bill extends BaseOpenmrsData {
 		return total;
 	}
 	
+	public BigDecimal getAmountPaid() {
+		BigDecimal total = getTotal();
+		BigDecimal totalPayments = getTotalPayments();
+		
+		return total.min(totalPayments);
+	}
+	
 	@Override
 	public Integer getId() {
-		return this.getBillId();
+		return billId;
 	}
 	
 	@Override
 	public void setId(Integer id) {
-		this.setBillId(id);
+		billId = id;
 	}
 	
-	// Custom setter - updates adjusted bill status
+	public String getReceiptNumber() {
+		return receiptNumber;
+	}
+	
+	public void setReceiptNumber(String number) {
+		this.receiptNumber = number;
+	}
+	
+	public Provider getCashier() {
+		return cashier;
+	}
+	
+	public void setCashier(Provider cashier) {
+		this.cashier = cashier;
+	}
+	
+	public Patient getPatient() {
+		return patient;
+	}
+	
+	public void setPatient(Patient patient) {
+		this.patient = patient;
+	}
+	
+	public CashPoint getCashPoint() {
+		return cashPoint;
+	}
+	
+	public void setCashPoint(CashPoint cashPoint) {
+		this.cashPoint = cashPoint;
+	}
+	
+	public Bill getBillAdjusted() {
+		return billAdjusted;
+	}
+	
 	public void setBillAdjusted(Bill billAdjusted) {
 		this.billAdjusted = billAdjusted;
 		
 		if (billAdjusted != null) {
 			billAdjusted.setStatus(BillStatus.ADJUSTED);
 		}
+	}
+	
+	public BillStatus getStatus() {
+		return status;
+	}
+	
+	public void setStatus(BillStatus status) {
+		this.status = status;
+	}
+	
+	public List<BillLineItem> getLineItems() {
+		return lineItems;
+	}
+	
+	public void setLineItems(List<BillLineItem> lineItems) {
+		this.lineItems = lineItems;
+	}
+	
+	public BillLineItem addLineItem(StockItem item, CashierItemPrice price, int quantity) {
+		if (item == null) {
+			throw new NullPointerException("The item to add must be defined.");
+		}
+		if (price == null) {
+			throw new NullPointerException("The item price must be defined.");
+		}
+		return addLineItem(item, price.getPrice(), "", quantity);
 	}
 	
 	public BillLineItem addLineItem(StockItem item, BigDecimal price, String priceName, int quantity) {
@@ -138,7 +221,7 @@ public class Bill extends BaseOpenmrsData {
 		}
 		
 		if (this.lineItems == null) {
-			this.lineItems = new ArrayList<>();
+			this.lineItems = new ArrayList<BillLineItem>();
 		}
 		
 		this.lineItems.add(item);
@@ -153,13 +236,48 @@ public class Bill extends BaseOpenmrsData {
 		}
 	}
 	
+	public Set<Payment> getPayments() {
+		return payments;
+	}
+	
+	public void setPayments(Set<Payment> payments) {
+		this.payments = payments;
+	}
+	
+	public Payment addPayment(PaymentMode mode, Set<PaymentAttribute> attributes, BigDecimal amount,
+	        BigDecimal amountTendered) {
+		if (mode == null) {
+			throw new NullPointerException("The payment mode must be defined.");
+		}
+		if (amount == null) {
+			throw new NullPointerException(("The payment amount must be defined."));
+		}
+		
+		Payment payment = new Payment();
+		payment.setInstanceType(mode);
+		payment.setAmount(amount);
+		payment.setAmountTendered(amountTendered);
+		
+		if (attributes != null && attributes.size() > 0) {
+			payment.setAttributes(attributes);
+			
+			for (PaymentAttribute attribute : attributes) {
+				attribute.setOwner(payment);
+			}
+		}
+		
+		addPayment(payment);
+		
+		return payment;
+	}
+	
 	public void addPayment(Payment payment) {
 		if (payment == null) {
 			throw new NullPointerException("The payment to add must be defined.");
 		}
 		
 		if (this.payments == null) {
-			this.payments = new HashSet<>();
+			this.payments = new HashSet<Payment>();
 		}
 		
 		this.payments.add(payment);
@@ -169,7 +287,7 @@ public class Bill extends BaseOpenmrsData {
 	}
 	
 	public void synchronizeBillStatus() {
-		if (!this.getPayments().isEmpty() && getTotalPayments().compareTo(BigDecimal.ZERO) > 0) {
+		if (this.getPayments().size() > 0 && getTotalPayments().compareTo(BigDecimal.ZERO) > 0) {
 			boolean billFullySettled = getTotalPayments().compareTo(getTotal()) >= 0;
 			if (billFullySettled) {
 				this.setStatus(BillStatus.PAID);
@@ -185,6 +303,14 @@ public class Bill extends BaseOpenmrsData {
 		}
 	}
 	
+	public Set<Bill> getAdjustedBy() {
+		return adjustedBy;
+	}
+	
+	public void setAdjustedBy(Set<Bill> adjustedBy) {
+		this.adjustedBy = adjustedBy;
+	}
+	
 	public void addAdjustedBy(Bill adjustedBill) {
 		checkAuthorizedToAdjust();
 		if (adjustedBill == null) {
@@ -192,29 +318,23 @@ public class Bill extends BaseOpenmrsData {
 		}
 		
 		if (this.adjustedBy == null) {
-			this.adjustedBy = new HashSet<>();
+			this.adjustedBy = new HashSet<Bill>();
 		}
 		
 		adjustedBill.setBillAdjusted(this);
 		this.adjustedBy.add(adjustedBill);
 	}
 	
+	public void removeAdjustedBy(Bill adjustedBill) {
+		if (adjustedBill != null && this.adjustedBy != null) {
+			this.adjustedBy.remove(adjustedBill);
+		}
+	}
+	
 	private void checkAuthorizedToAdjust() {
 		if (!Context.hasPrivilege(PrivilegeConstants.ADJUST_BILLS)) {
 			throw new AccessControlException("Access denied to adjust bill.");
 		}
-	}
-	
-	/**
-	 * Checks if the bill is in PENDING state.
-	 * 
-	 * @return {@code true} if the bill is new (no ID) or is in PENDING state, {@code false} otherwise
-	 */
-	public boolean editable() {
-		// New bills (no ID) are considered pending, existing bills must be in PENDING state
-		// If we do a partial payment bill is set to POSTED status. We should be able to edit posted status too
-		return getStatus() == null || this.getId() == null || this.getStatus() == BillStatus.PENDING
-		        || this.getStatus() == BillStatus.POSTED;
 	}
 	
 	public void recalculateLineItemOrder() {
@@ -224,4 +344,12 @@ public class Bill extends BaseOpenmrsData {
 		}
 	}
 	
+	public String getLastUpdated() {
+		SimpleDateFormat ft = Context.getDateTimeFormat();
+		String changedStr = (this.getDateChanged() != null) ? ft.format(this.getDateChanged()) : null;
+		String createdStr = (this.getDateCreated() != null) ? ft.format(this.getDateCreated()) : "";
+		String dateString = (changedStr != null) ? changedStr : createdStr;
+		
+		return dateString;
+	}
 }

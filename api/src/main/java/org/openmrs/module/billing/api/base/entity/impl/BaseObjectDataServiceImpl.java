@@ -102,7 +102,7 @@ public abstract class BaseObjectDataServiceImpl<E extends OpenmrsObject, P exten
 	
 	@Override
 	@Transactional
-	public E saveBill(E object) {
+	public E save(E object) {
 		P privileges = getPrivileges();
 		if (privileges != null && !StringUtils.isEmpty(privileges.getSavePrivilege())) {
 			PrivilegeUtil.requirePrivileges(Context.getAuthenticatedUser(), privileges.getSavePrivilege());
@@ -320,7 +320,7 @@ public abstract class BaseObjectDataServiceImpl<E extends OpenmrsObject, P exten
 				criteria = repository.createCriteria(getEntityClass());
 			}
 			
-			if (pagingInfo.getLoadRecordCount()) {
+			if (pagingInfo.shouldLoadRecordCount()) {
 				// Copy the current projection and transformer which requires getting access to the underlying criteria
 				// implementation
 				Projection projection = null;

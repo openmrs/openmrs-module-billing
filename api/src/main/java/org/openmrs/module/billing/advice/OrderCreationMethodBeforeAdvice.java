@@ -32,7 +32,7 @@ import org.openmrs.User;
 import org.openmrs.VisitAttribute;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.billing.api.BillService;
+import org.openmrs.module.billing.api.IBillService;
 import org.openmrs.module.billing.api.IBillableItemsService;
 import org.openmrs.module.billing.api.ICashPointService;
 import org.openmrs.module.billing.api.ItemPriceService;
@@ -44,6 +44,7 @@ import org.openmrs.module.billing.api.model.BillableServiceStatus;
 import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
 import org.openmrs.module.billing.api.search.BillableServiceSearch;
+import org.openmrs.module.billing.util.Utils;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
 import org.springframework.aop.MethodBeforeAdvice;
@@ -56,7 +57,7 @@ public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 	
 	OrderService orderService = Context.getOrderService();
 	
-	BillService billService = Context.getService(BillService.class);
+	IBillService billService = Context.getService(IBillService.class);
 	
 	StockManagementService stockService = Context.getService(StockManagementService.class);
 	
@@ -165,7 +166,7 @@ public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 				activeBill.setCashPoint(cashPoints.get(0));
 				activeBill.addLineItem(billLineItem);
 				activeBill.setStatus(BillStatus.PENDING);
-				billService.saveBill(activeBill);
+				billService.save(activeBill);
 			}
 			
 		}

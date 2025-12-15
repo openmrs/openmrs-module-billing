@@ -30,7 +30,7 @@ public abstract class BaseCustomizableData<TAttribute extends IAttribute<?, ?>>
 // @formatter:on
 	public static final long serialVersionUID = 0L;
 	
-	private Set<TAttribute> attributes = new HashSet<>();
+	private Set<TAttribute> attributes;
 	
 	protected void onAddAttribute(TAttribute attribute) {
 		// Just here to allow subclass to add custom logic

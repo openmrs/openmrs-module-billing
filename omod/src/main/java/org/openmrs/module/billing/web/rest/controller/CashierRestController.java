@@ -35,7 +35,7 @@ public class CashierRestController extends BaseRestController {
         BillableService billableService = request.billableServiceMapper(request);
         IBillableItemsService service = Context.getService(IBillableItemsService.class);
 
-        service.saveBill(billableService);
+        service.save(billableService);
 
         return true;
     }

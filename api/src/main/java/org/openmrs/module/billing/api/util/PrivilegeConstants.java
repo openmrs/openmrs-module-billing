@@ -42,8 +42,6 @@ public class PrivilegeConstants {
 	
 	public static final String PURGE_BILLS = "Purge Cashier Bills";
 	
-	public static final String DELETE_BILLS = "Delete Cashier Bills";
-	
 	public static final String REFUND_MONEY = "Refund Money";
 	
 	public static final String REPRINT_RECEIPT = "Reprint Receipt";

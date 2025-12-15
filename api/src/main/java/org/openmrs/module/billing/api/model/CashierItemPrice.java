@@ -15,10 +15,10 @@ package org.openmrs.module.billing.api.model;
 
 import java.math.BigDecimal;
 
-import org.openmrs.BaseChangeableOpenmrsMetadata;
+import org.openmrs.BaseOpenmrsData;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
 
-public class CashierItemPrice extends BaseChangeableOpenmrsMetadata {
+public class CashierItemPrice extends BaseOpenmrsData {
 	
 	public static final long serialVersionUID = 0L;
 	

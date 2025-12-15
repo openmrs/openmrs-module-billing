@@ -14,10 +14,10 @@
 package org.openmrs.module.billing.web.rest.resource;
 
 import org.openmrs.api.context.Context;
-import org.openmrs.module.billing.api.base.entity.IMetadataDataService;
-import org.openmrs.module.billing.web.base.resource.BaseRestMetadataResource;
+import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
 import org.openmrs.module.billing.api.ICashierItemPriceService;
+import org.openmrs.module.billing.api.base.entity.IEntityDataService;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
@@ -36,14 +36,14 @@ import java.math.BigDecimal;
 
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE + "/cashierItemPrice", supportedClass = CashierItemPrice.class,
         supportedOpenmrsVersions = {"2.0 - 2.*"})
-public class CashierItemPriceResource extends BaseRestMetadataResource<CashierItemPrice> {
+public class CashierItemPriceResource extends BaseRestDataResource<CashierItemPrice> {
     @Override
     public CashierItemPrice newDelegate() {
         return new CashierItemPrice();
     }
 
     @Override
-    public Class<? extends IMetadataDataService<CashierItemPrice>> getServiceClass() {
+    public Class<? extends IEntityDataService<CashierItemPrice>> getServiceClass() {
         return ICashierItemPriceService.class;
     }
 

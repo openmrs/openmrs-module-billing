@@ -1,0 +1,50 @@
+{
+    "services" : {
+        "all" : [
+            {
+                "id" : "167410AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+                "description" : "Clinical Consultation"
+            },
+            {
+                "id" : "160542AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+                "description" : "Outpatient Department"
+            }
+        ],
+        "program:HIV" : [
+            {
+                "id" : "855e254f-a5db-4760-88b3-26c3d0cdda14",
+                "description" : "HIV Consultation"
+            }
+        ],
+        "program:TB" : [
+            {
+                "id" : "855e254f-a5db-4760-88b3-26c3d0cdda14",
+                "description" : "TB Treatment"
+            }
+        ],
+        "age<5" : [
+            {
+                "id" : "160537AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+                "description" : "Pediatric Consultation"
+            },
+            {
+                "id" : "1283AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+                "description" : "Labaratory Orders"
+            }
+        ]
+    },
+    "commodities" : {
+        "all" : [
+            {
+                "id" : "164103AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+                "description" : "General Commodity"
+            }
+        ],
+        "program:HIV" : [
+            {
+                "id" : "161187AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+                "description" : "HIV Test Kits"
+            }
+        ]
+    }
+}

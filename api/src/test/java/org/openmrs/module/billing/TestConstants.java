@@ -18,6 +18,4 @@ public class TestConstants {
 	public static final String BASE_DATASET_DIR = "org/openmrs/module/billing/api/include/";
 	
 	public static final String CORE_DATASET = BASE_DATASET_DIR + "CoreTest.xml";
-	
-	public static final String CORE_DATASET2 = BASE_DATASET_DIR + "CoreTest-2.0.xml";
 }

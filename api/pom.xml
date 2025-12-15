@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.openmrs.module</groupId>
 		<artifactId>billing</artifactId>
-		<version>2.0.0-SNAPSHOT</version>
+		<version>1.3.3-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>billing-api</artifactId>
@@ -87,17 +87,7 @@
 			<groupId>com.itextpdf</groupId>
 			<artifactId>font-asian</artifactId>
 		</dependency>
-
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-inline</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-        </dependency>
-    </dependencies>
+	</dependencies>
 
 	<build>
 		<resources>

@@ -16,7 +16,7 @@ package org.openmrs.module.billing.web.rest.controller;
 import java.io.IOException;
 
 import org.openmrs.api.context.Context;
-import org.openmrs.module.billing.api.BillService;
+import org.openmrs.module.billing.api.IBillService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
@@ -37,25 +37,22 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class ReceiptController extends BaseRestController {
 
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<byte[]> get(@RequestParam(value = "billUuid", required = false) String billUuid)
-            throws IOException {
-        BillService service = Context.getService(BillService.class);
-        Bill bill = service.getBillByUuid(billUuid);
+    public ResponseEntity<byte[]> get(@RequestParam(value = "billId", required = false) Integer billId) throws IOException {
+        IBillService service = Context.getService(IBillService.class);
+        Bill bill = service.getById(billId);
 
         if (bill == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         byte[] pdfFile = service.downloadBillReceipt(bill);
-        if (pdfFile != null && pdfFile.length > 0) {
+        if (pdfFile.length > 0) {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.setContentLength(pdfFile.length);
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"receipt-" + bill.getId() + ".pdf\"");
 
             return new ResponseEntity<>(pdfFile, headers, HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

@@ -14,8 +14,8 @@
 package org.openmrs.module.billing.web.rest.resource;
 
 import org.openmrs.api.context.Context;
-import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
+import org.openmrs.module.billing.api.IBillService;
 import org.openmrs.module.billing.api.IPaymentModeService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.Payment;
@@ -48,18 +48,18 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
     @Override
     public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
         DelegatingResourceDescription description = new DelegatingResourceDescription();
+        description.addProperty("uuid");
+
         if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
-            description.addProperty("uuid");
             description.addProperty("instanceType", Representation.REF);
             description.addProperty("attributes");
             description.addProperty("amount");
             description.addProperty("amountTendered");
             description.addProperty("dateCreated");
             description.addProperty("voided");
-            return description;
         }
 
-        return null;
+        return description;
     }
 
     @Override
@@ -131,10 +131,10 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
 
     @Override
     public Payment save(Payment delegate) {
-        BillService service = Context.getService(BillService.class);
+        IBillService service = Context.getService(IBillService.class);
         Bill bill = delegate.getBill();
         bill.addPayment(delegate);
-        service.saveBill(bill);
+        service.save(bill);
 
         return delegate;
     }
@@ -146,7 +146,7 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
 
     @Override
     public void delete(String parentUniqueId, final String uuid, String reason, RequestContext context) {
-        BillService service = Context.getService(BillService.class);
+        IBillService service = Context.getService(IBillService.class);
         Bill bill = findBill(service, parentUniqueId);
         Payment payment = findPayment(bill, uuid);
 
@@ -154,7 +154,7 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
         payment.setVoidReason(reason);
         payment.setVoidedBy(Context.getAuthenticatedUser());
 
-        service.saveBill(bill);
+        service.save(bill);
     }
 
     @Override
@@ -164,12 +164,12 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
 
     @Override
     public void purge(String parentUniqueId, String uuid, RequestContext context) {
-        BillService service = Context.getService(BillService.class);
+        IBillService service = Context.getService(IBillService.class);
         Bill bill = findBill(service, parentUniqueId);
         Payment payment = findPayment(bill, uuid);
 
         bill.removePayment(payment);
-        service.saveBill(bill);
+        service.save(bill);
     }
 
     @Override
@@ -197,8 +197,8 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
         return new Payment();
     }
 
-    private Bill findBill(BillService service, String billUUID) {
-        Bill bill = service.getBillByUuid(billUUID);
+    private Bill findBill(IBillService service, String billUUID) {
+        Bill bill = service.getByUuid(billUUID);
         if (bill == null) {
             throw new ObjectNotFoundException();
         }

@@ -26,7 +26,7 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.ModuleSettings;
-import org.openmrs.module.billing.api.BillService;
+import org.openmrs.module.billing.api.IBillService;
 import org.openmrs.module.billing.api.ICashierOptionsService;
 import org.openmrs.module.billing.api.base.util.UrlUtil;
 import org.openmrs.module.billing.api.model.Bill;
@@ -159,17 +159,18 @@ public class BillAddEditController {
         model.addAttribute("patient", patient);
         model.addAttribute("cashPoint", bill.getCashPoint());
         model.addAttribute("adjustmentReason", bill.getAdjustmentReason());
-        if (!bill.getReceiptPrinted() || Context.hasPrivilege(PrivilegeConstants.REPRINT_RECEIPT)) {
+        if (!bill.isReceiptPrinted()
+                || (bill.isReceiptPrinted() && Context.hasPrivilege(PrivilegeConstants.REPRINT_RECEIPT))) {
             model.addAttribute("showPrint", true);
         }
     }
 
     private Bill getBillFromService(String billUuid) {
-        BillService service = Context.getService(BillService.class);
+        IBillService service = Context.getService(IBillService.class);
         Bill bill;
 
         try {
-            bill = service.getBillByUuid(billUuid);
+            bill = service.getByUuid(billUuid);
         } catch (APIException e) {
             LOG.error("Error when trying to get bill with ID <" + billUuid + ">", e);
             throw new APIException("Error when trying to get bill with ID <" + billUuid + ">");

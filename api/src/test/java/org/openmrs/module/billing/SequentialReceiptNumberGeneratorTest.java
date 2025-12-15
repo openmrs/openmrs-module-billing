@@ -14,16 +14,19 @@
 package org.openmrs.module.billing;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
-import org.junit.After;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.MockedStatic;
+import org.junit.runner.RunWith;
 import org.openmrs.Provider;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.ISequentialReceiptNumberGeneratorService;
@@ -32,27 +35,30 @@ import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.model.SequentialReceiptNumberGeneratorModel;
 import org.openmrs.patient.impl.LuhnIdentifierValidator;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ Context.class, SequentialReceiptNumberGenerator.class })
 public class SequentialReceiptNumberGeneratorTest {
 	
 	private ISequentialReceiptNumberGeneratorService service;
 	
 	private SequentialReceiptNumberGenerator generator;
 	
-	private MockedStatic<Context> contextMock;
+	private Calendar calendar;
 	
 	@Before
 	public void before() {
-		contextMock = mockStatic(Context.class);
+		mockStatic(Context.class);
 		service = mock(ISequentialReceiptNumberGeneratorService.class);
-		contextMock.when(() -> Context.getService(ISequentialReceiptNumberGeneratorService.class)).thenReturn(service);
+		when(Context.getService(ISequentialReceiptNumberGeneratorService.class)).thenReturn(service);
+		
+		mockStatic(Calendar.class);
+		calendar = mock(Calendar.class);
+		when(Calendar.getInstance()).thenReturn(calendar);
 		
 		generator = new SequentialReceiptNumberGenerator();
-	}
-	
-	@After
-	public void tearDown() {
-		contextMock.close();
 	}
 	
 	/**
@@ -137,24 +143,23 @@ public class SequentialReceiptNumberGeneratorTest {
 		generator.load();
 		when(service.reserveNextSequence("")).thenReturn(52013);
 		
+		Date date = new Date(125, 0, 1, 13, 14, 15);
+		SimpleDateFormat format = new SimpleDateFormat("yyMMdd");
+		when(calendar.getTimeInMillis()).thenReturn(date.getTime());
+		
 		number = generator.generateNumber(bill);
 		Assert.assertNotNull(number);
-		// Should end with the sequence number
-		Assert.assertTrue(number.endsWith("52013"));
-		// Should be longer than just the sequence due to date prefix (yyMMdd = 6 chars + 5 digits)
-		Assert.assertEquals(11, number.length());
+		Assert.assertEquals(format.format(date) + "52013", number);
 		
-		// Test DATE_TIME_COUNTER sequence type
 		model.setSequenceType(SequentialReceiptNumberGenerator.SequenceType.DATE_TIME_COUNTER);
 		generator.load();
 		when(service.reserveNextSequence("")).thenReturn(15);
 		
+		format = new SimpleDateFormat("yyMMddHHmmss");
+		
 		number = generator.generateNumber(bill);
 		Assert.assertNotNull(number);
-		// Should end with the sequence number
-		Assert.assertTrue(number.endsWith("0015"));
-		// Should be longer than just the sequence due to date-time prefix (yyMMddHHmmss = 12 chars + 4 digits)
-		Assert.assertEquals(16, number.length());
+		Assert.assertEquals(format.format(date) + "0015", number);
 	}
 	
 	/**
@@ -181,31 +186,26 @@ public class SequentialReceiptNumberGeneratorTest {
 		Assert.assertNotNull(number);
 		Assert.assertEquals("0001", number);
 		
-		// Test separator with DATE_TIME_COUNTER
 		model.setGroupingType(SequentialReceiptNumberGenerator.GroupingType.CASHIER_AND_CASH_POINT);
 		model.setSequenceType(SequentialReceiptNumberGenerator.SequenceType.DATE_TIME_COUNTER);
 		generator.load();
 		when(service.reserveNextSequence("P1CP3")).thenReturn(52013);
 		
+		Date date = new Date(125, 0, 1, 13, 14, 15);
+		SimpleDateFormat format = new SimpleDateFormat("yyMMddHHmmss");
+		when(calendar.getTimeInMillis()).thenReturn(date.getTime());
+		
 		number = generator.generateNumber(bill);
 		Assert.assertNotNull(number);
-		// Should start with grouping and separator
-		Assert.assertTrue(number.startsWith("P1-CP3-"));
-		// Should end with the sequence number
-		Assert.assertTrue(number.endsWith("52013"));
+		Assert.assertEquals("P1-CP3-" + format.format(date) + "52013", number);
 		
 		model.setIncludeCheckDigit(true);
 		generator.load();
 		
 		number = generator.generateNumber(bill);
 		Assert.assertNotNull(number);
-		// Should start with grouping and separator
-		Assert.assertTrue(number.startsWith("P1-CP3-"));
-		// Should contain the sequence number before the check digit
-		Assert.assertTrue(number.contains("52013"));
-		// Should end with a check digit (single digit after final separator)
-		String[] parts = number.split("-");
-		Assert.assertEquals(1, parts[parts.length - 1].length());
+		String expected = "P1-CP3-" + format.format(date) + "52013";
+		Assert.assertEquals(expected + "-" + generator.generateCheckDigit(expected), number);
 	}
 	
 	/**

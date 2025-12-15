@@ -15,13 +15,13 @@ package org.openmrs.module.billing.api;
 
 import java.util.List;
 
-import org.openmrs.module.billing.api.base.entity.IMetadataDataService;
+import org.openmrs.module.billing.api.base.entity.IEntityDataService;
 import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.search.BillableServiceSearch;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
-public interface IBillableItemsService extends IMetadataDataService<BillableService> {
+public interface IBillableItemsService extends IEntityDataService<BillableService> {
 	
 	List<BillableService> findServices(final BillableServiceSearch search);
 }

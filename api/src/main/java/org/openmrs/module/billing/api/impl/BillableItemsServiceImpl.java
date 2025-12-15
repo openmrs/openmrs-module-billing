@@ -17,15 +17,15 @@ import java.util.List;
 
 import org.hibernate.Criteria;
 import org.openmrs.module.billing.api.IBillableItemsService;
-import org.openmrs.module.billing.api.base.entity.impl.BaseMetadataDataServiceImpl;
-import org.openmrs.module.billing.api.base.entity.security.IMetadataAuthorizationPrivileges;
+import org.openmrs.module.billing.api.base.entity.impl.BaseEntityDataServiceImpl;
+import org.openmrs.module.billing.api.base.entity.security.IEntityAuthorizationPrivileges;
 import org.openmrs.module.billing.api.base.f.Action1;
 import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.search.BillableServiceSearch;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
-public class BillableItemsServiceImpl extends BaseMetadataDataServiceImpl<BillableService> implements IMetadataAuthorizationPrivileges, IBillableItemsService {
+public class BillableItemsServiceImpl extends BaseEntityDataServiceImpl<BillableService> implements IEntityAuthorizationPrivileges, IBillableItemsService {
 	
 	@Override
 	public List<BillableService> findServices(final BillableServiceSearch serviceSearch) {
@@ -39,7 +39,7 @@ public class BillableItemsServiceImpl extends BaseMetadataDataServiceImpl<Billab
 	}
 	
 	@Override
-	protected IMetadataAuthorizationPrivileges getPrivileges() {
+	protected IEntityAuthorizationPrivileges getPrivileges() {
 		return this;
 	}
 	
@@ -49,7 +49,7 @@ public class BillableItemsServiceImpl extends BaseMetadataDataServiceImpl<Billab
 	}
 	
 	@Override
-	public String getRetirePrivilege() {
+	public String getVoidPrivilege() {
 		return null;
 	}
 	

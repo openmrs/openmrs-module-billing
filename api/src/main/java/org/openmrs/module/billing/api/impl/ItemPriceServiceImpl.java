@@ -21,20 +21,20 @@ import org.hibernate.Criteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.module.billing.api.ItemPriceService;
-import org.openmrs.module.billing.api.base.entity.impl.BaseMetadataDataServiceImpl;
-import org.openmrs.module.billing.api.base.entity.security.IMetadataAuthorizationPrivileges;
+import org.openmrs.module.billing.api.base.entity.impl.BaseEntityDataServiceImpl;
+import org.openmrs.module.billing.api.base.entity.security.IEntityAuthorizationPrivileges;
 import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
-public class ItemPriceServiceImpl extends BaseMetadataDataServiceImpl<CashierItemPrice> implements IMetadataAuthorizationPrivileges, ItemPriceService {
+public class ItemPriceServiceImpl extends BaseEntityDataServiceImpl<CashierItemPrice> implements IEntityAuthorizationPrivileges, ItemPriceService {
 	
 	private static final Log LOG = LogFactory.getLog(ItemPriceServiceImpl.class);
 	
 	@Override
-	protected IMetadataAuthorizationPrivileges getPrivileges() {
+	protected IEntityAuthorizationPrivileges getPrivileges() {
 		return this;
 	}
 	
@@ -44,13 +44,13 @@ public class ItemPriceServiceImpl extends BaseMetadataDataServiceImpl<CashierIte
 	}
 	
 	@Override
-	public CashierItemPrice saveBill(CashierItemPrice object) {
+	public CashierItemPrice save(CashierItemPrice object) {
 		LOG.debug("Processing save Price");
-		return super.saveBill(object);
+		return super.save(object);
 	}
 	
 	@Override
-	public String getRetirePrivilege() {
+	public String getVoidPrivilege() {
 		return null;
 	}
 	

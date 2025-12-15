@@ -12,22 +12,20 @@ import org.openmrs.User;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.ProgramWorkflowService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.billing.api.BillExemptionService;
-import org.openmrs.module.billing.api.BillService;
+import org.openmrs.module.billing.api.IBillService;
 import org.openmrs.module.billing.api.IBillableItemsService;
 import org.openmrs.module.billing.api.ICashPointService;
 import org.openmrs.module.billing.api.ItemPriceService;
-import org.openmrs.module.billing.api.evaluator.ExemptionRuleEngine;
 import org.openmrs.module.billing.api.model.Bill;
-import org.openmrs.module.billing.api.model.BillExemption;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.model.BillableServiceStatus;
 import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
-import org.openmrs.module.billing.api.model.ExemptionType;
 import org.openmrs.module.billing.api.search.BillableServiceSearch;
+import org.openmrs.module.billing.exemptions.BillingExemptions;
+import org.openmrs.module.billing.util.Utils;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
 import org.springframework.aop.AfterReturningAdvice;
@@ -36,9 +34,10 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
@@ -49,17 +48,13 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 	
 	OrderService orderService = Context.getOrderService();
 	
-	BillService billService = Context.getService(BillService.class);
+	IBillService billService = Context.getService(IBillService.class);
 	
 	StockManagementService stockService = Context.getService(StockManagementService.class);
 	
 	ItemPriceService priceService = Context.getService(ItemPriceService.class);
 	
 	ICashPointService cashPointService = Context.getService(ICashPointService.class);
-	
-	ExemptionRuleEngine exemptionRuleEngine = Context.getRegisteredComponent("ruleEngine", ExemptionRuleEngine.class);
-	
-	BillExemptionService billExemptionService = Context.getService(BillExemptionService.class);
 	
 	/**
 	 * This is called immediately an order is saved
@@ -95,7 +90,7 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 					
 					if (!stockItems.isEmpty()) {
 						// check from the list for all exemptions
-						boolean isExempted = checkIfOrderIsExempted(workflowService, order, ExemptionType.COMMODITY);
+						boolean isExempted = checkIfOrderIsExempted(workflowService, order, BillingExemptions.COMMODITIES);
 						BillStatus lineItemStatus = isExempted ? BillStatus.EXEMPTED : BillStatus.PENDING;
 						addBillItemToBill(order, patient, cashierUUID, stockItems.get(0), null, (int) drugQuantity,
 						    order.getDateActivated(), lineItemStatus);
@@ -109,7 +104,7 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 					IBillableItemsService service = Context.getService(IBillableItemsService.class);
 					List<BillableService> searchResult = service.findServices(new BillableServiceSearch(searchTemplate));
 					if (!searchResult.isEmpty()) {
-						boolean isExempted = checkIfOrderIsExempted(workflowService, order, ExemptionType.SERVICE);
+						boolean isExempted = checkIfOrderIsExempted(workflowService, order, BillingExemptions.SERVICES);
 						BillStatus lineItemStatus = isExempted ? BillStatus.EXEMPTED : BillStatus.PENDING;
 						addBillItemToBill(order, patient, cashierUUID, null, searchResult.get(0), 1,
 						    order.getDateActivated(), lineItemStatus);
@@ -122,54 +117,56 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 		}
 	}
 	
+	/**
+	 * Checks if an order concept is in the exemptions list
+	 *
+	 * @param workflowService
+	 * @param order
+	 * @param config
+	 * @return
+	 */
 	private boolean checkIfOrderIsExempted(ProgramWorkflowService workflowService, Order order,
-	        ExemptionType exemptionType) {
-		if (order == null || order.getConcept() == null) {
+	        Map<String, Set<Integer>> config) {
+		if (config == null || order == null || config.size() == 0) {
 			return false;
 		}
-		List<BillExemption> exemptions = billExemptionService.getExemptionsByConcept(order.getConcept(), exemptionType,
-		    false);
-		
-		if (exemptions == null || exemptions.isEmpty()) {
-			return false;
+		if (config.get("all") != null && config.get("all").contains(order.getConcept().getConceptId())) {
+			return true;
 		}
-		
-		Map<String, Object> variables = buildVariablesMap(order, workflowService);
-		
-		for (BillExemption exemption : exemptions) {
-			if (exemptionRuleEngine.isExemptionApplicable(exemption, variables)) {
-				return true;
+		// check in programs list
+		List<String> programExemptions = config.keySet().stream().filter(key -> key.startsWith("program:"))
+		        .collect(Collectors.toList());
+		if (programExemptions.size() > 0) {
+			List<PatientProgram> programs = workflowService.getPatientPrograms(order.getPatient(), null, null, null,
+			    new Date(), null, false);
+			Set<String> activeEnrollments = new HashSet<>();
+			programs.forEach(patientProgram -> {
+				if (patientProgram.getActive()) {
+					activeEnrollments.add(patientProgram.getProgram().getName());
+				}
+			});
+			
+			for (String programEntry : programExemptions) {
+				if (programEntry.contains(":")) { // this is our convention to distinguish program exemption
+					String programName = programEntry.substring(programEntry.indexOf(":") + 1);
+					//check if patient is active in the program
+					if (activeEnrollments.contains(programName)) {
+						// check if order is exempted
+						if (config.get(programEntry).contains(order.getConcept().getConceptId())) {
+							return true;
+						}
+						
+					}
+				}
 			}
 		}
 		
+		// check age category
+		if (order.getPatient().getAge() < 5 && config.get("age<5") != null
+		        && config.get("age<5").contains(order.getConcept().getConceptId())) {
+			return true;
+		}
 		return false;
-	}
-	
-	private Map<String, Object> buildVariablesMap(Order order, ProgramWorkflowService workflowService) {
-		Map<String, Object> variables = new HashMap<>();
-		
-		Patient patient = order.getPatient();
-		variables.put("patient", patient);
-		// We cannot call getAge() method from Java Script
-		if (patient != null) {
-			variables.put("patientAge", patient.getAge());
-		}
-		
-		Map<String, Object> orderData = new HashMap<>();
-		orderData.put("uuid", order.getUuid());
-		if (order.getConcept() != null) {
-			orderData.put("conceptId", order.getConcept().getConceptId());
-		}
-		variables.put("order", orderData);
-		
-		List<PatientProgram> programs = workflowService.getPatientPrograms(patient, null, null, null, new Date(), null,
-		    false);
-		List<String> activePrograms = programs.stream().filter(PatientProgram::getActive)
-		        .map(pp -> pp.getProgram().getName()).collect(Collectors.toList());
-		
-		variables.put("activePrograms", activePrograms);
-		
-		return variables;
 	}
 	
 	/**
@@ -221,7 +218,7 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 				activeBill.setCashPoint(cashPoints.get(0));
 				activeBill.addLineItem(billLineItem);
 				activeBill.setStatus(BillStatus.PENDING);
-				billService.saveBill(activeBill);
+				billService.save(activeBill);
 			} else {
 				LOG.error("User is not a provider");
 			}
