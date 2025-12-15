@@ -152,10 +152,10 @@
 			Path for the Bill Reciept Logo
 		</description>
 	</globalProperty>
-
     <globalProperty>
         <property>${project.parent.artifactId}.disableDrugOrderBillAutoCreation</property>
         <description>Disable automatic bill creation for drug orders</description>
+        <defaultValue>true</defaultValue>
     </globalProperty>
 	<!-- Extensions -->
 	<!--	<extension>-->
