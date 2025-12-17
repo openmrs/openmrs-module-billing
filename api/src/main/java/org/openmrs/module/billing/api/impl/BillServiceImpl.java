@@ -134,6 +134,13 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 				bill.setReceiptNumber(generator.generateNumber(bill));
 			}
 		}
+		
+		// force new bill save without merging when forceNewBill is set true
+		if (bill.getForceNewBill() != null && bill.getForceNewBill()) {
+			// Skip merge logic, just save the bill as new
+			return super.save(bill);
+		}
+		
 		// Check if there is an existing pending bill for the patient
 		List<Bill> bills = searchBill(bill.getPatient());
 		if (!bills.isEmpty()) {
