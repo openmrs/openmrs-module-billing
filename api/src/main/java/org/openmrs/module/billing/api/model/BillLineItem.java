@@ -14,8 +14,9 @@
 package org.openmrs.module.billing.api.model;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
-import org.openmrs.BaseOpenmrsData;
+import org.openmrs.BaseChangeableOpenmrsData;
 import org.openmrs.Order;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
 
@@ -23,9 +24,9 @@ import org.openmrs.module.stockmanagement.api.model.StockItem;
  * A LineItem represents a line on a {@link Bill} which will bill some quantity of a particular
  * {@link StockItem}.
  */
-public class BillLineItem extends BaseOpenmrsData {
+public class BillLineItem extends BaseChangeableOpenmrsData {
 	
-	public static final long serialVersionUID = 0L;
+	private static final long serialVersionUID = 0L;
 	
 	private int billLineItemId;
 	

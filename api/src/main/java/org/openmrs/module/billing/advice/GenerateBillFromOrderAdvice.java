@@ -25,7 +25,6 @@ import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
 import org.openmrs.module.billing.api.search.BillableServiceSearch;
 import org.openmrs.module.billing.exemptions.BillingExemptions;
-import org.openmrs.module.billing.util.Utils;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
 import org.springframework.aop.AfterReturningAdvice;
