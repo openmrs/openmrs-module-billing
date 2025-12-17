@@ -12,7 +12,6 @@
  * Copyright (C) OpenMRS, LLC.  All Rights Reserved.
  */
 
-
 package org.openmrs.module.billing.impl;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -226,9 +225,9 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		
 		billService.save(pendingBill);
 		Context.flushSession();
-        Context.clearSession();
-
-        Bill updatedBill = billService.getById(2);
+		Context.clearSession();
+		
+		Bill updatedBill = billService.getById(2);
 		
 		assertEquals(pendingBill, updatedBill);
 		assertEquals(updatedPrice, updatedBill.getLineItems().get(0).getPrice());

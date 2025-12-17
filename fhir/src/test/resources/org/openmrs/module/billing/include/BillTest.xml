@@ -13,7 +13,7 @@
 
 	<!-- Payment mode referenced by bill payments -->
 	<cashier_payment_mode payment_mode_id="0" name="Test Payment Mode" description="test description"
-	                      creator="1" date_created="2012-01-01 00:00:00.0" retired="false"
+	                      creator="1" date_created="2012-01-01 00:00:00.0" retired="false" is_default="false"
 	                      uuid="4028814B39B565A20139B565A2200000"/>
 	<cashier_payment_mode_attribute_type payment_mode_attribute_type_id="0" payment_mode_id="0" attribute_order="0"
 	                                     name="Test Attribute Type" description="test description"

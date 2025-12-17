@@ -98,7 +98,7 @@ public class BillSearch extends BaseDataTemplateSearch<Bill> {
 			if (matchingPatients != null && !matchingPatients.isEmpty()) {
 				criteria.add(Restrictions.in("patient", matchingPatients));
 			} else {
-                criteria.add(Restrictions.sqlRestriction("1 = 2"));
+				criteria.add(Restrictions.sqlRestriction("1 = 2"));
 			}
 		}
 		
