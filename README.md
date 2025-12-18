@@ -94,6 +94,7 @@ The module provides several global properties for configuration:
 - `billing.adjustmentReasonField`: Require adjustment reason field (true/false)
 - `billing.autofillPaymentAmount`: Auto-fill payment amount with remaining balance (default: false)
 - `billing.patientDashboard2BillCount`: Number of bills to show on patient dashboard (default: 5)
+- `billing.disableDrugOrderBillAutoCreation` : Disable automatic bill creation for drug orders (true/false)
 
 **Financial Reports**:
 
