@@ -17,6 +17,7 @@ package org.openmrs.module.billing.impl;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,11 +30,16 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.TestConstants;
 import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.ICashPointService;
+import org.openmrs.module.billing.api.IPaymentModeService;
+import org.openmrs.module.billing.api.model.Payment;
+import org.openmrs.module.billing.api.model.PaymentMode;
+
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.search.BillSearch;
+
 import org.openmrs.module.stockmanagement.api.model.StockItem;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 
@@ -47,12 +53,15 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	
 	private ICashPointService cashPointService;
 	
+	private IPaymentModeService paymentModeService;
+	
 	@BeforeEach
 	public void setup() {
 		billService = Context.getService(BillService.class);
 		providerService = Context.getProviderService();
 		patientService = Context.getPatientService();
 		cashPointService = Context.getService(ICashPointService.class);
+		paymentModeService = Context.getService(IPaymentModeService.class);
 		
 		executeDataSet(TestConstants.CORE_DATASET2);
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "StockOperationType.xml");
@@ -303,7 +312,140 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	/**
-	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillByUuid(String)
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#saveBill(Bill)
+	 */
+	@Test
+	public void save_Bill_shouldChangeStatusToPostedWhenPartialPaymentIsAdded() {
+		Patient patient = patientService.getPatient(1);
+		assertNotNull(patient);
+		
+		Bill templateBill = billService.getById(0);
+		assertNotNull(templateBill);
+		assertFalse(templateBill.getLineItems().isEmpty());
+		
+		// Create a new bill with one line item
+		Bill newBill = new Bill();
+		newBill.setCashier(providerService.getProvider(0));
+		newBill.setPatient(patient);
+		newBill.setCashPoint(cashPointService.getById(0));
+		newBill.setReceiptNumber("TEST-" + UUID.randomUUID());
+		newBill.setStatus(BillStatus.PENDING);
+		
+		BillLineItem existingItem = templateBill.getLineItems().get(0);
+		StockItem stockItem = existingItem.getItem();
+		
+		BillLineItem lineItem = newBill.addLineItem(stockItem, BigDecimal.valueOf(150), "New price", 2);
+		lineItem.setPaymentStatus(BillStatus.PENDING);
+		lineItem.setUuid(UUID.randomUUID().toString());
+		
+		// Save the bill - status should be PENDING
+		Bill savedBill = billService.saveBill(newBill);
+		Context.flushSession();
+		
+		assertNotNull(savedBill);
+		assertNotNull(savedBill.getId());
+		assertEquals(BillStatus.PENDING, savedBill.getStatus());
+		assertEquals(1, savedBill.getLineItems().size());
+		assertEquals(BigDecimal.valueOf(300), savedBill.getTotal());
+		
+		// Add partial payment (less than total)
+		PaymentMode paymentMode = paymentModeService.getById(0);
+		assertNotNull(paymentMode);
+		
+		BigDecimal partialPaymentAmount = BigDecimal.valueOf(100);
+		Payment payment = new Payment();
+		payment.setInstanceType(paymentMode);
+		payment.setAmount(partialPaymentAmount);
+		payment.setAmountTendered(partialPaymentAmount);
+		payment.setCreator(Context.getAuthenticatedUser());
+		payment.setDateCreated(new Date());
+		payment.setUuid(UUID.randomUUID().toString());
+		savedBill.addPayment(payment);
+		
+		// Save the bill again - status should change to POSTED
+		Bill billWithPayment = billService.saveBill(savedBill);
+		Context.flushSession();
+		
+		assertNotNull(billWithPayment);
+		assertEquals(BillStatus.POSTED, billWithPayment.getStatus(), "Bill status should be POSTED when partial payment is added");
+		assertEquals(partialPaymentAmount, billWithPayment.getTotalPayments(), "Total payments should equal partial payment amount");
+		assertEquals(BigDecimal.valueOf(300), billWithPayment.getTotal(), "Bill total should remain unchanged");
+		
+		// Verify the status persists after retrieval
+		Bill retrievedBill = billService.getById(billWithPayment.getId());
+		assertNotNull(retrievedBill);
+		assertEquals(BillStatus.POSTED, retrievedBill.getStatus(), "Retrieved bill should have POSTED status");
+		assertEquals(partialPaymentAmount, retrievedBill.getTotalPayments(), "Retrieved bill should have correct payment amount");
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#saveBill(Bill)
+	 */
+	@Test
+	public void save_Bill_shouldThrowExceptionWhenModifyingLineItemQuantityAfterPartialPayment() {
+		Patient patient = patientService.getPatient(1);
+		assertNotNull(patient);
+		
+		Bill templateBill = billService.getById(0);
+		assertNotNull(templateBill);
+		assertFalse(templateBill.getLineItems().isEmpty());
+		
+		// Create a new bill with one line item
+		Bill newBill = new Bill();
+		newBill.setCashier(providerService.getProvider(0));
+		newBill.setPatient(patient);
+		newBill.setCashPoint(cashPointService.getById(0));
+		newBill.setReceiptNumber("TEST-" + UUID.randomUUID());
+		newBill.setStatus(BillStatus.PENDING);
+		
+		BillLineItem existingItem = templateBill.getLineItems().get(0);
+		StockItem stockItem = existingItem.getItem();
+		
+		BillLineItem lineItem = newBill.addLineItem(stockItem, BigDecimal.valueOf(150), "New price", 2);
+		lineItem.setPaymentStatus(BillStatus.PENDING);
+		lineItem.setUuid(UUID.randomUUID().toString());
+		
+		// Save the bill - status should be PENDING
+		Bill savedBill = billService.saveBill(newBill);
+		Context.flushSession();
+		
+		assertNotNull(savedBill);
+		assertEquals(BillStatus.PENDING, savedBill.getStatus());
+		assertEquals(2, savedBill.getLineItems().get(0).getQuantity(), "Initial quantity should be 2");
+		
+		// Add partial payment (less than total) - status changes to POSTED
+		PaymentMode paymentMode = paymentModeService.getById(0);
+		assertNotNull(paymentMode);
+		
+		BigDecimal partialPaymentAmount = BigDecimal.valueOf(100);
+		Payment payment = new Payment();
+		payment.setInstanceType(paymentMode);
+		payment.setAmount(partialPaymentAmount);
+		payment.setAmountTendered(partialPaymentAmount);
+		savedBill.addPayment(payment);
+		
+		Bill billWithPayment = billService.saveBill(savedBill);
+		Context.flushSession();
+		
+		assertEquals(BillStatus.POSTED, billWithPayment.getStatus(), "Bill status should be POSTED after partial payment");
+		
+		// Try to modify line item quantity by removing and re-adding with different quantity
+		// This should throw IllegalStateException because line items can only be modified when bill is PENDING
+		BillLineItem firstItem = billWithPayment.getLineItems().get(0);
+		
+		// Attempt to remove line item to change quantity - should throw exception
+		assertThrows(IllegalStateException.class, () -> {
+			billWithPayment.removeLineItem(firstItem);
+		}, "Should throw IllegalStateException when trying to remove line item from POSTED bill");
+		
+		// Attempt to add a new line item - should also throw exception
+		assertThrows(IllegalStateException.class, () -> {
+			billWithPayment.addLineItem(stockItem, BigDecimal.valueOf(100), "Another item", 1);
+		}, "Should throw IllegalStateException when trying to add line item to POSTED bill");
+  }
+
+	/** 
+   * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillByUuid(String)
 	 */
 	@Test
 	public void getBillByUuid_shouldReturnBillWithSpecifiedUuid() {
