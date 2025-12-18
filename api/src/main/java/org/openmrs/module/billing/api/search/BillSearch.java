@@ -15,107 +15,34 @@ package org.openmrs.module.billing.api.search;
 
 import java.util.List;
 
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-import org.openmrs.Patient;
-import org.openmrs.api.context.Context;
-import org.openmrs.api.db.hibernate.HibernatePatientDAO;
-import org.openmrs.module.billing.api.base.entity.search.BaseDataTemplateSearch;
-import org.openmrs.module.billing.api.model.Bill;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.openmrs.module.billing.api.model.BillStatus;
 
 /**
- * A search template class for the {@link Bill} model.
+ * A search criteria holder for {@link org.openmrs.module.billing.api.model.Bill} queries. This
+ * class holds search parameters that are used by the DAO layer to build queries. Uses Lombok's
+ * builder pattern for fluent API.
  */
-public class BillSearch extends BaseDataTemplateSearch<Bill> {
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class BillSearch {
 	
-	private Boolean includeVoidedLineItems;
+	private String patientUuid;
+	
+	private String cashierUuid;
+	
+	private String cashPointUuid;
 	
 	private List<BillStatus> statuses;
 	
 	private String patientName;
 	
-	public BillSearch() {
-		this(new Bill(), false);
-	}
+	private Boolean includeVoided = false;
 	
-	public BillSearch(Bill template) {
-		this(template, false);
-	}
-	
-	public BillSearch(Bill template, Boolean includeRetired) {
-		super(template, includeRetired);
-		this.includeVoidedLineItems = false;
-	}
-	
-	/**
-	 * Sets whether voided line items should be included in the results.
-	 * 
-	 * @param includeVoidedLineItems {@code true} to include voided line items, {@code false} to exclude
-	 *            them.
-	 * @return This BillSearch instance for method chaining.
-	 */
-	public BillSearch includeVoidedLineItems(boolean includeVoidedLineItems) {
-		this.includeVoidedLineItems = includeVoidedLineItems;
-		return this;
-	}
-	
-	public Boolean getIncludeVoidedLineItems() {
-		return includeVoidedLineItems;
-	}
-	
-	/**
-	 * Sets multiple statuses to filter by. When multiple statuses are provided, bills matching any of
-	 * the specified statuses will be returned.
-	 * 
-	 * @param statuses The list of statuses to filter by.
-	 * @return This BillSearch instance.
-	 */
-	public BillSearch setStatuses(List<BillStatus> statuses) {
-		this.statuses = statuses;
-		return this;
-	}
-	
-	@Override
-	public void updateCriteria(Criteria criteria) {
-		super.updateCriteria(criteria);
-		
-		Bill bill = getTemplate();
-		if (bill.getCashier() != null) {
-			criteria.add(Restrictions.eq("cashier", bill.getCashier()));
-		}
-		if (bill.getCashPoint() != null) {
-			criteria.add(Restrictions.eq("cashPoint", bill.getCashPoint()));
-		}
-		if (bill.getPatient() != null) {
-			criteria.add(Restrictions.eq("patient", bill.getPatient()));
-		}
-		
-		if (patientName != null && !patientName.trim().isEmpty()) {
-			List<Patient> matchingPatients = Context.getRegisteredComponent("patientDAO", HibernatePatientDAO.class)
-			        .getPatients(patientName, 0, null);
-			if (matchingPatients != null && !matchingPatients.isEmpty()) {
-				criteria.add(Restrictions.in("patient", matchingPatients));
-			} else {
-				criteria.add(Restrictions.sqlRestriction("1 = 2"));
-			}
-		}
-		
-		if (statuses != null && !statuses.isEmpty()) {
-			// Filter by multiple statuses using IN clause
-			criteria.add(Restrictions.in("status", statuses));
-		} else if (bill.getStatus() != null) {
-			criteria.add(Restrictions.eq("status", bill.getStatus()));
-		}
-		criteria.addOrder(Order.desc("id"));
-	}
-	
-	public String getPatientName() {
-		return patientName;
-	}
-	
-	public void setPatientName(String patientName) {
-		this.patientName = patientName;
-	}
+	private Boolean includeVoidedLineItems = false;
 }

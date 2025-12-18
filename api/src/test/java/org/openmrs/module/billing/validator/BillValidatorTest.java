@@ -20,7 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.TestConstants;
-import org.openmrs.module.billing.api.IBillService;
+import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
@@ -34,12 +34,12 @@ public class BillValidatorTest extends BaseModuleContextSensitiveTest {
 	
 	private BillValidator billValidator;
 	
-	private IBillService billService;
+	private BillService billService;
 	
 	@BeforeEach
 	public void setup() throws Exception {
 		billValidator = new BillValidator();
-		billService = Context.getService(IBillService.class);
+		billService = Context.getService(BillService.class);
 		
 		executeDataSet(TestConstants.CORE_DATASET2);
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "StockOperationType.xml");
@@ -50,7 +50,7 @@ public class BillValidatorTest extends BaseModuleContextSensitiveTest {
 	
 	@Test
 	public void validate_shouldNotRejectPendingBill() {
-		Bill pendingBill = billService.getById(2);
+		Bill pendingBill = billService.getBill(2);
 		assertNotNull(pendingBill);
 		assertEquals(BillStatus.PENDING, pendingBill.getStatus());
 		
@@ -61,17 +61,17 @@ public class BillValidatorTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
-	public void validate_shouldRejectPostedBill() {
-		Bill postedBill = billService.getById(0);
-		assertNotNull(postedBill);
-		assertEquals(BillStatus.POSTED, postedBill.getStatus());
+	public void validate_shouldRejectPaidBill() {
+		Bill paidBill = billService.getBill(1);
+		assertNotNull(paidBill);
+		assertEquals(BillStatus.PAID, paidBill.getStatus());
 		
-		Errors errors = new BindException(postedBill, "bill");
-		billValidator.validate(postedBill, errors);
+		Errors errors = new BindException(paidBill, "bill");
+		billValidator.validate(paidBill, errors);
 		
 		assertTrue(errors.hasErrors());
 		assertTrue(errors.getGlobalError().getDefaultMessage()
 		        .contains("Bill can only be modified when the bill is in PENDING state"));
-		assertTrue(errors.getGlobalError().getDefaultMessage().contains("POSTED"));
+		assertTrue(errors.getGlobalError().getDefaultMessage().contains("PAID"));
 	}
 }

@@ -32,7 +32,7 @@ import org.openmrs.User;
 import org.openmrs.VisitAttribute;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.billing.api.IBillService;
+import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.IBillableItemsService;
 import org.openmrs.module.billing.api.ICashPointService;
 import org.openmrs.module.billing.api.ItemPriceService;
@@ -54,7 +54,7 @@ public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 	
 	OrderService orderService = Context.getOrderService();
 	
-	IBillService billService = Context.getService(IBillService.class);
+	BillService billService = Context.getService(BillService.class);
 	
 	StockManagementService stockService = Context.getService(StockManagementService.class);
 	
