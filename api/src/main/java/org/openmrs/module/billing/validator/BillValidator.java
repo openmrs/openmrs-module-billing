@@ -19,7 +19,6 @@ public class BillValidator implements Validator {
 	}
 	
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void validate(Object target, Errors errors) {
 		if (!(target instanceof Bill)) {
 			errors.reject("error.general");
@@ -30,13 +29,9 @@ public class BillValidator implements Validator {
 				errors.rejectValue("voided", "error.null");
 			}
 			
-			if (bill.getId() != null) {
-				Bill existingBill = Context.getService(BillService.class).getBill(bill.getBillId());
-				if (existingBill != null && !existingBill.editable()) {
-					errors.reject("billing.bill.notEditable",
-					    "Bill can only be modified when the bill is in PENDING state. Current status: "
-					            + existingBill.getStatus());
-				}
+			if (!Context.getService(BillService.class).isBillEditable(bill)) {
+				errors.reject("billing.bill.notEditable",
+				    "Bill can only be modified when the bill is in PENDING or POSTED state");
 			}
 		}
 	}

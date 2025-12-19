@@ -71,7 +71,6 @@ public class BillValidatorTest extends BaseModuleContextSensitiveTest {
 		
 		assertTrue(errors.hasErrors());
 		assertTrue(errors.getGlobalError().getDefaultMessage()
-		        .contains("Bill can only be modified when the bill is in PENDING state"));
-		assertTrue(errors.getGlobalError().getDefaultMessage().contains("PAID"));
+		        .contains("Bill can only be modified when the bill is in PENDING or POSTED state"));
 	}
 }

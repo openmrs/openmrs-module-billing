@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.openmrs.Patient;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
+import org.openmrs.api.ValidationException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.TestConstants;
 import org.openmrs.module.billing.api.BillService;
@@ -240,7 +241,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		paidBill.addLineItem(newLineItem);
 		// Should throw exception
 		
-		assertThrows(IllegalArgumentException.class, () -> billService.saveBill(paidBill));
+		assertThrows(ValidationException.class, () -> billService.saveBill(paidBill));
 	}
 	
 	/**
@@ -280,7 +281,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		postedBill.removeLineItem(itemToRemove);
 		
 		// Should throw exception
-		assertThrows(IllegalArgumentException.class, () -> billService.saveBill(postedBill));
+		assertThrows(ValidationException.class, () -> billService.saveBill(postedBill));
 	}
 	
 	@Test
@@ -293,13 +294,13 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
-	public void save_Bill_shouldThrowIllegalStateExceptionForPostedBill() {
+	public void save_Bill_shouldNotThrowIllegalStateExceptionForPostedBill() {
 		Bill postedBill = billService.getBill(0);
 		assertNotNull(postedBill);
 		assertEquals(BillStatus.POSTED, postedBill.getStatus());
 		
 		postedBill.setReceiptNumber("ABV");
-		assertThrows(IllegalArgumentException.class, () -> billService.saveBill(postedBill));
+		assertDoesNotThrow(() -> billService.saveBill(postedBill));
 	}
 	
 	/**
