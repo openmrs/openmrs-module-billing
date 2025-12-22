@@ -28,11 +28,6 @@ public class BillValidator implements Validator {
 			if (bill.getVoided() && StringUtils.isBlank(bill.getVoidReason())) {
 				errors.rejectValue("voided", "error.null");
 			}
-			
-			if (!Context.getService(BillService.class).isBillEditable(bill)) {
-				errors.reject("billing.bill.notEditable",
-				    "Bill can only be modified when the bill is in PENDING or POSTED state");
-			}
 		}
 	}
 	

@@ -13,7 +13,6 @@
  */
 package org.openmrs.module.billing.api.base.entity.model;
 
-// @formatter:off
 /**
  * Base class for {@link org.openmrs.OpenmrsData} models that can be customized based on an
  * {@link IInstanceType}

@@ -212,9 +212,7 @@ public class Bill extends BaseOpenmrsData {
 	 */
 	public boolean editable() {
 		// New bills (no ID) are considered pending, existing bills must be in PENDING state
-		// If we do a partial payment bill is set to POSTED status. We should be able to edit posted status too
-		return getStatus() == null || this.getId() == null || this.getStatus() == BillStatus.PENDING
-		        || this.getStatus() == BillStatus.POSTED;
+		return getStatus() == null || this.getId() == null || this.getStatus() == BillStatus.PENDING;
 	}
 	
 	public void recalculateLineItemOrder() {
