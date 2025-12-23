@@ -335,6 +335,41 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		assertDoesNotThrow(Context::flushSession);
 	}
 	
+	@Test
+	public void saveBill_shouldNotAllowModifyingLineItemPropertiesOnPaidBill() {
+		Bill paidBill = billService.getBill(1);
+		assertNotNull(paidBill);
+		assertEquals(BillStatus.PAID, paidBill.getStatus());
+		assertFalse(paidBill.getLineItems().isEmpty());
+		
+		// Try to modify the price of an existing line item
+		BillLineItem lineItem = paidBill.getLineItems().get(0);
+		lineItem.setPrice(lineItem.getPrice().add(BigDecimal.TEN));
+		
+		billService.saveBill(paidBill);
+		
+		// Should throw exception when flushing (ImmutableBillLineItemInterceptor catches modifications)
+		assertThrows(UnchangeableObjectException.class, Context::flushSession);
+	}
+	
+	@Test
+	public void saveBill_shouldAllowModifyingLineItemPropertiesOnPendingBill() {
+		Bill pendingBill = billService.getBill(2);
+		assertNotNull(pendingBill);
+		assertEquals(BillStatus.PENDING, pendingBill.getStatus());
+		assertFalse(pendingBill.getLineItems().isEmpty());
+		
+		// Modify the price of an existing line item
+		BillLineItem lineItem = pendingBill.getLineItems().get(0);
+		BigDecimal newPrice = lineItem.getPrice().add(BigDecimal.TEN);
+		lineItem.setPrice(newPrice);
+		
+		billService.saveBill(pendingBill);
+		
+		// Should not throw exception
+		assertDoesNotThrow(Context::flushSession);
+	}
+	
 	/**
 	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBillByUuid(String)
 	 */
