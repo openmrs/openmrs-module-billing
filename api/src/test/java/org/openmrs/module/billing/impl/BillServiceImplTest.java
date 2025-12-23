@@ -50,7 +50,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	private ProviderService providerService;
 	
 	private PatientService patientService;
-
+	
 	private IPaymentModeService paymentModeService;
 	
 	private ICashPointService cashPointService;
@@ -246,9 +246,10 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		BillLineItem newLineItem = new BillLineItem();
 		newLineItem.setPrice(BigDecimal.valueOf(25.50));
 		newLineItem.setQuantity(2);
+		newLineItem.setPaymentStatus(BillStatus.PENDING);
 		paidBill.addLineItem(newLineItem);
-		// Should throw exception
 		
+		// Should throw exception when saving (BillValidator catches line item additions)
 		assertThrows(ValidationException.class, () -> billService.saveBill(paidBill));
 	}
 	
@@ -288,7 +289,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		BillLineItem itemToRemove = postedBill.getLineItems().get(0);
 		postedBill.removeLineItem(itemToRemove);
 		
-		// Should throw exception
+		// Should throw exception when saving (BillValidator catches line item removals)
 		assertThrows(ValidationException.class, () -> billService.saveBill(postedBill));
 	}
 	
@@ -297,39 +298,40 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		Bill pendingBill = billService.getBill(2);
 		assertNotNull(pendingBill);
 		assertEquals(BillStatus.PENDING, pendingBill.getStatus());
+		
 		pendingBill.setReceiptNumber("ABV");
-		assertDoesNotThrow(() -> billService.saveBill(pendingBill));
+		
+		billService.saveBill(pendingBill);
+		assertDoesNotThrow(Context::flushSession);
 	}
 	
 	@Test
-	public void saveBill_shouldThrowUnchangeableObjectExceptionForPostedBill() {
+	public void saveBill_shouldNotAllowChangesForPostedBill() {
 		Bill postedBill = billService.getBill(0);
 		assertNotNull(postedBill);
 		assertEquals(BillStatus.POSTED, postedBill.getStatus());
 		
 		postedBill.setReceiptNumber("ABV");
 		billService.saveBill(postedBill);
-
+		
 		assertThrows(UnchangeableObjectException.class, Context::flushSession);
 	}
-
+	
 	@Test
 	public void saveBill_shouldAllowPaymentsForPostedBill() {
 		Bill postedBill = billService.getBill(0);
 		assertNotNull(postedBill);
 		assertEquals(BillStatus.POSTED, postedBill.getStatus());
-
+		
 		PaymentMode paymentMode = paymentModeService.getById(0);
-
-		Payment payment = Payment.builder()
-				.amount(BigDecimal.valueOf(10.0))
-				.amountTendered(BigDecimal.valueOf(10.0))
-				.build();
+		
+		Payment payment = Payment.builder().amount(BigDecimal.valueOf(10.0)).amountTendered(BigDecimal.valueOf(10.0))
+		        .build();
 		payment.setInstanceType(paymentMode);
-
+		
 		postedBill.addPayment(payment);
 		billService.saveBill(postedBill);
-
+		
 		assertDoesNotThrow(Context::flushSession);
 	}
 	

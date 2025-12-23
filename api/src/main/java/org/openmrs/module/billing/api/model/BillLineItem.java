@@ -28,7 +28,7 @@ public class BillLineItem extends BaseChangeableOpenmrsData {
 	
 	private static final long serialVersionUID = 0L;
 	
-	private int billLineItemId;
+	private Integer billLineItemId;
 	
 	private Bill bill;
 	

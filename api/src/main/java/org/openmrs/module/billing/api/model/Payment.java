@@ -34,15 +34,15 @@ public class Payment extends BaseInstanceCustomizableData<PaymentMode, PaymentAt
 	public static final long serialVersionUID = 0L;
 	
 	private Integer paymentId;
-
+	
 	@Getter
 	@Setter
 	private Bill bill;
-
+	
 	@Getter
 	@Setter
 	private BigDecimal amount;
-
+	
 	@Getter
 	@Setter
 	private BigDecimal amountTendered;

@@ -81,7 +81,7 @@ public interface BillDAO {
 	 */
 	@Transactional(readOnly = true)
 	List<Bill> getBills(@Nonnull BillSearch billSearch, PagingInfo pagingInfo);
-
+	
 	/**
 	 * Persists a bill to the database.
 	 * <p>
