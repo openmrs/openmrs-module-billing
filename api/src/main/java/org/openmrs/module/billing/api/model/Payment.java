@@ -13,6 +13,12 @@
  */
 package org.openmrs.module.billing.api.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import org.openmrs.module.billing.api.base.entity.model.BaseInstanceCustomizableData;
 
 import java.math.BigDecimal;
@@ -20,16 +26,25 @@ import java.math.BigDecimal;
 /**
  * Model class that represents the {@link Bill} payment information.
  */
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Payment extends BaseInstanceCustomizableData<PaymentMode, PaymentAttribute> {
 	
 	public static final long serialVersionUID = 0L;
 	
 	private Integer paymentId;
 	
+	@Getter
+	@Setter
 	private Bill bill;
 	
+	@Getter
+	@Setter
 	private BigDecimal amount;
 	
+	@Getter
+	@Setter
 	private BigDecimal amountTendered;
 	
 	public Integer getId() {
@@ -55,29 +70,5 @@ public class Payment extends BaseInstanceCustomizableData<PaymentMode, PaymentAt
 		addAttribute(attribute);
 		
 		return attribute;
-	}
-	
-	public BigDecimal getAmount() {
-		return amount;
-	}
-	
-	public void setAmount(BigDecimal amount) {
-		this.amount = amount;
-	}
-	
-	public BigDecimal getAmountTendered() {
-		return amountTendered;
-	}
-	
-	public void setAmountTendered(BigDecimal amountTendered) {
-		this.amountTendered = amountTendered;
-	}
-	
-	public Bill getBill() {
-		return bill;
-	}
-	
-	public void setBill(Bill bill) {
-		this.bill = bill;
 	}
 }

@@ -33,7 +33,7 @@ import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 
-public class HibernateBillDAOImplTest extends BaseModuleContextSensitiveTest {
+public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 	
 	private BillDAO billDAO;
 	

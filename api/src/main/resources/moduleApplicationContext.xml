@@ -85,24 +85,28 @@
 			</list>
 		</property>
 	</bean>
-
-
+	<bean parent="serviceContext">
+		<property name="moduleService">
+			<list merge="true">
+				<value>org.openmrs.module.billing.api.BillService</value>
+				<ref bean="billService"/>
+			</list>
+		</property>
+	</bean>
+	<bean parent="serviceContext">
+		<property name="moduleService">
+			<list merge="true">
+				<value>org.openmrs.module.billing.api.BillExemptionService</value>
+				<ref bean="billingExemptionService"/>
+			</list>
+		</property>
+	</bean>
 
 	<!-- Service Bean Definitions -->
 	<bean id="itemPriceService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager" ref="transactionManager"/>
 		<property name="target">
 			<bean class="org.openmrs.module.billing.api.impl.ItemPriceServiceImpl">
-				<property name="repository" ref="genericRepositoryDao"/>
-			</bean>
-		</property>
-		<property name="preInterceptors" ref="serviceInterceptors"/>
-		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
-	</bean>
-	<bean id="billLineItemService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager" ref="transactionManager"/>
-		<property name="target">
-			<bean class="org.openmrs.module.billing.api.impl.BillLineItemServiceImpl">
 				<property name="repository" ref="genericRepositoryDao"/>
 			</bean>
 		</property>
@@ -190,29 +194,6 @@
 		<property name="preInterceptors" ref="serviceInterceptors"/>
 		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
 	</bean>
-	<bean id="genericRepositoryDao"
-	      class="org.openmrs.module.billing.api.base.entity.db.hibernate.BaseHibernateRepositoryImpl">
-		<constructor-arg name="sessionFactory" ref="dbSessionFactory"/>
-	</bean>
-
-	<bean parent="serviceContext">
-		<property name="moduleService">
-			<list merge="true">
-				<value>org.openmrs.module.billing.api.BillService</value>
-				<ref bean="billService"/>
-			</list>
-		</property>
-	</bean>
-
-	<bean parent="serviceContext">
-		<property name="moduleService">
-			<list merge="true">
-				<value>org.openmrs.module.billing.api.BillExemptionService</value>
-				<ref bean="billingExemptionService"/>
-			</list>
-		</property>
-	</bean>
-
 	<bean id="billService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager" ref="transactionManager"/>
 		<property name="target">
@@ -223,7 +204,16 @@
 		<property name="preInterceptors" ref="serviceInterceptors"/>
 		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
 	</bean>
-
+	<bean id="billLineItemService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target">
+			<bean class="org.openmrs.module.billing.api.impl.BillLineItemServiceImpl">
+				<property name="billLineItemDAO" ref="billLineItemDAO"/>
+			</bean>
+		</property>
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+	</bean>
 	<bean id="billingExemptionService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager" ref="transactionManager"/>
 		<property name="target">
@@ -235,22 +225,31 @@
 		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
 	</bean>
 
-	<bean id="billDAO"
-		  class="org.openmrs.module.billing.api.db.hibernate.HibernateBillDAOImpl"/>
 
+	<bean id="genericRepositoryDao"
+	      class="org.openmrs.module.billing.api.base.entity.db.hibernate.BaseHibernateRepositoryImpl">
+		<constructor-arg name="sessionFactory" ref="dbSessionFactory"/>
+	</bean>
+	<bean id="billLineItemDAO" class="org.openmrs.module.billing.api.db.hibernate.HibernateBillLineItemDAO">
+		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	<bean id="billDAO"
+		  class="org.openmrs.module.billing.api.db.hibernate.HibernateBillDAO">
+		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
+	</bean>
 	<bean id="billExemptionDAO"
 		  class="org.openmrs.module.billing.api.db.hibernate.BillExemptionDAOImpl">
 		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
 	</bean>
 
-	<bean id="javascriptRuleEvaluator"
-		  class="org.openmrs.module.billing.api.evaluator.impl.JSExemptionEvaluator"/>
+	<bean id="billValidator" class="org.openmrs.module.billing.validator.BillValidator"/>
 
 	<bean id="ruleEngine"
 		  class="org.openmrs.module.billing.api.evaluator.ExemptionRuleEngine">
 		<constructor-arg>
 			<list>
-				<ref bean="javascriptRuleEvaluator"/>
+				<bean id="javascriptRuleEvaluator"
+					  class="org.openmrs.module.billing.api.evaluator.impl.JSExemptionEvaluator"/>
 			</list>
 		</constructor-arg>
 	</bean>

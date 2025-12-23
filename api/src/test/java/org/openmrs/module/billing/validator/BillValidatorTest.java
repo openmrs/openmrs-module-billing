@@ -61,7 +61,7 @@ public class BillValidatorTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
-	public void validate_shouldRejectPaidBill() {
+	public void validate_shouldNotRejectUnmodifiedPaidBill() {
 		Bill paidBill = billService.getBill(1);
 		assertNotNull(paidBill);
 		assertEquals(BillStatus.PAID, paidBill.getStatus());
@@ -69,9 +69,8 @@ public class BillValidatorTest extends BaseModuleContextSensitiveTest {
 		Errors errors = new BindException(paidBill, "bill");
 		billValidator.validate(paidBill, errors);
 		
-		assertTrue(errors.hasErrors());
-		assertTrue(errors.getGlobalError().getDefaultMessage()
-		        .contains("Bill can only be modified when the bill is in PENDING state"));
-		assertTrue(errors.getGlobalError().getDefaultMessage().contains("PAID"));
+		// Unmodified PAID bills should pass validation - rejection happens only when
+		// attempting to modify line items
+		assertFalse(errors.hasErrors());
 	}
 }

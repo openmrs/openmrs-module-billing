@@ -20,19 +20,25 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
+import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openmrs.Patient;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
+import org.openmrs.api.UnchangeableObjectException;
+import org.openmrs.api.ValidationException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.TestConstants;
 import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.ICashPointService;
+import org.openmrs.module.billing.api.IPaymentModeService;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
+import org.openmrs.module.billing.api.model.Payment;
+import org.openmrs.module.billing.api.model.PaymentMode;
 import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
@@ -45,6 +51,8 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	
 	private PatientService patientService;
 	
+	private IPaymentModeService paymentModeService;
+	
 	private ICashPointService cashPointService;
 	
 	@BeforeEach
@@ -52,6 +60,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		billService = Context.getService(BillService.class);
 		providerService = Context.getProviderService();
 		patientService = Context.getPatientService();
+		paymentModeService = Context.getService(IPaymentModeService.class);
 		cashPointService = Context.getService(ICashPointService.class);
 		
 		executeDataSet(TestConstants.CORE_DATASET2);
@@ -65,7 +74,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#saveBill(Bill)
 	 */
 	@Test
-	public void save_Bill_shouldThrowNullPointerExceptionIfBillIsNull() {
+	public void saveBill_shouldThrowNullPointerExceptionIfBillIsNull() {
 		assertThrows(NullPointerException.class, () -> billService.saveBill(null));
 	}
 	
@@ -115,7 +124,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#saveBill(Bill)
 	 */
 	@Test
-	public void save_Bill_shouldCreateNewBillWithNewItem() {
+	public void saveBill_shouldCreateNewBillWithNewItem() {
 		Patient patient = patientService.getPatient(1);
 		assertNotNull(patient);
 		
@@ -155,7 +164,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#saveBill(Bill)
 	 */
 	@Test
-	public void save_Bill_shouldUpdateExistingBillWithUpdatedBillItem() {
+	public void saveBill_shouldUpdateExistingBillWithUpdatedBillItem() {
 		Bill pendingBill = billService.getBill(2);
 		assertNotNull(pendingBill);
 		assertEquals(BillStatus.PENDING, pendingBill.getStatus());
@@ -203,7 +212,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#saveBill(Bill)
 	 */
 	@Test
-	public void save_Bill_shouldAllowAddingLineItemsToPendingBill() {
+	public void saveBill_shouldAllowAddingLineItemsToPendingBill() {
 		// Get the PENDING bill from test data (bill_id=2)
 		Bill pendingBill = billService.getBill(2);
 		assertNotNull(pendingBill);
@@ -227,7 +236,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#saveBill(Bill)
 	 */
 	@Test
-	public void save_Bill_shouldThrowExceptionWhenAddingLineItemsToPaidBill() {
+	public void saveBill_shouldThrowExceptionWhenAddingLineItemsToPaidBill() {
 		// Get the PAID bill from test data (bill_id=1)
 		Bill paidBill = billService.getBill(1);
 		assertNotNull(paidBill);
@@ -237,17 +246,18 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		BillLineItem newLineItem = new BillLineItem();
 		newLineItem.setPrice(BigDecimal.valueOf(25.50));
 		newLineItem.setQuantity(2);
+		newLineItem.setPaymentStatus(BillStatus.PENDING);
 		paidBill.addLineItem(newLineItem);
-		// Should throw exception
 		
-		assertThrows(IllegalArgumentException.class, () -> billService.saveBill(paidBill));
+		// Should throw exception when saving (BillValidator catches line item additions)
+		assertThrows(ValidationException.class, () -> billService.saveBill(paidBill));
 	}
 	
 	/**
 	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#saveBill(Bill)
 	 */
 	@Test
-	public void save_Bill_shouldAllowRemovingLineItemsFromPendingBill() {
+	public void saveBill_shouldAllowRemovingLineItemsFromPendingBill() {
 		// Get the PENDING bill from test data (bill_id=2)
 		Bill pendingBill = billService.getBill(2);
 		assertNotNull(pendingBill);
@@ -270,7 +280,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#saveBill(Bill)
 	 */
 	@Test
-	public void save_Bill_shouldThrowExceptionWhenRemovingLineItemsFromPaidBill() {
+	public void saveBill_shouldThrowExceptionWhenRemovingLineItemsFromPaidBill() {
 		// Get the POSTED bill from test data (bill_id=1)
 		Bill postedBill = billService.getBill(1);
 		assertNotNull(postedBill);
@@ -279,27 +289,85 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		BillLineItem itemToRemove = postedBill.getLineItems().get(0);
 		postedBill.removeLineItem(itemToRemove);
 		
-		// Should throw exception
-		assertThrows(IllegalArgumentException.class, () -> billService.saveBill(postedBill));
+		// Should throw exception when saving (BillValidator catches line item removals)
+		assertThrows(ValidationException.class, () -> billService.saveBill(postedBill));
 	}
 	
 	@Test
-	public void save_Bill_shouldNotThrowExceptionForPendingBill() {
+	public void saveBill_shouldNotThrowExceptionForPendingBill() {
 		Bill pendingBill = billService.getBill(2);
 		assertNotNull(pendingBill);
 		assertEquals(BillStatus.PENDING, pendingBill.getStatus());
+		
 		pendingBill.setReceiptNumber("ABV");
-		assertDoesNotThrow(() -> billService.saveBill(pendingBill));
+		
+		billService.saveBill(pendingBill);
+		assertDoesNotThrow(Context::flushSession);
 	}
 	
 	@Test
-	public void save_Bill_shouldThrowIllegalStateExceptionForPostedBill() {
+	public void saveBill_shouldNotAllowChangesForPostedBill() {
 		Bill postedBill = billService.getBill(0);
 		assertNotNull(postedBill);
 		assertEquals(BillStatus.POSTED, postedBill.getStatus());
 		
 		postedBill.setReceiptNumber("ABV");
-		assertThrows(IllegalArgumentException.class, () -> billService.saveBill(postedBill));
+		billService.saveBill(postedBill);
+		
+		assertThrows(UnchangeableObjectException.class, Context::flushSession);
+	}
+	
+	@Test
+	public void saveBill_shouldAllowPaymentsForPostedBill() {
+		Bill postedBill = billService.getBill(0);
+		assertNotNull(postedBill);
+		assertEquals(BillStatus.POSTED, postedBill.getStatus());
+		
+		PaymentMode paymentMode = paymentModeService.getById(0);
+		
+		Payment payment = Payment.builder().amount(BigDecimal.valueOf(10.0)).amountTendered(BigDecimal.valueOf(10.0))
+		        .build();
+		payment.setInstanceType(paymentMode);
+		
+		postedBill.addPayment(payment);
+		billService.saveBill(postedBill);
+		
+		assertDoesNotThrow(Context::flushSession);
+	}
+	
+	@Test
+	public void saveBill_shouldNotAllowModifyingLineItemPropertiesOnPaidBill() {
+		Bill paidBill = billService.getBill(1);
+		assertNotNull(paidBill);
+		assertEquals(BillStatus.PAID, paidBill.getStatus());
+		assertFalse(paidBill.getLineItems().isEmpty());
+		
+		// Try to modify the price of an existing line item
+		BillLineItem lineItem = paidBill.getLineItems().get(0);
+		lineItem.setPrice(lineItem.getPrice().add(BigDecimal.TEN));
+		
+		billService.saveBill(paidBill);
+		
+		// Should throw exception when flushing (ImmutableBillLineItemInterceptor catches modifications)
+		assertThrows(UnchangeableObjectException.class, Context::flushSession);
+	}
+	
+	@Test
+	public void saveBill_shouldAllowModifyingLineItemPropertiesOnPendingBill() {
+		Bill pendingBill = billService.getBill(2);
+		assertNotNull(pendingBill);
+		assertEquals(BillStatus.PENDING, pendingBill.getStatus());
+		assertFalse(pendingBill.getLineItems().isEmpty());
+		
+		// Modify the price of an existing line item
+		BillLineItem lineItem = pendingBill.getLineItems().get(0);
+		BigDecimal newPrice = lineItem.getPrice().add(BigDecimal.TEN);
+		lineItem.setPrice(newPrice);
+		
+		billService.saveBill(pendingBill);
+		
+		// Should not throw exception
+		assertDoesNotThrow(Context::flushSession);
 	}
 	
 	/**

@@ -1,6 +1,11 @@
 package org.openmrs.module.billing.api.db.hibernate;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.openmrs.Patient;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.db.hibernate.HibernatePatientDAO;
@@ -8,10 +13,9 @@ import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.db.BillDAO;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.search.BillSearch;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -26,17 +30,18 @@ import java.util.List;
  * @see BillDAO
  * @see Bill
  */
-public class HibernateBillDAOImpl implements BillDAO {
+@AllArgsConstructor
+public class HibernateBillDAO implements BillDAO {
 	
-	@PersistenceContext
-	private EntityManager entityManager;
+	@Setter(AccessLevel.PROTECTED)
+	private SessionFactory sessionFactory;
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public Bill getBill(@Nonnull Integer id) {
-		return entityManager.find(Bill.class, id);
+		return sessionFactory.getCurrentSession().find(Bill.class, id);
 	}
 	
 	/**
@@ -44,7 +49,8 @@ public class HibernateBillDAOImpl implements BillDAO {
 	 */
 	@Override
 	public Bill getBillByUuid(@Nonnull String uuid) {
-		TypedQuery<Bill> query = entityManager.createQuery("select b from Bill b where b.uuid = :uuid", Bill.class);
+		TypedQuery<Bill> query = sessionFactory.getCurrentSession().createQuery("select b from Bill b where b.uuid = :uuid",
+		    Bill.class);
 		query.setParameter("uuid", uuid);
 		return query.getResultStream().findFirst().orElse(null);
 	}
@@ -53,21 +59,9 @@ public class HibernateBillDAOImpl implements BillDAO {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Bill saveBill(@Nonnull Bill bill) {
-		if (bill.getId() == null) {
-			entityManager.persist(bill);
-			return bill;
-		}
-		return entityManager.merge(bill);
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
 	public Bill getBillByReceiptNumber(@Nonnull String receiptNumber) {
-		TypedQuery<Bill> query = entityManager.createQuery("select b from Bill b where b.receiptNumber = :receiptNumber",
-		    Bill.class);
+		TypedQuery<Bill> query = sessionFactory.getCurrentSession()
+		        .createQuery("select b from Bill b where b.receiptNumber = :receiptNumber", Bill.class);
 		query.setParameter("receiptNumber", receiptNumber);
 		return query.getResultStream().findFirst().orElse(null);
 	}
@@ -77,14 +71,16 @@ public class HibernateBillDAOImpl implements BillDAO {
 	 */
 	@Override
 	public List<Bill> getBillsByPatientUuid(@Nonnull String patientUuid, PagingInfo pagingInfo) {
-		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		Session session = sessionFactory.getCurrentSession();
+		
+		CriteriaBuilder cb = session.getCriteriaBuilder();
 		CriteriaQuery<Bill> cq = cb.createQuery(Bill.class);
 		Root<Bill> root = cq.from(Bill.class);
 		
 		Predicate predicate = cb.equal(root.get("patient").get("uuid"), patientUuid);
 		cq.where(predicate);
 		
-		TypedQuery<Bill> query = entityManager.createQuery(cq);
+		TypedQuery<Bill> query = session.createQuery(cq);
 		
 		List<Predicate> predicates = new ArrayList<>();
 		predicates.add(predicate);
@@ -98,7 +94,9 @@ public class HibernateBillDAOImpl implements BillDAO {
 	 */
 	@Override
 	public List<Bill> getBills(@Nonnull BillSearch billSearch, PagingInfo pagingInfo) {
-		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		Session session = sessionFactory.getCurrentSession();
+		
+		CriteriaBuilder cb = session.getCriteriaBuilder();
 		CriteriaQuery<Bill> cq = cb.createQuery(Bill.class);
 		Root<Bill> root = cq.from(Bill.class);
 		
@@ -108,7 +106,7 @@ public class HibernateBillDAOImpl implements BillDAO {
 			cq.where(predicates.toArray(new Predicate[0]));
 		}
 		
-		TypedQuery<Bill> query = entityManager.createQuery(cq);
+		TypedQuery<Bill> query = session.createQuery(cq);
 		
 		applyPaging(query, pagingInfo, predicates);
 		
@@ -119,8 +117,17 @@ public class HibernateBillDAOImpl implements BillDAO {
 	 * {@inheritDoc}
 	 */
 	@Override
+	public Bill saveBill(@Nonnull Bill bill) {
+		sessionFactory.getCurrentSession().saveOrUpdate(bill);
+		return bill;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void purgeBill(@Nonnull Bill bill) {
-		entityManager.remove(bill);
+		sessionFactory.getCurrentSession().remove(bill);
 	}
 	
 	private List<Predicate> buildBillSearchPredicate(CriteriaBuilder cb, Root<Bill> root, BillSearch billSearch) {
@@ -173,7 +180,9 @@ public class HibernateBillDAOImpl implements BillDAO {
 			query.setMaxResults(pagingInfo.getPageSize());
 			
 			if (pagingInfo.getLoadRecordCount()) {
-				CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+				Session session = sessionFactory.getCurrentSession();
+				
+				CriteriaBuilder cb = session.getCriteriaBuilder();
 				CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
 				Root<Bill> countRoot = countQuery.from(Bill.class);
 				countQuery.select(cb.count(countRoot));
@@ -182,7 +191,7 @@ public class HibernateBillDAOImpl implements BillDAO {
 					countQuery.where(predicates.toArray(new Predicate[0]));
 				}
 				
-				Long totalCount = entityManager.createQuery(countQuery).getSingleResult();
+				Long totalCount = session.createQuery(countQuery).getSingleResult();
 				pagingInfo.setTotalRecordCount(totalCount);
 			}
 		}

@@ -6,6 +6,7 @@ import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.module.billing.api.util.PrivilegeConstants;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -148,5 +149,9 @@ public interface BillService extends OpenmrsService {
 	 */
 	@Authorized(PrivilegeConstants.DELETE_BILLS)
 	Bill unvoidBill(Bill bill);
+	
+	@Authorized(PrivilegeConstants.VIEW_BILLS)
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	boolean isBillEditable(Bill bill);
 	
 }

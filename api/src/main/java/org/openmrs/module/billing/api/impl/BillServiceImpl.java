@@ -15,6 +15,7 @@ package org.openmrs.module.billing.api.impl;
 
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
+import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.base.PagingInfo;
@@ -149,6 +150,18 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 	@Override
 	public Bill unvoidBill(Bill bill) {
 		return billDAO.saveBill(bill);
+	}
+	
+	@Override
+	public boolean isBillEditable(Bill bill) {
+		if (bill == null) {
+			throw new IllegalArgumentException("Bill cannot be null");
+		}
+		if (bill.getId() != null) {
+			Bill existingBill = Context.getService(BillService.class).getBill(bill.getBillId());
+			return existingBill == null || existingBill.editable();
+		}
+		return true;
 	}
 	
 }

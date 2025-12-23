@@ -385,6 +385,13 @@
 					<configuration>
 						<target>${javaCompilerVersion}</target>
 						<source>${javaCompilerVersion}</source>
+						<annotationProcessorPaths>
+							<path>
+								<groupId>org.projectlombok</groupId>
+								<artifactId>lombok</artifactId>
+								<version>${lombokVersion}</version>
+							</path>
+						</annotationProcessorPaths>
 					</configuration>
 				</plugin>
 				<plugin>

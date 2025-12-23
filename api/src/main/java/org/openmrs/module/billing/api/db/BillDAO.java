@@ -39,19 +39,6 @@ public interface BillDAO {
 	Bill getBillByUuid(@Nonnull String uuid);
 	
 	/**
-	 * Persists a bill to the database.
-	 * <p>
-	 * If the bill has no ID, it will be created as a new record. If it has an ID, the existing record
-	 * will be updated.
-	 * </p>
-	 *
-	 * @param bill the bill to save (must not be null)
-	 * @return the saved bill with updated metadata (timestamps, IDs, etc.)
-	 */
-	@Transactional
-	Bill saveBill(@Nonnull Bill bill);
-	
-	/**
 	 * Retrieves a bill by its receipt number.
 	 * <p>
 	 * Note: This method may return voided bills. Consider filtering voided records at the service layer
@@ -94,6 +81,19 @@ public interface BillDAO {
 	 */
 	@Transactional(readOnly = true)
 	List<Bill> getBills(@Nonnull BillSearch billSearch, PagingInfo pagingInfo);
+	
+	/**
+	 * Persists a bill to the database.
+	 * <p>
+	 * If the bill has no ID, it will be created as a new record. If it has an ID, the existing record
+	 * will be updated.
+	 * </p>
+	 *
+	 * @param bill the bill to save (must not be null)
+	 * @return the saved bill with updated metadata (timestamps, IDs, etc.)
+	 */
+	@Transactional
+	Bill saveBill(@Nonnull Bill bill);
 	
 	/**
 	 * Permanently deletes a bill from the database.
