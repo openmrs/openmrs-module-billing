@@ -38,6 +38,8 @@ public class BillLineItemNestedResource extends DelegatingSubResource<BillLineIt
             description.addProperty("paymentStatus");
             description.addProperty("item");
             description.addProperty("billableService", Representation.REF);
+            description.addProperty("discount");
+            description.addProperty("discountReason");
         }
         return description;
     }
@@ -49,6 +51,8 @@ public class BillLineItemNestedResource extends DelegatingSubResource<BillLineIt
         description.addProperty("price");
         description.addProperty("lineItemOrder");
         description.addProperty("paymentStatus");
+        description.addProperty("discount");
+        description.addProperty("discountReason");
         return description;
     }
 
@@ -105,6 +109,18 @@ public class BillLineItemNestedResource extends DelegatingSubResource<BillLineIt
     @PropertySetter(value = "paymentStatus")
     public void setPaymentStatus(BillLineItem instance, BillStatus status) {
         instance.setPaymentStatus(status);
+    }
+
+    @PropertySetter(value = "discount")
+    public void setDiscount(BillLineItem instance, Object discount) {
+        if (discount == null) {
+            instance.setDiscount(null);
+        } else if (discount instanceof Double || discount instanceof Integer) {
+            double discountValue = ((Number) discount).doubleValue();
+            instance.setDiscount(BigDecimal.valueOf(discountValue));
+        } else {
+            throw new IllegalArgumentException("Unsupported discount type: " + discount.getClass().getName());
+        }
     }
 
     @Override
