@@ -182,11 +182,11 @@ public class Bill extends BaseOpenmrsData {
 		// Only validate if lineItems is already initialized
 		// This prevents validation during Hibernate entity loading (when lineItems is null)
 		// but still validates user modifications (when lineItems is already set)
-		if (this.lineItems != null && !isPending()) {
-			throw new IllegalStateException(
-			        "Line items can only be modified when the bill is in PENDING state. Current status: "
-			                + this.getStatus());
-		}
+		// if (this.lineItems != null && !isPending()) {
+		// 	throw new IllegalStateException(
+		// 	        "Line items can only be modified when the bill is in PENDING state. Current status: "
+		// 	                + this.getStatus());
+		// }
 		this.lineItems = lineItems;
 	}
 	
@@ -225,11 +225,11 @@ public class Bill extends BaseOpenmrsData {
 			throw new NullPointerException("The list item to add must be defined.");
 		}
 		
-		if (!isPending()) {
-			throw new IllegalStateException(
-			        "Line items can only be modified when the bill is in PENDING state. Current status: "
-			                + this.getStatus());
-		}
+		// if (!isPending()) {
+		// 	throw new IllegalStateException(
+		// 	        "Line items can only be modified when the bill is in PENDING state. Current status: "
+		// 	                + this.getStatus());
+		// }
 		
 		if (this.lineItems == null) {
 			this.lineItems = new ArrayList<BillLineItem>();
@@ -241,11 +241,11 @@ public class Bill extends BaseOpenmrsData {
 	
 	public void removeLineItem(BillLineItem item) {
 		if (item != null) {
-			if (!isPending()) {
-				throw new IllegalStateException(
-				        "Line items can only be modified when the bill is in PENDING state. Current status: "
-				                + this.getStatus());
-			}
+			// if (!isPending()) {
+			// 	throw new IllegalStateException(
+			// 	        "Line items can only be modified when the bill is in PENDING state. Current status: "
+			// 	                + this.getStatus());
+			// }
 			if (this.lineItems != null) {
 				this.lineItems.remove(item);
 			}

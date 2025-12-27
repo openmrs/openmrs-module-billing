@@ -324,4 +324,96 @@ public class BillTest {
 		bill.setLineItems(existingLineItems);
 	}
 	
+	@Test
+	public void getTotal_shouldCalculateTotalWithDiscount() {
+		BillLineItem lineItem = new BillLineItem();
+		lineItem.setPrice(BigDecimal.valueOf(100));
+		lineItem.setQuantity(2);
+		lineItem.setDiscount(BigDecimal.valueOf(20));
+		
+		// Total should be (100 * 2) - 20 = 180
+		assertEquals(BigDecimal.valueOf(180), lineItem.getTotal());
+	}
+	
+	@Test
+	public void getTotal_shouldReturnSubtotalWhenDiscountIsNull() {
+		BillLineItem lineItem = new BillLineItem();
+		lineItem.setPrice(BigDecimal.valueOf(100));
+		lineItem.setQuantity(2);
+		lineItem.setDiscount(null);
+		
+		// Total should be 100 * 2 = 200 (no discount applied)
+		assertEquals(BigDecimal.valueOf(200), lineItem.getTotal());
+	}
+	
+	@Test
+	public void getTotal_shouldReturnSubtotalWhenDiscountIsZero() {
+		BillLineItem lineItem = new BillLineItem();
+		lineItem.setPrice(BigDecimal.valueOf(100));
+		lineItem.setQuantity(2);
+		lineItem.setDiscount(BigDecimal.ZERO);
+		
+		// Total should be 100 * 2 = 200 (zero discount)
+		assertEquals(BigDecimal.valueOf(200), lineItem.getTotal());
+	}
+	
+	@Test
+	public void getTotal_shouldNotReturnNegativeWhenDiscountExceedsSubtotal() {
+		BillLineItem lineItem = new BillLineItem();
+		lineItem.setPrice(BigDecimal.valueOf(100));
+		lineItem.setQuantity(1);
+		lineItem.setDiscount(BigDecimal.valueOf(150));
+		
+		// Total should be 0 (not negative) when discount exceeds subtotal
+		assertEquals(BigDecimal.ZERO, lineItem.getTotal());
+	}
+	
+	@Test
+	public void getTotal_shouldIncludeDiscountedLineItemsInBillTotal() {
+		Bill bill = new Bill();
+		bill.setLineItems(new ArrayList<>());
+		
+		BillLineItem lineItem1 = new BillLineItem();
+		lineItem1.setPrice(BigDecimal.valueOf(100));
+		lineItem1.setQuantity(2);
+		lineItem1.setDiscount(BigDecimal.valueOf(20));
+		lineItem1.setVoided(false);
+		bill.getLineItems().add(lineItem1);
+		
+		BillLineItem lineItem2 = new BillLineItem();
+		lineItem2.setPrice(BigDecimal.valueOf(50));
+		lineItem2.setQuantity(1);
+		lineItem2.setDiscount(null);
+		lineItem2.setVoided(false);
+		bill.getLineItems().add(lineItem2);
+		
+		// Total should be (100*2 - 20) + (50*1) = 180 + 50 = 230
+		assertEquals(BigDecimal.valueOf(230), bill.getTotal());
+	}
+	
+	@Test
+	public void synchronizeBillStatus_shouldUpdateStatusCorrectlyWithDiscount() {
+		Bill bill = new Bill();
+		bill.setLineItems(new ArrayList<>());
+		bill.setPayments(new HashSet<>());
+		
+		BillLineItem lineItem = new BillLineItem();
+		lineItem.setPrice(BigDecimal.valueOf(100));
+		lineItem.setQuantity(1);
+		lineItem.setDiscount(BigDecimal.valueOf(20));
+		lineItem.setVoided(false);
+		bill.getLineItems().add(lineItem);
+		
+		// Bill total is 80 (100 - 20)
+		Payment payment = new Payment();
+		payment.setAmountTendered(BigDecimal.valueOf(80));
+		payment.setVoided(false);
+		bill.getPayments().add(payment);
+		
+		bill.synchronizeBillStatus();
+		
+		// Should be PAID since payment (80) equals total (80)
+		assertEquals(BillStatus.PAID, bill.getStatus());
+	}
+	
 }

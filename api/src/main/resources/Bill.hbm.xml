@@ -169,6 +169,8 @@
 				<param name="type">12</param>
 			</type>
 		</property>
+        <property name="discount" type="java.math.BigDecimal" column="discount" not-null="false"/>
+        <property name="discountReason" type="java.lang.String" column="discount_reason" length="500"/>
 		<!-- bi-directional many-to-one association to User -->
 		<many-to-one name="creator" class="org.openmrs.User" not-null="true" column="creator"/>
 		<property name="dateCreated" type="java.util.Date" column="date_created" not-null="true" length="19"/>

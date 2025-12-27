@@ -59,6 +59,8 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
             description.addProperty("priceUuid");
             description.addProperty("lineItemOrder");
             description.addProperty("paymentStatus");
+            description.addProperty("discount");
+            description.addProperty("discountReason");
             return description;
         }
         return null;
@@ -139,6 +141,26 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
             LOG.warn("Price probably was deleted", e);
             return "";
         }
+    }
+
+    @PropertySetter(value = "discount")
+    public void setDiscount(BillLineItem instance, Object discount) {
+        if (discount instanceof Number) {
+            instance.setDiscount(BigDecimal.valueOf(((Number) discount).doubleValue()));
+        } else if (discount instanceof String && StringUtils.isNotBlank((String) discount)) {
+            instance.setDiscount(new BigDecimal((String) discount));
+        }
+    }
+
+    @PropertyGetter(value = "discount")
+    public BigDecimal getDiscount(BillLineItem instance) {
+        return instance.getDiscount();
+    }
+
+    @PropertyGetter(value = "discountReason")
+    public String getDiscountReason(BillLineItem instance) {
+        String reason = instance.getDiscountReason();
+        return StringUtils.isNotBlank(reason) ? reason : "";
     }
 
     @Override
