@@ -285,24 +285,19 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#save(Bill)
 	 */
 	@Test
-	public void save_shouldAllowAddingLineItemsToPostedBill() {
+	public void save_shouldThrowExceptionWhenAddingLineItemsToPostedBill() {
 		// Get the POSTED bill from test data (bill_id=0)
 		Bill postedBill = billService.getById(0);
 		assertNotNull(postedBill);
 		assertEquals(BillStatus.POSTED, postedBill.getStatus());
 		
-		// Add a new line item
+		// Try to add a new line item
 		BillLineItem newLineItem = new BillLineItem();
 		newLineItem.setPrice(BigDecimal.valueOf(25.50));
 		newLineItem.setQuantity(2);
-		newLineItem.setPaymentStatus(BillStatus.PENDING);
-		newLineItem.setLineItemOrder(postedBill.getLineItems().size());
-		postedBill.addLineItem(newLineItem);
 		
-		// Should not throw exception
-		Bill savedBill = billService.save(postedBill);
-		assertNotNull(savedBill);
-		assertTrue(savedBill.getLineItems().size() > 0);
+		// Should throw exception
+		assertThrows(IllegalStateException.class, () -> postedBill.addLineItem(newLineItem));
 	}
 	
 	/**
@@ -351,11 +346,11 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#save(Bill)
 	 */
 	@Test
-	public void save_Bill_shouldThrowExceptionWhenRemovingLineItemsFromPaidBill() {
-		// Get the POSTED bill from test data (bill_id=1)
-		Bill postedBill = billService.getById(1);
+	public void save_shouldThrowExceptionWhenRemovingLineItemsFromPostedBill() {
+		// Get the POSTED bill from test data (bill_id=0)
+		Bill postedBill = billService.getById(0);
 		assertNotNull(postedBill);
-		assertEquals(BillStatus.PAID, postedBill.getStatus());
+		assertEquals(BillStatus.POSTED, postedBill.getStatus());
 		
 		BillLineItem itemToRemove = postedBill.getLineItems().get(0);
 		

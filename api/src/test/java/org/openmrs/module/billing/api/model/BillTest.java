@@ -206,8 +206,8 @@ public class BillTest {
 		assertEquals(1, bill.getLineItems().size());
 	}
 	
-	@Test
-	public void addLineItem_shouldAllowAddingLineItemToExistingPostedBill() {
+	@Test(expected = IllegalStateException.class)
+	public void addLineItem_shouldThrowExceptionWhenBillIsPosted() {
 		Bill bill = new Bill();
 		bill.setId(1);
 		bill.setStatus(BillStatus.POSTED);
@@ -217,9 +217,7 @@ public class BillTest {
 		lineItem.setPrice(BigDecimal.valueOf(100));
 		lineItem.setQuantity(1);
 		
-		// Should not throw exception for POSTED bill
 		bill.addLineItem(lineItem);
-		assertEquals(1, bill.getLineItems().size());
 	}
 	
 	@Test(expected = IllegalStateException.class)
@@ -267,8 +265,8 @@ public class BillTest {
 		assertEquals(0, bill.getLineItems().size());
 	}
 	
-	@Test
-	public void removeLineItem_shouldAllowRemovingLineItemFromPostedBill() {
+	@Test(expected = IllegalStateException.class)
+	public void removeLineItem_shouldThrowExceptionWhenBillIsPosted() {
 		Bill bill = new Bill();
 		bill.setId(1);
 		bill.setStatus(BillStatus.POSTED);
@@ -279,9 +277,7 @@ public class BillTest {
 		lineItem.setQuantity(1);
 		bill.getLineItems().add(lineItem);
 		
-		// Should not throw exception for POSTED bill
 		bill.removeLineItem(lineItem);
-		assertEquals(0, bill.getLineItems().size());
 	}
 	
 	@Test
@@ -317,17 +313,15 @@ public class BillTest {
 		assertEquals(1, bill.getLineItems().size());
 	}
 	
-	@Test
-	public void setLineItems_shouldAllowSettingLineItemsOnExistingPostedBill() {
+	@Test(expected = IllegalStateException.class)
+	public void setLineItems_shouldThrowExceptionWhenBillIsPosted() {
 		Bill bill = new Bill();
 		bill.setId(1);
 		bill.setStatus(BillStatus.POSTED);
 		ArrayList<BillLineItem> existingLineItems = new ArrayList<>();
 		bill.setLineItems(existingLineItems);
 		existingLineItems.add(new BillLineItem());
-		// Should not throw exception for POSTED bill
 		bill.setLineItems(existingLineItems);
-		assertEquals(1, bill.getLineItems().size());
 	}
 	
 }
