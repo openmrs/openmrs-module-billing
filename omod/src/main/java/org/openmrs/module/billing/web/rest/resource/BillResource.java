@@ -91,9 +91,9 @@ public class BillResource extends BaseRestDataResource<Bill> {
 
     @PropertySetter("lineItems")
     public void setBillLineItems(Bill instance, List<BillLineItem> lineItems) {
-        if (!instance.editable()) {
+        if (!instance.isPending()) {
             throw new IllegalStateException(
-                    "Line items can only be modified when the bill is in PENDING or POSTED state. Current status: "
+                    "Line items can only be modified when the bill is in PENDING state. Current status: "
                             + instance.getStatus());
         }
         if (instance.getLineItems() == null) {

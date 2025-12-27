@@ -182,9 +182,9 @@ public class Bill extends BaseOpenmrsData {
 		// Only validate if lineItems is already initialized
 		// This prevents validation during Hibernate entity loading (when lineItems is null)
 		// but still validates user modifications (when lineItems is already set)
-		if (this.lineItems != null && !editable()) {
+		if (this.lineItems != null && !isPending()) {
 			throw new IllegalStateException(
-			        "Line items can only be modified when the bill is in PENDING or POSTED state. Current status: "
+			        "Line items can only be modified when the bill is in PENDING state. Current status: "
 			                + this.getStatus());
 		}
 		this.lineItems = lineItems;
@@ -225,9 +225,9 @@ public class Bill extends BaseOpenmrsData {
 			throw new NullPointerException("The list item to add must be defined.");
 		}
 		
-		if (!editable()) {
+		if (!isPending()) {
 			throw new IllegalStateException(
-			        "Line items can only be modified when the bill is in PENDING or POSTED state. Current status: "
+			        "Line items can only be modified when the bill is in PENDING state. Current status: "
 			                + this.getStatus());
 		}
 		
@@ -241,9 +241,9 @@ public class Bill extends BaseOpenmrsData {
 	
 	public void removeLineItem(BillLineItem item) {
 		if (item != null) {
-			if (!editable()) {
+			if (!isPending()) {
 				throw new IllegalStateException(
-				        "Line items can only be modified when the bill is in PENDING or POSTED state. Current status: "
+				        "Line items can only be modified when the bill is in PENDING state. Current status: "
 				                + this.getStatus());
 			}
 			if (this.lineItems != null) {
@@ -363,14 +363,12 @@ public class Bill extends BaseOpenmrsData {
 	
 	/**
 	 * Checks if the bill is in PENDING state.
-	 *
+	 * 
 	 * @return {@code true} if the bill is new (no ID) or is in PENDING state, {@code false} otherwise
 	 */
-	public boolean editable() {
+	public boolean isPending() {
 		// New bills (no ID) are considered pending, existing bills must be in PENDING state
-		// If we do a partial payment bill is set to POSTED status. We should be able to edit posted status too
-		return getStatus() == null || this.getId() == null || this.getStatus() == BillStatus.PENDING
-		        || this.getStatus() == BillStatus.POSTED;
+		return this.getId() == null || this.getStatus() == BillStatus.PENDING;
 	}
 	
 	public void recalculateLineItemOrder() {

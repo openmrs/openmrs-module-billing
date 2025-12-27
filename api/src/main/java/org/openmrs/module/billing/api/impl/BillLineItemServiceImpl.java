@@ -34,9 +34,9 @@ public class BillLineItemServiceImpl extends BaseEntityDataServiceImpl<BillLineI
 	protected void validate(BillLineItem object) {
 		if (object != null && object.getBill() != null) {
 			Bill bill = object.getBill();
-			if (!bill.editable()) {
+			if (!bill.isPending()) {
 				throw new IllegalStateException(
-				        "Line items can only be modified when the bill is in PENDING or POSTED state. Current status: "
+				        "Line items can only be modified when the bill is in PENDING state. Current status: "
 				                + bill.getStatus());
 			}
 		}
@@ -92,9 +92,9 @@ public class BillLineItemServiceImpl extends BaseEntityDataServiceImpl<BillLineI
 		if (entity != null && entity.getBill() != null) {
 			bill = entity.getBill();
 			// Validate before purging (purge doesn't call validate())
-			if (!bill.editable()) {
+			if (!bill.isPending()) {
 				throw new IllegalStateException(
-				        "Line items can only be modified when the bill is in PENDING or POSTED state. Current status: "
+				        "Line items can only be modified when the bill is in PENDING state. Current status: "
 				                + bill.getStatus());
 			}
 		}
