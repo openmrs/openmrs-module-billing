@@ -59,6 +59,8 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
             description.addProperty("priceUuid");
             description.addProperty("lineItemOrder");
             description.addProperty("paymentStatus");
+            description.addProperty("discount");
+            description.addProperty("discountReason");
             return description;
         }
         return null;
@@ -118,6 +120,24 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
     public String getPriceName(BillLineItem instance) {
         String itemName = instance.getPriceName();
         return StringUtils.isNotBlank(itemName) ? itemName : "";
+    }
+
+    @PropertySetter(value = "discount")
+    public void setDiscount(BillLineItem instance, Object discount) {
+        if (discount == null) {
+            instance.setDiscount(null);
+        } else if (discount instanceof Double || discount instanceof Integer) {
+            double discountValue = ((Number) discount).doubleValue();
+            instance.setDiscount(BigDecimal.valueOf(discountValue));
+        } else {
+            throw new IllegalArgumentException("Unsupported discount type: " + discount.getClass().getName());
+        }
+    }
+
+    @PropertyGetter(value = "discountReason")
+    public String getDiscountReason(BillLineItem instance) {
+        String reason = instance.getDiscountReason();
+        return StringUtils.isNotBlank(reason) ? reason : "";
     }
 
     @PropertySetter(value = "priceUuid")

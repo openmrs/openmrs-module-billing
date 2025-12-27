@@ -1003,4 +1003,20 @@
         <renameColumn tableName="cashier_item_price" oldColumnName="date_voided" newColumnName="date_retired" columnDataType="datetime" />
         <renameColumn tableName="cashier_item_price" oldColumnName="void_reason" newColumnName="retire_reason" columnDataType="varchar(255)" />
     </changeSet>
+    <changeSet id="openmrs.billing-001-v3.0.0-20251227" author="billing-module">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="cashier_bill_line_item" columnName="discount"/>
+            </not>
+        </preConditions>
+        <comment>Adding discount and discount_reason columns to cashier_bill_line_item table</comment>
+        <addColumn tableName="cashier_bill_line_item">
+            <column name="discount" type="decimal(10,2)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="discount_reason" type="varchar(500)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
