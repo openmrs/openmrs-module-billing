@@ -14,7 +14,6 @@
 package org.openmrs.module.billing.api.model;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 
 import org.openmrs.BaseChangeableOpenmrsData;
 import org.openmrs.Order;
@@ -51,6 +50,10 @@ public class BillLineItem extends BaseChangeableOpenmrsData {
 	
 	private Order order;
 	
+	private BigDecimal discount;
+	
+	private String discountReason;
+	
 	@Override
 	public Integer getId() {
 		return billLineItemId;
@@ -62,12 +65,19 @@ public class BillLineItem extends BaseChangeableOpenmrsData {
 	}
 	
 	/**
-	 * Get the total price for the line item
+	 * Get the total price for the line item (price * quantity - discount)
 	 *
-	 * @return double the total price for the line item
+	 * @return BigDecimal the total price for the line item after discount
 	 */
 	public BigDecimal getTotal() {
-		return price.multiply(BigDecimal.valueOf(quantity));
+		if (price == null || quantity == null) {
+			return BigDecimal.ZERO;
+		}
+		BigDecimal subtotal = price.multiply(BigDecimal.valueOf(quantity));
+		if (discount != null) {
+			return subtotal.subtract(discount);
+		}
+		return subtotal;
 	}
 	
 	public CashierItemPrice getItemPrice() {
@@ -148,5 +158,21 @@ public class BillLineItem extends BaseChangeableOpenmrsData {
 	
 	public void setOrder(Order order) {
 		this.order = order;
+	}
+	
+	public BigDecimal getDiscount() {
+		return discount;
+	}
+	
+	public void setDiscount(BigDecimal discount) {
+		this.discount = discount;
+	}
+	
+	public String getDiscountReason() {
+		return discountReason;
+	}
+	
+	public void setDiscountReason(String discountReason) {
+		this.discountReason = discountReason;
 	}
 }

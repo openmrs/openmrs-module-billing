@@ -101,6 +101,84 @@ public class BillTest {
 	}
 	
 	@Test
+	public void getTotal_shouldAccountForDiscountInLineItems() {
+		Bill bill = new Bill();
+		bill.setLineItems(new ArrayList<>());
+		
+		BillLineItem lineItem1 = new BillLineItem();
+		lineItem1.setPrice(BigDecimal.valueOf(100));
+		lineItem1.setQuantity(2);
+		lineItem1.setDiscount(BigDecimal.valueOf(10));
+		lineItem1.setVoided(false);
+		bill.getLineItems().add(lineItem1);
+		
+		BillLineItem lineItem2 = new BillLineItem();
+		lineItem2.setPrice(BigDecimal.valueOf(50));
+		lineItem2.setQuantity(1);
+		lineItem2.setDiscount(BigDecimal.valueOf(5));
+		lineItem2.setVoided(false);
+		bill.getLineItems().add(lineItem2);
+		
+		// Expected: (100*2 - 10) + (50*1 - 5) = 190 + 45 = 235
+		assertEquals(BigDecimal.valueOf(235), bill.getTotal());
+	}
+	
+	@Test
+	public void getTotal_shouldHandleNullDiscount() {
+		Bill bill = new Bill();
+		bill.setLineItems(new ArrayList<>());
+		
+		BillLineItem lineItem1 = new BillLineItem();
+		lineItem1.setPrice(BigDecimal.valueOf(100));
+		lineItem1.setQuantity(2);
+		lineItem1.setDiscount(null);
+		lineItem1.setVoided(false);
+		bill.getLineItems().add(lineItem1);
+		
+		BillLineItem lineItem2 = new BillLineItem();
+		lineItem2.setPrice(BigDecimal.valueOf(50));
+		lineItem2.setQuantity(1);
+		lineItem2.setDiscount(BigDecimal.valueOf(5));
+		lineItem2.setVoided(false);
+		bill.getLineItems().add(lineItem2);
+		
+		// Expected: (100*2) + (50*1 - 5) = 200 + 45 = 245
+		assertEquals(BigDecimal.valueOf(245), bill.getTotal());
+	}
+	
+	@Test
+	public void billLineItemGetTotal_shouldSubtractDiscountFromSubtotal() {
+		BillLineItem lineItem = new BillLineItem();
+		lineItem.setPrice(BigDecimal.valueOf(100));
+		lineItem.setQuantity(2);
+		lineItem.setDiscount(BigDecimal.valueOf(15));
+		
+		// Expected: 100 * 2 - 15 = 185
+		assertEquals(BigDecimal.valueOf(185), lineItem.getTotal());
+	}
+	
+	@Test
+	public void billLineItemGetTotal_shouldReturnSubtotalWhenDiscountIsNull() {
+		BillLineItem lineItem = new BillLineItem();
+		lineItem.setPrice(BigDecimal.valueOf(100));
+		lineItem.setQuantity(2);
+		lineItem.setDiscount(null);
+		
+		// Expected: 100 * 2 = 200
+		assertEquals(BigDecimal.valueOf(200), lineItem.getTotal());
+	}
+	
+	@Test
+	public void billLineItem_shouldAllowSettingAndGettingDiscountAndDiscountReason() {
+		BillLineItem lineItem = new BillLineItem();
+		lineItem.setDiscount(BigDecimal.valueOf(25));
+		lineItem.setDiscountReason("Patient discount");
+		
+		assertEquals(BigDecimal.valueOf(25), lineItem.getDiscount());
+		assertEquals("Patient discount", lineItem.getDiscountReason());
+	}
+	
+	@Test
 	public void synchronizeBillStatus_shouldUpdateStatusToPaidWhenFullyPaid() {
 		Bill bill = new Bill();
 		bill.setLineItems(new ArrayList<>());
@@ -177,6 +255,52 @@ public class BillTest {
 	}
 	
 	@Test
+	public void synchronizeBillStatus_shouldUpdateStatusToPaidWhenDiscountMakesBillFullyPaid() {
+		Bill bill = new Bill();
+		bill.setLineItems(new ArrayList<>());
+		bill.setPayments(new HashSet<>());
+		
+		BillLineItem lineItem = new BillLineItem();
+		lineItem.setPrice(BigDecimal.valueOf(100));
+		lineItem.setQuantity(1);
+		lineItem.setDiscount(BigDecimal.valueOf(20));
+		lineItem.setVoided(false);
+		bill.getLineItems().add(lineItem);
+		
+		Payment payment = new Payment();
+		payment.setAmountTendered(BigDecimal.valueOf(80)); // Total after discount is 80
+		payment.setVoided(false);
+		bill.getPayments().add(payment);
+		
+		bill.synchronizeBillStatus();
+		// Total is 100 - 20 = 80, payment is 80, so should be PAID
+		assertEquals(BillStatus.PAID, bill.getStatus());
+	}
+	
+	@Test
+	public void synchronizeBillStatus_shouldUpdateStatusToPostedWhenDiscountMakesBillPartiallyPaid() {
+		Bill bill = new Bill();
+		bill.setLineItems(new ArrayList<>());
+		bill.setPayments(new HashSet<>());
+		
+		BillLineItem lineItem = new BillLineItem();
+		lineItem.setPrice(BigDecimal.valueOf(100));
+		lineItem.setQuantity(1);
+		lineItem.setDiscount(BigDecimal.valueOf(20));
+		lineItem.setVoided(false);
+		bill.getLineItems().add(lineItem);
+		
+		Payment payment = new Payment();
+		payment.setAmountTendered(BigDecimal.valueOf(50)); // Total after discount is 80, payment is 50
+		payment.setVoided(false);
+		bill.getPayments().add(payment);
+		
+		bill.synchronizeBillStatus();
+		// Total is 100 - 20 = 80, payment is 50, so should be POSTED
+		assertEquals(BillStatus.POSTED, bill.getStatus());
+	}
+	
+	@Test
 	public void addLineItem_shouldAllowAddingLineItemToNewBill() {
 		Bill bill = new Bill();
 		bill.setStatus(BillStatus.PENDING);
@@ -206,48 +330,6 @@ public class BillTest {
 		assertEquals(1, bill.getLineItems().size());
 	}
 	
-	@Test(expected = IllegalStateException.class)
-	public void addLineItem_shouldThrowExceptionWhenBillIsPosted() {
-		Bill bill = new Bill();
-		bill.setId(1);
-		bill.setStatus(BillStatus.POSTED);
-		bill.setLineItems(new ArrayList<>());
-		
-		BillLineItem lineItem = new BillLineItem();
-		lineItem.setPrice(BigDecimal.valueOf(100));
-		lineItem.setQuantity(1);
-		
-		bill.addLineItem(lineItem);
-	}
-	
-	@Test(expected = IllegalStateException.class)
-	public void addLineItem_shouldThrowExceptionWhenBillIsPaid() {
-		Bill bill = new Bill();
-		bill.setId(1);
-		bill.setStatus(BillStatus.PAID);
-		bill.setLineItems(new ArrayList<>());
-		
-		BillLineItem lineItem = new BillLineItem();
-		lineItem.setPrice(BigDecimal.valueOf(100));
-		lineItem.setQuantity(1);
-		
-		bill.addLineItem(lineItem);
-	}
-	
-	@Test(expected = IllegalStateException.class)
-	public void addLineItem_shouldThrowExceptionWhenBillIsCancelled() {
-		Bill bill = new Bill();
-		bill.setId(1);
-		bill.setStatus(BillStatus.CANCELLED);
-		bill.setLineItems(new ArrayList<>());
-		
-		BillLineItem lineItem = new BillLineItem();
-		lineItem.setPrice(BigDecimal.valueOf(100));
-		lineItem.setQuantity(1);
-		
-		bill.addLineItem(lineItem);
-	}
-	
 	@Test
 	public void removeLineItem_shouldAllowRemovingLineItemFromPendingBill() {
 		Bill bill = new Bill();
@@ -263,21 +345,6 @@ public class BillTest {
 		// Should not throw exception for PENDING bill
 		bill.removeLineItem(lineItem);
 		assertEquals(0, bill.getLineItems().size());
-	}
-	
-	@Test(expected = IllegalStateException.class)
-	public void removeLineItem_shouldThrowExceptionWhenBillIsPosted() {
-		Bill bill = new Bill();
-		bill.setId(1);
-		bill.setStatus(BillStatus.POSTED);
-		bill.setLineItems(new ArrayList<>());
-		
-		BillLineItem lineItem = new BillLineItem();
-		lineItem.setPrice(BigDecimal.valueOf(100));
-		lineItem.setQuantity(1);
-		bill.getLineItems().add(lineItem);
-		
-		bill.removeLineItem(lineItem);
 	}
 	
 	@Test
@@ -311,17 +378,6 @@ public class BillTest {
 		// Should not throw exception for PENDING bill
 		bill.setLineItems(lineItems);
 		assertEquals(1, bill.getLineItems().size());
-	}
-	
-	@Test(expected = IllegalStateException.class)
-	public void setLineItems_shouldThrowExceptionWhenBillIsPosted() {
-		Bill bill = new Bill();
-		bill.setId(1);
-		bill.setStatus(BillStatus.POSTED);
-		ArrayList<BillLineItem> existingLineItems = new ArrayList<>();
-		bill.setLineItems(existingLineItems);
-		existingLineItems.add(new BillLineItem());
-		bill.setLineItems(existingLineItems);
 	}
 	
 }

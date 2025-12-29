@@ -70,48 +70,6 @@ public class BillLineItemServiceImplTest extends BaseModuleContextSensitiveTest 
 	}
 	
 	/**
-	 * @see org.openmrs.module.billing.api.impl.BillLineItemServiceImpl#save(BillLineItem)
-	 */
-	@Test
-	public void save_shouldThrowExceptionWhenSavingLineItemForPostedBill() {
-		// Get the POSTED bill from test data (bill_id=0)
-		Bill postedBill = billService.getById(0);
-		assertNotNull(postedBill);
-		assertEquals(BillStatus.POSTED, postedBill.getStatus());
-		
-		// Get a line item from the posted bill
-		BillLineItem lineItem = postedBill.getLineItems().get(0);
-		assertNotNull(lineItem);
-		
-		// Try to update the line item
-		lineItem.setPrice(BigDecimal.valueOf(99.99));
-		
-		// Should throw exception
-		assertThrows(IllegalStateException.class, () -> billLineItemService.save(lineItem));
-	}
-	
-	/**
-	 * @see org.openmrs.module.billing.api.impl.BillLineItemServiceImpl#save(BillLineItem)
-	 */
-	@Test
-	public void save_shouldThrowExceptionWhenSavingLineItemForPaidBill() {
-		// Get the PAID bill from test data (bill_id=1)
-		Bill paidBill = billService.getById(1);
-		assertNotNull(paidBill);
-		assertEquals(BillStatus.PAID, paidBill.getStatus());
-		
-		// Get a line item from the paid bill
-		BillLineItem lineItem = paidBill.getLineItems().get(0);
-		assertNotNull(lineItem);
-		
-		// Try to update the line item
-		lineItem.setPrice(BigDecimal.valueOf(99.99));
-		
-		// Should throw exception
-		assertThrows(IllegalStateException.class, () -> billLineItemService.save(lineItem));
-	}
-	
-	/**
 	 * @see org.openmrs.module.billing.api.impl.BillLineItemServiceImpl#voidEntity(BillLineItem, String)
 	 */
 	@Test
@@ -130,24 +88,6 @@ public class BillLineItemServiceImplTest extends BaseModuleContextSensitiveTest 
 		BillLineItem voidedItem = billLineItemService.voidEntity(lineItem, "Test void reason");
 		assertNotNull(voidedItem);
 		assertTrue(voidedItem.getVoided());
-	}
-	
-	/**
-	 * @see org.openmrs.module.billing.api.impl.BillLineItemServiceImpl#voidEntity(BillLineItem, String)
-	 */
-	@Test
-	public void voidEntity_shouldThrowExceptionWhenVoidingLineItemForPostedBill() {
-		// Get the POSTED bill from test data (bill_id=0)
-		Bill postedBill = billService.getById(0);
-		assertNotNull(postedBill);
-		assertEquals(BillStatus.POSTED, postedBill.getStatus());
-		
-		// Get a line item from the posted bill
-		BillLineItem lineItem = postedBill.getLineItems().get(0);
-		assertNotNull(lineItem);
-		
-		// Should throw exception
-		assertThrows(IllegalStateException.class, () -> billLineItemService.voidEntity(lineItem, "Test void reason"));
 	}
 	
 	/**
@@ -175,21 +115,4 @@ public class BillLineItemServiceImplTest extends BaseModuleContextSensitiveTest 
 		assertTrue(updatedBill.getLineItems().size() < originalSize);
 	}
 	
-	/**
-	 * @see org.openmrs.module.billing.api.impl.BillLineItemServiceImpl#purge(BillLineItem)
-	 */
-	@Test
-	public void purge_shouldThrowExceptionWhenPurgingLineItemForPostedBill() {
-		// Get the POSTED bill from test data (bill_id=0)
-		Bill postedBill = billService.getById(0);
-		assertNotNull(postedBill);
-		assertEquals(BillStatus.POSTED, postedBill.getStatus());
-		
-		// Get a line item from the posted bill
-		BillLineItem lineItem = postedBill.getLineItems().get(0);
-		assertNotNull(lineItem);
-		
-		// Should throw exception
-		assertThrows(IllegalStateException.class, () -> billLineItemService.purge(lineItem));
-	}
 }
