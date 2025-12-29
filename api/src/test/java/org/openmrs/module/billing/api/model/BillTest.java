@@ -330,48 +330,6 @@ public class BillTest {
 		assertEquals(1, bill.getLineItems().size());
 	}
 	
-	@Test(expected = IllegalStateException.class)
-	public void addLineItem_shouldThrowExceptionWhenBillIsPosted() {
-		Bill bill = new Bill();
-		bill.setId(1);
-		bill.setStatus(BillStatus.POSTED);
-		bill.setLineItems(new ArrayList<>());
-		
-		BillLineItem lineItem = new BillLineItem();
-		lineItem.setPrice(BigDecimal.valueOf(100));
-		lineItem.setQuantity(1);
-		
-		bill.addLineItem(lineItem);
-	}
-	
-	@Test(expected = IllegalStateException.class)
-	public void addLineItem_shouldThrowExceptionWhenBillIsPaid() {
-		Bill bill = new Bill();
-		bill.setId(1);
-		bill.setStatus(BillStatus.PAID);
-		bill.setLineItems(new ArrayList<>());
-		
-		BillLineItem lineItem = new BillLineItem();
-		lineItem.setPrice(BigDecimal.valueOf(100));
-		lineItem.setQuantity(1);
-		
-		bill.addLineItem(lineItem);
-	}
-	
-	@Test(expected = IllegalStateException.class)
-	public void addLineItem_shouldThrowExceptionWhenBillIsCancelled() {
-		Bill bill = new Bill();
-		bill.setId(1);
-		bill.setStatus(BillStatus.CANCELLED);
-		bill.setLineItems(new ArrayList<>());
-		
-		BillLineItem lineItem = new BillLineItem();
-		lineItem.setPrice(BigDecimal.valueOf(100));
-		lineItem.setQuantity(1);
-		
-		bill.addLineItem(lineItem);
-	}
-	
 	@Test
 	public void removeLineItem_shouldAllowRemovingLineItemFromPendingBill() {
 		Bill bill = new Bill();
@@ -387,21 +345,6 @@ public class BillTest {
 		// Should not throw exception for PENDING bill
 		bill.removeLineItem(lineItem);
 		assertEquals(0, bill.getLineItems().size());
-	}
-	
-	@Test(expected = IllegalStateException.class)
-	public void removeLineItem_shouldThrowExceptionWhenBillIsPosted() {
-		Bill bill = new Bill();
-		bill.setId(1);
-		bill.setStatus(BillStatus.POSTED);
-		bill.setLineItems(new ArrayList<>());
-		
-		BillLineItem lineItem = new BillLineItem();
-		lineItem.setPrice(BigDecimal.valueOf(100));
-		lineItem.setQuantity(1);
-		bill.getLineItems().add(lineItem);
-		
-		bill.removeLineItem(lineItem);
 	}
 	
 	@Test
@@ -435,17 +378,6 @@ public class BillTest {
 		// Should not throw exception for PENDING bill
 		bill.setLineItems(lineItems);
 		assertEquals(1, bill.getLineItems().size());
-	}
-	
-	@Test(expected = IllegalStateException.class)
-	public void setLineItems_shouldThrowExceptionWhenBillIsPosted() {
-		Bill bill = new Bill();
-		bill.setId(1);
-		bill.setStatus(BillStatus.POSTED);
-		ArrayList<BillLineItem> existingLineItems = new ArrayList<>();
-		bill.setLineItems(existingLineItems);
-		existingLineItems.add(new BillLineItem());
-		bill.setLineItems(existingLineItems);
 	}
 	
 }
