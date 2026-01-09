@@ -33,7 +33,7 @@ import org.openmrs.VisitAttribute;
 import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillService;
-import org.openmrs.module.billing.api.IBillableItemsService;
+import org.openmrs.module.billing.api.BillableServicesService;
 import org.openmrs.module.billing.api.ICashPointService;
 import org.openmrs.module.billing.api.ItemPriceService;
 import org.openmrs.module.billing.api.model.Bill;
@@ -88,12 +88,12 @@ public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 						}
 					} else if (order instanceof TestOrder) {
 						TestOrder testOrder = (TestOrder) order;
-						BillableService searchTemplate = new BillableService();
-						searchTemplate.setConcept(testOrder.getConcept());
+						BillableServiceSearch searchTemplate = new BillableServiceSearch();
+						searchTemplate.setConceptUuid(testOrder.getConcept().getUuid());
 						searchTemplate.setServiceStatus(BillableServiceStatus.ENABLED);
 						
-						IBillableItemsService service = Context.getService(IBillableItemsService.class);
-						List<BillableService> searchResult = service.findServices(new BillableServiceSearch(searchTemplate));
+						BillableServicesService service = Context.getService(BillableServicesService.class);
+						List<BillableService> searchResult = service.getBillableServices(searchTemplate, null);
 						if (!searchResult.isEmpty()) {
 							addBillItemToBill(order, patient, cashierUUID, null, searchResult.get(0), 1,
 							    order.getDateActivated());

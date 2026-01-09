@@ -13,45 +13,28 @@
  */
 package org.openmrs.module.billing.api.search;
 
-import org.hibernate.Criteria;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Restrictions;
-import org.openmrs.module.billing.api.base.entity.search.BaseMetadataTemplateSearch;
-import org.openmrs.module.billing.api.model.BillableService;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.openmrs.module.billing.api.model.BillableServiceStatus;
 
-public class BillableServiceSearch extends BaseMetadataTemplateSearch<BillableService> {
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class BillableServiceSearch {
 	
-	public BillableServiceSearch() {
-		this(new BillableService(), false);
-	}
+	private BillableServiceStatus serviceStatus;
 	
-	public BillableServiceSearch(BillableService template) {
-		this(template, false);
-	}
+	private String serviceCategoryUuid;
 	
-	public BillableServiceSearch(BillableService template, Boolean includeRetired) {
-		super(template, includeRetired);
-	}
+	private String serviceTypeUuid;
 	
-	@Override
-	public void updateCriteria(Criteria criteria) {
-		super.updateCriteria(criteria);
-		
-		BillableService billableService = getTemplate();
-		if (billableService.getServiceStatus() != null) {
-			criteria.add(Restrictions.eq("serviceStatus", billableService.getServiceStatus()));
-		}
-		if (billableService.getServiceCategory() != null) {
-			criteria.add(Restrictions.eq("serviceCategory", billableService.getServiceCategory()));
-		}
-		if (billableService.getServiceType() != null) {
-			criteria.add(Restrictions.eq("serviceType", billableService.getServiceType()));
-		}
-		if (billableService.getConcept() != null) {
-			criteria.add(Restrictions.eq("concept", billableService.getConcept()));
-		}
-		if (billableService.getName() != null) {
-			criteria.add(Restrictions.like("name", billableService.getName(), MatchMode.ANYWHERE));
-		}
-	}
+	private String conceptUuid;
+	
+	private String name;
+	
+	private Boolean includeRetired = false;
+	
 }

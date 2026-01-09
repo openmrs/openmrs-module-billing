@@ -14,7 +14,7 @@
 package org.openmrs.module.billing.web.rest.controller;
 
 import org.openmrs.api.context.Context;
-import org.openmrs.module.billing.api.IBillableItemsService;
+import org.openmrs.module.billing.api.BillableServicesService;
 import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
 import org.openmrs.module.billing.web.rest.restmapper.BillableServiceMapper;
@@ -33,9 +33,9 @@ public class CashierRestController extends BaseRestController {
     @ResponseBody
     public Object get(@RequestBody BillableServiceMapper request) {
         BillableService billableService = request.billableServiceMapper(request);
-        IBillableItemsService service = Context.getService(IBillableItemsService.class);
+        BillableServicesService service = Context.getService(BillableServicesService.class);
 
-        service.save(billableService);
+        service.saveBillableService(billableService);
 
         return true;
     }
