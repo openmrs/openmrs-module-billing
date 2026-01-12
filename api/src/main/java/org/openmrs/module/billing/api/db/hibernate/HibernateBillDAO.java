@@ -23,7 +23,7 @@ import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.openmrs.module.billing.api.util.PagingUtil.applyPaging;
+import static org.openmrs.module.billing.api.db.hibernate.PagingUtil.applyPaging;
 
 /**
  * Hibernate implementation of {@link BillDAO}.

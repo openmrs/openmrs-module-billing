@@ -14,6 +14,7 @@
 package org.openmrs.module.billing.api.search;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,6 +24,7 @@ import org.openmrs.module.billing.api.model.BillableServiceStatus;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class BillableServiceSearch {
 	
 	private BillableServiceStatus serviceStatus;

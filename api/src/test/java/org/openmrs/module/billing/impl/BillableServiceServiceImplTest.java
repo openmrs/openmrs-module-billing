@@ -27,12 +27,13 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.TestConstants;
 import org.openmrs.module.billing.api.BillableServicesService;
 import org.openmrs.module.billing.api.base.PagingInfo;
+import org.openmrs.module.billing.api.impl.BillableServiceServiceImpl;
 import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.model.BillableServiceStatus;
 import org.openmrs.module.billing.api.search.BillableServiceSearch;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 
-public class BillableServicesServiceImplTest extends BaseModuleContextSensitiveTest {
+public class BillableServiceServiceImplTest extends BaseModuleContextSensitiveTest {
 	
 	private BillableServicesService billableServicesService;
 	
@@ -48,7 +49,7 @@ public class BillableServicesServiceImplTest extends BaseModuleContextSensitiveT
 	}
 	
 	/**
-	 * @see org.openmrs.module.billing.api.impl.BillableServicesServiceImpl#saveBillableService(BillableService)
+	 * @see BillableServiceServiceImpl#saveBillableService(BillableService)
 	 */
 	@Test
 	public void saveBillableService_shouldThrowNullPointerExceptionIfBillableServiceIsNull() {
@@ -56,7 +57,7 @@ public class BillableServicesServiceImplTest extends BaseModuleContextSensitiveT
 	}
 	
 	/**
-	 * @see org.openmrs.module.billing.api.impl.BillableServicesServiceImpl#getBillableService(Integer)
+	 * @see BillableServiceServiceImpl#getBillableService(Integer)
 	 */
 	@Test
 	public void getBillableService_shouldReturnBillableServiceWithSpecifiedId() {
@@ -67,7 +68,7 @@ public class BillableServicesServiceImplTest extends BaseModuleContextSensitiveT
 	}
 	
 	/**
-	 * @see org.openmrs.module.billing.api.impl.BillableServicesServiceImpl#getBillableService(Integer)
+	 * @see BillableServiceServiceImpl#getBillableService(Integer)
 	 */
 	@Test
 	public void getBillableService_shouldReturnNullIfIdNotFound() {
@@ -76,7 +77,7 @@ public class BillableServicesServiceImplTest extends BaseModuleContextSensitiveT
 	}
 	
 	/**
-	 * @see org.openmrs.module.billing.api.impl.BillableServicesServiceImpl#getBillableService(Integer)
+	 * @see BillableServiceServiceImpl#getBillableService(Integer)
 	 */
 	@Test
 	public void getBillableService_shouldReturnNullIfIdIsNull() {
@@ -85,7 +86,7 @@ public class BillableServicesServiceImplTest extends BaseModuleContextSensitiveT
 	}
 	
 	/**
-	 * @see org.openmrs.module.billing.api.impl.BillableServicesServiceImpl#getBillableServiceByUuid(String)
+	 * @see BillableServiceServiceImpl#getBillableServiceByUuid(String)
 	 */
 	@Test
 	public void getBillableServiceByUuid_shouldReturnBillableServiceWithSpecifiedUuid() {
@@ -100,7 +101,7 @@ public class BillableServicesServiceImplTest extends BaseModuleContextSensitiveT
 	}
 	
 	/**
-	 * @see org.openmrs.module.billing.api.impl.BillableServicesServiceImpl#getBillableServiceByUuid(String)
+	 * @see BillableServiceServiceImpl#getBillableServiceByUuid(String)
 	 */
 	@Test
 	public void getBillableServiceByUuid_shouldReturnNullIfUuidNotFound() {
@@ -109,7 +110,7 @@ public class BillableServicesServiceImplTest extends BaseModuleContextSensitiveT
 	}
 	
 	/**
-	 * @see org.openmrs.module.billing.api.impl.BillableServicesServiceImpl#getBillableServiceByUuid(String)
+	 * @see BillableServiceServiceImpl#getBillableServiceByUuid(String)
 	 */
 	@Test
 	public void getBillableServiceByUuid_shouldReturnNullIfUuidIsEmpty() {
@@ -118,7 +119,7 @@ public class BillableServicesServiceImplTest extends BaseModuleContextSensitiveT
 	}
 	
 	/**
-	 * @see org.openmrs.module.billing.api.impl.BillableServicesServiceImpl#saveBillableService(BillableService)
+	 * @see BillableServiceServiceImpl#saveBillableService(BillableService)
 	 */
 	@Test
 	public void saveBillableService_shouldCreateNewBillableService() {
@@ -152,7 +153,7 @@ public class BillableServicesServiceImplTest extends BaseModuleContextSensitiveT
 	}
 	
 	/**
-	 * @see org.openmrs.module.billing.api.impl.BillableServicesServiceImpl#saveBillableService(BillableService)
+	 * @see BillableServiceServiceImpl#saveBillableService(BillableService)
 	 */
 	@Test
 	public void saveBillableService_shouldUpdateExistingBillableService() {
@@ -169,8 +170,7 @@ public class BillableServicesServiceImplTest extends BaseModuleContextSensitiveT
 	}
 	
 	/**
-	 * @see org.openmrs.module.billing.api.impl.BillableServicesServiceImpl#getBillableServices(BillableServiceSearch,
-	 *      PagingInfo)
+	 * @see BillableServiceServiceImpl#getBillableServices(BillableServiceSearch, PagingInfo)
 	 */
 	@Test
 	public void getBillableServices_shouldReturnAllBillableServicesWhenSearchIsEmpty() {
@@ -182,8 +182,7 @@ public class BillableServicesServiceImplTest extends BaseModuleContextSensitiveT
 	}
 	
 	/**
-	 * @see org.openmrs.module.billing.api.impl.BillableServicesServiceImpl#getBillableServices(BillableServiceSearch,
-	 *      PagingInfo)
+	 * @see BillableServiceServiceImpl#getBillableServices(BillableServiceSearch, PagingInfo)
 	 */
 	@Test
 	public void getBillableServices_shouldReturnEmptyListWhenSearchIsNull() {
@@ -193,8 +192,7 @@ public class BillableServicesServiceImplTest extends BaseModuleContextSensitiveT
 	}
 	
 	/**
-	 * @see org.openmrs.module.billing.api.impl.BillableServicesServiceImpl#getBillableServices(BillableServiceSearch,
-	 *      PagingInfo)
+	 * @see BillableServiceServiceImpl#getBillableServices(BillableServiceSearch, PagingInfo)
 	 */
 	@Test
 	public void getBillableServices_shouldFilterByServiceStatus() {
@@ -211,8 +209,7 @@ public class BillableServicesServiceImplTest extends BaseModuleContextSensitiveT
 	}
 	
 	/**
-	 * @see org.openmrs.module.billing.api.impl.BillableServicesServiceImpl#getBillableServices(BillableServiceSearch,
-	 *      PagingInfo)
+	 * @see BillableServiceServiceImpl#getBillableServices(BillableServiceSearch, PagingInfo)
 	 */
 	@Test
 	public void getBillableServices_shouldFilterByServiceTypeUuid() {
@@ -232,8 +229,7 @@ public class BillableServicesServiceImplTest extends BaseModuleContextSensitiveT
 	}
 	
 	/**
-	 * @see org.openmrs.module.billing.api.impl.BillableServicesServiceImpl#getBillableServices(BillableServiceSearch,
-	 *      PagingInfo)
+	 * @see BillableServiceServiceImpl#getBillableServices(BillableServiceSearch, PagingInfo)
 	 */
 	@Test
 	public void getBillableServices_shouldFilterByName() {
@@ -250,8 +246,7 @@ public class BillableServicesServiceImplTest extends BaseModuleContextSensitiveT
 	}
 	
 	/**
-	 * @see org.openmrs.module.billing.api.impl.BillableServicesServiceImpl#getBillableServices(BillableServiceSearch,
-	 *      PagingInfo)
+	 * @see BillableServiceServiceImpl#getBillableServices(BillableServiceSearch, PagingInfo)
 	 */
 	@Test
 	public void getBillableServices_shouldExcludeRetiredServicesByDefault() {
@@ -267,8 +262,7 @@ public class BillableServicesServiceImplTest extends BaseModuleContextSensitiveT
 	}
 	
 	/**
-	 * @see org.openmrs.module.billing.api.impl.BillableServicesServiceImpl#getBillableServices(BillableServiceSearch,
-	 *      PagingInfo)
+	 * @see BillableServiceServiceImpl#getBillableServices(BillableServiceSearch, PagingInfo)
 	 */
 	@Test
 	public void getBillableServices_shouldReturnEmptyListWhenSearchReturnsNoResults() {
@@ -281,8 +275,7 @@ public class BillableServicesServiceImplTest extends BaseModuleContextSensitiveT
 	}
 	
 	/**
-	 * @see org.openmrs.module.billing.api.impl.BillableServicesServiceImpl#getBillableServices(BillableServiceSearch,
-	 *      PagingInfo)
+	 * @see BillableServiceServiceImpl#getBillableServices(BillableServiceSearch, PagingInfo)
 	 */
 	@Test
 	public void getBillableServices_shouldApplyPagingCorrectly() {
@@ -296,7 +289,7 @@ public class BillableServicesServiceImplTest extends BaseModuleContextSensitiveT
 	}
 	
 	/**
-	 * @see org.openmrs.module.billing.api.impl.BillableServicesServiceImpl#purgeBillableService(BillableService)
+	 * @see BillableServiceServiceImpl#purgeBillableService(BillableService)
 	 */
 	@Test
 	public void purgeBillableService_shouldThrowNullPointerExceptionIfBillableServiceIsNull() {
@@ -304,7 +297,7 @@ public class BillableServicesServiceImplTest extends BaseModuleContextSensitiveT
 	}
 	
 	/**
-	 * @see org.openmrs.module.billing.api.impl.BillableServicesServiceImpl#purgeBillableService(BillableService)
+	 * @see BillableServiceServiceImpl#purgeBillableService(BillableService)
 	 */
 	@Test
 	public void purgeBillableService_shouldDeleteBillableService() {
@@ -330,5 +323,46 @@ public class BillableServicesServiceImplTest extends BaseModuleContextSensitiveT
 		
 		BillableService deletedService = billableServicesService.getBillableService(serviceId);
 		assertNull(deletedService);
+	}
+	
+	/**
+	 * @see BillableServiceServiceImpl#retireBillableService(BillableService, String)
+	 */
+	@Test
+	public void retireBillableService_shouldRetireBillableService() {
+		BillableService service = billableServicesService.getBillableService(0);
+		assertNotNull(service);
+		assertFalse(service.getRetired());
+		
+		String retireReason = "No longer in use";
+		BillableService retiredService = billableServicesService.retireBillableService(service, retireReason);
+		
+		assertTrue(retiredService.getRetired());
+		assertEquals(retireReason, retiredService.getRetireReason());
+	}
+	
+	/**
+	 * @see BillableServiceServiceImpl#retireBillableService(BillableService, String)
+	 */
+	@Test
+	public void retireBillableService_shouldThrowExceptionIfReasonIsEmpty() {
+		BillableService service = billableServicesService.getBillableService(0);
+		
+		assertThrows(IllegalArgumentException.class, () -> billableServicesService.retireBillableService(service, ""));
+	}
+	
+	/**
+	 * @see BillableServiceServiceImpl#unretireBillableService(BillableService)
+	 */
+	@Test
+	public void unretireBillableService_shouldUnretireRetiredService() {
+		BillableService service = billableServicesService.getBillableService(3);
+		assertNotNull(service);
+		assertTrue(service.getRetired());
+		
+		BillableService unretiredService = billableServicesService.unretireBillableService(service);
+		
+		assertFalse(unretiredService.getRetired());
+		assertNull(unretiredService.getRetireReason());
 	}
 }

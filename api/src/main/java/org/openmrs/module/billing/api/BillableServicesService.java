@@ -80,4 +80,8 @@ public interface BillableServicesService extends OpenmrsService {
 	 */
 	@Transactional
 	void purgeBillableService(BillableService billableService);
+	
+	BillableService retireBillableService(BillableService billableService, String reason);
+	
+	BillableService unretireBillableService(BillableService billableService);
 }

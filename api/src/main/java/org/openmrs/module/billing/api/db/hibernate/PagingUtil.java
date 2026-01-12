@@ -1,4 +1,4 @@
-package org.openmrs.module.billing.api.util;
+package org.openmrs.module.billing.api.db.hibernate;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;

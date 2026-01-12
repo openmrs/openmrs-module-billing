@@ -1,8 +1,6 @@
 package org.openmrs.module.billing.api.db.hibernate;
 
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -20,7 +18,7 @@ import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.openmrs.module.billing.api.util.PagingUtil.applyPaging;
+import static org.openmrs.module.billing.api.db.hibernate.PagingUtil.applyPaging;
 
 @RequiredArgsConstructor
 public class HibernateBillableServiceDAOImpl implements BillableServiceDAO {
@@ -96,7 +94,7 @@ public class HibernateBillableServiceDAOImpl implements BillableServiceDAO {
 			predicates.add(cb.like(cb.lower(root.get("name")), "%" + billableServiceSearch.getName().toLowerCase() + "%"));
 		}
 		
-		if (!Boolean.TRUE.equals(billableServiceSearch.getIncludeRetired())) {
+		if (!billableServiceSearch.getIncludeRetired()) {
 			predicates.add(cb.equal(root.get("retired"), false));
 		}
 		

@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Collections;
 import java.util.List;
 
-public class BillableServicesServiceImpl extends BaseOpenmrsService implements BillableServicesService {
+public class BillableServiceServiceImpl extends BaseOpenmrsService implements BillableServicesService {
 	
 	@Setter(onMethod_ = { @Autowired })
 	private BillableServiceDAO billableServiceDAO;
@@ -71,5 +71,18 @@ public class BillableServicesServiceImpl extends BaseOpenmrsService implements B
 			throw new NullPointerException("The billableService must be defined.");
 		}
 		billableServiceDAO.purgeBillableService(billableService);
+	}
+	
+	@Override
+	public BillableService retireBillableService(BillableService billableService, String reason) {
+		if (StringUtils.isEmpty(reason)) {
+			throw new IllegalArgumentException("Retire reason cannot be empty or null");
+		}
+		return billableServiceDAO.saveBillableService(billableService);
+	}
+	
+	@Override
+	public BillableService unretireBillableService(BillableService billableService) {
+		return billableServiceDAO.saveBillableService(billableService);
 	}
 }

@@ -177,7 +177,7 @@
 	<bean id="billableServicesService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager" ref="transactionManager"/>
 		<property name="target">
-			<bean class="org.openmrs.module.billing.api.impl.BillableServicesServiceImpl">
+			<bean class="org.openmrs.module.billing.api.impl.BillableServiceServiceImpl">
 				<property name="billableServiceDAO" ref="billableServiceDAO"/>
 			</bean>
 		</property>

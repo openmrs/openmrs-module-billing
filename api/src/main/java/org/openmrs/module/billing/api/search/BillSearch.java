@@ -16,6 +16,7 @@ package org.openmrs.module.billing.api.search;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -30,6 +31,7 @@ import org.openmrs.module.billing.api.model.BillStatus;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class BillSearch {
 	
 	private String patientUuid;
