@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+	<!-- Concepts for service types and categories -->
+	<concept concept_id="1000" retired="false" datatype_id="4" class_id="11" is_set="false" creator="1"
+	         date_created="2012-01-01 00:00:00.0" changed_by="1" date_changed="2012-01-01 00:00:00.0"
+	         uuid="5631b434-78aa-102b-91a0-001e378eb690"/>
+	<concept_name concept_id="1000" name="Service Type 1" locale="en" creator="1"
+	              date_created="2012-01-01 00:00:00.0"
+	              concept_name_id="10000" voided="false" uuid="5631b434-78aa-102b-91a0-001e378eb691"
+	              concept_name_type="FULLY_SPECIFIED" locale_preferred="1"/>
+
+	<concept concept_id="1001" retired="false" datatype_id="4" class_id="11" is_set="false" creator="1"
+	         date_created="2012-01-01 00:00:00.0" changed_by="1" date_changed="2012-01-01 00:00:00.0"
+	         uuid="5631b434-78aa-102b-91a0-001e378eb692"/>
+	<concept_name concept_id="1001" name="Service Category 1" locale="en" creator="1"
+	              date_created="2012-01-01 00:00:00.0"
+	              concept_name_id="10001" voided="false" uuid="5631b434-78aa-102b-91a0-001e378eb693"
+	              concept_name_type="FULLY_SPECIFIED" locale_preferred="1"/>
+
+	<concept concept_id="1002" retired="false" datatype_id="4" class_id="11" is_set="false" creator="1"
+	         date_created="2012-01-01 00:00:00.0" changed_by="1" date_changed="2012-01-01 00:00:00.0"
+	         uuid="5631b434-78aa-102b-91a0-001e378eb694"/>
+	<concept_name concept_id="1002" name="Consultation" locale="en" creator="1"
+	              date_created="2012-01-01 00:00:00.0"
+	              concept_name_id="10002" voided="false" uuid="5631b434-78aa-102b-91a0-001e378eb695"
+	              concept_name_type="FULLY_SPECIFIED" locale_preferred="1"/>
+
+	<!-- Billable Services -->
+	<cashier_billable_service service_id="0" name="General Consultation" short_name="Gen Consult"
+	                          concept_id="1002" service_type="1000" service_category="1001"
+	                          service_status="ENABLED"
+	                          creator="1" date_created="2012-01-01 00:00:00.0" retired="false"
+	                          uuid="7631b434-78aa-102b-91a0-001e378eb670"/>
+
+	<cashier_billable_service service_id="1" name="Specialist Consultation" short_name="Spec Consult"
+	                          concept_id="1002" service_type="1000" service_category="1001"
+	                          service_status="ENABLED"
+	                          creator="1" date_created="2012-01-01 00:00:00.0" retired="false"
+	                          uuid="7631b434-78aa-102b-91a0-001e378eb671"/>
+
+	<cashier_billable_service service_id="2" name="Disabled Service" short_name="Disabled"
+	                          concept_id="1002" service_type="1000" service_category="1001"
+	                          service_status="DISABLED"
+	                          creator="1" date_created="2012-01-01 00:00:00.0" retired="false"
+	                          uuid="7631b434-78aa-102b-91a0-001e378eb672"/>
+
+	<cashier_billable_service service_id="3" name="Retired Service" short_name="Retired"
+	                          concept_id="1002" service_type="1000" service_category="1001"
+	                          service_status="ENABLED"
+	                          creator="1" date_created="2012-01-01 00:00:00.0" retired="true"
+	                          retired_by="1" date_retired="2012-01-02 00:00:00.0" retire_reason="Test retirement"
+	                          uuid="7631b434-78aa-102b-91a0-001e378eb673"/>
+
+	<!-- Service Prices -->
+	<cashier_item_price item_price_id="0" service_id="0" name="Default Price" price="50.00"
+	                    creator="1" date_created="2012-01-01 00:00:00.0" retired="false"
+	                    uuid="8631b434-78aa-102b-91a0-001e378eb680"/>
+
+	<cashier_item_price item_price_id="1" service_id="1" name="Standard Price" price="100.00"
+	                    creator="1" date_created="2012-01-01 00:00:00.0" retired="false"
+	                    uuid="8631b434-78aa-102b-91a0-001e378eb681"/>
+</dataset>

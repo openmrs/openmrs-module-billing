@@ -13,7 +13,6 @@ import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.db.BillDAO;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.search.BillSearch;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import javax.persistence.TypedQuery;
@@ -23,6 +22,8 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.openmrs.module.billing.api.db.hibernate.PagingUtil.applyPaging;
 
 /**
  * Hibernate implementation of {@link BillDAO}.
@@ -84,7 +85,7 @@ public class HibernateBillDAO implements BillDAO {
 		
 		List<Predicate> predicates = new ArrayList<>();
 		predicates.add(predicate);
-		applyPaging(query, pagingInfo, predicates);
+		applyPaging(query, pagingInfo, predicates, sessionFactory, Bill.class);
 		
 		return query.getResultList();
 	}
@@ -108,7 +109,7 @@ public class HibernateBillDAO implements BillDAO {
 		
 		TypedQuery<Bill> query = session.createQuery(cq);
 		
-		applyPaging(query, pagingInfo, predicates);
+		applyPaging(query, pagingInfo, predicates, sessionFactory, Bill.class);
 		
 		return query.getResultList();
 	}
@@ -164,37 +165,6 @@ public class HibernateBillDAO implements BillDAO {
 		}
 		
 		return predicates;
-	}
-	
-	/**
-	 * Applies paging to a query and optionally loads total record count.
-	 *
-	 * @param query The typed query to apply paging to
-	 * @param pagingInfo The paging information (null to skip paging)
-	 * @param predicates The predicates used for filtering (needed for count query)
-	 */
-	private void applyPaging(TypedQuery<Bill> query, PagingInfo pagingInfo, List<Predicate> predicates) {
-		if (pagingInfo != null && pagingInfo.getPage() > 0 && pagingInfo.getPageSize() > 0) {
-			int offset = (pagingInfo.getPage() - 1) * pagingInfo.getPageSize();
-			query.setFirstResult(offset);
-			query.setMaxResults(pagingInfo.getPageSize());
-			
-			if (pagingInfo.getLoadRecordCount()) {
-				Session session = sessionFactory.getCurrentSession();
-				
-				CriteriaBuilder cb = session.getCriteriaBuilder();
-				CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
-				Root<Bill> countRoot = countQuery.from(Bill.class);
-				countQuery.select(cb.count(countRoot));
-				
-				if (predicates != null && !predicates.isEmpty()) {
-					countQuery.where(predicates.toArray(new Predicate[0]));
-				}
-				
-				Long totalCount = session.createQuery(countQuery).getSingleResult();
-				pagingInfo.setTotalRecordCount(totalCount);
-			}
-		}
 	}
 	
 }

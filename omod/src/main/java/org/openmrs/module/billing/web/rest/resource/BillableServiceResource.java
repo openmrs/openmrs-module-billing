@@ -16,14 +16,16 @@ package org.openmrs.module.billing.web.rest.resource;
 import org.apache.logging.log4j.util.Strings;
 import org.openmrs.Concept;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.billing.api.BillableServicesService;
+import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.base.entity.IMetadataDataService;
 import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.model.BillableServiceStatus;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
 import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
 import org.openmrs.module.billing.web.base.resource.BaseRestMetadataResource;
+import org.openmrs.module.billing.web.base.resource.PagingUtil;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
-import org.openmrs.module.billing.api.IBillableItemsService;
 import org.openmrs.module.billing.api.search.BillableServiceSearch;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
@@ -36,14 +38,17 @@ import org.openmrs.module.webservices.rest.web.representation.FullRepresentation
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.impl.AlreadyPaged;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
+import org.openmrs.module.webservices.rest.web.resource.impl.MetadataDelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
+import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE + "/billableService", supportedClass = BillableService.class,
         supportedOpenmrsVersions = {"2.0 - 2.*"})
-public class BillableServiceResource extends BaseRestMetadataResource<BillableService> {
+public class BillableServiceResource extends MetadataDelegatingCrudResource<BillableService> {
+
 
     @Override
     public BillableService newDelegate() {
@@ -51,18 +56,18 @@ public class BillableServiceResource extends BaseRestMetadataResource<BillableSe
     }
 
     @Override
-    public Class<? extends IMetadataDataService<BillableService>> getServiceClass() {
-        return IBillableItemsService.class;
+    public BillableService getByUniqueId(String uuid) {
+        return Context.getService(BillableServicesService.class).getBillableServiceByUuid(uuid);
     }
 
     @Override
-    public BillableService getByUniqueId(String uuid) {
-        return getService().getByUuid(uuid);
+    public void purge(BillableService billableService, RequestContext requestContext) throws ResponseException {
+        Context.getService(BillableServicesService.class).purgeBillableService(billableService);
     }
 
     @Override
     public BillableService save(BillableService delegate) {
-        return super.save(delegate);
+        return Context.getService(BillableServicesService.class).saveBillableService(delegate);
     }
 
     @Override
@@ -79,14 +84,16 @@ public class BillableServiceResource extends BaseRestMetadataResource<BillableSe
                 status = BillableServiceStatus.DISABLED;
             }
         }
-        BillableService searchTemplate = new BillableService();
-        searchTemplate.setServiceType(serviceType);
-        searchTemplate.setServiceCategory(serviceCategory);
+        BillableServiceSearch searchTemplate = new BillableServiceSearch();
+        searchTemplate.setServiceTypeUuid(serviceType.getUuid());
+        searchTemplate.setServiceCategoryUuid(serviceCategory.getUuid());
         searchTemplate.setServiceStatus(status);
         searchTemplate.setName(serviceName);
 
-        IBillableItemsService service = Context.getService(IBillableItemsService.class);
-        return new AlreadyPaged<>(context, service.findServices(new BillableServiceSearch(searchTemplate, false)), false);
+        BillableServicesService service = Context.getService(BillableServicesService.class);
+        PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
+        List<BillableService> billableServices = service.getBillableServices(searchTemplate, pagingInfo);
+        return new AlreadyPaged<>(context, billableServices, false);
     }
 
     @Override

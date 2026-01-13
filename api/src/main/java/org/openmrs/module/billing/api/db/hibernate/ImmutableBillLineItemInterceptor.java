@@ -42,7 +42,7 @@ public class ImmutableBillLineItemInterceptor extends ImmutableEntityInterceptor
 		if (bill == null || bill.editable()) {
 			return false;
 		}
-
+		
 		// Bill is not editable - only allow mutable properties to be changed
 		return super.onFlushDirty(entity, id, currentState, previousState, propertyNames, types);
 	}

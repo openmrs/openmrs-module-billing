@@ -17,10 +17,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.billing.api.BillableServicesService;
 import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
 import org.openmrs.module.billing.api.BillLineItemService;
-import org.openmrs.module.billing.api.IBillableItemsService;
 import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
 import org.openmrs.module.billing.api.base.entity.IEntityDataService;
@@ -73,9 +73,9 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
 
     @PropertySetter(value = "billableService")
     public void setBillableService(BillLineItem instance, Object item) {
-        IBillableItemsService service = Context.getService(IBillableItemsService.class);
+        BillableServicesService service = Context.getService(BillableServicesService.class);
         String serviceUuid = (String) item;
-        instance.setBillableService(service.getByUuid(serviceUuid));
+        instance.setBillableService(service.getBillableServiceByUuid(serviceUuid));
     }
 
     @PropertyGetter(value = "item")
