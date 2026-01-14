@@ -14,7 +14,7 @@ import org.openmrs.api.ProgramWorkflowService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillExemptionService;
 import org.openmrs.module.billing.api.BillService;
-import org.openmrs.module.billing.api.BillableServicesService;
+import org.openmrs.module.billing.api.BillableServiceService;
 import org.openmrs.module.billing.api.ICashPointService;
 import org.openmrs.module.billing.api.ItemPriceService;
 import org.openmrs.module.billing.api.evaluator.ExemptionRuleEngine;
@@ -98,7 +98,7 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 					searchTemplate.setConceptUuid(testOrder.getConcept().getUuid());
 					searchTemplate.setServiceStatus(BillableServiceStatus.ENABLED);
 					
-					BillableServicesService service = Context.getService(BillableServicesService.class);
+					BillableServiceService service = Context.getService(BillableServiceService.class);
 					List<BillableService> searchResult = service.getBillableServices(searchTemplate, null);
 					if (!searchResult.isEmpty()) {
 						boolean isExempted = checkIfOrderIsExempted(workflowService, order, ExemptionType.SERVICE);

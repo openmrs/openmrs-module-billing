@@ -18,7 +18,7 @@ import java.util.List;
  * @see BillableService
  * @see BillableServiceSearch
  */
-public interface BillableServicesService extends OpenmrsService {
+public interface BillableServiceService extends OpenmrsService {
 	
 	/**
 	 * Retrieves a billable service by its database ID.

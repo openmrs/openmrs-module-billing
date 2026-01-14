@@ -3,7 +3,7 @@ package org.openmrs.module.billing.api.impl;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.impl.BaseOpenmrsService;
-import org.openmrs.module.billing.api.BillableServicesService;
+import org.openmrs.module.billing.api.BillableServiceService;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.db.BillableServiceDAO;
 import org.openmrs.module.billing.api.model.BillableService;
@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Collections;
 import java.util.List;
 
-public class BillableServiceServiceImpl extends BaseOpenmrsService implements BillableServicesService {
+public class BillableServiceServiceImpl extends BaseOpenmrsService implements BillableServiceService {
 	
 	@Setter(onMethod_ = { @Autowired })
 	private BillableServiceDAO billableServiceDAO;

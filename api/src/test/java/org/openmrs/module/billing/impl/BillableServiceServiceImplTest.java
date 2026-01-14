@@ -25,7 +25,7 @@ import org.openmrs.Concept;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.TestConstants;
-import org.openmrs.module.billing.api.BillableServicesService;
+import org.openmrs.module.billing.api.BillableServiceService;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.impl.BillableServiceServiceImpl;
 import org.openmrs.module.billing.api.model.BillableService;
@@ -35,13 +35,13 @@ import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 
 public class BillableServiceServiceImplTest extends BaseModuleContextSensitiveTest {
 	
-	private BillableServicesService billableServicesService;
+	private BillableServiceService billableServiceService;
 	
 	private ConceptService conceptService;
 	
 	@BeforeEach
 	public void setup() {
-		billableServicesService = Context.getService(BillableServicesService.class);
+		billableServiceService = Context.getService(BillableServiceService.class);
 		conceptService = Context.getConceptService();
 		
 		executeDataSet(TestConstants.CORE_DATASET2);
@@ -53,7 +53,7 @@ public class BillableServiceServiceImplTest extends BaseModuleContextSensitiveTe
 	 */
 	@Test
 	public void saveBillableService_shouldThrowNullPointerExceptionIfBillableServiceIsNull() {
-		assertThrows(NullPointerException.class, () -> billableServicesService.saveBillableService(null));
+		assertThrows(NullPointerException.class, () -> billableServiceService.saveBillableService(null));
 	}
 	
 	/**
@@ -61,7 +61,7 @@ public class BillableServiceServiceImplTest extends BaseModuleContextSensitiveTe
 	 */
 	@Test
 	public void getBillableService_shouldReturnBillableServiceWithSpecifiedId() {
-		BillableService service = billableServicesService.getBillableService(0);
+		BillableService service = billableServiceService.getBillableService(0);
 		assertNotNull(service);
 		assertEquals(0, service.getId());
 		assertEquals("General Consultation", service.getName());
@@ -72,7 +72,7 @@ public class BillableServiceServiceImplTest extends BaseModuleContextSensitiveTe
 	 */
 	@Test
 	public void getBillableService_shouldReturnNullIfIdNotFound() {
-		BillableService service = billableServicesService.getBillableService(999);
+		BillableService service = billableServiceService.getBillableService(999);
 		assertNull(service);
 	}
 	
@@ -81,7 +81,7 @@ public class BillableServiceServiceImplTest extends BaseModuleContextSensitiveTe
 	 */
 	@Test
 	public void getBillableService_shouldReturnNullIfIdIsNull() {
-		BillableService service = billableServicesService.getBillableService(null);
+		BillableService service = billableServiceService.getBillableService(null);
 		assertNull(service);
 	}
 	
@@ -90,11 +90,11 @@ public class BillableServiceServiceImplTest extends BaseModuleContextSensitiveTe
 	 */
 	@Test
 	public void getBillableServiceByUuid_shouldReturnBillableServiceWithSpecifiedUuid() {
-		BillableService service = billableServicesService.getBillableService(0);
+		BillableService service = billableServiceService.getBillableService(0);
 		assertNotNull(service);
 		String uuid = service.getUuid();
 		
-		BillableService foundService = billableServicesService.getBillableServiceByUuid(uuid);
+		BillableService foundService = billableServiceService.getBillableServiceByUuid(uuid);
 		assertNotNull(foundService);
 		assertEquals(uuid, foundService.getUuid());
 		assertEquals(0, foundService.getId());
@@ -105,7 +105,7 @@ public class BillableServiceServiceImplTest extends BaseModuleContextSensitiveTe
 	 */
 	@Test
 	public void getBillableServiceByUuid_shouldReturnNullIfUuidNotFound() {
-		BillableService service = billableServicesService.getBillableServiceByUuid("nonexistent-uuid");
+		BillableService service = billableServiceService.getBillableServiceByUuid("nonexistent-uuid");
 		assertNull(service);
 	}
 	
@@ -114,7 +114,7 @@ public class BillableServiceServiceImplTest extends BaseModuleContextSensitiveTe
 	 */
 	@Test
 	public void getBillableServiceByUuid_shouldReturnNullIfUuidIsEmpty() {
-		BillableService service = billableServicesService.getBillableServiceByUuid("");
+		BillableService service = billableServiceService.getBillableServiceByUuid("");
 		assertNull(service);
 	}
 	
@@ -140,14 +140,14 @@ public class BillableServiceServiceImplTest extends BaseModuleContextSensitiveTe
 		newService.setServiceStatus(BillableServiceStatus.ENABLED);
 		newService.setUuid(UUID.randomUUID().toString());
 		
-		BillableService savedService = billableServicesService.saveBillableService(newService);
+		BillableService savedService = billableServiceService.saveBillableService(newService);
 		
 		assertNotNull(savedService);
 		assertNotNull(savedService.getId());
 		assertEquals("New Test Service", savedService.getName());
 		assertEquals(BillableServiceStatus.ENABLED, savedService.getServiceStatus());
 		
-		BillableService retrievedService = billableServicesService.getBillableService(savedService.getId());
+		BillableService retrievedService = billableServiceService.getBillableService(savedService.getId());
 		assertNotNull(retrievedService);
 		assertEquals("New Test Service", retrievedService.getName());
 	}
@@ -157,15 +157,15 @@ public class BillableServiceServiceImplTest extends BaseModuleContextSensitiveTe
 	 */
 	@Test
 	public void saveBillableService_shouldUpdateExistingBillableService() {
-		BillableService existingService = billableServicesService.getBillableService(1);
+		BillableService existingService = billableServiceService.getBillableService(1);
 		assertNotNull(existingService);
 		
 		String newName = "Updated Specialist Consultation";
 		existingService.setName(newName);
 		
-		billableServicesService.saveBillableService(existingService);
+		billableServiceService.saveBillableService(existingService);
 		
-		BillableService updatedService = billableServicesService.getBillableService(1);
+		BillableService updatedService = billableServiceService.getBillableService(1);
 		assertEquals(newName, updatedService.getName());
 	}
 	
@@ -175,7 +175,7 @@ public class BillableServiceServiceImplTest extends BaseModuleContextSensitiveTe
 	@Test
 	public void getBillableServices_shouldReturnAllBillableServicesWhenSearchIsEmpty() {
 		BillableServiceSearch search = new BillableServiceSearch();
-		List<BillableService> services = billableServicesService.getBillableServices(search, null);
+		List<BillableService> services = billableServiceService.getBillableServices(search, null);
 		
 		assertNotNull(services);
 		assertFalse(services.isEmpty());
@@ -186,7 +186,7 @@ public class BillableServiceServiceImplTest extends BaseModuleContextSensitiveTe
 	 */
 	@Test
 	public void getBillableServices_shouldReturnEmptyListWhenSearchIsNull() {
-		List<BillableService> services = billableServicesService.getBillableServices(null, null);
+		List<BillableService> services = billableServiceService.getBillableServices(null, null);
 		assertNotNull(services);
 		assertTrue(services.isEmpty());
 	}
@@ -199,7 +199,7 @@ public class BillableServiceServiceImplTest extends BaseModuleContextSensitiveTe
 		BillableServiceSearch search = new BillableServiceSearch();
 		search.setServiceStatus(BillableServiceStatus.DISABLED);
 		
-		List<BillableService> services = billableServicesService.getBillableServices(search, null);
+		List<BillableService> services = billableServiceService.getBillableServices(search, null);
 		assertNotNull(services);
 		assertFalse(services.isEmpty());
 		
@@ -219,7 +219,7 @@ public class BillableServiceServiceImplTest extends BaseModuleContextSensitiveTe
 		BillableServiceSearch search = new BillableServiceSearch();
 		search.setServiceTypeUuid(serviceType.getUuid());
 		
-		List<BillableService> services = billableServicesService.getBillableServices(search, null);
+		List<BillableService> services = billableServiceService.getBillableServices(search, null);
 		assertNotNull(services);
 		assertFalse(services.isEmpty());
 		
@@ -236,7 +236,7 @@ public class BillableServiceServiceImplTest extends BaseModuleContextSensitiveTe
 		BillableServiceSearch search = new BillableServiceSearch();
 		search.setName("consultation");
 		
-		List<BillableService> services = billableServicesService.getBillableServices(search, null);
+		List<BillableService> services = billableServiceService.getBillableServices(search, null);
 		assertNotNull(services);
 		assertFalse(services.isEmpty());
 		
@@ -253,7 +253,7 @@ public class BillableServiceServiceImplTest extends BaseModuleContextSensitiveTe
 		BillableServiceSearch search = new BillableServiceSearch();
 		search.setIncludeRetired(false);
 		
-		List<BillableService> services = billableServicesService.getBillableServices(search, null);
+		List<BillableService> services = billableServiceService.getBillableServices(search, null);
 		assertNotNull(services);
 		
 		for (BillableService service : services) {
@@ -269,7 +269,7 @@ public class BillableServiceServiceImplTest extends BaseModuleContextSensitiveTe
 		BillableServiceSearch search = new BillableServiceSearch();
 		search.setName("NonexistentService");
 		
-		List<BillableService> services = billableServicesService.getBillableServices(search, null);
+		List<BillableService> services = billableServiceService.getBillableServices(search, null);
 		assertNotNull(services);
 		assertTrue(services.isEmpty());
 	}
@@ -282,7 +282,7 @@ public class BillableServiceServiceImplTest extends BaseModuleContextSensitiveTe
 		BillableServiceSearch search = new BillableServiceSearch();
 		PagingInfo pagingInfo = new PagingInfo(1, 2);
 		
-		List<BillableService> services = billableServicesService.getBillableServices(search, pagingInfo);
+		List<BillableService> services = billableServiceService.getBillableServices(search, pagingInfo);
 		assertNotNull(services);
 		assertTrue(services.size() <= 2);
 		assertNotNull(pagingInfo.getTotalRecordCount());
@@ -293,7 +293,7 @@ public class BillableServiceServiceImplTest extends BaseModuleContextSensitiveTe
 	 */
 	@Test
 	public void purgeBillableService_shouldThrowNullPointerExceptionIfBillableServiceIsNull() {
-		assertThrows(NullPointerException.class, () -> billableServicesService.purgeBillableService(null));
+		assertThrows(NullPointerException.class, () -> billableServiceService.purgeBillableService(null));
 	}
 	
 	/**
@@ -314,14 +314,14 @@ public class BillableServiceServiceImplTest extends BaseModuleContextSensitiveTe
 		newService.setServiceStatus(BillableServiceStatus.ENABLED);
 		newService.setUuid(UUID.randomUUID().toString());
 		
-		BillableService savedService = billableServicesService.saveBillableService(newService);
+		BillableService savedService = billableServiceService.saveBillableService(newService);
 		
 		Integer serviceId = savedService.getId();
 		assertNotNull(serviceId);
 		
-		billableServicesService.purgeBillableService(savedService);
+		billableServiceService.purgeBillableService(savedService);
 		
-		BillableService deletedService = billableServicesService.getBillableService(serviceId);
+		BillableService deletedService = billableServiceService.getBillableService(serviceId);
 		assertNull(deletedService);
 	}
 	
@@ -330,12 +330,12 @@ public class BillableServiceServiceImplTest extends BaseModuleContextSensitiveTe
 	 */
 	@Test
 	public void retireBillableService_shouldRetireBillableService() {
-		BillableService service = billableServicesService.getBillableService(0);
+		BillableService service = billableServiceService.getBillableService(0);
 		assertNotNull(service);
 		assertFalse(service.getRetired());
 		
 		String retireReason = "No longer in use";
-		BillableService retiredService = billableServicesService.retireBillableService(service, retireReason);
+		BillableService retiredService = billableServiceService.retireBillableService(service, retireReason);
 		
 		assertTrue(retiredService.getRetired());
 		assertEquals(retireReason, retiredService.getRetireReason());
@@ -346,9 +346,9 @@ public class BillableServiceServiceImplTest extends BaseModuleContextSensitiveTe
 	 */
 	@Test
 	public void retireBillableService_shouldThrowExceptionIfReasonIsEmpty() {
-		BillableService service = billableServicesService.getBillableService(0);
+		BillableService service = billableServiceService.getBillableService(0);
 		
-		assertThrows(IllegalArgumentException.class, () -> billableServicesService.retireBillableService(service, ""));
+		assertThrows(IllegalArgumentException.class, () -> billableServiceService.retireBillableService(service, ""));
 	}
 	
 	/**
@@ -356,11 +356,11 @@ public class BillableServiceServiceImplTest extends BaseModuleContextSensitiveTe
 	 */
 	@Test
 	public void unretireBillableService_shouldUnretireRetiredService() {
-		BillableService service = billableServicesService.getBillableService(3);
+		BillableService service = billableServiceService.getBillableService(3);
 		assertNotNull(service);
 		assertTrue(service.getRetired());
 		
-		BillableService unretiredService = billableServicesService.unretireBillableService(service);
+		BillableService unretiredService = billableServiceService.unretireBillableService(service);
 		
 		assertFalse(unretiredService.getRetired());
 		assertNull(unretiredService.getRetireReason());

@@ -72,7 +72,7 @@
 	<bean parent="serviceContext">
 		<property name="moduleService">
 			<list merge="true">
-				<value>org.openmrs.module.billing.api.BillableServicesService</value>
+				<value>org.openmrs.module.billing.api.BillableServiceService</value>
 				<ref bean="billableServicesService"/>
 			</list>
 		</property>
