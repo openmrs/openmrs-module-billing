@@ -16,14 +16,12 @@ package org.openmrs.module.billing.web.rest.resource;
 import org.apache.logging.log4j.util.Strings;
 import org.openmrs.Concept;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.billing.api.BillableServicesService;
+import org.openmrs.module.billing.api.BillableServiceService;
 import org.openmrs.module.billing.api.base.PagingInfo;
-import org.openmrs.module.billing.api.base.entity.IMetadataDataService;
 import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.model.BillableServiceStatus;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
 import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
-import org.openmrs.module.billing.web.base.resource.BaseRestMetadataResource;
 import org.openmrs.module.billing.web.base.resource.PagingUtil;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
 import org.openmrs.module.billing.api.search.BillableServiceSearch;
@@ -57,17 +55,17 @@ public class BillableServiceResource extends MetadataDelegatingCrudResource<Bill
 
     @Override
     public BillableService getByUniqueId(String uuid) {
-        return Context.getService(BillableServicesService.class).getBillableServiceByUuid(uuid);
+        return Context.getService(BillableServiceService.class).getBillableServiceByUuid(uuid);
     }
 
     @Override
     public void purge(BillableService billableService, RequestContext requestContext) throws ResponseException {
-        Context.getService(BillableServicesService.class).purgeBillableService(billableService);
+        Context.getService(BillableServiceService.class).purgeBillableService(billableService);
     }
 
     @Override
     public BillableService save(BillableService delegate) {
-        return Context.getService(BillableServicesService.class).saveBillableService(delegate);
+        return Context.getService(BillableServiceService.class).saveBillableService(delegate);
     }
 
     @Override
@@ -90,7 +88,7 @@ public class BillableServiceResource extends MetadataDelegatingCrudResource<Bill
         searchTemplate.setServiceStatus(status);
         searchTemplate.setName(serviceName);
 
-        BillableServicesService service = Context.getService(BillableServicesService.class);
+        BillableServiceService service = Context.getService(BillableServiceService.class);
         PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
         List<BillableService> billableServices = service.getBillableServices(searchTemplate, pagingInfo);
         return new AlreadyPaged<>(context, billableServices, false);
