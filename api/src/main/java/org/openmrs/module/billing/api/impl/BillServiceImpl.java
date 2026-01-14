@@ -13,7 +13,9 @@
  */
 package org.openmrs.module.billing.api.impl;
 
-import lombok.Setter;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
@@ -21,13 +23,13 @@ import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.db.BillDAO;
 import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.module.billing.util.ReceiptGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.List;
+import lombok.Setter;
 
 /**
  * Default implementation of {@link BillService}.
@@ -75,6 +77,22 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		if (bill == null) {
 			throw new NullPointerException("The bill must be defined.");
 		}
+		
+		if (bill.getId() != null) {
+			Bill persistedBill = billDAO.getBill(bill.getId());
+			
+			if (persistedBill != null && persistedBill.getStatus() != null) {
+				
+				if (persistedBill.getStatus() == BillStatus.POSTED) {
+					throw new IllegalArgumentException("Cannot modify a bill that is already POSTED");
+				}
+				
+				if (persistedBill.getStatus() == BillStatus.PAID) {
+					throw new IllegalArgumentException("Cannot modify a bill that is already PAID");
+				}
+			}
+		}
+		
 		return billDAO.saveBill(bill);
 	}
 	
