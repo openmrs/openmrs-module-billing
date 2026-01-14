@@ -73,7 +73,7 @@
 		<property name="moduleService">
 			<list merge="true">
 				<value>org.openmrs.module.billing.api.BillableServiceService</value>
-				<ref bean="billableServicesService"/>
+				<ref bean="billableServiceService"/>
 			</list>
 		</property>
 	</bean>
@@ -174,7 +174,7 @@
 		<property name="preInterceptors" ref="serviceInterceptors"/>
 		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
 	</bean>
-	<bean id="billableServicesService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+	<bean id="billableServiceService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager" ref="transactionManager"/>
 		<property name="target">
 			<bean class="org.openmrs.module.billing.api.impl.BillableServiceServiceImpl">
