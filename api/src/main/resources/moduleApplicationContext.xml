@@ -24,8 +24,8 @@
 	<bean parent="serviceContext">
 		<property name="moduleService">
 			<list merge="true">
-				<value>org.openmrs.module.billing.api.IPaymentModeService</value>
-				<ref bean="cashierPaymentModeService"/>
+				<value>org.openmrs.module.billing.api.PaymentModeService</value>
+				<ref bean="paymentModeService"/>
 			</list>
 		</property>
 	</bean>
@@ -113,12 +113,12 @@
 		<property name="preInterceptors" ref="serviceInterceptors"/>
 		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
 	</bean>
-	<bean id="cashierPaymentModeService"
+	<bean id="paymentModeService"
 	      class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager" ref="transactionManager"/>
 		<property name="target">
 			<bean class="org.openmrs.module.billing.api.impl.PaymentModeServiceImpl">
-				<property name="repository" ref="genericRepositoryDao"/>
+				<property name="paymentModeDAO" ref="paymentModeDAO"/>
 			</bean>
 		</property>
 		<property name="preInterceptors" ref="serviceInterceptors"/>
@@ -243,6 +243,10 @@
 	</bean>
 	<bean id="billableServiceDAO"
 		  class="org.openmrs.module.billing.api.db.hibernate.HibernateBillableServiceDAOImpl">
+		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	<bean id="paymentModeDAO"
+		  class="org.openmrs.module.billing.api.db.hibernate.HibernatePaymentModeDAOImpl">
 		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
 	</bean>
 

@@ -20,7 +20,6 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openmrs.Patient;
@@ -32,7 +31,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.TestConstants;
 import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.ICashPointService;
-import org.openmrs.module.billing.api.IPaymentModeService;
+import org.openmrs.module.billing.api.PaymentModeService;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
@@ -51,7 +50,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	
 	private PatientService patientService;
 	
-	private IPaymentModeService paymentModeService;
+	private PaymentModeService paymentModeService;
 	
 	private ICashPointService cashPointService;
 	
@@ -60,7 +59,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		billService = Context.getService(BillService.class);
 		providerService = Context.getProviderService();
 		patientService = Context.getPatientService();
-		paymentModeService = Context.getService(IPaymentModeService.class);
+		paymentModeService = Context.getService(PaymentModeService.class);
 		cashPointService = Context.getService(ICashPointService.class);
 		
 		executeDataSet(TestConstants.CORE_DATASET2);
@@ -323,7 +322,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		assertNotNull(postedBill);
 		assertEquals(BillStatus.POSTED, postedBill.getStatus());
 		
-		PaymentMode paymentMode = paymentModeService.getById(0);
+		PaymentMode paymentMode = paymentModeService.getPaymentMode(0);
 		
 		Payment payment = Payment.builder().amount(BigDecimal.valueOf(10.0)).amountTendered(BigDecimal.valueOf(10.0))
 		        .build();

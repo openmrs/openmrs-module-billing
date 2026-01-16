@@ -19,7 +19,7 @@ import java.util.Map;
 import org.openmrs.Concept;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.billing.api.IPaymentModeService;
+import org.openmrs.module.billing.api.PaymentModeService;
 import org.openmrs.module.billing.api.model.PaymentMode;
 import org.openmrs.module.billing.api.model.PaymentModeAttributeType;
 import org.springframework.stereotype.Controller;
@@ -36,8 +36,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class PaymentModeFragmentController {
     @RequestMapping(method = RequestMethod.GET)
     public void paymentModeFragment(@RequestParam("uuid") String uuid, ModelMap model) {
-        IPaymentModeService service = Context.getService(IPaymentModeService.class);
-        PaymentMode paymentMode = service.getByUuid(uuid);
+        PaymentModeService service = Context.getService(PaymentModeService.class);
+        PaymentMode paymentMode = service.getPaymentModeByUuid(uuid);
         ConceptService conceptService = Context.getConceptService();
 
         Map<Integer, Concept> conceptMap = new HashMap<Integer, Concept>();

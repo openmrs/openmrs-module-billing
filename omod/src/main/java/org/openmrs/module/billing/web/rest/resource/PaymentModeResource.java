@@ -13,9 +13,11 @@
  */
 package org.openmrs.module.billing.web.rest.resource;
 
+import org.openmrs.api.context.Context;
+import org.openmrs.module.billing.api.PaymentModeService;
+import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.web.base.resource.BaseRestInstanceTypeResource;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
-import org.openmrs.module.billing.api.IPaymentModeService;
 import org.openmrs.module.billing.api.base.entity.IMetadataDataService;
 import org.openmrs.module.billing.api.model.PaymentMode;
 import org.openmrs.module.billing.api.model.PaymentModeAttributeType;
@@ -28,6 +30,8 @@ import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
+import org.openmrs.module.webservices.rest.web.resource.impl.MetadataDelegatingCrudResource;
+import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
 import java.util.List;
 
@@ -35,22 +39,11 @@ import java.util.List;
  * REST resource representing a {@link PaymentMode}.
  */
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE + "/paymentMode", supportedClass = PaymentMode.class,
-        supportedOpenmrsVersions = {"2.0 - 2.*"})
-public class PaymentModeResource extends BaseRestInstanceTypeResource<PaymentMode, PaymentModeAttributeType> {
-    @Override
-    public PaymentMode newDelegate() {
-        return new PaymentMode();
-    }
+        supportedOpenmrsVersions = {"2.7.8 - 9.*"})
+public class PaymentModeResource extends MetadataDelegatingCrudResource<PaymentMode> {
 
-    @Override
-    protected PageableResult doGetAll(RequestContext context) {
-        return super.doGetAll(context);
-    }
 
-    @Override
-    public Class<? extends IMetadataDataService<PaymentMode>> getServiceClass() {
-        return IPaymentModeService.class;
-    }
+    private final PaymentModeService paymentModeService = Context.getService(PaymentModeService.class);
 
     @Override
     public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
@@ -66,8 +59,23 @@ public class PaymentModeResource extends BaseRestInstanceTypeResource<PaymentMod
         return description;
     }
 
-    @PropertySetter("attributeTypes")
-    public void setAttributeTypes(PaymentMode instance, List<PaymentModeAttributeType> attributeTypes) {
-        super.baseSetAttributeTypes(instance, attributeTypes);
+    @Override
+    public PaymentMode getByUniqueId(String s) {
+        return paymentModeService.getPaymentModeByUuid(s);
+    }
+
+    @Override
+    public PaymentMode newDelegate() {
+        return new PaymentMode();
+    }
+
+    @Override
+    public PaymentMode save(PaymentMode paymentMode) {
+        return paymentModeService.savePaymentMode(paymentMode);
+    }
+
+    @Override
+    public void purge(PaymentMode paymentMode, RequestContext requestContext) throws ResponseException {
+        paymentModeService.purgePaymentMode(paymentMode);
     }
 }
