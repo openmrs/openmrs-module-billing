@@ -22,7 +22,6 @@ import org.openmrs.module.billing.api.model.PaymentMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
 
 /**

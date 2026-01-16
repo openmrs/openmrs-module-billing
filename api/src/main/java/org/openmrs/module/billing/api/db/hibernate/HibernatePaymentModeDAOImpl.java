@@ -20,7 +20,6 @@ import org.openmrs.module.billing.api.model.PaymentMode;
 
 import javax.annotation.Nonnull;
 import javax.persistence.TypedQuery;
-import java.util.Collections;
 import java.util.List;
 
 /**

@@ -14,7 +14,6 @@
 
 package org.openmrs.module.billing.impl;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.UUID;
 
@@ -26,6 +25,13 @@ import org.openmrs.module.billing.api.PaymentModeService;
 import org.openmrs.module.billing.api.impl.PaymentModeServiceImpl;
 import org.openmrs.module.billing.api.model.PaymentMode;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PaymentModeServiceImplTest extends BaseModuleContextSensitiveTest {
 	

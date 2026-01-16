@@ -15,26 +15,18 @@ package org.openmrs.module.billing.web.rest.resource;
 
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.PaymentModeService;
-import org.openmrs.module.billing.api.model.BillableService;
-import org.openmrs.module.billing.web.base.resource.BaseRestInstanceTypeResource;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
-import org.openmrs.module.billing.api.base.entity.IMetadataDataService;
 import org.openmrs.module.billing.api.model.PaymentMode;
-import org.openmrs.module.billing.api.model.PaymentModeAttributeType;
 import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
-import org.openmrs.module.webservices.rest.web.annotation.PropertySetter;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
 import org.openmrs.module.webservices.rest.web.representation.CustomRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
-import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.resource.impl.MetadataDelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
-
-import java.util.List;
 
 /**
  * REST resource representing a {@link PaymentMode}.
