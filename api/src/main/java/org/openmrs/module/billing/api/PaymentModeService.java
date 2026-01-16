@@ -43,12 +43,13 @@ public interface PaymentModeService extends OpenmrsService {
 	PaymentMode getPaymentModeByUuid(String uuid);
 	
 	/**
-	 * Gets all payment modes
+	 * Gets all payment modes.
 	 *
-	 * @return List of payment modes
+	 * @param includeRetired whether to include retired payment modes
+	 * @return a list of payment modes, or an empty list if none found
 	 */
-	@Transactional
-	List<PaymentMode> getPaymentModes();
+	@Transactional(readOnly = true)
+	List<PaymentMode> getPaymentModes(boolean includeRetired);
 	
 	/**
 	 * Saves or updates the specified payment mode.

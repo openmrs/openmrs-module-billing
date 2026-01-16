@@ -13,6 +13,7 @@
  */
 package org.openmrs.module.billing.web.rest.resource;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.PaymentModeService;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
@@ -75,7 +76,8 @@ public class PaymentModeResource extends MetadataDelegatingCrudResource<PaymentM
     @Override
     public SimpleObject getAll(RequestContext context) throws ResponseException {
         SimpleObject result = new SimpleObject();
-        result.put("results", paymentModeService.getPaymentModes());
+        boolean includeRetired = BooleanUtils.toBoolean(context.getParameter("includeAll"));
+        result.put("results", paymentModeService.getPaymentModes(includeRetired));
         return result;
     }
 }

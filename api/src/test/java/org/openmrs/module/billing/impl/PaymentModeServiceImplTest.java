@@ -14,6 +14,7 @@
 
 package org.openmrs.module.billing.impl;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -234,5 +235,30 @@ public class PaymentModeServiceImplTest extends BaseModuleContextSensitiveTest {
 		assertNotNull(paymentMode);
 		assertNotNull(paymentMode.getAttributeTypes());
 		assertFalse(paymentMode.getAttributeTypes().isEmpty());
+	}
+	
+	/**
+	 * @see PaymentModeServiceImpl#getPaymentModes(boolean)
+	 */
+	@Test
+	public void getPaymentModes_shouldReturnOnlyNonRetiredPaymentModesWhenIncludeRetiredIsFalse() {
+		List<PaymentMode> paymentModes = paymentModeService.getPaymentModes(false);
+		
+		assertNotNull(paymentModes);
+		assertEquals(3, paymentModes.size());
+		for (PaymentMode paymentMode : paymentModes) {
+			assertFalse(paymentMode.getRetired());
+		}
+	}
+	
+	/**
+	 * @see PaymentModeServiceImpl#getPaymentModes(boolean)
+	 */
+	@Test
+	public void getPaymentModes_shouldReturnAllPaymentModesIncludingRetiredWhenIncludeRetiredIsTrue() {
+		List<PaymentMode> paymentModes = paymentModeService.getPaymentModes(true);
+		
+		assertNotNull(paymentModes);
+		assertEquals(4, paymentModes.size());
 	}
 }

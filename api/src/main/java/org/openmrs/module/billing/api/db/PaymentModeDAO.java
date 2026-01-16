@@ -42,8 +42,14 @@ public interface PaymentModeDAO {
 	@Transactional(readOnly = true)
 	PaymentMode getPaymentModeByUuid(@Nonnull String uuid);
 	
+	/**
+	 * Gets all payment modes.
+	 *
+	 * @param includeRetired whether to include retired payment modes
+	 * @return a list of payment modes, or an empty list if none found
+	 */
 	@Transactional(readOnly = true)
-	List<PaymentMode> getPaymentModes();
+	List<PaymentMode> getPaymentModes(boolean includeRetired);
 	
 	/**
 	 * Saves or updates the specified payment mode.

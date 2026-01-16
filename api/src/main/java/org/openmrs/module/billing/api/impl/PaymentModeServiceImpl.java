@@ -55,9 +55,12 @@ public class PaymentModeServiceImpl extends BaseOpenmrsService implements Paymen
 		return paymentModeDAO.getPaymentModeByUuid(uuid);
 	}
 	
+	/**
+	 * @inheritDoc
+	 */
 	@Override
-	public List<PaymentMode> getPaymentModes() {
-		return paymentModeDAO.getPaymentModes();
+	public List<PaymentMode> getPaymentModes(boolean includeRetired) {
+		return paymentModeDAO.getPaymentModes(includeRetired);
 	}
 	
 	/**

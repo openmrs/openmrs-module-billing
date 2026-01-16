@@ -49,9 +49,13 @@ public class HibernatePaymentModeDAOImpl implements PaymentModeDAO {
 		return query.getResultStream().findFirst().orElse(null);
 	}
 	
+	/**
+	 * @inheritDoc
+	 */
 	@Override
-	public List<PaymentMode> getPaymentModes() {
-		return sessionFactory.getCurrentSession().createQuery("from PaymentMode", PaymentMode.class).getResultList();
+	public List<PaymentMode> getPaymentModes(boolean includeRetired) {
+		String hql = "from PaymentMode" + (includeRetired ? "" : " where retired = false");
+		return sessionFactory.getCurrentSession().createQuery(hql, PaymentMode.class).getResultList();
 	}
 	
 	/**
