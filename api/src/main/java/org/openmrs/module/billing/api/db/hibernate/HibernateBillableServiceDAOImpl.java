@@ -94,6 +94,11 @@ public class HibernateBillableServiceDAOImpl implements BillableServiceDAO {
 			predicates.add(cb.like(cb.lower(root.get("name")), "%" + billableServiceSearch.getName().toLowerCase() + "%"));
 		}
 		
+		if (StringUtils.isNotEmpty(billableServiceSearch.getShortName())) {
+			predicates.add(
+			    cb.like(cb.lower(root.get("shortName")), "%" + billableServiceSearch.getShortName().toLowerCase() + "%"));
+		}
+		
 		if (!billableServiceSearch.getIncludeRetired()) {
 			predicates.add(cb.equal(root.get("retired"), false));
 		}
