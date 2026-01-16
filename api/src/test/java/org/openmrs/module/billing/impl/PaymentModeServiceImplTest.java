@@ -14,7 +14,6 @@
 
 package org.openmrs.module.billing.impl;
 
-
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -198,6 +197,8 @@ public class PaymentModeServiceImplTest extends BaseModuleContextSensitiveTest {
 		PaymentMode retiredPaymentMode = paymentModeService.retirePaymentMode(paymentMode, retireReason);
 		
 		assertNotNull(retiredPaymentMode);
+		assertTrue(retiredPaymentMode.getRetired());
+		assertNotNull(retiredPaymentMode.getRetireReason());
 	}
 	
 	/**
