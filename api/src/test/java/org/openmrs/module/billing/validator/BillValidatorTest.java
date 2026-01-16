@@ -31,46 +31,177 @@ import org.springframework.validation.Errors;
  * Integration tests for {@link BillValidator}
  */
 public class BillValidatorTest extends BaseModuleContextSensitiveTest {
-	
+
 	private BillValidator billValidator;
-	
+
 	private BillService billService;
-	
+
 	@BeforeEach
 	public void setup() throws Exception {
 		billValidator = new BillValidator();
 		billService = Context.getService(BillService.class);
-		
+
 		executeDataSet(TestConstants.CORE_DATASET2);
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "StockOperationType.xml");
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "PaymentModeTest.xml");
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "CashPointTest.xml");
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "BillTest.xml");
 	}
-	
+
 	@Test
 	public void validate_shouldNotRejectPendingBill() {
 		Bill pendingBill = billService.getBill(2);
 		assertNotNull(pendingBill);
 		assertEquals(BillStatus.PENDING, pendingBill.getStatus());
-		
+
 		Errors errors = new BindException(pendingBill, "bill");
 		billValidator.validate(pendingBill, errors);
-		
+
 		assertFalse(errors.hasErrors());
 	}
-	
+
 	@Test
 	public void validate_shouldNotRejectUnmodifiedPaidBill() {
 		Bill paidBill = billService.getBill(1);
 		assertNotNull(paidBill);
 		assertEquals(BillStatus.PAID, paidBill.getStatus());
-		
+
 		Errors errors = new BindException(paidBill, "bill");
 		billValidator.validate(paidBill, errors);
-		
+
 		// Unmodified PAID bills should pass validation - rejection happens only when
 		// attempting to modify line items
+		assertFalse(errors.hasErrors());
+	}
+
+	@Test
+	public void validate_shouldRejectBillWithoutPatient() {
+		Bill bill = billService.getBill(2);
+		assertNotNull(bill);
+		bill.setPatient(null);
+
+		Errors errors = new BindException(bill, "bill");
+		billValidator.validate(bill, errors);
+
+		assertTrue(errors.hasErrors());
+		assertTrue(errors.hasFieldErrors("patient"));
+	}
+
+	@Test
+	public void validate_shouldRejectBillWithoutCashier() {
+		Bill bill = billService.getBill(2);
+		assertNotNull(bill);
+		bill.setCashier(null);
+
+		Errors errors = new BindException(bill, "bill");
+		billValidator.validate(bill, errors);
+
+		assertTrue(errors.hasErrors());
+		assertTrue(errors.hasFieldErrors("cashier"));
+	}
+
+	@Test
+	public void validate_shouldRejectBillWithoutCashPoint() {
+		Bill bill = billService.getBill(2);
+		assertNotNull(bill);
+		bill.setCashPoint(null);
+
+		Errors errors = new BindException(bill, "bill");
+		billValidator.validate(bill, errors);
+
+		assertTrue(errors.hasErrors());
+		assertTrue(errors.hasFieldErrors("cashPoint"));
+	}
+
+	@Test
+	public void validate_shouldRejectBillWithoutStatus() {
+		Bill bill = billService.getBill(2);
+		assertNotNull(bill);
+		bill.setStatus(null);
+
+		Errors errors = new BindException(bill, "bill");
+		billValidator.validate(bill, errors);
+
+		assertTrue(errors.hasErrors());
+		assertTrue(errors.hasFieldErrors("status"));
+	}
+
+	@Test
+	public void validate_shouldRejectBillWithoutLineItems() {
+		Bill bill = billService.getBill(2);
+		assertNotNull(bill);
+		bill.getLineItems().clear();
+
+		Errors errors = new BindException(bill, "bill");
+		billValidator.validate(bill, errors);
+
+		assertTrue(errors.hasErrors());
+		assertTrue(errors.hasFieldErrors("lineItems"));
+	}
+
+	@Test
+	public void validate_shouldRejectBillWithOnlyVoidedLineItems() {
+		Bill bill = billService.getBill(2);
+		assertNotNull(bill);
+		bill.getLineItems().forEach(item -> {
+			item.setVoided(true);
+			item.setVoidReason("Test void");
+		});
+
+		Errors errors = new BindException(bill, "bill");
+		billValidator.validate(bill, errors);
+
+		assertTrue(errors.hasErrors());
+		assertTrue(errors.hasFieldErrors("lineItems"));
+	}
+
+	@Test
+	public void validate_shouldRejectReceiptNumberExceeding255Characters() {
+		Bill bill = billService.getBill(2);
+		assertNotNull(bill);
+		bill.setReceiptNumber(org.apache.commons.lang3.StringUtils.repeat("a", 256));
+
+		Errors errors = new BindException(bill, "bill");
+		billValidator.validate(bill, errors);
+
+		assertTrue(errors.hasErrors());
+		assertTrue(errors.hasFieldErrors("receiptNumber"));
+	}
+
+	@Test
+	public void validate_shouldPassReceiptNumberWith255Characters() {
+		Bill bill = billService.getBill(2);
+		assertNotNull(bill);
+		bill.setReceiptNumber(org.apache.commons.lang3.StringUtils.repeat("a", 255));
+
+		Errors errors = new BindException(bill, "bill");
+		billValidator.validate(bill, errors);
+
+		assertFalse(errors.hasErrors());
+	}
+
+	@Test
+	public void validate_shouldRejectAdjustmentReasonExceeding500Characters() {
+		Bill bill = billService.getBill(2);
+		assertNotNull(bill);
+		bill.setAdjustmentReason(org.apache.commons.lang3.StringUtils.repeat("a", 501));
+
+		Errors errors = new BindException(bill, "bill");
+		billValidator.validate(bill, errors);
+
+		assertTrue(errors.hasErrors());
+		assertTrue(errors.hasFieldErrors("adjustmentReason"));
+	}
+
+	@Test
+	public void validate_shouldPassAdjustmentReasonWith500Characters() {
+		Bill bill = billService.getBill(2);
+		assertNotNull(bill);
+		bill.setAdjustmentReason(org.apache.commons.lang3.StringUtils.repeat("a", 500));
+
+		Errors errors = new BindException(bill, "bill");
+		billValidator.validate(bill, errors);
+
 		assertFalse(errors.hasErrors());
 	}
 }
