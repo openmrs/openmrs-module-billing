@@ -21,6 +21,7 @@ import org.openmrs.module.billing.web.rest.controller.base.CashierResourceContro
 import org.openmrs.module.billing.api.base.entity.IMetadataDataService;
 import org.openmrs.module.billing.api.model.PaymentMode;
 import org.openmrs.module.billing.api.model.PaymentModeAttributeType;
+import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.PropertySetter;
@@ -77,5 +78,12 @@ public class PaymentModeResource extends MetadataDelegatingCrudResource<PaymentM
     @Override
     public void purge(PaymentMode paymentMode, RequestContext requestContext) throws ResponseException {
         paymentModeService.purgePaymentMode(paymentMode);
+    }
+
+    @Override
+    public SimpleObject getAll(RequestContext context) throws ResponseException {
+        SimpleObject result = new SimpleObject();
+        result.put("results", paymentModeService.getPaymentModes());
+        return result;
     }
 }

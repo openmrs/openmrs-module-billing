@@ -20,6 +20,8 @@ import org.openmrs.module.billing.api.model.PaymentMode;
 
 import javax.annotation.Nonnull;
 import javax.persistence.TypedQuery;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Hibernate implementation of {@link PaymentModeDAO}.
@@ -46,6 +48,11 @@ public class HibernatePaymentModeDAOImpl implements PaymentModeDAO {
 		        .createQuery("select b from PaymentMode b where b.uuid = :uuid", PaymentMode.class);
 		query.setParameter("uuid", uuid);
 		return query.getResultStream().findFirst().orElse(null);
+	}
+	
+	@Override
+	public List<PaymentMode> getPaymentModes() {
+		return sessionFactory.getCurrentSession().createQuery("from PaymentMode", PaymentMode.class).getResultList();
 	}
 	
 	/**

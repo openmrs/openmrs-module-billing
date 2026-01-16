@@ -17,6 +17,8 @@ import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.billing.api.model.PaymentMode;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * Service for managing {@link PaymentMode} entities.
  */
@@ -39,6 +41,14 @@ public interface PaymentModeService extends OpenmrsService {
 	 */
 	@Transactional(readOnly = true)
 	PaymentMode getPaymentModeByUuid(String uuid);
+	
+	/**
+	 * Gets all payment modes
+	 *
+	 * @return List of payment modes
+	 */
+	@Transactional
+	List<PaymentMode> getPaymentModes();
 	
 	/**
 	 * Saves or updates the specified payment mode.

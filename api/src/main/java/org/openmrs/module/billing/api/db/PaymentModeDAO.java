@@ -17,6 +17,7 @@ import org.openmrs.module.billing.api.model.PaymentMode;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
 /**
  * Data access object for {@link PaymentMode} entities.
@@ -40,6 +41,9 @@ public interface PaymentModeDAO {
 	 */
 	@Transactional(readOnly = true)
 	PaymentMode getPaymentModeByUuid(@Nonnull String uuid);
+	
+	@Transactional(readOnly = true)
+	List<PaymentMode> getPaymentModes();
 	
 	/**
 	 * Saves or updates the specified payment mode.
