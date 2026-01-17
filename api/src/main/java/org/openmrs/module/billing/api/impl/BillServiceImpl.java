@@ -75,6 +75,7 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		if (bill == null) {
 			throw new NullPointerException("The bill must be defined.");
 		}
+		org.openmrs.validator.ValidateUtil.validate(bill);
 		return billDAO.saveBill(bill);
 	}
 	
