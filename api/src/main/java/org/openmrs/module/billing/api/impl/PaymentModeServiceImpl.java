@@ -11,34 +11,96 @@
  *
  * Copyright (C) OpenMRS, LLC.  All Rights Reserved.
  */
-
 package org.openmrs.module.billing.api.impl;
 
-import org.hibernate.criterion.Order;
-import org.openmrs.module.billing.api.IPaymentModeService;
-import org.openmrs.module.billing.api.base.entity.impl.BaseMetadataDataServiceImpl;
-import org.openmrs.module.billing.api.base.entity.security.IMetadataAuthorizationPrivileges;
+import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
+import org.openmrs.api.impl.BaseOpenmrsService;
+import org.openmrs.module.billing.api.PaymentModeService;
+import org.openmrs.module.billing.api.db.PaymentModeDAO;
 import org.openmrs.module.billing.api.model.PaymentMode;
-import org.openmrs.module.billing.api.security.BasicMetadataAuthorizationPrivileges;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
- * Data service implementation class for {@link PaymentMode}s.
+ * Default implementation of {@link PaymentModeService}.
  */
 @Transactional
-public class PaymentModeServiceImpl extends BaseMetadataDataServiceImpl<PaymentMode> implements IPaymentModeService {
+public class PaymentModeServiceImpl extends BaseOpenmrsService implements PaymentModeService {
 	
+	@Setter(onMethod_ = { @Autowired })
+	private PaymentModeDAO paymentModeDAO;
+	
+	/**
+	 * @inheritDoc
+	 */
 	@Override
-	protected IMetadataAuthorizationPrivileges getPrivileges() {
-		return new BasicMetadataAuthorizationPrivileges();
+	public PaymentMode getPaymentMode(Integer id) {
+		if (id == null) {
+			return null;
+		}
+		return paymentModeDAO.getPaymentMode(id);
 	}
 	
+	/**
+	 * @inheritDoc
+	 */
 	@Override
-	protected void validate(PaymentMode entity) {
+	public PaymentMode getPaymentModeByUuid(String uuid) {
+		if (StringUtils.isEmpty(uuid)) {
+			return null;
+		}
+		return paymentModeDAO.getPaymentModeByUuid(uuid);
 	}
 	
+	/**
+	 * @inheritDoc
+	 */
 	@Override
-	protected Order[] getDefaultSort() {
-		return new Order[] { Order.asc("sortOrder"), Order.asc("name") };
+	public List<PaymentMode> getPaymentModes(boolean includeRetired) {
+		return paymentModeDAO.getPaymentModes(includeRetired);
+	}
+	
+	/**
+	 * @inheritDoc
+	 */
+	@Override
+	public PaymentMode savePaymentMode(PaymentMode paymentMode) {
+		if (paymentMode == null) {
+			throw new NullPointerException("Payment mode cannot be null");
+		}
+		return paymentModeDAO.savePaymentMode(paymentMode);
+	}
+	
+	/**
+	 * @inheritDoc
+	 */
+	@Override
+	public PaymentMode retirePaymentMode(PaymentMode paymentMode, String reason) {
+		if (StringUtils.isEmpty(reason)) {
+			throw new IllegalArgumentException("Retire reason cannot be null");
+		}
+		return paymentModeDAO.savePaymentMode(paymentMode);
+	}
+	
+	/**
+	 * @inheritDoc
+	 */
+	@Override
+	public PaymentMode unretirePaymentMode(PaymentMode paymentMode) {
+		return paymentModeDAO.savePaymentMode(paymentMode);
+	}
+	
+	/**
+	 * @inheritDoc
+	 */
+	@Override
+	public void purgePaymentMode(PaymentMode paymentMode) {
+		if (paymentMode == null) {
+			throw new NullPointerException("Payment mode cannot be null");
+		}
+		paymentModeDAO.purgePaymentMode(paymentMode);
 	}
 }
