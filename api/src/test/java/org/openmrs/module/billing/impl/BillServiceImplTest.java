@@ -14,8 +14,6 @@
 
 package org.openmrs.module.billing.impl;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
@@ -30,7 +28,7 @@ import org.openmrs.api.ValidationException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.TestConstants;
 import org.openmrs.module.billing.api.BillService;
-import org.openmrs.module.billing.api.ICashPointService;
+import org.openmrs.module.billing.api.CashPointService;
 import org.openmrs.module.billing.api.PaymentModeService;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.model.Bill;
@@ -42,6 +40,14 @@ import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	
 	private BillService billService;
@@ -52,7 +58,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	
 	private PaymentModeService paymentModeService;
 	
-	private ICashPointService cashPointService;
+	private CashPointService cashPointService;
 	
 	@BeforeEach
 	public void setup() {
@@ -60,7 +66,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		providerService = Context.getProviderService();
 		patientService = Context.getPatientService();
 		paymentModeService = Context.getService(PaymentModeService.class);
-		cashPointService = Context.getService(ICashPointService.class);
+		cashPointService = Context.getService(CashPointService.class);
 		
 		executeDataSet(TestConstants.CORE_DATASET2);
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "StockOperationType.xml");
@@ -134,7 +140,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		Bill newBill = new Bill();
 		newBill.setCashier(providerService.getProvider(0));
 		newBill.setPatient(patient);
-		newBill.setCashPoint(cashPointService.getById(0));
+		newBill.setCashPoint(cashPointService.getCashPoint(0));
 		newBill.setReceiptNumber("TEST-" + UUID.randomUUID());
 		newBill.setStatus(BillStatus.PENDING);
 		

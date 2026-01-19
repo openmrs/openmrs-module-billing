@@ -40,8 +40,8 @@
 	<bean parent="serviceContext">
 		<property name="moduleService">
 			<list merge="true">
-				<value>org.openmrs.module.billing.api.ICashPointService</value>
-				<ref bean="cashierCashPointService"/>
+				<value>org.openmrs.module.billing.api.CashPointService</value>
+				<ref bean="cashPointService"/>
 			</list>
 		</property>
 	</bean>
@@ -135,11 +135,11 @@
 		<property name="preInterceptors" ref="serviceInterceptors"/>
 		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
 	</bean>
-	<bean id="cashierCashPointService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+	<bean id="cashPointService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager" ref="transactionManager"/>
 		<property name="target">
 			<bean class="org.openmrs.module.billing.api.impl.CashPointServiceImpl">
-				<property name="repository" ref="genericRepositoryDao"/>
+				<property name="cashPointDAO" ref="cashPointDAO"/>
 			</bean>
 		</property>
 		<property name="preInterceptors" ref="serviceInterceptors"/>
@@ -247,6 +247,10 @@
 	</bean>
 	<bean id="paymentModeDAO"
 		  class="org.openmrs.module.billing.api.db.hibernate.HibernatePaymentModeDAOImpl">
+		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	<bean id="cashPointDAO"
+		  class="org.openmrs.module.billing.api.db.hibernate.HibernateCashPointDAOImpl">
 		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
 	</bean>
 
