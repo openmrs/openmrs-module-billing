@@ -25,7 +25,7 @@ import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.TestConstants;
-import org.openmrs.module.billing.api.ICashPointService;
+import org.openmrs.module.billing.api.CashPointService;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.db.BillDAO;
 import org.openmrs.module.billing.api.model.Bill;
@@ -41,14 +41,14 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 	
 	private ProviderService providerService;
 	
-	private ICashPointService cashPointService;
+	private CashPointService cashPointService;
 	
 	@BeforeEach
 	public void setup() {
 		billDAO = Context.getRegisteredComponent("billDAO", BillDAO.class);
 		patientService = Context.getPatientService();
 		providerService = Context.getProviderService();
-		cashPointService = Context.getService(ICashPointService.class);
+		cashPointService = Context.getService(CashPointService.class);
 		
 		executeDataSet(TestConstants.CORE_DATASET2);
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "StockOperationType.xml");
@@ -96,7 +96,7 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 		Bill newBill = new Bill();
 		newBill.setCashier(providerService.getProvider(0));
 		newBill.setPatient(patient);
-		newBill.setCashPoint(cashPointService.getById(0));
+		newBill.setCashPoint(cashPointService.getCashPoint(0));
 		newBill.setReceiptNumber("TEST-" + UUID.randomUUID());
 		newBill.setStatus(BillStatus.PENDING);
 		
@@ -223,7 +223,7 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 		Bill newBill = new Bill();
 		newBill.setCashier(providerService.getProvider(0));
 		newBill.setPatient(patient);
-		newBill.setCashPoint(cashPointService.getById(0));
+		newBill.setCashPoint(cashPointService.getCashPoint(0));
 		newBill.setReceiptNumber("TO-DELETE-" + UUID.randomUUID());
 		newBill.setStatus(BillStatus.PENDING);
 		

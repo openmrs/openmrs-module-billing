@@ -13,93 +13,164 @@
  */
 package org.openmrs.module.billing.api.impl;
 
+import java.util.Collections;
 import java.util.List;
 
+import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Restrictions;
 import org.openmrs.Location;
-import org.openmrs.module.billing.api.ICashPointService;
+import org.openmrs.api.impl.BaseOpenmrsService;
+import org.openmrs.module.billing.api.CashPointService;
 import org.openmrs.module.billing.api.base.PagingInfo;
-import org.openmrs.module.billing.api.base.entity.impl.BaseMetadataDataServiceImpl;
-import org.openmrs.module.billing.api.base.entity.security.IMetadataAuthorizationPrivileges;
-import org.openmrs.module.billing.api.base.f.Action1;
+import org.openmrs.module.billing.api.db.CashPointDAO;
 import org.openmrs.module.billing.api.model.CashPoint;
-import org.openmrs.module.billing.api.security.BasicMetadataAuthorizationPrivileges;
-import org.openmrs.module.billing.api.util.HibernateCriteriaConstants;
+import org.openmrs.module.billing.api.search.CashPointSearch;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Data service implementation class for {@link CashPoint}s.
+ * Default implementation of {@link CashPointService}.
  */
 @Transactional
-public class CashPointServiceImpl extends BaseMetadataDataServiceImpl<CashPoint> implements ICashPointService {
+public class CashPointServiceImpl extends BaseOpenmrsService implements CashPointService {
 	
-	private static final Integer MAX_CASHPOINT_NAME_CHARACTERS = 255;
+	@Setter(onMethod_ = { @Autowired })
+	private CashPointDAO cashPointDAO;
 	
+	private static final int MAX_CASHPOINT_NAME_CHARACTERS = 255;
+	
+	/**
+	 * @inheritDoc
+	 */
 	@Override
-	protected IMetadataAuthorizationPrivileges getPrivileges() {
-		return new BasicMetadataAuthorizationPrivileges();
+	public CashPoint getCashPoint(Integer id) {
+		if (id == null) {
+			return null;
+		}
+		return cashPointDAO.getCashPoint(id);
 	}
 	
+	/**
+	 * @inheritDoc
+	 */
 	@Override
-	protected void validate(CashPoint entity) {
+	public CashPoint getCashPointByUuid(String uuid) {
+		if (StringUtils.isEmpty(uuid)) {
+			return null;
+		}
+		return cashPointDAO.getCashPointByUuid(uuid);
 	}
 	
+	/**
+	 * @inheritDoc
+	 */
+	@Override
+	public List<CashPoint> getCashPoints(CashPointSearch cashPointSearch, PagingInfo pagingInfo) {
+		if (cashPointSearch == null) {
+			return Collections.emptyList();
+		}
+		return cashPointDAO.getCashPoints(cashPointSearch, pagingInfo);
+	}
+	
+	/**
+	 * @inheritDoc
+	 */
 	@Override
 	public List<CashPoint> getCashPointsByLocation(Location location, boolean includeRetired) {
 		return getCashPointsByLocation(location, includeRetired, null);
 	}
 	
+	/**
+	 * @inheritDoc
+	 */
 	@Override
 	public List<CashPoint> getCashPointsByLocation(final Location location, final boolean includeRetired,
 	        PagingInfo pagingInfo) {
 		if (location == null) {
-			throw new IllegalArgumentException("The location must be defined");
+			throw new IllegalArgumentException("Location cannot be null");
 		}
-		
-		return executeCriteria(CashPoint.class, pagingInfo, new Action1<Criteria>() {
-			
-			@Override
-			public void apply(Criteria criteria) {
-				criteria.add(Restrictions.eq(HibernateCriteriaConstants.LOCATION, location));
-				if (!includeRetired) {
-					criteria.add(Restrictions.eq(HibernateCriteriaConstants.RETIRED, false));
-				}
-			}
-		});
+		CashPointSearch cashPointSearch = CashPointSearch.builder().locationUuid(location.getUuid())
+		        .includeRetired(includeRetired).build();
+		return cashPointDAO.getCashPoints(cashPointSearch, pagingInfo);
 	}
 	
+	/**
+	 * @inheritDoc
+	 */
 	@Override
 	public List<CashPoint> getCashPointsByLocationAndName(Location location, String name, boolean includeRetired) {
 		return getCashPointsByLocationAndName(location, name, includeRetired, null);
 	}
 	
+	/**
+	 * @inheritDoc
+	 */
 	@Override
 	public List<CashPoint> getCashPointsByLocationAndName(final Location location, final String name,
 	        final boolean includeRetired, PagingInfo pagingInfo) {
 		if (location == null) {
-			throw new IllegalArgumentException("The location must be defined");
+			throw new IllegalArgumentException("Location cannot be null");
 		}
 		if (StringUtils.isEmpty(name)) {
-			throw new IllegalArgumentException("The Cashpoint name must be defined.");
+			throw new IllegalArgumentException("Name cannot be null or empty");
 		}
 		if (name.length() > MAX_CASHPOINT_NAME_CHARACTERS) {
-			throw new IllegalArgumentException("The Cashpoint name must be less than 256 characters.");
+			throw new IllegalArgumentException(
+			        "Name cannot be longer than " + MAX_CASHPOINT_NAME_CHARACTERS + " characters");
 		}
 		
-		return executeCriteria(CashPoint.class, pagingInfo, new Action1<Criteria>() {
-			
-			@Override
-			public void apply(Criteria criteria) {
-				criteria.add(Restrictions.eq(HibernateCriteriaConstants.LOCATION, location))
-				        .add(Restrictions.ilike(HibernateCriteriaConstants.NAME, name, MatchMode.START));
-				
-				if (!includeRetired) {
-					criteria.add(Restrictions.eq(HibernateCriteriaConstants.RETIRED, false));
-				}
-			}
-		});
+		CashPointSearch cashPointSearch = CashPointSearch.builder().locationUuid(location.getUuid()).name(name)
+		        .includeRetired(includeRetired).build();
+		return cashPointDAO.getCashPoints(cashPointSearch, pagingInfo);
+	}
+	
+	/**
+	 * @inheritDoc
+	 */
+	@Override
+	public List<CashPoint> getAllCashPoints(boolean includeRetired) {
+		CashPointSearch cashPointSearch = CashPointSearch.builder().includeRetired(includeRetired).build();
+		return cashPointDAO.getCashPoints(cashPointSearch, null);
+	}
+	
+	/**
+	 * @inheritDoc
+	 */
+	@Override
+	public CashPoint saveCashPoint(CashPoint cashPoint) {
+		if (cashPoint == null) {
+			throw new IllegalArgumentException("Cash point cannot be null");
+		}
+		return cashPointDAO.saveCashPoint(cashPoint);
+	}
+	
+	/**
+	 * @inheritDoc
+	 */
+	@Override
+	public void purgeCashPoint(CashPoint cashPoint) {
+		if (cashPoint == null) {
+			throw new IllegalArgumentException("Cash point cannot be null");
+		}
+		cashPointDAO.purgeCashPoint(cashPoint);
+	}
+	
+	/**
+	 * @inheritDoc
+	 */
+	@Override
+	public CashPoint retireCashPoint(CashPoint cashPoint, String retireReason) {
+		if (StringUtils.isEmpty(retireReason)) {
+			throw new IllegalArgumentException("Retire reason cannot be null or empty");
+		}
+		return cashPointDAO.saveCashPoint(cashPoint);
+	}
+	
+	/**
+	 * @inheritDoc
+	 */
+	@Override
+	public CashPoint unretireCashPoint(CashPoint cashPoint) {
+		return cashPointDAO.saveCashPoint(cashPoint);
 	}
 }
