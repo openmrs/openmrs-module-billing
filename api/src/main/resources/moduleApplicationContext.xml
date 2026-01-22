@@ -80,7 +80,7 @@
 	<bean parent="serviceContext">
 		<property name="moduleService">
 			<list merge="true">
-				<value>org.openmrs.module.billing.api.ICashierItemPriceService</value>
+				<value>org.openmrs.module.billing.api.CashierItemPriceService</value>
 				<ref bean="cashierItemPriceService"/>
 			</list>
 		</property>
@@ -187,8 +187,8 @@
 	<bean id="cashierItemPriceService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager" ref="transactionManager"/>
 		<property name="target">
-			<bean class="org.openmrs.module.billing.api.impl.ICashierItemPriceServiceImpl">
-				<property name="repository" ref="genericRepositoryDao"/>
+			<bean class="org.openmrs.module.billing.api.impl.CashierItemPriceServiceImpl">
+				<property name="cashierItemPriceDAO" ref="cashierItemPriceDAO"/>
 			</bean>
 		</property>
 		<property name="preInterceptors" ref="serviceInterceptors"/>
@@ -251,6 +251,10 @@
 	</bean>
 	<bean id="cashPointDAO"
 		  class="org.openmrs.module.billing.api.db.hibernate.HibernateCashPointDAOImpl">
+		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	<bean id="cashierItemPriceDAO"
+		  class="org.openmrs.module.billing.api.db.hibernate.HibernateCashierItemPriceDAOImpl">
 		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
 	</bean>
 

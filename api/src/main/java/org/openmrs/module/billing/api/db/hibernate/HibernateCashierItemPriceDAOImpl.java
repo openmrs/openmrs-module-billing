@@ -1,0 +1,50 @@
+package org.openmrs.module.billing.api.db.hibernate;
+
+import lombok.RequiredArgsConstructor;
+import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
+import org.openmrs.module.billing.api.db.CashierItemPriceDAO;
+import org.openmrs.module.billing.api.model.CashierItemPrice;
+
+import javax.annotation.Nonnull;
+import java.util.List;
+
+@RequiredArgsConstructor
+public class HibernateCashierItemPriceDAOImpl implements CashierItemPriceDAO {
+	
+	private final SessionFactory sessionFactory;
+	
+	/** {@inheritDoc} */
+	@Override
+	public CashierItemPrice getCashierItemPrice(@Nonnull Integer id) {
+		return sessionFactory.getCurrentSession().get(CashierItemPrice.class, id);
+	}
+	
+	/** {@inheritDoc} */
+	@Override
+	public CashierItemPrice getCashierItemPriceByUuid(@Nonnull String uuid) {
+		return sessionFactory.getCurrentSession()
+		        .createQuery("from CashierItemPrice where uuid = :uuid", CashierItemPrice.class).setParameter("uuid", uuid)
+		        .uniqueResultOptional().orElse(null);
+	}
+	
+	/** {@inheritDoc} */
+	@Override
+	public List<CashierItemPrice> getCashierItemPrices(boolean includeRetired) {
+		return sessionFactory.getCurrentSession().createQuery(
+		    "from CashierItemPrice" + (includeRetired ? "" : " where retired = false"), CashierItemPrice.class).list();
+	}
+	
+	/** {@inheritDoc} */
+	@Override
+	public CashierItemPrice saveCashierItemPrice(@Nonnull CashierItemPrice cashierItemPrice) {
+		sessionFactory.getCurrentSession().saveOrUpdate(cashierItemPrice);
+		return cashierItemPrice;
+	}
+	
+	/** {@inheritDoc} */
+	@Override
+	public void purgeCashierItemPrice(@Nonnull CashierItemPrice cashierItemPrice) {
+		sessionFactory.getCurrentSession().delete(cashierItemPrice);
+	}
+}
