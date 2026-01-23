@@ -33,7 +33,6 @@ public interface CashPointDAO {
 	 * @param id the cash point id
 	 * @return the cash point or {@code null} if not found
 	 */
-	@Transactional(readOnly = true)
 	CashPoint getCashPoint(@Nonnull Integer id);
 	
 	/**
@@ -42,7 +41,6 @@ public interface CashPointDAO {
 	 * @param uuid the cash point uuid
 	 * @return the cash point or {@code null} if not found
 	 */
-	@Transactional(readOnly = true)
 	CashPoint getCashPointByUuid(@Nonnull String uuid);
 	
 	/**
@@ -52,7 +50,6 @@ public interface CashPointDAO {
 	 * @param pagingInfo optional paging information
 	 * @return a list of cash points matching the criteria, or an empty list if none found
 	 */
-	@Transactional(readOnly = true)
 	List<CashPoint> getCashPoints(@Nonnull CashPointSearch cashPointSearch, PagingInfo pagingInfo);
 	
 	/**
@@ -61,7 +58,6 @@ public interface CashPointDAO {
 	 * @param cashPoint the cash point to save
 	 * @return the saved cash point
 	 */
-	@Transactional
 	CashPoint saveCashPoint(@Nonnull CashPoint cashPoint);
 	
 	/**
@@ -69,6 +65,5 @@ public interface CashPointDAO {
 	 *
 	 * @param cashPoint the cash point to purge
 	 */
-	@Transactional
 	void purgeCashPoint(@Nonnull CashPoint cashPoint);
 }

@@ -26,7 +26,6 @@ public interface BillableServiceDAO {
 	 * @param id the database ID of the billable service (must not be null)
 	 * @return the billable service with the specified ID, or null if not found
 	 */
-	@Transactional(readOnly = true)
 	BillableService getBillableService(@Nonnull Integer id);
 	
 	/**
@@ -39,7 +38,6 @@ public interface BillableServiceDAO {
 	 * @param uuid the UUID of the billable service (must not be null)
 	 * @return the billable service with the specified UUID, or null if not found
 	 */
-	@Transactional(readOnly = true)
 	BillableService getBillableServiceByUuid(@Nonnull String uuid);
 	
 	/**
@@ -56,7 +54,6 @@ public interface BillableServiceDAO {
 	 * @return a list of billable services matching the search criteria, or an empty list if none found
 	 * @see BillableServiceSearch
 	 */
-	@Transactional(readOnly = true)
 	List<BillableService> getBillableServices(@Nonnull BillableServiceSearch billableServiceSearch, PagingInfo pagingInfo);
 	
 	/**
@@ -69,7 +66,6 @@ public interface BillableServiceDAO {
 	 * @param billableService the billable service to save (must not be null)
 	 * @return the saved billable service with updated metadata (timestamps, IDs, etc.)
 	 */
-	@Transactional
 	BillableService saveBillableService(@Nonnull BillableService billableService);
 	
 	/**
@@ -81,7 +77,6 @@ public interface BillableServiceDAO {
 	 *
 	 * @param billableService the billable service to permanently delete
 	 */
-	@Transactional
 	void purgeBillableService(BillableService billableService);
 	
 }

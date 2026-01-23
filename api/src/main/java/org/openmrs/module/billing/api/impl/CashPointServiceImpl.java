@@ -43,6 +43,7 @@ public class CashPointServiceImpl extends BaseOpenmrsService implements CashPoin
 	 * @inheritDoc
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public CashPoint getCashPoint(Integer id) {
 		if (id == null) {
 			return null;
@@ -54,6 +55,7 @@ public class CashPointServiceImpl extends BaseOpenmrsService implements CashPoin
 	 * @inheritDoc
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public CashPoint getCashPointByUuid(String uuid) {
 		if (StringUtils.isEmpty(uuid)) {
 			return null;
@@ -65,6 +67,7 @@ public class CashPointServiceImpl extends BaseOpenmrsService implements CashPoin
 	 * @inheritDoc
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public List<CashPoint> getCashPoints(CashPointSearch cashPointSearch, PagingInfo pagingInfo) {
 		if (cashPointSearch == null) {
 			return Collections.emptyList();
@@ -76,6 +79,7 @@ public class CashPointServiceImpl extends BaseOpenmrsService implements CashPoin
 	 * @inheritDoc
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public List<CashPoint> getCashPointsByLocation(Location location, boolean includeRetired) {
 		return getCashPointsByLocation(location, includeRetired, null);
 	}
@@ -84,6 +88,7 @@ public class CashPointServiceImpl extends BaseOpenmrsService implements CashPoin
 	 * @inheritDoc
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public List<CashPoint> getCashPointsByLocation(final Location location, final boolean includeRetired,
 	        PagingInfo pagingInfo) {
 		if (location == null) {
@@ -98,6 +103,7 @@ public class CashPointServiceImpl extends BaseOpenmrsService implements CashPoin
 	 * @inheritDoc
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public List<CashPoint> getCashPointsByLocationAndName(Location location, String name, boolean includeRetired) {
 		return getCashPointsByLocationAndName(location, name, includeRetired, null);
 	}
@@ -106,6 +112,7 @@ public class CashPointServiceImpl extends BaseOpenmrsService implements CashPoin
 	 * @inheritDoc
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public List<CashPoint> getCashPointsByLocationAndName(final Location location, final String name,
 	        final boolean includeRetired, PagingInfo pagingInfo) {
 		if (location == null) {
@@ -128,6 +135,7 @@ public class CashPointServiceImpl extends BaseOpenmrsService implements CashPoin
 	 * @inheritDoc
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public List<CashPoint> getAllCashPoints(boolean includeRetired) {
 		CashPointSearch cashPointSearch = CashPointSearch.builder().includeRetired(includeRetired).build();
 		return cashPointDAO.getCashPoints(cashPointSearch, null);
@@ -137,6 +145,7 @@ public class CashPointServiceImpl extends BaseOpenmrsService implements CashPoin
 	 * @inheritDoc
 	 */
 	@Override
+	@Transactional
 	public CashPoint saveCashPoint(CashPoint cashPoint) {
 		if (cashPoint == null) {
 			throw new IllegalArgumentException("Cash point cannot be null");
@@ -148,6 +157,7 @@ public class CashPointServiceImpl extends BaseOpenmrsService implements CashPoin
 	 * @inheritDoc
 	 */
 	@Override
+	@Transactional
 	public void purgeCashPoint(CashPoint cashPoint) {
 		if (cashPoint == null) {
 			throw new IllegalArgumentException("Cash point cannot be null");
@@ -159,6 +169,7 @@ public class CashPointServiceImpl extends BaseOpenmrsService implements CashPoin
 	 * @inheritDoc
 	 */
 	@Override
+	@Transactional
 	public CashPoint retireCashPoint(CashPoint cashPoint, String retireReason) {
 		if (StringUtils.isEmpty(retireReason)) {
 			throw new IllegalArgumentException("Retire reason cannot be null or empty");
@@ -170,6 +181,7 @@ public class CashPointServiceImpl extends BaseOpenmrsService implements CashPoin
 	 * @inheritDoc
 	 */
 	@Override
+	@Transactional
 	public CashPoint unretireCashPoint(CashPoint cashPoint) {
 		return cashPointDAO.saveCashPoint(cashPoint);
 	}

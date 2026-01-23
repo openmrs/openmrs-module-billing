@@ -6,8 +6,6 @@ import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.module.billing.api.util.PrivilegeConstants;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -26,7 +24,6 @@ public interface BillService extends OpenmrsService {
 	 * @return the bill with the specified ID, or null if not found
 	 * @throws org.openmrs.api.APIAuthenticationException if the user lacks VIEW_BILLS privilege
 	 */
-	@Transactional(readOnly = true)
 	@Authorized(PrivilegeConstants.VIEW_BILLS)
 	Bill getBill(Integer id);
 	
@@ -37,7 +34,6 @@ public interface BillService extends OpenmrsService {
 	 * @return the bill with the specified UUID, or null if not found
 	 * @throws org.openmrs.api.APIAuthenticationException if the user lacks VIEW_BILLS privilege
 	 */
-	@Transactional(readOnly = true)
 	@Authorized(PrivilegeConstants.VIEW_BILLS)
 	Bill getBillByUuid(String uuid);
 	
@@ -48,7 +44,6 @@ public interface BillService extends OpenmrsService {
 	 * @return the bill with the specified receipt number, or null if not found
 	 * @throws org.openmrs.api.APIAuthenticationException if the user lacks VIEW_BILLS privilege
 	 */
-	@Transactional(readOnly = true)
 	@Authorized(PrivilegeConstants.VIEW_BILLS)
 	Bill getBillByReceiptNumber(String receiptNumber);
 	
@@ -60,7 +55,6 @@ public interface BillService extends OpenmrsService {
 	 * @return a list of bills for the patient, or an empty list if none found
 	 * @throws org.openmrs.api.APIAuthenticationException if the user lacks VIEW_BILLS privilege
 	 */
-	@Transactional(readOnly = true)
 	@Authorized(PrivilegeConstants.VIEW_BILLS)
 	List<Bill> getBillsByPatientUuid(String patientUuid, PagingInfo pagingInfo);
 	
@@ -77,7 +71,6 @@ public interface BillService extends OpenmrsService {
 	 * @throws org.openmrs.api.APIAuthenticationException if the user lacks VIEW_BILLS privilege
 	 * @see BillSearch
 	 */
-	@Transactional(readOnly = true)
 	@Authorized(PrivilegeConstants.VIEW_BILLS)
 	List<Bill> getBills(BillSearch billSearch, PagingInfo pagingInfo);
 	
@@ -88,7 +81,6 @@ public interface BillService extends OpenmrsService {
 	 * @return a byte array containing the receipt data (typically a PDF)
 	 * @throws org.openmrs.api.APIAuthenticationException if the user lacks VIEW_BILLS privilege
 	 */
-	@Transactional(readOnly = true)
 	@Authorized(PrivilegeConstants.VIEW_BILLS)
 	byte[] downloadBillReceipt(Bill bill);
 	
@@ -104,7 +96,6 @@ public interface BillService extends OpenmrsService {
 	 * @throws org.openmrs.api.APIAuthenticationException if the user lacks MANAGE_BILLS privilege
 	 * @throws IllegalArgumentException if the bill is null or invalid
 	 */
-	@Transactional
 	@Authorized(PrivilegeConstants.MANAGE_BILLS)
 	Bill saveBill(Bill bill);
 	
@@ -151,7 +142,6 @@ public interface BillService extends OpenmrsService {
 	Bill unvoidBill(Bill bill);
 	
 	@Authorized(PrivilegeConstants.VIEW_BILLS)
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	boolean isBillEditable(Bill bill);
 	
 }

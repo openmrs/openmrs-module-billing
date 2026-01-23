@@ -13,12 +13,9 @@ public interface BillExemptionDAO {
 	
 	BillExemption getBillingExemptionById(Integer id);
 	
-	@Transactional(readOnly = true)
 	BillExemption getBillingExemptionByUuid(String uuid);
 	
-	@Transactional(readOnly = true)
 	List<BillExemption> getExemptionsByConcept(Concept concept, ExemptionType itemType, boolean includeRetired);
 	
-	@Transactional(readOnly = true)
 	List<BillExemption> getExemptionsByItemType(ExemptionType itemType, boolean includeRetired);
 }

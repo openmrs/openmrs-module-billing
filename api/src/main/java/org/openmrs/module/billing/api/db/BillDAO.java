@@ -22,7 +22,6 @@ public interface BillDAO {
 	 * @param id the database ID of the bill (must not be null)
 	 * @return the bill with the specified ID, or null if not found
 	 */
-	@Transactional(readOnly = true)
 	Bill getBill(@Nonnull Integer id);
 	
 	/**
@@ -35,7 +34,6 @@ public interface BillDAO {
 	 * @param uuid the UUID of the bill (must not be null)
 	 * @return the bill with the specified UUID, or null if not found
 	 */
-	@Transactional(readOnly = true)
 	Bill getBillByUuid(@Nonnull String uuid);
 	
 	/**
@@ -48,7 +46,6 @@ public interface BillDAO {
 	 * @param receiptNumber the receipt number of the bill (must not be null)
 	 * @return the bill with the specified receipt number, or null if not found
 	 */
-	@Transactional(readOnly = true)
 	Bill getBillByReceiptNumber(@Nonnull String receiptNumber);
 	
 	/**
@@ -62,7 +59,6 @@ public interface BillDAO {
 	 * @param pagingInfo optional paging information (can be null for no paging)
 	 * @return a list of bills for the patient, or an empty list if none found
 	 */
-	@Transactional(readOnly = true)
 	List<Bill> getBillsByPatientUuid(@Nonnull String patientUuid, PagingInfo pagingInfo);
 	
 	/**
@@ -79,7 +75,6 @@ public interface BillDAO {
 	 * @return a list of bills matching the search criteria, or an empty list if none found
 	 * @see BillSearch
 	 */
-	@Transactional(readOnly = true)
 	List<Bill> getBills(@Nonnull BillSearch billSearch, PagingInfo pagingInfo);
 	
 	/**
@@ -92,7 +87,6 @@ public interface BillDAO {
 	 * @param bill the bill to save (must not be null)
 	 * @return the saved bill with updated metadata (timestamps, IDs, etc.)
 	 */
-	@Transactional
 	Bill saveBill(@Nonnull Bill bill);
 	
 	/**
@@ -104,7 +98,6 @@ public interface BillDAO {
 	 *
 	 * @param bill the bill to permanently delete (must not be null)
 	 */
-	@Transactional
 	void purgeBill(@Nonnull Bill bill);
 	
 }

@@ -49,6 +49,7 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public Bill getBill(Integer id) {
 		if (id == null) {
 			return null;
@@ -60,6 +61,7 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public Bill getBillByUuid(String uuid) {
 		if (uuid == null) {
 			return null;
@@ -71,6 +73,7 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional
 	public Bill saveBill(Bill bill) {
 		if (bill == null) {
 			throw new NullPointerException("The bill must be defined.");
@@ -82,6 +85,7 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public Bill getBillByReceiptNumber(String receiptNumber) {
 		if (receiptNumber == null) {
 			return null;
@@ -93,6 +97,7 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public List<Bill> getBillsByPatientUuid(String patientUuid, PagingInfo pagingInfo) {
 		if (StringUtils.isEmpty(patientUuid)) {
 			return Collections.emptyList();
@@ -104,6 +109,7 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public List<Bill> getBills(BillSearch billSearch, PagingInfo pagingInfo) {
 		if (billSearch == null) {
 			return Collections.emptyList();
@@ -115,6 +121,7 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public byte[] downloadBillReceipt(Bill bill) {
 		if (bill == null) {
 			throw new NullPointerException("The bill must be defined.");
@@ -126,6 +133,7 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional
 	public void purgeBill(Bill bill) {
 		if (bill == null) {
 			throw new NullPointerException("The bill must be defined.");
@@ -137,6 +145,7 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional
 	public Bill voidBill(Bill bill, String voidReason) {
 		if (StringUtils.isBlank(voidReason)) {
 			throw new IllegalArgumentException("voidReason cannot be null or empty");
@@ -148,11 +157,13 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional
 	public Bill unvoidBill(Bill bill) {
 		return billDAO.saveBill(bill);
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
 	public boolean isBillEditable(Bill bill) {
 		if (bill == null) {
 			throw new IllegalArgumentException("Bill cannot be null");

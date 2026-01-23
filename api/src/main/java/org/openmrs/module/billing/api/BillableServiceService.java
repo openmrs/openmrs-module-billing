@@ -4,7 +4,6 @@ import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.search.BillableServiceSearch;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -26,7 +25,6 @@ public interface BillableServiceService extends OpenmrsService {
 	 * @param id the database ID of the billable service
 	 * @return the billable service with the specified ID, or null if not found
 	 */
-	@Transactional(readOnly = true)
 	BillableService getBillableService(Integer id);
 	
 	/**
@@ -35,7 +33,6 @@ public interface BillableServiceService extends OpenmrsService {
 	 * @param uuid the UUID of the billable service
 	 * @return the billable service with the specified UUID, or null if not found
 	 */
-	@Transactional(readOnly = true)
 	BillableService getBillableServiceByUuid(String uuid);
 	
 	/**
@@ -51,7 +48,6 @@ public interface BillableServiceService extends OpenmrsService {
 	 * @return a list of billable services matching the search criteria, or an empty list if none found
 	 * @see BillableServiceSearch
 	 */
-	@Transactional(readOnly = true)
 	List<BillableService> getBillableServices(BillableServiceSearch billableServiceSearch, PagingInfo pagingInfo);
 	
 	/**
@@ -65,7 +61,6 @@ public interface BillableServiceService extends OpenmrsService {
 	 * @return the saved billable service with updated metadata
 	 * @throws IllegalArgumentException if the billable service is null or invalid
 	 */
-	@Transactional
 	BillableService saveBillableService(BillableService billableService);
 	
 	/**
@@ -78,7 +73,6 @@ public interface BillableServiceService extends OpenmrsService {
 	 *
 	 * @param billableService the billable service to permanently delete
 	 */
-	@Transactional
 	void purgeBillableService(BillableService billableService);
 	
 	BillableService retireBillableService(BillableService billableService, String reason);
