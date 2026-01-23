@@ -135,45 +135,45 @@ public class BillServiceImpl extends BaseEntityDataServiceImpl<Bill> implements 
 			}
 		}
 		
-		// force new bill save without merging when forceNewBill is set true
-		if (bill.getForceNewBill() != null && bill.getForceNewBill()) {
-			// Skip merge logic, just save the bill as new
-			return super.save(bill);
-		}
-		
-		// Check if there is an existing pending bill for the patient
-		List<Bill> bills = searchBill(bill.getPatient());
-		if (!bills.isEmpty()) {
-			Bill billToUpdate = bills.get(0);
-			billToUpdate.setStatus(BillStatus.PENDING);
-			
-			// Handle the case where bill and billToUpdate are the same object reference
-			// (Hibernate session cache returns same managed instance)
-			Set<BillLineItem> existingItemsSet = new HashSet<>(billToUpdate.getLineItems());
-			
-			for (BillLineItem item : bill.getLineItems()) {
-				// Only add if not already present (BillLineItem.equals() handles comparison)
-				if (!existingItemsSet.contains(item)) {
-					item.setBill(billToUpdate);
-					billToUpdate.getLineItems().add(item);
-				}
-			}
-			
-			// Calculate the total payments made on the bill (excluding voided payments)
-			BigDecimal totalPaid = billToUpdate.getTotalPayments();
-			
-			// Check if the bill is fully paid
-			if (totalPaid.compareTo(billToUpdate.getTotal()) >= 0) {
-				billToUpdate.setStatus(BillStatus.PAID);
-			} else {
+		// If bill has an ID or UUID, this is an UPDATE (e.g., POST /bill/{uuid})
+        // If forceNewBill is true, always create a new bill
+		boolean isUpdate = bill.getId() != null || StringUtils.isNotBlank(bill.getUuid());
+		boolean forceNew = Boolean.TRUE.equals(bill.getForceNewBill());
+
+		if (!isUpdate && !forceNew) {
+			// Check if there is an existing pending bill for the patient
+			List<Bill> bills = searchBill(bill.getPatient());
+			if (!bills.isEmpty()) {
+				Bill billToUpdate = bills.get(0);
 				billToUpdate.setStatus(BillStatus.PENDING);
+				
+				// Handle the case where bill and billToUpdate are the same object reference
+				// (Hibernate session cache returns same managed instance)
+				Set<BillLineItem> existingItemsSet = new HashSet<>(billToUpdate.getLineItems());
+				
+				for (BillLineItem item : bill.getLineItems()) {
+					// Only add if not already present (BillLineItem.equals() handles comparison)
+					if (!existingItemsSet.contains(item)) {
+						item.setBill(billToUpdate);
+						billToUpdate.getLineItems().add(item);
+					}
+				}
+				
+				// Calculate the total payments made on the bill (excluding voided payments)
+				BigDecimal totalPaid = billToUpdate.getTotalPayments();
+				
+				// Check if the bill is fully paid
+				if (totalPaid.compareTo(billToUpdate.getTotal()) >= 0) {
+					billToUpdate.setStatus(BillStatus.PAID);
+				} else {
+					billToUpdate.setStatus(BillStatus.PENDING);
+				}
+				
+				// Save the updated bill
+				return super.save(billToUpdate);
 			}
-			
-			// Save the updated bill
-			return super.save(billToUpdate);
 		}
-		
-		// If no pending bill exists, just save the new bill as it is
+        // For updates or forceNewBill, skip merging and save as-is
 		return super.save(bill);
 	}
 	
