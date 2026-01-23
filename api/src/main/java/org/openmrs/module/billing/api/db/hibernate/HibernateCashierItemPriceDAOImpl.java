@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.hibernate.SessionFactory;
 import org.openmrs.module.billing.api.db.CashierItemPriceDAO;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -25,12 +26,14 @@ public class HibernateCashierItemPriceDAOImpl implements CashierItemPriceDAO {
 	
 	/** {@inheritDoc} */
 	@Override
+	@Transactional(readOnly = true)
 	public CashierItemPrice getCashierItemPrice(@Nonnull Integer id) {
 		return sessionFactory.getCurrentSession().get(CashierItemPrice.class, id);
 	}
 	
 	/** {@inheritDoc} */
 	@Override
+	@Transactional(readOnly = true)
 	public CashierItemPrice getCashierItemPriceByUuid(@Nonnull String uuid) {
 		return sessionFactory.getCurrentSession()
 		        .createQuery("from CashierItemPrice where uuid = :uuid", CashierItemPrice.class).setParameter("uuid", uuid)
@@ -39,6 +42,7 @@ public class HibernateCashierItemPriceDAOImpl implements CashierItemPriceDAO {
 	
 	/** {@inheritDoc} */
 	@Override
+	@Transactional(readOnly = true)
 	public List<CashierItemPrice> getCashierItemPrices(boolean includeRetired) {
 		return sessionFactory.getCurrentSession().createQuery(
 		    "from CashierItemPrice" + (includeRetired ? "" : " where retired = false"), CashierItemPrice.class).list();
@@ -46,6 +50,7 @@ public class HibernateCashierItemPriceDAOImpl implements CashierItemPriceDAO {
 	
 	/** {@inheritDoc} */
 	@Override
+	@Transactional
 	public CashierItemPrice saveCashierItemPrice(@Nonnull CashierItemPrice cashierItemPrice) {
 		sessionFactory.getCurrentSession().saveOrUpdate(cashierItemPrice);
 		return cashierItemPrice;
@@ -53,6 +58,7 @@ public class HibernateCashierItemPriceDAOImpl implements CashierItemPriceDAO {
 	
 	/** {@inheritDoc} */
 	@Override
+	@Transactional
 	public void purgeCashierItemPrice(@Nonnull CashierItemPrice cashierItemPrice) {
 		sessionFactory.getCurrentSession().delete(cashierItemPrice);
 	}

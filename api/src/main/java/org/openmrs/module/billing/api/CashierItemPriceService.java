@@ -11,14 +11,12 @@ package org.openmrs.module.billing.api;
 
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 /**
  * Service for managing {@link CashierItemPrice} entities.
  */
-@Transactional
 public interface CashierItemPriceService extends OpenmrsService {
 	
 	/**
@@ -27,7 +25,6 @@ public interface CashierItemPriceService extends OpenmrsService {
 	 * @param id the cashier item price id
 	 * @return the cashier item price or {@code null} if not found
 	 */
-	@Transactional(readOnly = true)
 	CashierItemPrice getCashierItemPrice(Integer id);
 	
 	/**
@@ -36,7 +33,6 @@ public interface CashierItemPriceService extends OpenmrsService {
 	 * @param uuid the cashier item price uuid
 	 * @return the cashier item price or {@code null} if not found
 	 */
-	@Transactional(readOnly = true)
 	CashierItemPrice getCashierItemPriceByUuid(String uuid);
 	
 	/**
@@ -45,7 +41,6 @@ public interface CashierItemPriceService extends OpenmrsService {
 	 * @param includeRetired whether to include retired cashier item prices
 	 * @return a list of all cashier item prices, or an empty list if none found
 	 */
-	@Transactional(readOnly = true)
 	List<CashierItemPrice> getCashierItemPrices(boolean includeRetired);
 	
 	/**
@@ -55,7 +50,6 @@ public interface CashierItemPriceService extends OpenmrsService {
 	 * @return the saved cashier item price
 	 * @throws IllegalArgumentException if cashierItemPrice is null
 	 */
-	@Transactional
 	CashierItemPrice saveCashierItemPrice(CashierItemPrice cashierItemPrice);
 	
 	/**
@@ -65,7 +59,6 @@ public interface CashierItemPriceService extends OpenmrsService {
 	 * @param reason the reason for retiring
 	 * @throws IllegalArgumentException if cashierItemPrice is null or reason is empty
 	 */
-	@Transactional
 	void retireCashierItemPrice(CashierItemPrice cashierItemPrice, String reason);
 	
 	/**
@@ -75,7 +68,6 @@ public interface CashierItemPriceService extends OpenmrsService {
 	 * @return the unretired cashier item price
 	 * @throws IllegalArgumentException if cashierItemPrice is null
 	 */
-	@Transactional
 	CashierItemPrice unretireCashierItemPrice(CashierItemPrice cashierItemPrice);
 	
 	/**
@@ -84,6 +76,5 @@ public interface CashierItemPriceService extends OpenmrsService {
 	 * @param cashierItemPrice the cashier item price to purge
 	 * @throws IllegalArgumentException if cashierItemPrice is null
 	 */
-	@Transactional
 	void purgeCashierItemPrice(CashierItemPrice cashierItemPrice);
 }

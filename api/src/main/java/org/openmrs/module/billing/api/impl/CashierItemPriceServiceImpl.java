@@ -30,6 +30,7 @@ public class CashierItemPriceServiceImpl extends BaseOpenmrsService implements C
 	
 	/** {@inheritDoc} */
 	@Override
+	@Transactional(readOnly = true)
 	public CashierItemPrice getCashierItemPrice(Integer id) {
 		if (id == null) {
 			return null;
@@ -39,6 +40,7 @@ public class CashierItemPriceServiceImpl extends BaseOpenmrsService implements C
 	
 	/** {@inheritDoc} */
 	@Override
+	@Transactional(readOnly = true)
 	public CashierItemPrice getCashierItemPriceByUuid(String uuid) {
 		if (uuid == null) {
 			return null;
@@ -48,12 +50,14 @@ public class CashierItemPriceServiceImpl extends BaseOpenmrsService implements C
 	
 	/** {@inheritDoc} */
 	@Override
+	@Transactional(readOnly = true)
 	public List<CashierItemPrice> getCashierItemPrices(boolean includeRetired) {
 		return cashierItemPriceDAO.getCashierItemPrices(includeRetired);
 	}
 	
 	/** {@inheritDoc} */
 	@Override
+	@Transactional
 	public CashierItemPrice saveCashierItemPrice(CashierItemPrice cashierItemPrice) {
 		if (cashierItemPrice == null) {
 			throw new IllegalArgumentException("CashierItemPrice cannot be null");
@@ -63,6 +67,7 @@ public class CashierItemPriceServiceImpl extends BaseOpenmrsService implements C
 	
 	/** {@inheritDoc} */
 	@Override
+	@Transactional
 	public void retireCashierItemPrice(CashierItemPrice cashierItemPrice, String reason) {
 		if (cashierItemPrice == null) {
 			throw new IllegalArgumentException("CashierItemPrice cannot be null");
@@ -75,6 +80,7 @@ public class CashierItemPriceServiceImpl extends BaseOpenmrsService implements C
 	
 	/** {@inheritDoc} */
 	@Override
+	@Transactional
 	public CashierItemPrice unretireCashierItemPrice(CashierItemPrice cashierItemPrice) {
 		if (cashierItemPrice == null) {
 			throw new IllegalArgumentException("CashierItemPrice cannot be null");
@@ -84,6 +90,7 @@ public class CashierItemPriceServiceImpl extends BaseOpenmrsService implements C
 	
 	/** {@inheritDoc} */
 	@Override
+	@Transactional
 	public void purgeCashierItemPrice(CashierItemPrice cashierItemPrice) {
 		if (cashierItemPrice == null) {
 			throw new IllegalArgumentException("CashierItemPrice cannot be null");

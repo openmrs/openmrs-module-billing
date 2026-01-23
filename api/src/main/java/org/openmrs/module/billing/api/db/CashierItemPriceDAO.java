@@ -10,7 +10,6 @@
 package org.openmrs.module.billing.api.db;
 
 import org.openmrs.module.billing.api.model.CashierItemPrice;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -26,7 +25,6 @@ public interface CashierItemPriceDAO {
 	 * @param id the cashier item price id
 	 * @return the cashier item price or {@code null} if not found
 	 */
-	@Transactional(readOnly = true)
 	CashierItemPrice getCashierItemPrice(@Nonnull Integer id);
 	
 	/**
@@ -35,7 +33,6 @@ public interface CashierItemPriceDAO {
 	 * @param uuid the cashier item price uuid
 	 * @return the cashier item price or {@code null} if not found
 	 */
-	@Transactional(readOnly = true)
 	CashierItemPrice getCashierItemPriceByUuid(@Nonnull String uuid);
 	
 	/**
@@ -44,7 +41,6 @@ public interface CashierItemPriceDAO {
 	 * @param includeRetired whether to include retired cashier item prices
 	 * @return a list of all cashier item prices, or an empty list if none found
 	 */
-	@Transactional(readOnly = true)
 	List<CashierItemPrice> getCashierItemPrices(boolean includeRetired);
 	
 	/**
@@ -53,7 +49,6 @@ public interface CashierItemPriceDAO {
 	 * @param cashierItemPrice the cashier item price to save
 	 * @return the saved cashier item price
 	 */
-	@Transactional
 	CashierItemPrice saveCashierItemPrice(@Nonnull CashierItemPrice cashierItemPrice);
 	
 	/**
@@ -61,7 +56,6 @@ public interface CashierItemPriceDAO {
 	 *
 	 * @param cashierItemPrice the cashier item price to purge
 	 */
-	@Transactional
 	void purgeCashierItemPrice(@Nonnull CashierItemPrice cashierItemPrice);
 	
 }
