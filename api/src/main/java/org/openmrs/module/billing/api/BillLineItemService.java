@@ -14,17 +14,30 @@
 package org.openmrs.module.billing.api;
 
 import org.openmrs.api.OpenmrsService;
+import org.openmrs.module.billing.api.model.BillLineItem;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 public interface BillLineItemService extends OpenmrsService {
-	
+
 	/**
-	 * Retrieves the IDs of line items currently persisted in the database for a bill.
+	 * Retrieves the IDs of line items currently persisted in the database for a
+	 * bill.
 	 *
 	 * @param billId the ID of the bill
-	 * @return a list of line item IDs, or an empty list if the bill has no line items
+	 * @return a list of line item IDs, or an empty list if the bill has no line
+	 *         items
 	 */
 	List<Integer> getPersistedLineItemIds(Integer billId);
-	
+
+	/**
+	 * Retrieves a bill line item by its UUID.
+	 *
+	 * @param uuid the UUID of the bill line item
+	 * @return the bill line item with the specified UUID, or null if not found
+	 */
+	@Nullable
+	BillLineItem getBillLineItemByUuid(String uuid);
+
 }
