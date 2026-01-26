@@ -13,6 +13,9 @@
  */
 package org.openmrs.module.billing.web.rest.resource;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.BooleanUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
@@ -51,7 +54,12 @@ public class CashPointResource extends MetadataDelegatingCrudResource<CashPoint>
     public SimpleObject getAll(RequestContext context) throws ResponseException {
         SimpleObject results = new SimpleObject();
         boolean includeRetired = BooleanUtils.toBoolean(context.getParameter("includeAll"));
-        results.put("results", cashPointService.getAllCashPoints(includeRetired));
+        List<CashPoint> cashPoints = cashPointService.getAllCashPoints(includeRetired);
+        List<SimpleObject> convertedResults = new ArrayList<>();
+        for (CashPoint cashPoint : cashPoints) {
+            convertedResults.add(asRepresentation(cashPoint, context.getRepresentation()));
+        }
+        results.put("results", convertedResults);
         return results;
     }
 
