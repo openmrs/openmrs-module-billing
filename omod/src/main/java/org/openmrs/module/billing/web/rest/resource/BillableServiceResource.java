@@ -73,7 +73,7 @@ public class BillableServiceResource extends MetadataDelegatingCrudResource<Bill
         BillableServiceService service = Context.getService(BillableServiceService.class);
         PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
         List<BillableService> billableServices = service.getBillableServices(searchTemplate, pagingInfo);
-        return new AlreadyPaged<>(context, billableServices, false);
+        return new AlreadyPaged<>(context, billableServices, pagingInfo.hasMoreResults());
     }
 
     @Override
