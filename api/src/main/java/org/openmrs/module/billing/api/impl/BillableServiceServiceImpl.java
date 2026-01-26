@@ -9,6 +9,7 @@ import org.openmrs.module.billing.api.db.BillableServiceDAO;
 import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.search.BillableServiceSearch;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
@@ -22,6 +23,7 @@ public class BillableServiceServiceImpl extends BaseOpenmrsService implements Bi
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public BillableService getBillableService(Integer id) {
 		if (id == null) {
 			return null;
@@ -33,6 +35,7 @@ public class BillableServiceServiceImpl extends BaseOpenmrsService implements Bi
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public BillableService getBillableServiceByUuid(String uuid) {
 		if (StringUtils.isEmpty(uuid)) {
 			return null;
@@ -44,6 +47,7 @@ public class BillableServiceServiceImpl extends BaseOpenmrsService implements Bi
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public List<BillableService> getBillableServices(BillableServiceSearch billableServiceSearch, PagingInfo pagingInfo) {
 		if (billableServiceSearch == null) {
 			return Collections.emptyList();
@@ -55,6 +59,7 @@ public class BillableServiceServiceImpl extends BaseOpenmrsService implements Bi
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional
 	public BillableService saveBillableService(BillableService billableService) {
 		if (billableService == null) {
 			throw new NullPointerException("The billableService must be defined.");
@@ -66,6 +71,7 @@ public class BillableServiceServiceImpl extends BaseOpenmrsService implements Bi
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional
 	public void purgeBillableService(BillableService billableService) {
 		if (billableService == null) {
 			throw new NullPointerException("The billableService must be defined.");
@@ -74,6 +80,7 @@ public class BillableServiceServiceImpl extends BaseOpenmrsService implements Bi
 	}
 	
 	@Override
+	@Transactional
 	public BillableService retireBillableService(BillableService billableService, String reason) {
 		if (StringUtils.isEmpty(reason)) {
 			throw new IllegalArgumentException("Retire reason cannot be empty or null");
@@ -82,6 +89,7 @@ public class BillableServiceServiceImpl extends BaseOpenmrsService implements Bi
 	}
 	
 	@Override
+	@Transactional
 	public BillableService unretireBillableService(BillableService billableService) {
 		return billableServiceDAO.saveBillableService(billableService);
 	}

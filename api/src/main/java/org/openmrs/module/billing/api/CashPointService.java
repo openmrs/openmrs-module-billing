@@ -22,7 +22,6 @@ import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.search.CashPointSearch;
 import org.openmrs.module.billing.api.util.PrivilegeConstants;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service for managing {@link CashPoint} entities.
@@ -35,7 +34,6 @@ public interface CashPointService extends OpenmrsService {
 	 * @param id the cash point id
 	 * @return the cash point or {@code null} if not found
 	 */
-	@Transactional(readOnly = true)
 	@Authorized({ PrivilegeConstants.MANAGE_METADATA })
 	CashPoint getCashPoint(Integer id);
 	
@@ -45,7 +43,6 @@ public interface CashPointService extends OpenmrsService {
 	 * @param uuid the cash point uuid
 	 * @return the cash point or {@code null} if not found
 	 */
-	@Transactional(readOnly = true)
 	@Authorized({ PrivilegeConstants.MANAGE_METADATA })
 	CashPoint getCashPointByUuid(String uuid);
 	
@@ -56,7 +53,6 @@ public interface CashPointService extends OpenmrsService {
 	 * @param pagingInfo optional paging information
 	 * @return a list of cash points matching the criteria, or an empty list if none found
 	 */
-	@Transactional(readOnly = true)
 	@Authorized({ PrivilegeConstants.MANAGE_METADATA })
 	List<CashPoint> getCashPoints(CashPointSearch cashPointSearch, PagingInfo pagingInfo);
 	
@@ -68,7 +64,6 @@ public interface CashPointService extends OpenmrsService {
 	 * @return a list of cash points at the location, or an empty list if none found
 	 * @throws IllegalArgumentException if location is null
 	 */
-	@Transactional(readOnly = true)
 	@Authorized({ PrivilegeConstants.MANAGE_METADATA })
 	List<CashPoint> getCashPointsByLocation(Location location, boolean includeRetired);
 	
@@ -81,7 +76,6 @@ public interface CashPointService extends OpenmrsService {
 	 * @return a list of cash points at the location, or an empty list if none found
 	 * @throws IllegalArgumentException if location is null
 	 */
-	@Transactional(readOnly = true)
 	@Authorized({ PrivilegeConstants.MANAGE_METADATA })
 	List<CashPoint> getCashPointsByLocation(Location location, boolean includeRetired, PagingInfo pagingInfo);
 	
@@ -95,7 +89,6 @@ public interface CashPointService extends OpenmrsService {
 	 * @throws IllegalArgumentException if location is null, name is null/empty, or name exceeds 255
 	 *             characters
 	 */
-	@Transactional(readOnly = true)
 	@Authorized({ PrivilegeConstants.MANAGE_METADATA })
 	List<CashPoint> getCashPointsByLocationAndName(Location location, String name, boolean includeRetired);
 	
@@ -110,7 +103,6 @@ public interface CashPointService extends OpenmrsService {
 	 * @throws IllegalArgumentException if location is null, name is null/empty, or name exceeds 255
 	 *             characters
 	 */
-	@Transactional(readOnly = true)
 	@Authorized({ PrivilegeConstants.MANAGE_METADATA })
 	List<CashPoint> getCashPointsByLocationAndName(Location location, String name, boolean includeRetired,
 	        PagingInfo pagingInfo);
@@ -121,7 +113,6 @@ public interface CashPointService extends OpenmrsService {
 	 * @param includeRetired whether to include retired cash points
 	 * @return a list of all cash points, or an empty list if none found
 	 */
-	@Transactional(readOnly = true)
 	@Authorized({ PrivilegeConstants.MANAGE_METADATA })
 	List<CashPoint> getAllCashPoints(boolean includeRetired);
 	
@@ -132,7 +123,6 @@ public interface CashPointService extends OpenmrsService {
 	 * @return the saved cash point
 	 * @throws IllegalArgumentException if cashPoint is null
 	 */
-	@Transactional
 	@Authorized({ PrivilegeConstants.MANAGE_METADATA })
 	CashPoint saveCashPoint(CashPoint cashPoint);
 	
@@ -142,7 +132,6 @@ public interface CashPointService extends OpenmrsService {
 	 * @param cashPoint the cash point to purge
 	 * @throws IllegalArgumentException if cashPoint is null
 	 */
-	@Transactional
 	@Authorized({ PrivilegeConstants.MANAGE_METADATA })
 	void purgeCashPoint(CashPoint cashPoint);
 	
@@ -154,7 +143,6 @@ public interface CashPointService extends OpenmrsService {
 	 * @return the retired cash point
 	 * @throws IllegalArgumentException if retireReason is empty or null
 	 */
-	@Transactional
 	@Authorized({ PrivilegeConstants.MANAGE_METADATA })
 	CashPoint retireCashPoint(CashPoint cashPoint, String retireReason);
 	
@@ -164,7 +152,6 @@ public interface CashPointService extends OpenmrsService {
 	 * @param cashPoint the cash point to unretire
 	 * @return the unretired cash point
 	 */
-	@Transactional
 	@Authorized({ PrivilegeConstants.MANAGE_METADATA })
 	CashPoint unretireCashPoint(CashPoint cashPoint);
 }

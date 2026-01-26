@@ -30,7 +30,6 @@ public interface PaymentModeDAO {
 	 * @param id the payment mode id
 	 * @return the payment mode or {@code null} if not found
 	 */
-	@Transactional(readOnly = true)
 	PaymentMode getPaymentMode(@Nonnull Integer id);
 	
 	/**
@@ -39,7 +38,6 @@ public interface PaymentModeDAO {
 	 * @param uuid the payment mode uuid
 	 * @return the payment mode or {@code null} if not found
 	 */
-	@Transactional(readOnly = true)
 	PaymentMode getPaymentModeByUuid(@Nonnull String uuid);
 	
 	/**
@@ -48,7 +46,6 @@ public interface PaymentModeDAO {
 	 * @param includeRetired whether to include retired payment modes
 	 * @return a list of payment modes, or an empty list if none found
 	 */
-	@Transactional(readOnly = true)
 	List<PaymentMode> getPaymentModes(boolean includeRetired);
 	
 	/**
@@ -57,7 +54,6 @@ public interface PaymentModeDAO {
 	 * @param paymentMode the payment mode to save
 	 * @return the saved payment mode
 	 */
-	@Transactional
 	PaymentMode savePaymentMode(@Nonnull PaymentMode paymentMode);
 	
 	/**
@@ -65,6 +61,5 @@ public interface PaymentModeDAO {
 	 *
 	 * @param paymentMode the payment mode to purge
 	 */
-	@Transactional
 	void purgePaymentMode(@Nonnull PaymentMode paymentMode);
 }

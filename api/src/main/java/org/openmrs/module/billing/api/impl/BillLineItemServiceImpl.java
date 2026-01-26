@@ -28,6 +28,7 @@ public class BillLineItemServiceImpl extends BaseOpenmrsService implements BillL
 	private BillLineItemDAO billLineItemDAO;
 	
 	@Override
+	@Transactional(readOnly = true)
 	public List<Integer> getPersistedLineItemIds(Integer billId) {
 		if (billId == null) {
 			return Collections.emptyList();

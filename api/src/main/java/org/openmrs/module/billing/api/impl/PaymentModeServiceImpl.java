@@ -37,6 +37,7 @@ public class PaymentModeServiceImpl extends BaseOpenmrsService implements Paymen
 	 * @inheritDoc
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public PaymentMode getPaymentMode(Integer id) {
 		if (id == null) {
 			return null;
@@ -48,6 +49,7 @@ public class PaymentModeServiceImpl extends BaseOpenmrsService implements Paymen
 	 * @inheritDoc
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public PaymentMode getPaymentModeByUuid(String uuid) {
 		if (StringUtils.isEmpty(uuid)) {
 			return null;
@@ -59,6 +61,7 @@ public class PaymentModeServiceImpl extends BaseOpenmrsService implements Paymen
 	 * @inheritDoc
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public List<PaymentMode> getPaymentModes(boolean includeRetired) {
 		return paymentModeDAO.getPaymentModes(includeRetired);
 	}
@@ -67,6 +70,7 @@ public class PaymentModeServiceImpl extends BaseOpenmrsService implements Paymen
 	 * @inheritDoc
 	 */
 	@Override
+	@Transactional
 	public PaymentMode savePaymentMode(PaymentMode paymentMode) {
 		if (paymentMode == null) {
 			throw new NullPointerException("Payment mode cannot be null");
@@ -78,6 +82,7 @@ public class PaymentModeServiceImpl extends BaseOpenmrsService implements Paymen
 	 * @inheritDoc
 	 */
 	@Override
+	@Transactional
 	public PaymentMode retirePaymentMode(PaymentMode paymentMode, String reason) {
 		if (StringUtils.isEmpty(reason)) {
 			throw new IllegalArgumentException("Retire reason cannot be null");
@@ -89,6 +94,7 @@ public class PaymentModeServiceImpl extends BaseOpenmrsService implements Paymen
 	 * @inheritDoc
 	 */
 	@Override
+	@Transactional
 	public PaymentMode unretirePaymentMode(PaymentMode paymentMode) {
 		return paymentModeDAO.savePaymentMode(paymentMode);
 	}
@@ -97,6 +103,7 @@ public class PaymentModeServiceImpl extends BaseOpenmrsService implements Paymen
 	 * @inheritDoc
 	 */
 	@Override
+	@Transactional
 	public void purgePaymentMode(PaymentMode paymentMode) {
 		if (paymentMode == null) {
 			throw new NullPointerException("Payment mode cannot be null");

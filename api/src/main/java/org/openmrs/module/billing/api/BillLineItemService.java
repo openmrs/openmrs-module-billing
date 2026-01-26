@@ -14,11 +14,9 @@
 package org.openmrs.module.billing.api;
 
 import org.openmrs.api.OpenmrsService;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Transactional
 public interface BillLineItemService extends OpenmrsService {
 	
 	/**
@@ -27,7 +25,6 @@ public interface BillLineItemService extends OpenmrsService {
 	 * @param billId the ID of the bill
 	 * @return a list of line item IDs, or an empty list if the bill has no line items
 	 */
-	@Transactional(readOnly = true)
 	List<Integer> getPersistedLineItemIds(Integer billId);
 	
 }
