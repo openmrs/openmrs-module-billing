@@ -30,12 +30,15 @@ import org.openmrs.module.webservices.rest.web.representation.CustomRepresentati
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
+import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.resource.impl.MetadataDelegatingCrudResource;
+import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE + "/cashierItemPrice", supportedClass = CashierItemPrice.class,
         supportedOpenmrsVersions = {"2.0 - 2.*"})
@@ -137,10 +140,9 @@ public class CashierItemPriceResource extends MetadataDelegatingCrudResource<Cas
     }
 
     @Override
-    public SimpleObject getAll(RequestContext context) throws ResponseException {
+    protected PageableResult doGetAll(RequestContext context) throws ResponseException {
         boolean includeRetired = BooleanUtils.toBoolean(context.getParameter("includeAll"));
-        SimpleObject results = new SimpleObject();
-        results.put("results", cashierItemPriceService.getCashierItemPrices(includeRetired));
-        return results;
+        List<CashierItemPrice> results = cashierItemPriceService.getCashierItemPrices(includeRetired);
+        return new NeedsPaging<>(results, context);
     }
 }
