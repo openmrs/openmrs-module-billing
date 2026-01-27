@@ -7,6 +7,7 @@ import org.openmrs.module.billing.api.model.BillLineItem;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.persistence.TypedQuery;
 import java.util.List;
 
 /**
@@ -26,17 +27,12 @@ public class HibernateBillLineItemDAO implements BillLineItemDAO {
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	@Nullable
 	public BillLineItem getBillLineItemByUuid(@Nonnull String uuid) {
-		// Use native query to bypass Hibernate's first-level cache, ensuring it returns
-		// the
-		// actual persisted state of line items rather than any in-memory modifications
-		List<BillLineItem> results = sessionFactory.getCurrentSession()
-		        .createNativeQuery("SELECT * FROM cashier_bill_line_item WHERE uuid = :uuid").addEntity(BillLineItem.class)
-		        .setParameter("uuid", uuid).getResultList();
-		
-		return results.isEmpty() ? null : results.get(0);
+		TypedQuery<BillLineItem> query = sessionFactory.getCurrentSession()
+		        .createQuery("select b from BillLineItem b where b.uuid = :uuid", BillLineItem.class);
+		query.setParameter("uuid", uuid);
+		return query.getResultStream().findFirst().orElse(null);
 	}
 	
 }

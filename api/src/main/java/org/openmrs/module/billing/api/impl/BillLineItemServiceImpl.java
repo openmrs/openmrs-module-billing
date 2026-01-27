@@ -22,6 +22,7 @@ import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.billing.api.BillLineItemService;
 import org.openmrs.module.billing.api.db.BillLineItemDAO;
 import org.openmrs.module.billing.api.model.BillLineItem;
+import org.springframework.transaction.annotation.Transactional;
 
 public class BillLineItemServiceImpl extends BaseOpenmrsService implements BillLineItemService {
 	

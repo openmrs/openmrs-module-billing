@@ -20,17 +20,15 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 public interface BillLineItemService extends OpenmrsService {
-
+	
 	/**
-	 * Retrieves the IDs of line items currently persisted in the database for a
-	 * bill.
+	 * Retrieves the IDs of line items currently persisted in the database for a bill.
 	 *
 	 * @param billId the ID of the bill
-	 * @return a list of line item IDs, or an empty list if the bill has no line
-	 *         items
+	 * @return a list of line item IDs, or an empty list if the bill has no line items
 	 */
 	List<Integer> getPersistedLineItemIds(Integer billId);
-
+	
 	/**
 	 * Retrieves a bill line item by its UUID.
 	 *
@@ -39,5 +37,5 @@ public interface BillLineItemService extends OpenmrsService {
 	 */
 	@Nullable
 	BillLineItem getBillLineItemByUuid(String uuid);
-
+	
 }
