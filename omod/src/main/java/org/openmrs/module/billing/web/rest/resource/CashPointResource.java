@@ -24,6 +24,9 @@ import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
 import org.openmrs.module.webservices.rest.web.representation.CustomRepresentation;
+import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
+import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
+import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
@@ -43,16 +46,30 @@ public class CashPointResource extends MetadataDelegatingCrudResource<CashPoint>
     @Override
     public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
         DelegatingResourceDescription description = new DelegatingResourceDescription();
-        description.addProperty("uuid");
-        description.addProperty("name");
-        description.addProperty("description");
-        description.addProperty("retired");
-        description.addProperty("location", Representation.REF);
-        if (rep instanceof CustomRepresentation) {
+        if (rep instanceof RefRepresentation) {
+            description.addProperty("uuid");
+            description.addProperty("name");
+            description.addProperty("description");
+            description.addProperty("retired");
+        } else if (rep instanceof DefaultRepresentation) {
+            description.addProperty("uuid");
+            description.addProperty("name");
+            description.addProperty("description");
+            description.addProperty("retired");
+            description.addProperty("location", Representation.REF);
+        } else if (rep instanceof FullRepresentation) {
+            description.addProperty("uuid");
+            description.addProperty("name");
+            description.addProperty("description");
+            description.addProperty("retired");
+            description.addProperty("location", Representation.REF);
+            description.addProperty("auditInfo");
+        } else if (rep instanceof CustomRepresentation) {
             // For custom representation, must be null
             // - let the user decide which properties should be included in the response
-            return null;
+            description = null;
         }
+
         return description;
     }
 
