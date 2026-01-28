@@ -1,8 +1,9 @@
 package org.openmrs.module.billing.api.db;
 
-import org.springframework.transaction.annotation.Transactional;
+import org.openmrs.module.billing.api.model.BillLineItem;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -21,5 +22,14 @@ public interface BillLineItemDAO {
 	 * @return a list of line item IDs, or an empty list if the bill has no line items
 	 */
 	List<Integer> getLineItemIdsByBillId(@Nonnull Integer billId);
+	
+	/**
+	 * Retrieves a bill line item by its UUID.
+	 *
+	 * @param uuid the UUID of the bill line item
+	 * @return the bill line item with the specified UUID, or null if not found
+	 */
+	@Nullable
+	BillLineItem getBillLineItemByUuid(@Nonnull String uuid);
 	
 }

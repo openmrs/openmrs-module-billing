@@ -76,7 +76,7 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
             description.addProperty("receiptNumber");
             description.addProperty("status");
             description.addProperty("adjustmentReason");
-            description.addProperty("id");
+            description.addProperty("uuid");
             return description;
         }
         return null;

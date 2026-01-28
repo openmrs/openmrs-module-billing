@@ -17,9 +17,11 @@ import java.util.Collections;
 import java.util.List;
 
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.billing.api.BillLineItemService;
 import org.openmrs.module.billing.api.db.BillLineItemDAO;
+import org.openmrs.module.billing.api.model.BillLineItem;
 import org.springframework.transaction.annotation.Transactional;
 
 public class BillLineItemServiceImpl extends BaseOpenmrsService implements BillLineItemService {
@@ -34,5 +36,14 @@ public class BillLineItemServiceImpl extends BaseOpenmrsService implements BillL
 			return Collections.emptyList();
 		}
 		return billLineItemDAO.getLineItemIdsByBillId(billId);
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public BillLineItem getBillLineItemByUuid(String uuid) {
+		if (StringUtils.isEmpty(uuid)) {
+			return null;
+		}
+		return billLineItemDAO.getBillLineItemByUuid(uuid);
 	}
 }
