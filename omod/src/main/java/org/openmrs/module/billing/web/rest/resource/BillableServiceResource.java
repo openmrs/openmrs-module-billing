@@ -43,10 +43,9 @@ import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE + "/billableService", supportedClass = BillableService.class,
-        supportedOpenmrsVersions = {"2.0 - 2.*"})
+@Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
+        + "/billableService", supportedClass = BillableService.class, supportedOpenmrsVersions = { "2.0 - 2.*" })
 public class BillableServiceResource extends MetadataDelegatingCrudResource<BillableService> {
-
 
     @Override
     public BillableService newDelegate() {
@@ -69,11 +68,24 @@ public class BillableServiceResource extends MetadataDelegatingCrudResource<Bill
     }
 
     @Override
+    protected AlreadyPaged<BillableService> doGetAll(RequestContext context) {
+        BillableServiceSearch searchTemplate = new BillableServiceSearch();
+        BillableServiceService service = Context.getService(BillableServiceService.class);
+        PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
+        List<BillableService> billableServices = service.getBillableServices(searchTemplate, pagingInfo);
+        return new AlreadyPaged<>(context, billableServices, pagingInfo.hasMoreResults());
+    }
+
+    @Override
     protected AlreadyPaged<BillableService> doSearch(RequestContext context) {
-        Concept serviceType = context.getParameter("serviceType") != null ? Context.getConceptService().getConceptByUuid(
-                context.getParameter("serviceType")) : null;
-        Concept serviceCategory = context.getParameter("serviceCategory") != null ? Context.getConceptService().getConceptByUuid(
-                context.getParameter("serviceCategory")) : null;
+        Concept serviceType = context.getParameter("serviceType") != null
+                ? Context.getConceptService().getConceptByUuid(
+                        context.getParameter("serviceType"))
+                : null;
+        Concept serviceCategory = context.getParameter("serviceCategory") != null
+                ? Context.getConceptService().getConceptByUuid(
+                        context.getParameter("serviceCategory"))
+                : null;
         String serviceStatus = context.getParameter("isDisabled");
         String serviceName = context.getParameter("serviceName");
         BillableServiceStatus status = BillableServiceStatus.ENABLED;
@@ -83,10 +95,16 @@ public class BillableServiceResource extends MetadataDelegatingCrudResource<Bill
             }
         }
         BillableServiceSearch searchTemplate = new BillableServiceSearch();
-        searchTemplate.setServiceTypeUuid(serviceType.getUuid());
-        searchTemplate.setServiceCategoryUuid(serviceCategory.getUuid());
+        if (serviceType != null) {
+            searchTemplate.setServiceTypeUuid(serviceType.getUuid());
+        }
+        if (serviceCategory != null) {
+            searchTemplate.setServiceCategoryUuid(serviceCategory.getUuid());
+        }
         searchTemplate.setServiceStatus(status);
-        searchTemplate.setName(serviceName);
+        if (Strings.isNotEmpty(serviceName)) {
+            searchTemplate.setName(serviceName);
+        }
 
         BillableServiceService service = Context.getService(BillableServiceService.class);
         PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
@@ -106,7 +124,7 @@ public class BillableServiceResource extends MetadataDelegatingCrudResource<Bill
             description.addProperty("servicePrices");
             description.addProperty("serviceStatus");
         } else if (rep instanceof CustomRepresentation) {
-            //For custom representation, must be null
+            // For custom representation, must be null
             // - let the user decide which properties should be included in the response
             description = null;
         }
