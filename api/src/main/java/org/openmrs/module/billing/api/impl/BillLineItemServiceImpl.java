@@ -25,10 +25,10 @@ import org.openmrs.module.billing.api.model.BillLineItem;
 import org.springframework.transaction.annotation.Transactional;
 
 public class BillLineItemServiceImpl extends BaseOpenmrsService implements BillLineItemService {
-	
+
 	@Setter
 	private BillLineItemDAO billLineItemDAO;
-	
+
 	@Override
 	@Transactional(readOnly = true)
 	public List<Integer> getPersistedLineItemIds(Integer billId) {
@@ -37,8 +37,9 @@ public class BillLineItemServiceImpl extends BaseOpenmrsService implements BillL
 		}
 		return billLineItemDAO.getLineItemIdsByBillId(billId);
 	}
-	
+
 	@Override
+	@Transactional(readOnly = true)
 	public BillLineItem getBillLineItemByUuid(String uuid) {
 		if (StringUtils.isEmpty(uuid)) {
 			return null;
