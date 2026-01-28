@@ -146,10 +146,7 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
             return null;
         }
 
-        // BillLineItemService doesn't implement IEntityDataService, so we use the
-        // service directly
-        BillLineItemService service = Context.getService(BillLineItemService.class);
-        return service != null ? service.getBillLineItemByUuid(uuid) : null;
+        return Context.getService(BillLineItemService.class).getBillLineItemByUuid(uuid);
     }
 
     @Override
