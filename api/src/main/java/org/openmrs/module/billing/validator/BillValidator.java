@@ -20,19 +20,19 @@ import org.springframework.validation.Validator;
 
 @Handler(supports = { Bill.class }, order = 50)
 public class BillValidator implements Validator {
-
+	
 	@Override
 	public boolean supports(@Nonnull Class<?> clazz) {
 		return Bill.class.isAssignableFrom(clazz);
 	}
-
+	
 	@Override
 	public void validate(@Nonnull Object target, @Nonnull Errors errors) {
 		if (!(target instanceof Bill)) {
 			errors.reject("error.general");
 		} else {
 			Bill bill = (Bill) target;
-
+			
 			if (bill.getVoided() && StringUtils.isBlank(bill.getVoidReason())) {
 				errors.rejectValue("voided", "error.null");
 			}
@@ -68,11 +68,11 @@ public class BillValidator implements Validator {
 			if (bill.getAdjustmentReason() != null && bill.getAdjustmentReason().length() > 500) {
 				errors.rejectValue("adjustmentReason", "billing.bill.error.adjustmentReasonTooLong");
 			}
-
+			
 			validateLineItemsNotModified(bill, errors);
 		}
 	}
-
+	
 	/**
 	 * Validates that line items have not been added or removed from a non-editable bill. This check is
 	 * necessary because the ImmutableBillInterceptor cannot detect collection changes due to
@@ -86,27 +86,27 @@ public class BillValidator implements Validator {
 		if (bill.getId() == null || bill.editable()) {
 			return;
 		}
-
+		
 		// Get the original line item IDs from the database
 		BillLineItemService billLineItemService = Context.getService(BillLineItemService.class);
 		List<Integer> originalLineItemIds = billLineItemService.getPersistedLineItemIds(bill.getId());
-
+		
 		Set<Integer> originalIds = new HashSet<>(originalLineItemIds);
-
+		
 		// Get current line item IDs (only those that have been persisted, i.e., have an ID)
 		Set<Integer> currentIds = new HashSet<>();
 		if (bill.getLineItems() != null) {
 			currentIds = bill.getLineItems().stream().map(BillLineItem::getId).filter(id -> id != null)
-					.collect(Collectors.toSet());
+			        .collect(Collectors.toSet());
 		}
-
+		
 		// Check if any line items were removed
 		Set<Integer> removedIds = new HashSet<>(originalIds);
 		removedIds.removeAll(currentIds);
 		if (!removedIds.isEmpty()) {
 			errors.reject("billing.error.lineItemsCannotBeRemovedFromNonPendingBill");
 		}
-
+		
 		// Check if any new line items were added (new items have null ID)
 		if (bill.getLineItems() != null) {
 			boolean hasNewLineItems = bill.getLineItems().stream().anyMatch(item -> item.getId() == null);
