@@ -10,7 +10,7 @@ import org.openmrs.module.billing.api.model.Bill;
 
 import java.util.Date;
 
-@Handler(supports = Bill.class)
+@Handler(supports = Bill.class, order = 1000)
 public class BillReceiptNumberHandler implements SaveHandler<Bill> {
 	
 	@Override
