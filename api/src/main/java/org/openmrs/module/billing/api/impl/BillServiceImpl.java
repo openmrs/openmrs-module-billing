@@ -80,12 +80,6 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		if (bill == null) {
 			throw new NullPointerException("The bill must be defined.");
 		}
-		if (StringUtils.isEmpty(bill.getReceiptNumber())) {
-			IReceiptNumberGenerator receiptNumberGenerator = ReceiptNumberGeneratorFactory.getGenerator();
-			if (receiptNumberGenerator != null) {
-				bill.setReceiptNumber(receiptNumberGenerator.generateNumber(bill));
-			}
-		}
 		return billDAO.saveBill(bill);
 	}
 	
