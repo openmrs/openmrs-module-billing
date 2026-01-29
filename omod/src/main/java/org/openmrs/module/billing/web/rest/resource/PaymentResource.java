@@ -15,8 +15,8 @@ package org.openmrs.module.billing.web.rest.resource;
 
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillService;
+import org.openmrs.module.billing.api.PaymentModeService;
 import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
-import org.openmrs.module.billing.api.IPaymentModeService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.Payment;
 import org.openmrs.module.billing.api.model.PaymentAttribute;
@@ -76,9 +76,9 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
     // Work around TypeVariable issue on base generic property (BaseCustomizableInstanceData.getInstanceType)
     @PropertySetter("instanceType")
     public void setPaymentMode(Payment instance, String uuid) {
-        IPaymentModeService service = Context.getService(IPaymentModeService.class);
+        PaymentModeService service = Context.getService(PaymentModeService.class);
 
-        PaymentMode mode = service.getByUuid(uuid);
+        PaymentMode mode = service.getPaymentModeByUuid(uuid);
         if (mode == null) {
             throw new ObjectNotFoundException();
         }

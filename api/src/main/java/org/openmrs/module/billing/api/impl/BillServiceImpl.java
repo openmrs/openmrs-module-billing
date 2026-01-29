@@ -18,6 +18,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.billing.api.BillService;
+import org.openmrs.module.billing.api.IReceiptNumberGenerator;
+import org.openmrs.module.billing.api.ReceiptNumberGeneratorFactory;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.db.BillDAO;
 import org.openmrs.module.billing.api.model.Bill;
@@ -41,119 +43,136 @@ import java.util.List;
  */
 @Transactional
 public class BillServiceImpl extends BaseOpenmrsService implements BillService {
-	
+
 	@Setter(onMethod_ = { @Autowired })
 	private BillDAO billDAO;
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public Bill getBill(Integer id) {
 		if (id == null) {
 			return null;
 		}
 		return billDAO.getBill(id);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public Bill getBillByUuid(String uuid) {
 		if (uuid == null) {
 			return null;
 		}
 		return billDAO.getBillByUuid(uuid);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional
 	public Bill saveBill(Bill bill) {
 		if (bill == null) {
 			throw new NullPointerException("The bill must be defined.");
 		}
+		if (StringUtils.isEmpty(bill.getReceiptNumber())) {
+			IReceiptNumberGenerator receiptNumberGenerator = ReceiptNumberGeneratorFactory.getGenerator();
+			if (receiptNumberGenerator != null) {
+				bill.setReceiptNumber(receiptNumberGenerator.generateNumber(bill));
+			}
+		}
 		org.openmrs.validator.ValidateUtil.validate(bill);
 		return billDAO.saveBill(bill);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public Bill getBillByReceiptNumber(String receiptNumber) {
 		if (receiptNumber == null) {
 			return null;
 		}
 		return billDAO.getBillByReceiptNumber(receiptNumber);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public List<Bill> getBillsByPatientUuid(String patientUuid, PagingInfo pagingInfo) {
 		if (StringUtils.isEmpty(patientUuid)) {
 			return Collections.emptyList();
 		}
 		return billDAO.getBillsByPatientUuid(patientUuid, pagingInfo);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public List<Bill> getBills(BillSearch billSearch, PagingInfo pagingInfo) {
 		if (billSearch == null) {
 			return Collections.emptyList();
 		}
 		return billDAO.getBills(billSearch, pagingInfo);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public byte[] downloadBillReceipt(Bill bill) {
 		if (bill == null) {
 			throw new NullPointerException("The bill must be defined.");
 		}
 		return ReceiptGenerator.createBillReceipt(bill);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional
 	public void purgeBill(Bill bill) {
 		if (bill == null) {
 			throw new NullPointerException("The bill must be defined.");
 		}
 		billDAO.purgeBill(bill);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional
 	public Bill voidBill(Bill bill, String voidReason) {
 		if (StringUtils.isBlank(voidReason)) {
 			throw new IllegalArgumentException("voidReason cannot be null or empty");
 		}
 		return billDAO.saveBill(bill);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional
 	public Bill unvoidBill(Bill bill) {
 		return billDAO.saveBill(bill);
 	}
-	
+
 	@Override
+	@Transactional(readOnly = true)
 	public boolean isBillEditable(Bill bill) {
 		if (bill == null) {
 			throw new IllegalArgumentException("Bill cannot be null");
@@ -164,5 +183,5 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		}
 		return true;
 	}
-	
+
 }

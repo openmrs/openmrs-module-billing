@@ -17,12 +17,12 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.openmrs.Location;
-import org.openmrs.api.LocationService;
+import org.apache.commons.lang3.BooleanUtils;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.billing.api.ICashPointService;
+import org.openmrs.module.billing.api.CashPointService;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.model.CashPoint;
+import org.openmrs.module.billing.api.search.CashPointSearch;
 import org.openmrs.module.billing.web.base.resource.AlreadyPagedWithLength;
 import org.openmrs.module.billing.web.base.resource.PagingUtil;
 import org.openmrs.module.billing.web.legacyweb.CashierRestConstants;
@@ -47,32 +47,19 @@ public class CashPointSearchHandler implements SearchHandler {
     public PageableResult search(RequestContext context) {
         String query = context.getParameter("q");
         String locationUuid = context.getParameter("location_uuid");
+        boolean includeRetired = BooleanUtils.toBoolean(context.getParameter("includeAll"));
         query = query.isEmpty() ? null : query;
         locationUuid = StringUtils.isEmpty(locationUuid) ? null : locationUuid;
 
-        ICashPointService service = Context.getService(ICashPointService.class);
-        LocationService locationService = Context.getLocationService();
-        Location location = locationService.getLocationByUuid(locationUuid);
+        CashPointSearch cashPointSearch = CashPointSearch.builder()
+                .locationUuid(locationUuid)
+                .name(query)
+                .includeRetired(includeRetired).build();
+
         PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
 
-        List<CashPoint> cashpoints = null;
-        PageableResult results = null;
-
-        if (locationUuid == null) {
-            // Do a name search
-            cashpoints = service.getByNameFragment(query, context.getIncludeAll(), pagingInfo);
-        } else if (query == null) {
-            //performs the location search
-            cashpoints = service.getCashPointsByLocation(location, context.getIncludeAll(), pagingInfo);
-        } else {
-            // Do a name & location search
-            cashpoints = service.getCashPointsByLocationAndName(location, query, context.getIncludeAll(), pagingInfo);
-        }
-
-        results =
-                new AlreadyPagedWithLength<>(context, cashpoints, pagingInfo.hasMoreResults(),
-                        pagingInfo.getTotalRecordCount());
-        return results;
+        List<CashPoint> cashPoints = Context.getService(CashPointService.class).getCashPoints(cashPointSearch, pagingInfo);
+        return new AlreadyPagedWithLength<>(context, cashPoints, pagingInfo.hasMoreResults(), pagingInfo.getTotalRecordCount());
     }
 
     @Override

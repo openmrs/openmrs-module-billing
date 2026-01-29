@@ -22,7 +22,7 @@ import org.junit.Test;
 import org.openmrs.Provider;
 import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.billing.api.ICashPointService;
+import org.openmrs.module.billing.api.CashPointService;
 import org.openmrs.module.billing.api.ITimesheetService;
 import org.openmrs.module.billing.api.model.Timesheet;
 import org.openmrs.module.billing.base.entity.IEntityDataServiceTest;
@@ -31,7 +31,7 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 	
 	private ProviderService providerService;
 	
-	private ICashPointService cashPointService;
+	private CashPointService cashPointService;
 	
 	public static final String TIMESHEET_DATASET = TestConstants.BASE_DATASET_DIR + "TimesheetTest.xml";
 	
@@ -40,7 +40,7 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 		super.before();
 		
 		providerService = Context.getProviderService();
-		cashPointService = Context.getService(ICashPointService.class);
+		cashPointService = Context.getService(CashPointService.class);
 		
 		executeDataSet(TestConstants.CORE_DATASET);
 		executeDataSet(ICashPointServiceTest.CASH_POINT_DATASET);
@@ -53,7 +53,7 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 		
 		if (valid) {
 			timesheet.setCashier(providerService.getProvider(0));
-			timesheet.setCashPoint(cashPointService.getById(0));
+			timesheet.setCashPoint(cashPointService.getCashPoint(0));
 		}
 		
 		// Holy crap, date stuff really sucks in Java... there must be a more sane library out there?
@@ -80,7 +80,7 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 	@Override
 	protected void updateEntityFields(Timesheet entity) {
 		entity.setCashier(providerService.getProvider(1));
-		entity.setCashPoint(cashPointService.getById(1));
+		entity.setCashPoint(cashPointService.getCashPoint(1));
 		
 		Calendar cal = Calendar.getInstance();
 		

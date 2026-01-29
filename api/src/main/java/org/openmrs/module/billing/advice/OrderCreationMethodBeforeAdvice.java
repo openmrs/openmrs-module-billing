@@ -34,7 +34,7 @@ import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.BillableServiceService;
-import org.openmrs.module.billing.api.ICashPointService;
+import org.openmrs.module.billing.api.CashPointService;
 import org.openmrs.module.billing.api.ItemPriceService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
@@ -60,7 +60,7 @@ public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 	
 	ItemPriceService priceService = Context.getService(ItemPriceService.class);
 	
-	ICashPointService cashPointService = Context.getService(ICashPointService.class);
+	CashPointService cashPointService = Context.getService(CashPointService.class);
 	
 	@Override
 	public void before(Method method, Object[] args, Object target) throws Throwable {
@@ -153,7 +153,7 @@ public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 			
 			if (!providers.isEmpty()) {
 				activeBill.setCashier(providers.get(0));
-				List<CashPoint> cashPoints = cashPointService.getAll();
+				List<CashPoint> cashPoints = cashPointService.getAllCashPoints(false);
 				activeBill.setCashPoint(cashPoints.get(0));
 				activeBill.addLineItem(billLineItem);
 				activeBill.setStatus(BillStatus.PENDING);

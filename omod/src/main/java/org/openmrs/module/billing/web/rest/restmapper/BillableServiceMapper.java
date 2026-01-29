@@ -14,7 +14,7 @@
 package org.openmrs.module.billing.web.rest.restmapper;
 
 import org.openmrs.api.context.Context;
-import org.openmrs.module.billing.api.IPaymentModeService;
+import org.openmrs.module.billing.api.PaymentModeService;
 import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.model.BillableServiceStatus;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
@@ -100,7 +100,7 @@ public class BillableServiceMapper {
             CashierItemPrice price = new CashierItemPrice();
             price.setName(itemPrice.getName());
             price.setPrice(itemPrice.getPrice());
-            price.setPaymentMode(Context.getService(IPaymentModeService.class).getByUuid(itemPrice.getPaymentMode()));
+            price.setPaymentMode(Context.getService(PaymentModeService.class).getPaymentModeByUuid(itemPrice.getPaymentMode()));
             price.setBillableService(service);
             servicePrices.add(price);
         }

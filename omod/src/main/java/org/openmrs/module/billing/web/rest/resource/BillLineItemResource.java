@@ -18,9 +18,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillableServiceService;
+import org.openmrs.module.billing.api.BillLineItemService;
 import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
-import org.openmrs.module.billing.api.BillLineItemService;
 import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
 import org.openmrs.module.billing.api.base.entity.IEntityDataService;
@@ -41,8 +41,8 @@ import java.math.BigDecimal;
 /**
  * REST resource representing a {@link BillLineItem}.
  */
-@Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE + "/billLineItem", supportedClass = BillLineItem.class,
-        supportedOpenmrsVersions = {"2.0 - 2.*"})
+@Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
+        + "/billLineItem", supportedClass = BillLineItem.class, supportedOpenmrsVersions = { "2.0 - 2.*" })
 public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
 
     private static final Log LOG = LogFactory.getLog(BillLineItemResource.class);
@@ -98,7 +98,6 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
         }
     }
 
-
     @PropertySetter(value = "price")
     public void setPriceValue(BillLineItem instance, Object price) {
         if (price instanceof Double || price instanceof Integer) {
@@ -143,7 +142,11 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
 
     @Override
     public BillLineItem getByUniqueId(String uuid) {
-        return getService().getByUuid(uuid);
+        if (StringUtils.isEmpty(uuid)) {
+            return null;
+        }
+
+        return Context.getService(BillLineItemService.class).getBillLineItemByUuid(uuid);
     }
 
     @Override
@@ -153,6 +156,8 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
 
     @Override
     public Class<IEntityDataService<BillLineItem>> getServiceClass() {
-        return (Class<IEntityDataService<BillLineItem>>) (Object) BillLineItemService.class;
+        // BillLineItemService doesn't implement IEntityDataService, so return null
+        // Line items are managed through BillService, not directly
+        return null;
     }
 }

@@ -11,15 +11,31 @@
  *
  * Copyright (C) OpenMRS, LLC.  All Rights Reserved.
  */
+package org.openmrs.module.billing.api.search;
 
-package org.openmrs.module.billing.api;
-
-import org.openmrs.module.billing.api.base.entity.IMetadataDataService;
-import org.openmrs.module.billing.api.model.PaymentMode;
-import org.springframework.transaction.annotation.Transactional;
+import lombok.Builder;
+import lombok.Data;
 
 /**
- * Interface that represents classes which perform data operations for {@link PaymentMode}s.
+ * Search criteria for querying {@link org.openmrs.module.billing.api.model.CashPoint} entities.
  */
-@Transactional
-public interface IPaymentModeService extends IMetadataDataService<PaymentMode> {}
+@Data
+@Builder
+public class CashPointSearch {
+	
+	/**
+	 * The UUID of the location to filter cash points by.
+	 */
+	private String locationUuid;
+	
+	/**
+	 * The name pattern to search for (partial match).
+	 */
+	private String name;
+	
+	/**
+	 * Whether to include retired cash points in the results.
+	 */
+	private boolean includeRetired;
+	
+}

@@ -15,7 +15,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillExemptionService;
 import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.BillableServiceService;
-import org.openmrs.module.billing.api.ICashPointService;
+import org.openmrs.module.billing.api.CashPointService;
 import org.openmrs.module.billing.api.ItemPriceService;
 import org.openmrs.module.billing.api.evaluator.ExemptionRuleEngine;
 import org.openmrs.module.billing.api.model.Bill;
@@ -28,6 +28,7 @@ import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
 import org.openmrs.module.billing.api.model.ExemptionType;
 import org.openmrs.module.billing.api.search.BillableServiceSearch;
+import org.openmrs.module.billing.api.search.CashPointSearch;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
 import org.springframework.aop.AfterReturningAdvice;
@@ -53,7 +54,7 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 	
 	ItemPriceService priceService = Context.getService(ItemPriceService.class);
 	
-	ICashPointService cashPointService = Context.getService(ICashPointService.class);
+	CashPointService cashPointService = Context.getService(CashPointService.class);
 	
 	ExemptionRuleEngine exemptionRuleEngine = Context.getRegisteredComponent("ruleEngine", ExemptionRuleEngine.class);
 	
@@ -209,7 +210,7 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 			
 			if (!providers.isEmpty()) {
 				activeBill.setCashier(providers.get(0));
-				List<CashPoint> cashPoints = cashPointService.getAll();
+				List<CashPoint> cashPoints = cashPointService.getAllCashPoints(false);
 				activeBill.setCashPoint(cashPoints.get(0));
 				activeBill.addLineItem(billLineItem);
 				activeBill.setStatus(BillStatus.PENDING);

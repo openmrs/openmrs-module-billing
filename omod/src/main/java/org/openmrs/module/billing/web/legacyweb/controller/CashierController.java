@@ -20,13 +20,13 @@ import org.openmrs.Provider;
 import org.openmrs.api.APIException;
 import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.billing.api.ICashPointService;
+import org.openmrs.module.billing.api.CashPointService;
 import org.openmrs.module.billing.api.ITimesheetService;
 import org.openmrs.module.billing.api.base.ProviderUtil;
 import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.model.Timesheet;
 import org.openmrs.module.billing.web.CashierWebConstants;
-import org.openmrs.module.billing.web.propertyeditor.EntityPropertyEditor;
+import org.openmrs.module.billing.web.propertyeditor.CashPointPropertyEditor;
 import org.openmrs.module.billing.web.propertyeditor.ProviderPropertyEditor;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.stereotype.Controller;
@@ -59,7 +59,7 @@ public class CashierController {
 
     @InitBinder
     public void initBinder(WebDataBinder binder) {
-        binder.registerCustomEditor(CashPoint.class, new EntityPropertyEditor<>(ICashPointService.class));
+        binder.registerCustomEditor(CashPoint.class, new CashPointPropertyEditor());
         binder.registerCustomEditor(Provider.class, new ProviderPropertyEditor());
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm");
@@ -139,7 +139,7 @@ public class CashierController {
 
     @ModelAttribute("cashPoints")
     public List<CashPoint> getCashPoints() {
-        return Context.getService(ICashPointService.class).getAll();
+        return Context.getService(CashPointService.class).getAllCashPoints(false);
     }
 
     private void addRenderAttributes(ModelMap modelMap, Timesheet timesheet, Provider cashier, String returnUrl) {
