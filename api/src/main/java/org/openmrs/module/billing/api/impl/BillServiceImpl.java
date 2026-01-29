@@ -43,10 +43,10 @@ import java.util.List;
  */
 @Transactional
 public class BillServiceImpl extends BaseOpenmrsService implements BillService {
-
+	
 	@Setter(onMethod_ = { @Autowired })
 	private BillDAO billDAO;
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -58,7 +58,7 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		}
 		return billDAO.getBill(id);
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -70,7 +70,7 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		}
 		return billDAO.getBillByUuid(uuid);
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -89,7 +89,7 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		org.openmrs.validator.ValidateUtil.validate(bill);
 		return billDAO.saveBill(bill);
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -101,7 +101,7 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		}
 		return billDAO.getBillByReceiptNumber(receiptNumber);
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -113,7 +113,7 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		}
 		return billDAO.getBillsByPatientUuid(patientUuid, pagingInfo);
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -125,7 +125,7 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		}
 		return billDAO.getBills(billSearch, pagingInfo);
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -137,7 +137,7 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		}
 		return ReceiptGenerator.createBillReceipt(bill);
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -149,7 +149,7 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		}
 		billDAO.purgeBill(bill);
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -161,7 +161,7 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		}
 		return billDAO.saveBill(bill);
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -170,7 +170,7 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 	public Bill unvoidBill(Bill bill) {
 		return billDAO.saveBill(bill);
 	}
-
+	
 	@Override
 	@Transactional(readOnly = true)
 	public boolean isBillEditable(Bill bill) {
@@ -183,5 +183,5 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		}
 		return true;
 	}
-
+	
 }
