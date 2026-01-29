@@ -31,49 +31,49 @@ import org.springframework.validation.Errors;
  * Integration tests for {@link BillValidator}
  */
 public class BillValidatorTest extends BaseModuleContextSensitiveTest {
-
+	
 	private BillValidator billValidator;
-
+	
 	private BillService billService;
-
+	
 	@BeforeEach
 	public void setup() throws Exception {
 		billValidator = new BillValidator();
 		billService = Context.getService(BillService.class);
-
+		
 		executeDataSet(TestConstants.CORE_DATASET2);
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "StockOperationType.xml");
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "PaymentModeTest.xml");
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "CashPointTest.xml");
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "BillTest.xml");
 	}
-
+	
 	@Test
 	public void validate_shouldNotRejectPendingBill() {
 		Bill pendingBill = billService.getBill(2);
 		assertNotNull(pendingBill);
 		assertEquals(BillStatus.PENDING, pendingBill.getStatus());
-
+		
 		Errors errors = new BindException(pendingBill, "bill");
 		billValidator.validate(pendingBill, errors);
-
+		
 		assertFalse(errors.hasErrors());
 	}
-
+	
 	@Test
 	public void validate_shouldNotRejectUnmodifiedPaidBill() {
 		Bill paidBill = billService.getBill(1);
 		assertNotNull(paidBill);
 		assertEquals(BillStatus.PAID, paidBill.getStatus());
-
+		
 		Errors errors = new BindException(paidBill, "bill");
 		billValidator.validate(paidBill, errors);
-
+		
 		// Unmodified PAID bills should pass validation - rejection happens only when
 		// attempting to modify line items
 		assertFalse(errors.hasErrors());
 	}
-
+	
 	@Test
 	public void validate_shouldRejectBillWithoutPatient() {
 		Bill bill = billService.getBill(2);
