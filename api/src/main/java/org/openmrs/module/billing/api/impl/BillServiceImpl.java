@@ -86,6 +86,7 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 				bill.setReceiptNumber(receiptNumberGenerator.generateNumber(bill));
 			}
 		}
+		org.openmrs.validator.ValidateUtil.validate(bill);
 		return billDAO.saveBill(bill);
 	}
 	

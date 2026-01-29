@@ -13,7 +13,9 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillLineItemService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
+import org.openmrs.module.billing.api.model.BillStatus;
 import org.springframework.validation.Errors;
+import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
 @Handler(supports = { Bill.class }, order = 50)
@@ -33,6 +35,38 @@ public class BillValidator implements Validator {
 			
 			if (bill.getVoided() && StringUtils.isBlank(bill.getVoidReason())) {
 				errors.rejectValue("voided", "error.null");
+			}
+
+			if (bill.getPatient() == null) {
+				errors.rejectValue("patient", "billing.bill.error.patientRequired");
+			}
+
+			if (bill.getCashier() == null) {
+				errors.rejectValue("cashier", "billing.bill.error.cashierRequired");
+			}
+
+			if (bill.getCashPoint() == null) {
+				errors.rejectValue("cashPoint", "billing.bill.error.cashPointRequired");
+			}
+
+			if (bill.getStatus() == null) {
+				errors.rejectValue("status", "billing.bill.error.statusRequired");
+			}
+
+			validateLineItems(bill, errors);
+
+			if (bill.getStatus() != null && bill.getStatus() == BillStatus.PAID) {
+				if (bill.getTotalPayments().compareTo(bill.getTotal()) < 0) {
+					errors.rejectValue("status", "billing.bill.error.insufficientPayments");
+				}
+			}
+
+			if (bill.getReceiptNumber() != null && bill.getReceiptNumber().length() > 255) {
+				errors.rejectValue("receiptNumber", "billing.bill.error.receiptNumberTooLong");
+			}
+
+			if (bill.getAdjustmentReason() != null && bill.getAdjustmentReason().length() > 500) {
+				errors.rejectValue("adjustmentReason", "billing.bill.error.adjustmentReasonTooLong");
 			}
 			
 			validateLineItemsNotModified(bill, errors);
@@ -81,5 +115,28 @@ public class BillValidator implements Validator {
 			}
 		}
 	}
-	
+
+	private void validateLineItems(Bill bill, Errors errors) {
+		if (bill.getLineItems() == null || bill.getLineItems().isEmpty()) {
+			errors.rejectValue("lineItems", "billing.bill.error.atLeastOneLineItemRequired");
+			return;
+		}
+
+		boolean hasNonVoidedLineItem = bill.getLineItems().stream().anyMatch(item -> !item.getVoided());
+		if (!hasNonVoidedLineItem) {
+			errors.rejectValue("lineItems", "billing.bill.error.atLeastOneNonVoidedLineItemRequired");
+		}
+
+		for (int i = 0; i < bill.getLineItems().size(); i++) {
+			BillLineItem lineItem = bill.getLineItems().get(i);
+			if (lineItem != null) {
+				try {
+					errors.pushNestedPath("lineItems[" + i + "]");
+					ValidationUtils.invokeValidator(new BillLineItemValidator(), lineItem, errors);
+				} finally {
+					errors.popNestedPath();
+				}
+			}
+		}
+	}
 }
