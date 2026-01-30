@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="billing-audit-trail-20260129-1200" author="billing-module">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="billing_bill_audit"/>
+            </not>
+        </preConditions>
+        <comment>Create bill audit trail table for tracking bill modifications</comment>
+        
+        <createTable tableName="billing_bill_audit">
+            <column name="bill_audit_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            
+            <column name="bill_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            
+            <column name="action" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            
+            <column name="field_name" type="varchar(100)">
+                <constraints nullable="true"/>
+            </column>
+            
+            <column name="old_value" type="text">
+                <constraints nullable="true"/>
+            </column>
+            
+            <column name="new_value" type="text">
+                <constraints nullable="true"/>
+            </column>
+            
+            <column name="reason" type="text">
+                <constraints nullable="true"/>
+            </column>
+            
+            <column name="user_id" type="int">
+                <constraints nullable="true"/>
+            </column>
+            
+            <column name="audit_date" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            
+            <column name="changed_by" type="int">
+                <constraints nullable="true"/>
+            </column>
+            
+            <column name="date_changed" type="datetime">
+                <constraints nullable="true"/>
+            </column>
+            
+            <column name="voided" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            
+            <column name="voided_by" type="int">
+                <constraints nullable="true"/>
+            </column>
+            
+            <column name="date_voided" type="datetime">
+                <constraints nullable="true"/>
+            </column>
+            
+            <column name="void_reason" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="billing-audit-trail-20260129-1201" author="billing-module">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="billing_bill_audit"/>
+            <tableExists tableName="billing_bill"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="billing_bill_audit_bill_fk"/>
+            </not>
+        </preConditions>
+        <comment>Add foreign key constraint from bill_audit to bill</comment>
+        
+        <addForeignKeyConstraint constraintName="billing_bill_audit_bill_fk"
+                                 baseTableName="billing_bill_audit"
+                                 baseColumnNames="bill_id"
+                                 referencedTableName="billing_bill"
+                                 referencedColumnNames="bill_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet id="billing-audit-trail-20260129-1202" author="billing-module">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="billing_bill_audit"/>
+            <tableExists tableName="users"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="billing_bill_audit_user_fk"/>
+            </not>
+        </preConditions>
+        <comment>Add foreign key constraint from bill_audit to users table for user_id</comment>
+        
+        <addForeignKeyConstraint constraintName="billing_bill_audit_user_fk"
+                                 baseTableName="billing_bill_audit"
+                                 baseColumnNames="user_id"
+                                 referencedTableName="users"
+                                 referencedColumnNames="user_id"
+                                 onDelete="SET NULL"
+                                 onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet id="billing-audit-trail-20260129-1203" author="billing-module">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="billing_bill_audit"/>
+            <tableExists tableName="users"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="billing_bill_audit_creator_fk"/>
+            </not>
+        </preConditions>
+        <comment>Add foreign key constraint from bill_audit to users table for creator</comment>
+        
+        <addForeignKeyConstraint constraintName="billing_bill_audit_creator_fk"
+                                 baseTableName="billing_bill_audit"
+                                 baseColumnNames="creator"
+                                 referencedTableName="users"
+                                 referencedColumnNames="user_id"
+                                 onDelete="RESTRICT"
+                                 onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet id="billing-audit-trail-20260129-1204" author="billing-module">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="billing_bill_audit"/>
+            <tableExists tableName="users"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="billing_bill_audit_changed_by_fk"/>
+            </not>
+        </preConditions>
+        <comment>Add foreign key constraint from bill_audit to users table for changed_by</comment>
+        
+        <addForeignKeyConstraint constraintName="billing_bill_audit_changed_by_fk"
+                                 baseTableName="billing_bill_audit"
+                                 baseColumnNames="changed_by"
+                                 referencedTableName="users"
+                                 referencedColumnNames="user_id"
+                                 onDelete="SET NULL"
+                                 onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet id="billing-audit-trail-20260129-1205" author="billing-module">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="billing_bill_audit"/>
+            <tableExists tableName="users"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="billing_bill_audit_voided_by_fk"/>
+            </not>
+        </preConditions>
+        <comment>Add foreign key constraint from bill_audit to users table for voided_by</comment>
+        
+        <addForeignKeyConstraint constraintName="billing_bill_audit_voided_by_fk"
+                                 baseTableName="billing_bill_audit"
+                                 baseColumnNames="voided_by"
+                                 referencedTableName="users"
+                                 referencedColumnNames="user_id"
+                                 onDelete="SET NULL"
+                                 onUpdate="CASCADE"/>
+    </changeSet>
+
+    <changeSet id="billing-audit-trail-20260129-1206" author="billing-module">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="billing_bill_audit"/>
+            <not>
+                <indexExists indexName="billing_bill_audit_bill_id_idx"/>
+            </not>
+        </preConditions>
+        <comment>Create index on bill_id for efficient audit history queries</comment>
+        
+        <createIndex indexName="billing_bill_audit_bill_id_idx" tableName="billing_bill_audit">
+            <column name="bill_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="billing-audit-trail-20260129-1207" author="billing-module">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="billing_bill_audit"/>
+            <not>
+                <indexExists indexName="billing_bill_audit_action_idx"/>
+            </not>
+        </preConditions>
+        <comment>Create index on action for efficient filtering by action type</comment>
+        
+        <createIndex indexName="billing_bill_audit_action_idx" tableName="billing_bill_audit">
+            <column name="action"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="billing-audit-trail-20260129-1208" author="billing-module">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="billing_bill_audit"/>
+            <not>
+                <indexExists indexName="billing_bill_audit_audit_date_idx"/>
+            </not>
+        </preConditions>
+        <comment>Create index on audit_date for efficient date range queries</comment>
+        
+        <createIndex indexName="billing_bill_audit_audit_date_idx" tableName="billing_bill_audit">
+            <column name="audit_date"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="billing-audit-trail-20260129-1209" author="billing-module">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="billing_bill_audit"/>
+            <not>
+                <indexExists indexName="billing_bill_audit_uuid_idx"/>
+            </not>
+        </preConditions>
+        <comment>Create unique index on uuid for efficient UUID lookups</comment>
+        
+        <createIndex indexName="billing_bill_audit_uuid_idx" tableName="billing_bill_audit" unique="true">
+            <column name="uuid"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="billing-audit-trail-20260129-1210" author="billing-module">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="billing_bill_audit"/>
+            <not>
+                <indexExists indexName="billing_bill_audit_composite_idx"/>
+            </not>
+        </preConditions>
+        <comment>Create composite index on bill_id and audit_date for optimal query performance</comment>
+        
+        <createIndex indexName="billing_bill_audit_composite_idx" tableName="billing_bill_audit">
+            <column name="bill_id"/>
+            <column name="audit_date" descending="true"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
