@@ -13,8 +13,6 @@
  */
 package org.openmrs.module.billing.web.rest.controller;
 
-import java.io.IOException;
-
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.model.Bill;
@@ -36,9 +34,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/billing/receipt")
 public class ReceiptController extends BaseRestController {
 
-    @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<byte[]> get(@RequestParam(value = "billUuid", required = false) String billUuid)
-            throws IOException {
+    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> get(@RequestParam(value = "billUuid", required = false) String billUuid) {
         BillService service = Context.getService(BillService.class);
         Bill bill = service.getBillByUuid(billUuid);
 
