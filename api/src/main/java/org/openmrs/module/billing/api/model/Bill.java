@@ -173,6 +173,14 @@ public class Bill extends BaseOpenmrsData {
 			boolean billFullySettled = getTotalPayments().compareTo(getTotal()) >= 0;
 			if (billFullySettled) {
 				this.setStatus(BillStatus.PAID);
+				// Update all non-voided bill line items to PAID status
+				if (this.lineItems != null) {
+					for (BillLineItem lineItem : this.lineItems) {
+						if (lineItem != null && !lineItem.getVoided()) {
+							lineItem.setPaymentStatus(BillStatus.PAID);
+						}
+					}
+				}
 			} else if (!billFullySettled) {
 				this.setStatus(BillStatus.POSTED);
 			}

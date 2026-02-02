@@ -120,6 +120,7 @@ public class BillTest {
 		bill.synchronizeBillStatus();
 		
 		assertEquals(BillStatus.PAID, bill.getStatus());
+		assertEquals(BillStatus.PAID, lineItem.getPaymentStatus());
 	}
 	
 	@Test
@@ -174,6 +175,46 @@ public class BillTest {
 		
 		bill.synchronizeBillStatus();
 		assertEquals(BillStatus.PAID, bill.getStatus());
+		// Only non-voided line items should be set to PAID
+		assertEquals(BillStatus.PAID, lineItem1.getPaymentStatus());
+	}
+	
+	@Test
+	public void synchronizeBillStatus_shouldUpdateAllNonVoidedLineItemsToPaidWhenBillIsFullyPaid() {
+		Bill bill = new Bill();
+		bill.setLineItems(new ArrayList<>());
+		bill.setPayments(new HashSet<>());
+		
+		BillLineItem lineItem1 = new BillLineItem();
+		lineItem1.setPrice(BigDecimal.valueOf(50));
+		lineItem1.setQuantity(1);
+		lineItem1.setVoided(false);
+		bill.getLineItems().add(lineItem1);
+		
+		BillLineItem lineItem2 = new BillLineItem();
+		lineItem2.setPrice(BigDecimal.valueOf(30));
+		lineItem2.setQuantity(1);
+		lineItem2.setVoided(false);
+		bill.getLineItems().add(lineItem2);
+		
+		BillLineItem voidedLineItem = new BillLineItem();
+		voidedLineItem.setPrice(BigDecimal.valueOf(20));
+		voidedLineItem.setQuantity(1);
+		voidedLineItem.setVoided(true);
+		bill.getLineItems().add(voidedLineItem);
+		
+		Payment payment = new Payment();
+		payment.setAmountTendered(BigDecimal.valueOf(80));
+		payment.setVoided(false);
+		bill.getPayments().add(payment);
+		
+		bill.synchronizeBillStatus();
+		
+		assertEquals(BillStatus.PAID, bill.getStatus());
+		assertEquals(BillStatus.PAID, lineItem1.getPaymentStatus());
+		assertEquals(BillStatus.PAID, lineItem2.getPaymentStatus());
+		// Voided line items should not be updated
+		assertEquals(null, voidedLineItem.getPaymentStatus());
 	}
 	
 	@Test
