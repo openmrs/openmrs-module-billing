@@ -312,6 +312,18 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
+	public void saveBill_shouldNotAllowChangesForPostedBill() {
+		Bill postedBill = billService.getBill(0);
+		assertNotNull(postedBill);
+		assertEquals(BillStatus.POSTED, postedBill.getStatus());
+		
+		postedBill.setCashier(providerService.getProvider(1));
+		billService.saveBill(postedBill);
+		
+		assertThrows(UnchangeableObjectException.class, Context::flushSession);
+	}
+	
+	@Test
 	public void saveBill_shouldAllowPaymentsForPostedBill() {
 		Bill postedBill = billService.getBill(0);
 		assertNotNull(postedBill);
