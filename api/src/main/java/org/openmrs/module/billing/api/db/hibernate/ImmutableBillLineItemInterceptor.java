@@ -3,7 +3,6 @@ package org.openmrs.module.billing.api.db.hibernate;
 import java.io.Serializable;
 
 import org.hibernate.type.Type;
-import org.openmrs.api.UnchangeableObjectException;
 import org.openmrs.api.db.hibernate.ImmutableEntityInterceptor;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
@@ -16,7 +15,8 @@ import org.springframework.stereotype.Component;
 @Component("immutableBillLineItemInterceptor")
 public class ImmutableBillLineItemInterceptor extends ImmutableEntityInterceptor {
 	
-	private static final String[] MUTABLE_PROPERTY_NAMES = new String[] { "voided", "dateVoided", "voidedBy", "voidReason" };
+	private static final String[] MUTABLE_PROPERTY_NAMES = new String[] { "voided", "dateVoided", "voidedBy", "voidReason",
+	        "paymentStatus", "changedBy", "dateChanged" };
 	
 	@Override
 	protected Class<?> getSupportedType() {

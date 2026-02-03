@@ -254,7 +254,8 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		newLineItem.setPaymentStatus(BillStatus.PENDING);
 		paidBill.addLineItem(newLineItem);
 		
-		// Should throw exception when saving (BillValidator catches line item additions)
+		// Should throw exception when saving (BillValidator catches line item
+		// additions)
 		assertThrows(ValidationException.class, () -> billService.saveBill(paidBill));
 	}
 	
@@ -316,7 +317,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		assertNotNull(postedBill);
 		assertEquals(BillStatus.POSTED, postedBill.getStatus());
 		
-		postedBill.setReceiptNumber("ABV");
+		postedBill.setCashier(providerService.getProvider(1));
 		billService.saveBill(postedBill);
 		
 		assertThrows(UnchangeableObjectException.class, Context::flushSession);
@@ -353,7 +354,8 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		
 		billService.saveBill(paidBill);
 		
-		// Should throw exception when flushing (ImmutableBillLineItemInterceptor catches modifications)
+		// Should throw exception when flushing (ImmutableBillLineItemInterceptor
+		// catches modifications)
 		assertThrows(UnchangeableObjectException.class, Context::flushSession);
 	}
 	
@@ -451,41 +453,39 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	public void getBills_shouldApplyPagingCorrectly() {
 		BillSearch billSearch = new BillSearch();
 		PagingInfo pagingInfo = new PagingInfo(1, 2);
-
+		
 		List<Bill> bills = billService.getBills(billSearch, pagingInfo);
 		assertNotNull(bills);
 		assertTrue(bills.size() <= 2);
 		assertNotNull(pagingInfo.getTotalRecordCount());
 	}
-
+	
 	/**
 	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#saveBill(Bill)
 	 */
 	@Test
 	public void saveBill_shouldGenerateReceiptNumberWhenNotProvided() {
-		Context.getAdministrationService().setGlobalProperty(
-		    "billing.systemReceiptNumberGenerator",
-		    "org.openmrs.module.billing.api.SequentialReceiptNumberGenerator"
-		);
-
+		Context.getAdministrationService().setGlobalProperty("billing.systemReceiptNumberGenerator",
+		    "org.openmrs.module.billing.api.SequentialReceiptNumberGenerator");
+		
 		Patient patient = patientService.getPatient(1);
 		assertNotNull(patient);
-
+		
 		// Create a new bill WITHOUT a receipt number
 		Bill newBill = new Bill();
 		newBill.setCashier(providerService.getProvider(0));
 		newBill.setPatient(patient);
 		newBill.setCashPoint(cashPointService.getCashPoint(0));
 		newBill.setStatus(BillStatus.PENDING);
-
+		
 		Bill templateBill = billService.getBill(0);
 		BillLineItem existingItem = templateBill.getLineItems().get(0);
 		BillLineItem lineItem = newBill.addLineItem(existingItem.getItem(), BigDecimal.valueOf(100), "Test price", 1);
 		lineItem.setPaymentStatus(BillStatus.PENDING);
 		lineItem.setUuid(UUID.randomUUID().toString());
-
+		
 		Bill savedBill = billService.saveBill(newBill);
-
+		
 		assertNotNull(savedBill);
 		assertNotNull(savedBill.getReceiptNumber());
 		assertFalse(savedBill.getReceiptNumber().isEmpty());

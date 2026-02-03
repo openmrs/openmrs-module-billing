@@ -173,7 +173,15 @@ public class Bill extends BaseOpenmrsData {
 			boolean billFullySettled = getTotalPayments().compareTo(getTotal()) >= 0;
 			if (billFullySettled) {
 				this.setStatus(BillStatus.PAID);
-			} else if (!billFullySettled) {
+				// Update all non-voided bill line items to PAID status
+				if (this.lineItems != null) {
+					for (BillLineItem lineItem : this.lineItems) {
+						if (lineItem != null && !lineItem.getVoided()) {
+							lineItem.setPaymentStatus(BillStatus.PAID);
+						}
+					}
+				}
+			} else {
 				this.setStatus(BillStatus.POSTED);
 			}
 		}
@@ -211,7 +219,8 @@ public class Bill extends BaseOpenmrsData {
 	 * @return {@code true} if the bill is new (no ID) or is in PENDING state, {@code false} otherwise
 	 */
 	public boolean editable() {
-		// New bills (no ID) are considered pending, existing bills must be in PENDING state
+		// New bills (no ID) are considered pending, existing bills must be in PENDING
+		// state
 		return getStatus() == null || this.getId() == null || this.getStatus() == BillStatus.PENDING;
 	}
 	
