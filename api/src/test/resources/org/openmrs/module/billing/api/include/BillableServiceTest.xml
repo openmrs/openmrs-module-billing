@@ -59,4 +59,8 @@
 	<cashier_item_price item_price_id="1" service_id="1" name="Standard Price" price="100.00"
 	                    creator="1" date_created="2012-01-01 00:00:00.0" retired="false"
 	                    uuid="8631b434-78aa-102b-91a0-001e378eb681"/>
+
+	<cashier_item_price item_price_id="2" service_id="3" name="Retired Price" price="200.00"
+						creator="1" date_created="2012-01-01 00:00:00.0" retired="true"
+						uuid="8631b435-78aa-102b-91a0-101e378eb681"/>
 </dataset>
