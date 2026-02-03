@@ -38,6 +38,8 @@ import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.NumberFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 
@@ -56,7 +58,11 @@ public class ReceiptGenerator {
 		Patient patient = bill.getPatient();
 		String fullName = patient.getPersonName().getFullName();
 		String gender = patient.getGender() != null ? patient.getGender() : "";
-		String dob = patient.getBirthdate() != null ? dateFormatter.format(patient.getBirthdate().toInstant()) : "";
+		String dob = "";
+		if (patient.getBirthdate() != null) {
+			LocalDate birthDate = patient.getBirthdate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+			dob = dateFormatter.format(birthDate);
+		}
 		
 		/**
 		 * https://kb.itextpdf.com/home/it7kb/faq/how-to-set-the-page-size-to-envelope-size-with-landscape-orientation
