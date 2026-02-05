@@ -1,6 +1,5 @@
 package org.openmrs.module.billing.api.evaluator.impl;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Value;
 import org.openmrs.module.billing.api.evaluator.ExemptionEvaluator;

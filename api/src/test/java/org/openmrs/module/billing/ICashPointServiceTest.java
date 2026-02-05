@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.openmrs.module.billing.base.entity.IMetadataDataServiceTest.assertOpenmrsMetadata;
 
-import java.util.Date;
 import java.util.List;
 
 import com.google.common.collect.Iterators;
