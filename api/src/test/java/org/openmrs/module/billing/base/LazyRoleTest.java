@@ -29,14 +29,14 @@ public class LazyRoleTest extends BaseModuleContextTest {
 	private UserService userService;
 	
 	@Before
-	public void before() throws Exception {
+	public void before() {
 		super.executeDataSet(TestConstants.CORE_DATASET);
 		
 		userService = Context.getUserService();
 	}
 	
 	@Test
-	public void selectAll_ShouldReturnAllRoles() throws Exception {
+	public void selectAll_ShouldReturnAllRoles() {
 		List<Role> roles = userService.getAllRoles();
 		
 		Assert.assertEquals(8, roles.size());

@@ -16,7 +16,6 @@ package org.openmrs.module.billing.web.base.controller;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
 import java.util.List;
 
 import org.openmrs.Location;
@@ -29,7 +28,7 @@ import org.springframework.ui.ModelMap;
  */
 public class HeaderController {
 	
-	public static void render(ModelMap model, HttpServletRequest request) throws IOException {
+	public static void render(ModelMap model, HttpServletRequest request) {
 		
 		HttpSession session = request.getSession();
 		Integer locationId = (Integer) session.getAttribute("emrContext.sessionLocationId");

@@ -37,7 +37,7 @@ public class BillValidatorTest extends BaseModuleContextSensitiveTest {
 	private BillService billService;
 	
 	@BeforeEach
-	public void setup() throws Exception {
+	public void setup() {
 		billValidator = new BillValidator();
 		billService = Context.getService(BillService.class);
 		

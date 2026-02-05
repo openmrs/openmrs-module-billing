@@ -35,7 +35,7 @@ public class TimesheetUtil {
 	protected TimesheetUtil() {
 	}
 	
-	public static Timesheet getCurrentTimesheet() throws TimesheetRequiredException {
+	public static Timesheet getCurrentTimesheet() {
 		Provider provider = null;
 		Timesheet timesheet = null;
 		ProviderService providerService = Context.getProviderService();

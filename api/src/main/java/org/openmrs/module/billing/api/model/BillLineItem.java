@@ -14,7 +14,6 @@
 package org.openmrs.module.billing.api.model;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 
 import org.openmrs.BaseChangeableOpenmrsData;
 import org.openmrs.Order;

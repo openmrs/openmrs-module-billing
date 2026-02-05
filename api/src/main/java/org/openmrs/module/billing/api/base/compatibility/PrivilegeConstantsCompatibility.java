@@ -26,26 +26,26 @@ public abstract class PrivilegeConstantsCompatibility {
 	
 	public static String GET_USERS = "";
 	
-	public static String GET_PROVIDERS = "";
+	public static final String GET_PROVIDERS = "";
 	
-	public static String GET_CONCEPTS = "";
+	public static final String GET_CONCEPTS = "";
 	
 	/* Cashier Module privilege constants */
-	public static String GET_VISITS = "";
+	public static final String GET_VISITS = "";
 	
-	public static String GET_ENCOUNTERS = "";
+	public static final String GET_ENCOUNTERS = "";
 	
-	public static String GET_OBS = "";
+	public static final String GET_OBS = "";
 	
-	public static String GET_PATIENTS = "";
+	public static final String GET_PATIENTS = "";
 	
-	public static String DASHBOARD_SUMMARY = "";
+	public static final String DASHBOARD_SUMMARY = "";
 	
-	public static String DASHBOARD_DEMOGRAPHICS = "";
+	public static final String DASHBOARD_DEMOGRAPHICS = "";
 	
-	public static String DASHBOARD_OVERVIEW = "";
+	public static final String DASHBOARD_OVERVIEW = "";
 	
-	public static String DASHBOARD_VISITS = "";
+	public static final String DASHBOARD_VISITS = "";
 	
 	/* Inventory Module privilege constants */
 	public static String GET_ROLES = "";

@@ -56,7 +56,7 @@ public abstract class AbstractReceiptNumberGenerator {
 	
 	@RequestMapping(method = RequestMethod.POST)
 	@Authorized(PrivilegeConstants.MANAGE_BILLS)
-	public String submit(ModelMap model, @RequestParam(value = "selectedGenerator", required = true) String generatorName) {
+	public String submit(ModelMap model, @RequestParam(value = "selectedGenerator") String generatorName) {
 		IReceiptNumberGenerator[] generators = ReceiptNumberGeneratorFactory.locateGenerators();
 		IReceiptNumberGenerator selectedGenerator = null;
 		

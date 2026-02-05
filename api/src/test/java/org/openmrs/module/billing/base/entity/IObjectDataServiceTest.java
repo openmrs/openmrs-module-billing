@@ -88,7 +88,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#save(OpenmrsObject)
 	 */
 	@Test(expected = NullPointerException.class)
-	public void save_shouldThrowNullPointerExceptionIfTheObjectIsNull() throws Exception {
+	public void save_shouldThrowNullPointerExceptionIfTheObjectIsNull() {
 		service.save(null);
 	}
 	
@@ -97,7 +97,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#save(OpenmrsObject)
 	 */
 	@Test(expected = APIException.class)
-	public void save_shouldValidateTheObjectBeforeSaving() throws Exception {
+	public void save_shouldValidateTheObjectBeforeSaving() {
 		E entity = createEntity(false);
 		
 		service.save(entity);
@@ -108,7 +108,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#save(OpenmrsObject)
 	 */
 	@Test
-	public void save_shouldReturnSavedObject() throws Exception {
+	public void save_shouldReturnSavedObject() {
 		E entity = createEntity(true);
 		
 		E result = service.save(entity);
@@ -123,7 +123,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#save(OpenmrsObject)
 	 */
 	@Test
-	public void save_shouldUpdateTheObjectSuccessfully() throws Exception {
+	public void save_shouldUpdateTheObjectSuccessfully() {
 		E entity = service.getById(0);
 		Assert.assertNotNull(entity);
 		
@@ -141,7 +141,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#save(OpenmrsObject)
 	 */
 	@Test
-	public void save_shouldCreateTheObjectSuccessfully() throws Exception {
+	public void save_shouldCreateTheObjectSuccessfully() {
 		E entity = createEntity(true);
 		
 		entity = service.save(entity);
@@ -156,7 +156,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#purge(OpenmrsObject)
 	 */
 	@Test(expected = NullPointerException.class)
-	public void purge_shouldThrowNullPointerExceptionIfTheObjectIsNull() throws Exception {
+	public void purge_shouldThrowNullPointerExceptionIfTheObjectIsNull() {
 		service.purge(null);
 	}
 	
@@ -165,7 +165,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#purge(OpenmrsObject)
 	 */
 	@Test
-	public void purge_shouldDeleteTheSpecifiedObject() throws Exception {
+	public void purge_shouldDeleteTheSpecifiedObject() {
 		E entity = createEntity(true);
 		
 		service.save(entity);
@@ -186,7 +186,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#getAll()
 	 */
 	@Test
-	public void getAll_shouldReturnAllObjectRecords() throws Exception {
+	public void getAll_shouldReturnAllObjectRecords() {
 		List<E> entities = service.getAll();
 		Assert.assertNotNull(entities);
 		
@@ -198,7 +198,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#getAll()
 	 */
 	@Test
-	public void getAll_shouldReturnAnEmptyListIfThereAreNoObjects() throws Exception {
+	public void getAll_shouldReturnAnEmptyListIfThereAreNoObjects() {
 		List<E> entities = service.getAll();
 		for (E entity : entities) {
 			service.purge(entity);
@@ -216,7 +216,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#getById(int)
 	 */
 	@Test
-	public void getById_shouldReturnTheObjectWithTheSpecifiedId() throws Exception {
+	public void getById_shouldReturnTheObjectWithTheSpecifiedId() {
 		E entity = service.getById(0);
 		
 		Assert.assertEquals((Integer) 0, entity.getId());
@@ -227,7 +227,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#getById(int)
 	 */
 	@Test
-	public void getById_shouldReturnNullIfNoObjectCanBeFound() throws Exception {
+	public void getById_shouldReturnNullIfNoObjectCanBeFound() {
 		E entity = service.getById(-100);
 		
 		Assert.assertNull(entity);
@@ -238,7 +238,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#getByUuid(String)
 	 */
 	@Test
-	public void getByUuid_shouldFindTheObjectWithTheSpecifiedUuid() throws Exception {
+	public void getByUuid_shouldFindTheObjectWithTheSpecifiedUuid() {
 		E entity = service.getById(0);
 		E uuidEntity = service.getByUuid(entity.getUuid());
 		
@@ -250,7 +250,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#getByUuid(String)
 	 */
 	@Test
-	public void getByUuid_shouldReturnNullIfNoObjectIsFound() throws Exception {
+	public void getByUuid_shouldReturnNullIfNoObjectIsFound() {
 		E entity = service.getByUuid("Invalid");
 		
 		Assert.assertNull(entity);
@@ -261,7 +261,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#getByUuid(String)
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void getByUuid_shouldThrowIllegalArgumentExceptionIfUuidIsNull() throws Exception {
+	public void getByUuid_shouldThrowIllegalArgumentExceptionIfUuidIsNull() {
 		service.getByUuid(null);
 	}
 	
@@ -270,7 +270,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#getByUuid(String)
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void getByUuid_shouldThrowIllegalArgumentExceptionIfUuidIsEmpty() throws Exception {
+	public void getByUuid_shouldThrowIllegalArgumentExceptionIfUuidIsEmpty() {
 		service.getByUuid("");
 	}
 	
@@ -279,7 +279,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#getAll(PagingInfo)
 	 */
 	@Test
-	public void getAll_shouldReturnAllObjectRecordsIfPagingIsNull() throws Exception {
+	public void getAll_shouldReturnAllObjectRecordsIfPagingIsNull() {
 		List<E> entities = service.getAll(null);
 		
 		Assert.assertNotNull(entities);
@@ -291,7 +291,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#getAll(PagingInfo)
 	 */
 	@Test
-	public void getAll_shouldReturnAllObjectRecordsIfPagingPageOrSizeIsLessThanOne() throws Exception {
+	public void getAll_shouldReturnAllObjectRecordsIfPagingPageOrSizeIsLessThanOne() {
 		PagingInfo paging = new PagingInfo(0, 1);
 		List<E> entities = service.getAll(paging);
 		
@@ -310,7 +310,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#getAll(PagingInfo)
 	 */
 	@Test
-	public void getAll_shouldSetThePagingTotalRecordsToTheTotalNumberOfObjectRecords() throws Exception {
+	public void getAll_shouldSetThePagingTotalRecordsToTheTotalNumberOfObjectRecords() {
 		PagingInfo paging = new PagingInfo(1, 1);
 		List<E> entities = service.getAll(paging);
 		
@@ -324,7 +324,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IObjectDataService#getAll(PagingInfo)
 	 */
 	@Test
-	public void getAll_shouldNotGetTheTotalPagingRecordCountIfItIsMoreThanZero() throws Exception {
+	public void getAll_shouldNotGetTheTotalPagingRecordCountIfItIsMoreThanZero() {
 		PagingInfo paging = new PagingInfo(1, 1);
 		paging.setLoadRecordCount(false);
 		List<E> entities = service.getAll(paging);
@@ -339,7 +339,7 @@ public abstract class IObjectDataServiceTest<S extends IObjectDataService<E>, E 
 	 * @see IObjectDataService#getAll(PagingInfo)
 	 */
 	@Test
-	public void getAll_shouldReturnPagedObjectRecordsIfPagingIsSpecified() throws Exception {
+	public void getAll_shouldReturnPagedObjectRecordsIfPagingIsSpecified() {
 		List<E> allEntities = service.getAll();
 		
 		PagingInfo paging = new PagingInfo(1, 1);

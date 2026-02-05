@@ -133,18 +133,18 @@ public class PrivilegeConstants {
 		names.add(org.openmrs.util.PrivilegeConstants.EDIT_ENCOUNTERS);
 		names.add(org.openmrs.util.PrivilegeConstants.EDIT_PATIENTS);
 		names.add(org.openmrs.util.PrivilegeConstants.EDIT_VISITS);
-		names.add(getPrivilegeConstantsCompatibility().DASHBOARD_SUMMARY);
-		names.add(getPrivilegeConstantsCompatibility().DASHBOARD_DEMOGRAPHICS);
-		names.add(getPrivilegeConstantsCompatibility().DASHBOARD_OVERVIEW);
-		names.add(getPrivilegeConstantsCompatibility().DASHBOARD_VISITS);
+		names.add(PrivilegeConstantsCompatibility.DASHBOARD_SUMMARY);
+		names.add(PrivilegeConstantsCompatibility.DASHBOARD_DEMOGRAPHICS);
+		names.add(PrivilegeConstantsCompatibility.DASHBOARD_OVERVIEW);
+		names.add(PrivilegeConstantsCompatibility.DASHBOARD_VISITS);
 		names.add(org.openmrs.util.PrivilegeConstants.VIEW_ADMIN_FUNCTIONS);
-		names.add(getPrivilegeConstantsCompatibility().GET_CONCEPTS);
-		names.add(getPrivilegeConstantsCompatibility().GET_ENCOUNTERS);
+		names.add(PrivilegeConstantsCompatibility.GET_CONCEPTS);
+		names.add(PrivilegeConstantsCompatibility.GET_ENCOUNTERS);
 		names.add(org.openmrs.util.PrivilegeConstants.VIEW_NAVIGATION_MENU);
-		names.add(getPrivilegeConstantsCompatibility().GET_OBS);
-		names.add(getPrivilegeConstantsCompatibility().GET_PATIENTS);
-		names.add(getPrivilegeConstantsCompatibility().GET_PROVIDERS);
-		names.add(getPrivilegeConstantsCompatibility().GET_VISITS);
+		names.add(PrivilegeConstantsCompatibility.GET_OBS);
+		names.add(PrivilegeConstantsCompatibility.GET_PATIENTS);
+		names.add(PrivilegeConstantsCompatibility.GET_PROVIDERS);
+		names.add(PrivilegeConstantsCompatibility.GET_VISITS);
 		
 		for (String name : names) {
 			Privilege privilege = service.getPrivilege(name);

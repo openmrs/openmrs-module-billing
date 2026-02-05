@@ -53,7 +53,7 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 	 *      String)
 	 */
 	@Test
-	public void voidEntity_shouldVoidTheEntity() throws Exception {
+	public void voidEntity_shouldVoidTheEntity() {
 		String reason = "test void";
 		E entity = service.getById(0);
 		service.voidEntity(entity, reason);
@@ -74,7 +74,7 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 	 *      String)
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void voidEntity_shouldThrowIllegalArgumentExceptionWithNullReasonParameter() throws Exception {
+	public void voidEntity_shouldThrowIllegalArgumentExceptionWithNullReasonParameter() {
 		E entity = service.getById(0);
 		
 		service.voidEntity(entity, null);
@@ -86,7 +86,7 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 	 *      String)
 	 */
 	@Test(expected = NullPointerException.class)
-	public void voidEntity_shouldThrowNullPointerExceptionWithNullEntity() throws Exception {
+	public void voidEntity_shouldThrowNullPointerExceptionWithNullEntity() {
 		service.voidEntity(null, "something");
 	}
 	
@@ -95,7 +95,7 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IEntityDataService#unvoidEntity(OpenmrsData)
 	 */
 	@Test
-	public void unvoidEntity_shouldUnvoidTheEntity() throws Exception {
+	public void unvoidEntity_shouldUnvoidTheEntity() {
 		String reason = "test void";
 		E entity = service.getById(0);
 		service.voidEntity(entity, reason);
@@ -122,7 +122,7 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IEntityDataService#unvoidEntity(OpenmrsData)
 	 */
 	@Test(expected = NullPointerException.class)
-	public void unvoidEntity_shouldThrowNullPointerExceptionWithNullEntity() throws Exception {
+	public void unvoidEntity_shouldThrowNullPointerExceptionWithNullEntity() {
 		service.unvoidEntity(null);
 	}
 	
@@ -131,7 +131,7 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IMetadataDataService#getAll(boolean)
 	 */
 	@Test
-	public void getAll_shouldReturnAllEntitiesWhenIncludeVoidedIsSetToTrue() throws Exception {
+	public void getAll_shouldReturnAllEntitiesWhenIncludeVoidedIsSetToTrue() {
 		String reason = "test void";
 		E entity = service.getById(0);
 		service.voidEntity(entity, reason);
@@ -148,7 +148,7 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IMetadataDataService#getAll(boolean)
 	 */
 	@Test
-	public void getAll_shouldReturnAllUnvoidedEntitiesWhenIncludeVoidedIsSetToFalse() throws Exception {
+	public void getAll_shouldReturnAllUnvoidedEntitiesWhenIncludeVoidedIsSetToFalse() {
 		String reason = "test void";
 		E entity = service.getById(0);
 		service.voidEntity(entity, reason);
@@ -165,7 +165,7 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 	 * @see IMetadataDataService#getAll(boolean)
 	 */
 	@Test
-	public void getAll_shouldReturnAllUnvoidedEntitiesWhenVoidedIsNotSpecified() throws Exception {
+	public void getAll_shouldReturnAllUnvoidedEntitiesWhenVoidedIsNotSpecified() {
 		String reason = "test void";
 		E entity = service.getById(0);
 		service.voidEntity(entity, reason);
@@ -183,7 +183,7 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 	 *      PagingInfo)
 	 */
 	@Test
-	public void getAll_shouldReturnAnEmptyListIfNoEntitiesAreFound() throws Exception {
+	public void getAll_shouldReturnAnEmptyListIfNoEntitiesAreFound() {
 		// Delete all defined entities
 		List<E> entities = service.getAll(true);
 		for (E entity : entities) {
@@ -214,7 +214,7 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 	 *      PagingInfo)
 	 */
 	@Test
-	public void getAll_shouldNotReturnVoidedEntitiesUnlessSpecified() throws Exception {
+	public void getAll_shouldNotReturnVoidedEntitiesUnlessSpecified() {
 		E entity = service.getById(0);
 		service.voidEntity(entity, "something");
 		Context.flushSession();
@@ -234,7 +234,7 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 	 *      PagingInfo)
 	 */
 	@Test
-	public void getAll_shouldReturnAllSpecifiedMetadataRecordsIfPagingIsNull() throws Exception {
+	public void getAll_shouldReturnAllSpecifiedMetadataRecordsIfPagingIsNull() {
 		List<E> entities = service.getAll(true, null);
 		Assert.assertNotNull(entities);
 		Assert.assertEquals(getTestEntityCount(), entities.size());
@@ -246,7 +246,7 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 	 *      PagingInfo)
 	 */
 	@Test
-	public void getAll_shouldReturnAllSpecifiedEntityRecordsIfPagingPageOrSizeIsLessThanOne() throws Exception {
+	public void getAll_shouldReturnAllSpecifiedEntityRecordsIfPagingPageOrSizeIsLessThanOne() {
 		List<E> entities = service.getAll(true, new PagingInfo(0, 1));
 		Assert.assertNotNull(entities);
 		Assert.assertEquals(getTestEntityCount(), entities.size());
@@ -266,7 +266,7 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 	 *      PagingInfo)
 	 */
 	@Test
-	public void getAll_shouldSetThePagingTotalRecordsToTheTotalNumberOfEntityRecords() throws Exception {
+	public void getAll_shouldSetThePagingTotalRecordsToTheTotalNumberOfEntityRecords() {
 		PagingInfo paging = new PagingInfo(1, 1);
 		List<E> entities = service.getAll(false, paging);
 		
@@ -281,7 +281,7 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 	 *      PagingInfo)
 	 */
 	@Test
-	public void getAll_shouldNotGetTheTotalPagingRecordCountIfItIsMoreThanZero() throws Exception {
+	public void getAll_shouldNotGetTheTotalPagingRecordCountIfItIsMoreThanZero() {
 		PagingInfo paging = new PagingInfo(1, 1);
 		
 		// First check that the full total is set
@@ -314,7 +314,7 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 	 * @see IEntityDataService#getAll(boolean, PagingInfo)
 	 */
 	@Test
-	public void getAll_shouldReturnPagedEntityRecordsIfPagingIsSpecified() throws Exception {
+	public void getAll_shouldReturnPagedEntityRecordsIfPagingIsSpecified() {
 		PagingInfo paging = new PagingInfo(1, 1);
 		List<E> entities;
 		

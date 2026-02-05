@@ -52,18 +52,18 @@ public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 	
 	private static final Log LOG = LogFactory.getLog(OrderCreationMethodBeforeAdvice.class);
 	
-	OrderService orderService = Context.getOrderService();
+	final OrderService orderService = Context.getOrderService();
 	
-	BillService billService = Context.getService(BillService.class);
+	final BillService billService = Context.getService(BillService.class);
 	
-	StockManagementService stockService = Context.getService(StockManagementService.class);
+	final StockManagementService stockService = Context.getService(StockManagementService.class);
 	
-	ItemPriceService priceService = Context.getService(ItemPriceService.class);
+	final ItemPriceService priceService = Context.getService(ItemPriceService.class);
 	
-	CashPointService cashPointService = Context.getService(CashPointService.class);
+	final CashPointService cashPointService = Context.getService(CashPointService.class);
 	
 	@Override
-	public void before(Method method, Object[] args, Object target) throws Throwable {
+	public void before(Method method, Object[] args, Object target) {
 		try {
 			// Extract the Order object from the arguments
 			if (method.getName().equals("saveOrder") && args.length > 0 && args[0] instanceof Order) {

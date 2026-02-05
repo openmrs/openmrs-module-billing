@@ -28,7 +28,6 @@ import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
 import org.openmrs.module.billing.api.model.ExemptionType;
 import org.openmrs.module.billing.api.search.BillableServiceSearch;
-import org.openmrs.module.billing.api.search.CashPointSearch;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
 import org.springframework.aop.AfterReturningAdvice;
@@ -48,23 +47,23 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 	
 	OrderService orderService = Context.getOrderService();
 	
-	BillService billService = Context.getService(BillService.class);
+	final BillService billService = Context.getService(BillService.class);
 	
-	StockManagementService stockService = Context.getService(StockManagementService.class);
+	final StockManagementService stockService = Context.getService(StockManagementService.class);
 	
-	ItemPriceService priceService = Context.getService(ItemPriceService.class);
+	final ItemPriceService priceService = Context.getService(ItemPriceService.class);
 	
-	CashPointService cashPointService = Context.getService(CashPointService.class);
+	final CashPointService cashPointService = Context.getService(CashPointService.class);
 	
-	ExemptionRuleEngine exemptionRuleEngine = Context.getRegisteredComponent("ruleEngine", ExemptionRuleEngine.class);
+	final ExemptionRuleEngine exemptionRuleEngine = Context.getRegisteredComponent("ruleEngine", ExemptionRuleEngine.class);
 	
-	BillExemptionService billExemptionService = Context.getService(BillExemptionService.class);
+	final BillExemptionService billExemptionService = Context.getService(BillExemptionService.class);
 	
 	/**
 	 * This is called immediately an order is saved
 	 */
 	@Override
-	public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
+	public void afterReturning(Object returnValue, Method method, Object[] args, Object target) {
 		try {
 			ProgramWorkflowService workflowService = Context.getProgramWorkflowService();
 			if (method.getName().equals("saveOrder") && args.length > 0 && args[0] instanceof Order) {
