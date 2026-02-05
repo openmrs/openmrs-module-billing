@@ -20,21 +20,20 @@ import javax.annotation.Nonnull;
 @Setter
 @RequiredArgsConstructor
 public class InvoiceFhirResourceProvider implements IResourceProvider {
-
-
-    private final FhirInvoiceService fhirInvoiceService;
-
-    @Override
-    public Class<? extends IBaseResource> getResourceType() {
-        return Invoice.class;
-    }
-
-    @Read
-    public Invoice getInvoiceByUuid(@IdParam @Nonnull IdType id) {
-        Invoice invoice = fhirInvoiceService.get(id.getIdPart());
-        if (invoice == null) {
-            throw new ResourceNotFoundException("Could not find an invoice with Id: " + id.getIdPart());
-        }
-        return invoice;
-    }
+	
+	private final FhirInvoiceService fhirInvoiceService;
+	
+	@Override
+	public Class<? extends IBaseResource> getResourceType() {
+		return Invoice.class;
+	}
+	
+	@Read
+	public Invoice getInvoiceByUuid(@IdParam @Nonnull IdType id) {
+		Invoice invoice = fhirInvoiceService.get(id.getIdPart());
+		if (invoice == null) {
+			throw new ResourceNotFoundException("Could not find an invoice with Id: " + id.getIdPart());
+		}
+		return invoice;
+	}
 }

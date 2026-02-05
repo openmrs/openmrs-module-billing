@@ -39,30 +39,32 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class TimesheetSearchHandler implements SearchHandler {
-    private final SearchConfig searchConfig = new SearchConfig("default", RestConstants.VERSION_2 + "/billing/timesheet",
-            Collections.singletonList("*"), new SearchQuery.Builder("Find a timesheet by date").withRequiredParameters("date")
-            .build());
-
-    @Override
-    public PageableResult search(RequestContext context) {
-        ITimesheetService service = Context.getService(ITimesheetService.class);
-        Provider provider = ProviderUtil.getCurrentProvider();
-        Date date;
-        if (provider == null) {
-            return null;
-        }
-        try {
-            date = new SimpleDateFormat("MM/dd/yyyy").parse(context.getParameter("date"));
-        } catch (ParseException e) {
-            throw new APIException("Invalid date parameter: " + context.getParameter("date"));
-        }
-        List<Timesheet> timesheets = service.getTimesheetsByDate(provider, date);
-        PageableResult results = new AlreadyPagedWithLength<>(context, timesheets, false, timesheets.size());
-        return results;
-    }
-
-    @Override
-    public SearchConfig getSearchConfig() {
-        return searchConfig;
-    }
+	
+	private final SearchConfig searchConfig = new SearchConfig("default", RestConstants.VERSION_2 + "/billing/timesheet",
+	        Collections.singletonList("*"),
+	        new SearchQuery.Builder("Find a timesheet by date").withRequiredParameters("date").build());
+	
+	@Override
+	public PageableResult search(RequestContext context) {
+		ITimesheetService service = Context.getService(ITimesheetService.class);
+		Provider provider = ProviderUtil.getCurrentProvider();
+		Date date;
+		if (provider == null) {
+			return null;
+		}
+		try {
+			date = new SimpleDateFormat("MM/dd/yyyy").parse(context.getParameter("date"));
+		}
+		catch (ParseException e) {
+			throw new APIException("Invalid date parameter: " + context.getParameter("date"));
+		}
+		List<Timesheet> timesheets = service.getTimesheetsByDate(provider, date);
+		PageableResult results = new AlreadyPagedWithLength<>(context, timesheets, false, timesheets.size());
+		return results;
+	}
+	
+	@Override
+	public SearchConfig getSearchConfig() {
+		return searchConfig;
+	}
 }

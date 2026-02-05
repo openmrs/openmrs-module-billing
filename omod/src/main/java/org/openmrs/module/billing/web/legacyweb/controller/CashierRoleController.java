@@ -30,18 +30,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping(CashierWebConstants.CASHIER_ROLE_ROOT)
 public class CashierRoleController extends RoleCreationControllerBase {
-
-    public CashierRoleController() {
-
-    }
-
-    @Override
-    public UserService getUserService() {
-        return Context.getUserService();
-    }
-
-    @Override
-    public Set<Privilege> privileges() {
-        return PrivilegeConstants.getDefaultPrivileges();
-    }
+	
+	public CashierRoleController() {
+		
+	}
+	
+	@Override
+	public UserService getUserService() {
+		return Context.getUserService();
+	}
+	
+	@Override
+	public Set<Privilege> privileges() {
+		return PrivilegeConstants.getDefaultPrivileges();
+	}
 }

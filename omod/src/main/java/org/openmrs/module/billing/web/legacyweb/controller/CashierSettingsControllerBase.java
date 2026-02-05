@@ -31,20 +31,21 @@ import java.io.IOException;
  * Base Controller to manage the settings pages.
  */
 public abstract class CashierSettingsControllerBase {
-    @RequestMapping(method = RequestMethod.GET)
-    public void render(ModelMap modelMap, HttpServletRequest request) throws IOException {
-        modelMap.addAttribute("cashierSettings", ModuleSettings.loadSettings());
-        HeaderController.render(modelMap, request);
-    }
-
-    @RequestMapping(method = RequestMethod.POST)
-    public void submit(HttpServletRequest request, CashierSettings cashierSettings, Errors errors, ModelMap modelMap)
-            throws IOException {
-        ModuleSettings.saveSettings(cashierSettings);
-
-        HttpSession session = request.getSession();
-        session.setAttribute(WebConstants.OPENMRS_MSG_ATTR, "openhmis.cashier.settings.saved");
-
-        render(modelMap, request);
-    }
+	
+	@RequestMapping(method = RequestMethod.GET)
+	public void render(ModelMap modelMap, HttpServletRequest request) throws IOException {
+		modelMap.addAttribute("cashierSettings", ModuleSettings.loadSettings());
+		HeaderController.render(modelMap, request);
+	}
+	
+	@RequestMapping(method = RequestMethod.POST)
+	public void submit(HttpServletRequest request, CashierSettings cashierSettings, Errors errors, ModelMap modelMap)
+	        throws IOException {
+		ModuleSettings.saveSettings(cashierSettings);
+		
+		HttpSession session = request.getSession();
+		session.setAttribute(WebConstants.OPENMRS_MSG_ATTR, "openhmis.cashier.settings.saved");
+		
+		render(modelMap, request);
+	}
 }

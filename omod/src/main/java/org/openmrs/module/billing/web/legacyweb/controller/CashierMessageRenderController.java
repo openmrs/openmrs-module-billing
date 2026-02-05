@@ -31,33 +31,29 @@ import java.util.Vector;
 @Controller
 @RequestMapping(CashierWebConstants.MESSAGE_PROPERTIES_JS_URI)
 public class CashierMessageRenderController {
-
-    @RequestMapping(method = RequestMethod.GET)
-    public ModelAndView render(HttpServletRequest request) {
-        // object to store keys from cashier and backboneforms
-        Vector<String> keys = new Vector<String>();
-
-        // locate and retrieve cashier messages
-        Locale locale = RequestContextUtils.getLocale(request);
-        ResourceBundle resourceBundle = ResourceBundle.getBundle("messages", locale);
-
-        // store cashier message keys in the vector object
-        keys.addAll(resourceBundle.keySet());
-
-        // retrieve backboneforms messages
-        /**BackboneMessageRenderController backboneController = new BackboneMessageRenderController();
-         ModelAndView modelAndView = backboneController.render(request);
-
-         // store backboneforms message keys in the vector object
-         for (Map.Entry<String, Object> messageKeys : modelAndView.getModel().entrySet()) {
-         Enumeration<String> messageKey = (Enumeration<String>)messageKeys.getValue();
-         while (messageKey.hasMoreElements()) {
-         String key = messageKey.nextElement();
-         if (!keys.contains(key))
-         keys.add(key);
-         }
-         }*/
-
-        return new ModelAndView(CashierWebConstants.MESSAGE_PAGE, "keys", keys.elements());
-    }
+	
+	@RequestMapping(method = RequestMethod.GET)
+	public ModelAndView render(HttpServletRequest request) {
+		// object to store keys from cashier and backboneforms
+		Vector<String> keys = new Vector<String>();
+		
+		// locate and retrieve cashier messages
+		Locale locale = RequestContextUtils.getLocale(request);
+		ResourceBundle resourceBundle = ResourceBundle.getBundle("messages", locale);
+		
+		// store cashier message keys in the vector object
+		keys.addAll(resourceBundle.keySet());
+		
+		// retrieve backboneforms messages
+		/**
+		 * BackboneMessageRenderController backboneController = new BackboneMessageRenderController();
+		 * ModelAndView modelAndView = backboneController.render(request); // store backboneforms message
+		 * keys in the vector object for (Map.Entry<String, Object> messageKeys :
+		 * modelAndView.getModel().entrySet()) { Enumeration<String> messageKey =
+		 * (Enumeration<String>)messageKeys.getValue(); while (messageKey.hasMoreElements()) { String key =
+		 * messageKey.nextElement(); if (!keys.contains(key)) keys.add(key); } }
+		 */
+		
+		return new ModelAndView(CashierWebConstants.MESSAGE_PAGE, "keys", keys.elements());
+	}
 }

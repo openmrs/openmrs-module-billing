@@ -21,6 +21,4 @@ import org.openmrs.module.billing.api.base.entity.IMetadataDataService;
  *
  * @param <T> The model class
  */
-public interface IMetadataDataServiceResource<T extends OpenmrsMetadata>
-        extends IObjectDataServiceResource<T, IMetadataDataService<T>> {
-}
+public interface IMetadataDataServiceResource<T extends OpenmrsMetadata> extends IObjectDataServiceResource<T, IMetadataDataService<T>> {}

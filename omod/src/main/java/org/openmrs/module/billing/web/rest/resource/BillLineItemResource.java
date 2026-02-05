@@ -44,120 +44,123 @@ import java.math.BigDecimal;
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
         + "/billLineItem", supportedClass = BillLineItem.class, supportedOpenmrsVersions = { "2.0 - 2.*" })
 public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
-
-    private static final Log LOG = LogFactory.getLog(BillLineItemResource.class);
-
-    @Override
-    public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
-        DelegatingResourceDescription description = super.getRepresentationDescription(rep);
-        if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
-            description.addProperty("item");
-            description.addProperty("billableService", Representation.REF);
-            description.addProperty("quantity");
-            description.addProperty("price");
-            description.addProperty("priceName");
-            description.addProperty("priceUuid");
-            description.addProperty("lineItemOrder");
-            description.addProperty("paymentStatus");
-            return description;
-        }
-        return null;
-    }
-
-    @PropertySetter(value = "item")
-    public void setItem(BillLineItem instance, Object item) {
-        StockManagementService service = Context.getService(StockManagementService.class);
-        String itemUuid = (String) item;
-        instance.setItem(service.getStockItemByUuid(itemUuid));
-    }
-
-    @PropertySetter(value = "billableService")
-    public void setBillableService(BillLineItem instance, Object item) {
-        BillableServiceService service = Context.getService(BillableServiceService.class);
-        String serviceUuid = (String) item;
-        instance.setBillableService(service.getBillableServiceByUuid(serviceUuid));
-    }
-
-    @PropertyGetter(value = "item")
-    public String getItem(BillLineItem instance) {
-        try {
-            StockItem stockItem = instance.getItem();
-            return stockItem.getDrug().getName();
-        } catch (Exception e) {
-            return "";
-        }
-    }
-
-    @PropertyGetter(value = "billableService")
-    public String getBillableService(BillLineItem instance) {
-        try {
-            BillableService service = instance.getBillableService();
-            return service.getName();
-        } catch (Exception e) {
-            return "";
-        }
-    }
-
-    @PropertySetter(value = "price")
-    public void setPriceValue(BillLineItem instance, Object price) {
-        if (price instanceof Double || price instanceof Integer) {
-            double priceValue = ((Number) price).doubleValue();
-            instance.setPrice(BigDecimal.valueOf(priceValue));
-        } else {
-            throw new IllegalArgumentException("Unsupported price type: " + price.getClass().getName());
-        }
-    }
-
-    @PropertySetter(value = "priceName")
-    public void setPriceName(BillLineItem instance, String name) {
-        instance.setPriceName(name);
-    }
-
-    @PropertyGetter(value = "priceName")
-    public String getPriceName(BillLineItem instance) {
-        String itemName = instance.getPriceName();
-        return StringUtils.isNotBlank(itemName) ? itemName : "";
-    }
-
-    @PropertySetter(value = "priceUuid")
-    public void setItemPrice(BillLineItem instance, String uuid) {
-        StockManagementService itemDataService = Context.getService(StockManagementService.class);
-        CashierItemPrice itemPrice = null;
-        if (itemPrice != null) {
-            instance.setItemPrice(itemPrice);
-            instance.setPriceName("");
-        }
-    }
-
-    @PropertyGetter(value = "priceUuid")
-    public String getItemPriceUuid(BillLineItem instance) {
-        try {
-            CashierItemPrice itemPrice = instance.getItemPrice();
-            return "";
-        } catch (Exception e) {
-            LOG.warn("Price probably was deleted", e);
-            return "";
-        }
-    }
-
-    @Override
-    public BillLineItem getByUniqueId(String uuid) {
-        if (StringUtils.isEmpty(uuid)) {
-            return null;
-        }
-
-        return Context.getService(BillLineItemService.class).getBillLineItemByUuid(uuid);
-    }
-
-    @Override
-    public BillLineItem newDelegate() {
-        return new BillLineItem();
-    }
-
-    @Override
-    public Class<IEntityDataService<BillLineItem>> getServiceClass() {
-        // BillLineItemService doesn't implement IEntityDataService, so return null
-        // Line items are managed through BillService, not directly
-        return null;
-    }
+	
+	private static final Log LOG = LogFactory.getLog(BillLineItemResource.class);
+	
+	@Override
+	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
+		DelegatingResourceDescription description = super.getRepresentationDescription(rep);
+		if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
+			description.addProperty("item");
+			description.addProperty("billableService", Representation.REF);
+			description.addProperty("quantity");
+			description.addProperty("price");
+			description.addProperty("priceName");
+			description.addProperty("priceUuid");
+			description.addProperty("lineItemOrder");
+			description.addProperty("paymentStatus");
+			return description;
+		}
+		return null;
+	}
+	
+	@PropertySetter(value = "item")
+	public void setItem(BillLineItem instance, Object item) {
+		StockManagementService service = Context.getService(StockManagementService.class);
+		String itemUuid = (String) item;
+		instance.setItem(service.getStockItemByUuid(itemUuid));
+	}
+	
+	@PropertySetter(value = "billableService")
+	public void setBillableService(BillLineItem instance, Object item) {
+		BillableServiceService service = Context.getService(BillableServiceService.class);
+		String serviceUuid = (String) item;
+		instance.setBillableService(service.getBillableServiceByUuid(serviceUuid));
+	}
+	
+	@PropertyGetter(value = "item")
+	public String getItem(BillLineItem instance) {
+		try {
+			StockItem stockItem = instance.getItem();
+			return stockItem.getDrug().getName();
+		}
+		catch (Exception e) {
+			return "";
+		}
+	}
+	
+	@PropertyGetter(value = "billableService")
+	public String getBillableService(BillLineItem instance) {
+		try {
+			BillableService service = instance.getBillableService();
+			return service.getName();
+		}
+		catch (Exception e) {
+			return "";
+		}
+	}
+	
+	@PropertySetter(value = "price")
+	public void setPriceValue(BillLineItem instance, Object price) {
+		if (price instanceof Double || price instanceof Integer) {
+			double priceValue = ((Number) price).doubleValue();
+			instance.setPrice(BigDecimal.valueOf(priceValue));
+		} else {
+			throw new IllegalArgumentException("Unsupported price type: " + price.getClass().getName());
+		}
+	}
+	
+	@PropertySetter(value = "priceName")
+	public void setPriceName(BillLineItem instance, String name) {
+		instance.setPriceName(name);
+	}
+	
+	@PropertyGetter(value = "priceName")
+	public String getPriceName(BillLineItem instance) {
+		String itemName = instance.getPriceName();
+		return StringUtils.isNotBlank(itemName) ? itemName : "";
+	}
+	
+	@PropertySetter(value = "priceUuid")
+	public void setItemPrice(BillLineItem instance, String uuid) {
+		StockManagementService itemDataService = Context.getService(StockManagementService.class);
+		CashierItemPrice itemPrice = null;
+		if (itemPrice != null) {
+			instance.setItemPrice(itemPrice);
+			instance.setPriceName("");
+		}
+	}
+	
+	@PropertyGetter(value = "priceUuid")
+	public String getItemPriceUuid(BillLineItem instance) {
+		try {
+			CashierItemPrice itemPrice = instance.getItemPrice();
+			return "";
+		}
+		catch (Exception e) {
+			LOG.warn("Price probably was deleted", e);
+			return "";
+		}
+	}
+	
+	@Override
+	public BillLineItem getByUniqueId(String uuid) {
+		if (StringUtils.isEmpty(uuid)) {
+			return null;
+		}
+		
+		return Context.getService(BillLineItemService.class).getBillLineItemByUuid(uuid);
+	}
+	
+	@Override
+	public BillLineItem newDelegate() {
+		return new BillLineItem();
+	}
+	
+	@Override
+	public Class<IEntityDataService<BillLineItem>> getServiceClass() {
+		// BillLineItemService doesn't implement IEntityDataService, so return null
+		// Line items are managed through BillService, not directly
+		return null;
+	}
 }

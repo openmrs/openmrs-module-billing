@@ -34,38 +34,38 @@ import org.springframework.web.context.request.WebRequest;
  * Abstract sequential receipt number generator functionality
  */
 public abstract class AbstractSequentialReceiptNumberGenerator {
-
-    public abstract ISequentialReceiptNumberGeneratorService getService();
-
-    public abstract String getReceiptNumberGeneratorUrl();
-
-    @RequestMapping(method = RequestMethod.GET)
-    public void render(ModelMap modelMap, HttpServletRequest request) throws IOException {
-        SequentialReceiptNumberGeneratorModel model = getService().getOnly();
-
-        modelMap.addAttribute("generator", model);
-
-        modelMap.addAttribute("settings", ModuleSettings.loadSettings());
-
-        HeaderController.render(modelMap, request);
-    }
-
-    @RequestMapping(method = RequestMethod.POST)
-    public String post(@ModelAttribute("generator") SequentialReceiptNumberGeneratorModel generator, WebRequest request) {
-        if (generator.getSeparator().equals("<space>")) {
-            generator.setSeparator(" ");
-        }
-
-        // The check digit checkbox value is only bound if checked
-        if (request.getParameter("includeCheckDigit") == null) {
-            generator.setIncludeCheckDigit(false);
-        }
-
-        // Save the generator settings
-        getService().save(generator);
-
-        // Set the system generator
-        ReceiptNumberGeneratorFactory.setGenerator(new SequentialReceiptNumberGenerator());
-        return UrlUtil.redirectUrl(getReceiptNumberGeneratorUrl());
-    }
+	
+	public abstract ISequentialReceiptNumberGeneratorService getService();
+	
+	public abstract String getReceiptNumberGeneratorUrl();
+	
+	@RequestMapping(method = RequestMethod.GET)
+	public void render(ModelMap modelMap, HttpServletRequest request) throws IOException {
+		SequentialReceiptNumberGeneratorModel model = getService().getOnly();
+		
+		modelMap.addAttribute("generator", model);
+		
+		modelMap.addAttribute("settings", ModuleSettings.loadSettings());
+		
+		HeaderController.render(modelMap, request);
+	}
+	
+	@RequestMapping(method = RequestMethod.POST)
+	public String post(@ModelAttribute("generator") SequentialReceiptNumberGeneratorModel generator, WebRequest request) {
+		if (generator.getSeparator().equals("<space>")) {
+			generator.setSeparator(" ");
+		}
+		
+		// The check digit checkbox value is only bound if checked
+		if (request.getParameter("includeCheckDigit") == null) {
+			generator.setIncludeCheckDigit(false);
+		}
+		
+		// Save the generator settings
+		getService().save(generator);
+		
+		// Set the system generator
+		ReceiptNumberGeneratorFactory.setGenerator(new SequentialReceiptNumberGenerator());
+		return UrlUtil.redirectUrl(getReceiptNumberGeneratorUrl());
+	}
 }

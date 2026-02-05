@@ -25,92 +25,90 @@ import javax.annotation.Nonnull;
 @Setter
 @RequiredArgsConstructor
 public class InvoiceTranslatorImpl implements InvoiceTranslator {
-
-
-    private final PractitionerReferenceTranslator<Provider> practitionerReferenceTranslator;
-
-    private final PatientReferenceTranslator patientReferenceTranslator;
-
-    @Override
-    public Invoice toFhirResource(@Nonnull Bill bill) {
-        Validate.notNull(bill, "Bill cannot be null");
-
-        Invoice invoice = new Invoice();
-        invoice.setId(bill.getUuid());
-        invoice.setStatus(mapStatus(bill.getStatus()));
-
-        if (bill.getCashier() != null) {
-            Invoice.InvoiceParticipantComponent participantComponent = new Invoice.InvoiceParticipantComponent();
-            participantComponent.setActor(practitionerReferenceTranslator.toFhirResource(bill.getCashier()));
-            Concept role = bill.getCashier().getRole();
-            if (role != null) {
-                CodeableConcept participantRole = new CodeableConcept();
-                participantRole.addCoding(new Coding().setDisplay(role.getDisplayString()));
-                participantComponent.setRole(participantRole);
-            }
-            invoice.addParticipant(participantComponent);
-        }
-        if (bill.getPatient() != null) {
-            invoice.setSubject(patientReferenceTranslator.toFhirResource(bill.getPatient()));
-            invoice.setRecipient(patientReferenceTranslator.toFhirResource(bill.getPatient()));
-        }
-
-        if (bill.getLineItems() != null) {
-            for (BillLineItem billLineItem : bill.getLineItems()) {
-                Invoice.InvoiceLineItemComponent invoiceLineItemComponent = new Invoice.InvoiceLineItemComponent();
-                if (billLineItem.getItem() != null) {
-                    invoiceLineItemComponent.setSequence(billLineItem.getLineItemOrder());
-                    CodeableConcept codeableConcept = new CodeableConcept();
-                    Coding coding  = new Coding().setCode(billLineItem.getUuid());
-                    if (billLineItem.getItem().getConcept() != null) {
-                        coding.setDisplay(billLineItem.getItem().getCommonName());
-                    }
-                    codeableConcept.addCoding(coding);
-                    invoiceLineItemComponent.setChargeItem(codeableConcept);
-                }
-
-                if (billLineItem.getPrice() != null) {
-                    Invoice.InvoiceLineItemPriceComponentComponent priceComponent = new Invoice.InvoiceLineItemPriceComponentComponent();
-                    priceComponent.setCode(new CodeableConcept().addCoding(new Coding().setCode(billLineItem.getUuid())));
-                    priceComponent.setAmount(new Money().setValue(billLineItem.getPrice()));
-                    invoiceLineItemComponent.addPriceComponent(priceComponent);
-                }
-                invoice.addLineItem(invoiceLineItemComponent);
-            }
-        }
-
-
-        if (bill.getTotal() != null) {
-            Money totalNet = new Money();
-            totalNet.setValue(bill.getTotal());
-            invoice.setTotalNet(totalNet);
-            invoice.setTotalGross(totalNet);
-        }
-
-        invoice.setDate(bill.getDateCreated());
-        return invoice;
-    }
-
-    private Invoice.InvoiceStatus mapStatus(BillStatus status) {
-        if (status == null) {
-            return Invoice.InvoiceStatus.DRAFT;
-        }
-        switch (status) {
-            case POSTED:
-            case ADJUSTED:
-                return Invoice.InvoiceStatus.ISSUED;
-            case PAID:
-            case EXEMPTED:
-                return Invoice.InvoiceStatus.BALANCED;
-            case CANCELLED:
-                return Invoice.InvoiceStatus.CANCELLED;
-            default:
-                return Invoice.InvoiceStatus.DRAFT;
-        }
-    }
-
-    @Override
-    public Bill toOpenmrsType(@Nonnull Invoice invoice) {
-        return null;
-    }
+	
+	private final PractitionerReferenceTranslator<Provider> practitionerReferenceTranslator;
+	
+	private final PatientReferenceTranslator patientReferenceTranslator;
+	
+	@Override
+	public Invoice toFhirResource(@Nonnull Bill bill) {
+		Validate.notNull(bill, "Bill cannot be null");
+		
+		Invoice invoice = new Invoice();
+		invoice.setId(bill.getUuid());
+		invoice.setStatus(mapStatus(bill.getStatus()));
+		
+		if (bill.getCashier() != null) {
+			Invoice.InvoiceParticipantComponent participantComponent = new Invoice.InvoiceParticipantComponent();
+			participantComponent.setActor(practitionerReferenceTranslator.toFhirResource(bill.getCashier()));
+			Concept role = bill.getCashier().getRole();
+			if (role != null) {
+				CodeableConcept participantRole = new CodeableConcept();
+				participantRole.addCoding(new Coding().setDisplay(role.getDisplayString()));
+				participantComponent.setRole(participantRole);
+			}
+			invoice.addParticipant(participantComponent);
+		}
+		if (bill.getPatient() != null) {
+			invoice.setSubject(patientReferenceTranslator.toFhirResource(bill.getPatient()));
+			invoice.setRecipient(patientReferenceTranslator.toFhirResource(bill.getPatient()));
+		}
+		
+		if (bill.getLineItems() != null) {
+			for (BillLineItem billLineItem : bill.getLineItems()) {
+				Invoice.InvoiceLineItemComponent invoiceLineItemComponent = new Invoice.InvoiceLineItemComponent();
+				if (billLineItem.getItem() != null) {
+					invoiceLineItemComponent.setSequence(billLineItem.getLineItemOrder());
+					CodeableConcept codeableConcept = new CodeableConcept();
+					Coding coding = new Coding().setCode(billLineItem.getUuid());
+					if (billLineItem.getItem().getConcept() != null) {
+						coding.setDisplay(billLineItem.getItem().getCommonName());
+					}
+					codeableConcept.addCoding(coding);
+					invoiceLineItemComponent.setChargeItem(codeableConcept);
+				}
+				
+				if (billLineItem.getPrice() != null) {
+					Invoice.InvoiceLineItemPriceComponentComponent priceComponent = new Invoice.InvoiceLineItemPriceComponentComponent();
+					priceComponent.setCode(new CodeableConcept().addCoding(new Coding().setCode(billLineItem.getUuid())));
+					priceComponent.setAmount(new Money().setValue(billLineItem.getPrice()));
+					invoiceLineItemComponent.addPriceComponent(priceComponent);
+				}
+				invoice.addLineItem(invoiceLineItemComponent);
+			}
+		}
+		
+		if (bill.getTotal() != null) {
+			Money totalNet = new Money();
+			totalNet.setValue(bill.getTotal());
+			invoice.setTotalNet(totalNet);
+			invoice.setTotalGross(totalNet);
+		}
+		
+		invoice.setDate(bill.getDateCreated());
+		return invoice;
+	}
+	
+	private Invoice.InvoiceStatus mapStatus(BillStatus status) {
+		if (status == null) {
+			return Invoice.InvoiceStatus.DRAFT;
+		}
+		switch (status) {
+			case POSTED:
+			case ADJUSTED:
+				return Invoice.InvoiceStatus.ISSUED;
+			case PAID:
+			case EXEMPTED:
+				return Invoice.InvoiceStatus.BALANCED;
+			case CANCELLED:
+				return Invoice.InvoiceStatus.CANCELLED;
+			default:
+				return Invoice.InvoiceStatus.DRAFT;
+		}
+	}
+	
+	@Override
+	public Bill toOpenmrsType(@Nonnull Invoice invoice) {
+		return null;
+	}
 }

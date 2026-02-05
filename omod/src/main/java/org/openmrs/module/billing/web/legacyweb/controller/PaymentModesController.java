@@ -26,8 +26,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 @RequestMapping("/module/billing/paymentModes")
 public class PaymentModesController {
-    @RequestMapping(method = RequestMethod.GET)
-    public void paymentModes(ModelMap model) throws IOException {
-        model.addAttribute("modelBase", "openhmis.cashier.paymentMode");
-    }
+	
+	@RequestMapping(method = RequestMethod.GET)
+	public void paymentModes(ModelMap model) throws IOException {
+		model.addAttribute("modelBase", "openhmis.cashier.paymentMode");
+	}
 }
