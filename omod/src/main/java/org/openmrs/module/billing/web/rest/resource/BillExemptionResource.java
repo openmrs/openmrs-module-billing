@@ -36,25 +36,25 @@ import java.util.List;
 /**
  * REST resource representing a {@link BillExemption}.
  */
-@Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE + "/billExemption",
-        supportedClass = BillExemption.class, supportedOpenmrsVersions = {"2.0 - 2.*"})
+@Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
+        + "/billExemption", supportedClass = BillExemption.class, supportedOpenmrsVersions = { "2.0 - 2.*" })
 public class BillExemptionResource extends MetadataDelegatingCrudResource<BillExemption> {
-
+	
 	@Override
 	public BillExemption newDelegate() {
 		return new BillExemption();
 	}
-
+	
 	@Override
 	public BillExemption save(BillExemption delegate) {
 		return getService().save(delegate);
 	}
-
+	
 	@Override
 	public BillExemption getByUniqueId(String uniqueId) {
 		return getService().getBillingExemptionByUuid(uniqueId);
 	}
-
+	
 	@Override
 	public void delete(BillExemption delegate, String reason, RequestContext context) throws ResponseException {
 		if (delegate.getRetired()) {
@@ -64,16 +64,16 @@ public class BillExemptionResource extends MetadataDelegatingCrudResource<BillEx
 		delegate.setRetireReason(reason);
 		getService().save(delegate);
 	}
-
+	
 	@Override
 	public void purge(BillExemption delegate, RequestContext context) throws ResponseException {
 		throw new UnsupportedOperationException("Purge is not supported for BillingExemption");
 	}
-
+	
 	@Override
 	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
 		DelegatingResourceDescription description = new DelegatingResourceDescription();
-
+		
 		if (rep instanceof RefRepresentation) {
 			description.addProperty("uuid");
 			description.addProperty("name");
@@ -99,10 +99,10 @@ public class BillExemptionResource extends MetadataDelegatingCrudResource<BillEx
 			description.addProperty("rules", Representation.FULL);
 			description.addProperty("auditInfo");
 		}
-
+		
 		return description;
 	}
-
+	
 	@Override
 	public DelegatingResourceDescription getCreatableProperties() {
 		DelegatingResourceDescription description = new DelegatingResourceDescription();
@@ -113,12 +113,12 @@ public class BillExemptionResource extends MetadataDelegatingCrudResource<BillEx
 		description.addProperty("rules");
 		return description;
 	}
-
+	
 	@Override
 	public DelegatingResourceDescription getUpdatableProperties() {
 		return getCreatableProperties();
 	}
-
+	
 	@PropertySetter("rules")
 	public void setRules(BillExemption instance, List<BillExemptionRule> rules) {
 		if (rules != null) {
@@ -128,14 +128,14 @@ public class BillExemptionResource extends MetadataDelegatingCrudResource<BillEx
 			instance.setRules(rules);
 		}
 	}
-
+	
 	@PropertySetter("exemptionType")
 	public void setExemptionType(BillExemption instance, String exemptionType) {
 		if (exemptionType != null) {
 			instance.setExemptionType(ExemptionType.valueOf(exemptionType));
 		}
 	}
-
+	
 	private BillExemptionService getService() {
 		return Context.getService(BillExemptionService.class);
 	}

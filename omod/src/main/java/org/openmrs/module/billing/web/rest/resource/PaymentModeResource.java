@@ -39,52 +39,52 @@ import org.openmrs.module.webservices.rest.web.response.ResponseException;
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
         + "/paymentMode", supportedClass = PaymentMode.class, supportedOpenmrsVersions = { "2.7.8 - 9.*" })
 public class PaymentModeResource extends MetadataDelegatingCrudResource<PaymentMode> {
-
-    private final PaymentModeService paymentModeService = Context.getService(PaymentModeService.class);
-
-    @Override
-    public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
-        DelegatingResourceDescription description = new DelegatingResourceDescription();
-        description.addProperty("uuid");
-        description.addProperty("name");
-        description.addProperty("description");
-        description.addProperty("retired");
-        if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
-            description.addProperty("retireReason");
-            description.addProperty("sortOrder");
-            description.addProperty("attributeTypes", Representation.REF);
-        } else if (rep instanceof CustomRepresentation) {
-            // For custom representation, must be null
-            // - let the user decide which properties should be included in the response
-            return null;
-        }
-        return description;
-    }
-
-    @Override
-    public PageableResult doGetAll(RequestContext context) throws ResponseException {
-        boolean includeRetired = BooleanUtils.toBoolean(context.getParameter("includeAll"));
-        List<PaymentMode> paymentModes = paymentModeService.getPaymentModes(includeRetired);
-        return new NeedsPaging<>(paymentModes, context);
-    }
-
-    @Override
-    public PaymentMode getByUniqueId(String s) {
-        return paymentModeService.getPaymentModeByUuid(s);
-    }
-
-    @Override
-    public PaymentMode newDelegate() {
-        return new PaymentMode();
-    }
-
-    @Override
-    public PaymentMode save(PaymentMode paymentMode) {
-        return paymentModeService.savePaymentMode(paymentMode);
-    }
-
-    @Override
-    public void purge(PaymentMode paymentMode, RequestContext requestContext) throws ResponseException {
-        paymentModeService.purgePaymentMode(paymentMode);
-    }
+	
+	private final PaymentModeService paymentModeService = Context.getService(PaymentModeService.class);
+	
+	@Override
+	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
+		DelegatingResourceDescription description = new DelegatingResourceDescription();
+		description.addProperty("uuid");
+		description.addProperty("name");
+		description.addProperty("description");
+		description.addProperty("retired");
+		if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
+			description.addProperty("retireReason");
+			description.addProperty("sortOrder");
+			description.addProperty("attributeTypes", Representation.REF);
+		} else if (rep instanceof CustomRepresentation) {
+			// For custom representation, must be null
+			// - let the user decide which properties should be included in the response
+			return null;
+		}
+		return description;
+	}
+	
+	@Override
+	public PageableResult doGetAll(RequestContext context) throws ResponseException {
+		boolean includeRetired = BooleanUtils.toBoolean(context.getParameter("includeAll"));
+		List<PaymentMode> paymentModes = paymentModeService.getPaymentModes(includeRetired);
+		return new NeedsPaging<>(paymentModes, context);
+	}
+	
+	@Override
+	public PaymentMode getByUniqueId(String s) {
+		return paymentModeService.getPaymentModeByUuid(s);
+	}
+	
+	@Override
+	public PaymentMode newDelegate() {
+		return new PaymentMode();
+	}
+	
+	@Override
+	public PaymentMode save(PaymentMode paymentMode) {
+		return paymentModeService.savePaymentMode(paymentMode);
+	}
+	
+	@Override
+	public void purge(PaymentMode paymentMode, RequestContext requestContext) throws ResponseException {
+		paymentModeService.purgePaymentMode(paymentMode);
+	}
 }

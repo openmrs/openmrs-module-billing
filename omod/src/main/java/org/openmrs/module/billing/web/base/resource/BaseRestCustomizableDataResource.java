@@ -35,24 +35,24 @@ public abstract class BaseRestCustomizableDataResource<
 			TAttribute extends IAttribute<E, ?>>
 		extends BaseRestDataResource<E> {
 // @formatter:on
-@Override
-public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
-    DelegatingResourceDescription description = super.getRepresentationDescription(rep);
-    if (!(rep instanceof RefRepresentation)) {
-        description.addProperty("attributes");
-    }
-
-    return description;
-}
-
-    protected void baseSetAttributes(E instance, List<TAttribute> attributes) {
-        if (instance.getAttributes() == null) {
-            instance.setAttributes(new HashSet<TAttribute>());
-        }
-
-        syncCollection(instance.getAttributes(), attributes);
-        for (TAttribute attribute : instance.getAttributes()) {
-            attribute.setOwner(instance);
-        }
-    }
+	@Override
+	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
+		DelegatingResourceDescription description = super.getRepresentationDescription(rep);
+		if (!(rep instanceof RefRepresentation)) {
+			description.addProperty("attributes");
+		}
+		
+		return description;
+	}
+	
+	protected void baseSetAttributes(E instance, List<TAttribute> attributes) {
+		if (instance.getAttributes() == null) {
+			instance.setAttributes(new HashSet<TAttribute>());
+		}
+		
+		syncCollection(instance.getAttributes(), attributes);
+		for (TAttribute attribute : instance.getAttributes()) {
+			attribute.setOwner(instance);
+		}
+	}
 }

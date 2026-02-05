@@ -33,27 +33,27 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/billing/receipt")
 public class ReceiptController extends BaseRestController {
-
-    @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
-    public ResponseEntity<byte[]> get(@RequestParam(value = "billUuid", required = false) String billUuid) {
-        BillService service = Context.getService(BillService.class);
-        Bill bill = service.getBillByUuid(billUuid);
-
-        if (bill == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        byte[] pdfFile = service.downloadBillReceipt(bill);
-        if (pdfFile != null && pdfFile.length > 0) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.setContentLength(pdfFile.length);
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"receipt-" + bill.getId() + ".pdf\"");
-
-            return new ResponseEntity<>(pdfFile, headers, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-    }
-
+	
+	@RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+	public ResponseEntity<byte[]> get(@RequestParam(value = "billUuid", required = false) String billUuid) {
+		BillService service = Context.getService(BillService.class);
+		Bill bill = service.getBillByUuid(billUuid);
+		
+		if (bill == null) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+		
+		byte[] pdfFile = service.downloadBillReceipt(bill);
+		if (pdfFile != null && pdfFile.length > 0) {
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_PDF);
+			headers.setContentLength(pdfFile.length);
+			headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"receipt-" + bill.getId() + ".pdf\"");
+			
+			return new ResponseEntity<>(pdfFile, headers, HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+	}
+	
 }

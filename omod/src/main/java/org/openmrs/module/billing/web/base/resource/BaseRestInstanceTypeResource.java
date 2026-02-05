@@ -33,32 +33,32 @@ public abstract class BaseRestInstanceTypeResource<
 			TAttributeType extends IInstanceAttributeType<E>>
         extends BaseRestMetadataResource<E> {
 // @formatter:on
-@Override
-public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
-    DelegatingResourceDescription description = super.getRepresentationDescription(rep);
-    if (!(rep instanceof RefRepresentation)) {
-        description.addProperty("attributeTypes");
-    }
-
-    return description;
-}
-
-    @Override
-    public DelegatingResourceDescription getCreatableProperties() {
-        DelegatingResourceDescription description = super.getCreatableProperties();
-        description.addProperty("attributeTypes");
-
-        return description;
-    }
-
-    protected void baseSetAttributeTypes(E instance, List<TAttributeType> attributeTypes) {
-        if (instance.getAttributeTypes() == null) {
-            instance.setAttributeTypes(new ArrayList<TAttributeType>());
-        }
-
-        BaseRestDataResource.syncCollection(instance.getAttributeTypes(), attributeTypes);
-        for (TAttributeType type : instance.getAttributeTypes()) {
-            type.setOwner(instance);
-        }
-    }
+	@Override
+	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
+		DelegatingResourceDescription description = super.getRepresentationDescription(rep);
+		if (!(rep instanceof RefRepresentation)) {
+			description.addProperty("attributeTypes");
+		}
+		
+		return description;
+	}
+	
+	@Override
+	public DelegatingResourceDescription getCreatableProperties() {
+		DelegatingResourceDescription description = super.getCreatableProperties();
+		description.addProperty("attributeTypes");
+		
+		return description;
+	}
+	
+	protected void baseSetAttributeTypes(E instance, List<TAttributeType> attributeTypes) {
+		if (instance.getAttributeTypes() == null) {
+			instance.setAttributeTypes(new ArrayList<TAttributeType>());
+		}
+		
+		BaseRestDataResource.syncCollection(instance.getAttributeTypes(), attributeTypes);
+		for (TAttributeType type : instance.getAttributeTypes()) {
+			type.setOwner(instance);
+		}
+	}
 }

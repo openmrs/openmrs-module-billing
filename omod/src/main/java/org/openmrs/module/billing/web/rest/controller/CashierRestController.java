@@ -29,14 +29,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE + "/api")
 public class CashierRestController extends BaseRestController {
-    @RequestMapping(method = RequestMethod.POST, path = "/billable-service")
-    @ResponseBody
-    public Object get(@RequestBody BillableServiceMapper request) {
-        BillableService billableService = request.billableServiceMapper(request);
-        BillableServiceService service = Context.getService(BillableServiceService.class);
-
-        service.saveBillableService(billableService);
-
-        return true;
-    }
+	
+	@RequestMapping(method = RequestMethod.POST, path = "/billable-service")
+	@ResponseBody
+	public Object get(@RequestBody BillableServiceMapper request) {
+		BillableService billableService = request.billableServiceMapper(request);
+		BillableServiceService service = Context.getService(BillableServiceService.class);
+		
+		service.saveBillableService(billableService);
+		
+		return true;
+	}
 }

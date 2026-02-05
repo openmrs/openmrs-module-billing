@@ -7,5 +7,5 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class FhirInvoiceDaoImpl extends BaseFhirDao<Bill> implements FhirInvoiceDao {
-
+	
 }
