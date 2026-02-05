@@ -33,7 +33,7 @@ import java.io.IOException;
 public abstract class CashierSettingsControllerBase {
 	
 	@RequestMapping(method = RequestMethod.GET)
-	public void render(ModelMap modelMap, HttpServletRequest request) throws IOException {
+	public void render(ModelMap modelMap, HttpServletRequest request) {
 		modelMap.addAttribute("cashierSettings", ModuleSettings.loadSettings());
 		HeaderController.render(modelMap, request);
 	}

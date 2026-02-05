@@ -46,7 +46,7 @@ public abstract class RoleCreationControllerBase {
 	public abstract Set<Privilege> privileges();
 	
 	@RequestMapping(method = RequestMethod.GET)
-	public void render(ModelMap model, HttpServletRequest request) throws IOException {
+	public void render(ModelMap model, HttpServletRequest request) {
 		List<Role> roles = getUserService().getAllRoles();
 		model.addAttribute("roles", roles);
 		HeaderController.render(model, request);

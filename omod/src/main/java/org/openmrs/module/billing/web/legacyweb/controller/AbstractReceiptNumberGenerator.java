@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 
 /**
  * Abstract Receipt Number Generator Functionality.
@@ -42,7 +41,7 @@ public abstract class AbstractReceiptNumberGenerator {
 	
 	@RequestMapping(method = RequestMethod.GET)
 	@Authorized(PrivilegeConstants.MANAGE_BILLS)
-	public void render(ModelMap model, HttpServletRequest request) throws IOException {
+	public void render(ModelMap model, HttpServletRequest request) {
 		IReceiptNumberGenerator currentGenerator = ReceiptNumberGeneratorFactory.getGenerator();
 		IReceiptNumberGenerator[] generators = ReceiptNumberGeneratorFactory.locateGenerators();
 		
