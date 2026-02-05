@@ -152,6 +152,12 @@
 			Path for the Bill Reciept Logo
 		</description>
 	</globalProperty>
+	<globalProperty>
+		<property>${project.parent.artifactId}.currency</property>
+		<description>
+			Currency symbol for billing receipts (e.g., "USD", "KES", or custom text). Falls back to locale default if not set.
+		</description>
+	</globalProperty>
 
 
 	<!-- Extensions -->

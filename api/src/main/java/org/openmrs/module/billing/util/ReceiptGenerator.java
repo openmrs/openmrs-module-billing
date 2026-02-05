@@ -37,8 +37,12 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.time.LocalDate;
+
+import org.openmrs.module.billing.api.util.CashierModuleConstants;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -52,6 +56,13 @@ public class ReceiptGenerator {
 	//TODO: Try to clean this up more
 	public static byte[] createBillReceipt(Bill bill) {
 		NumberFormat nf = NumberFormat.getCurrencyInstance(Context.getLocale());
+		String currencySymbol = ConfigUtil.getGlobalProperty(CashierModuleConstants.GLOBAL_PROPERTY_BILLING_CURRENCY);
+		if (StringUtils.isNotBlank(currencySymbol) && nf instanceof DecimalFormat) {
+			DecimalFormat df = (DecimalFormat) nf;
+			DecimalFormatSymbols symbols = df.getDecimalFormatSymbols();
+			symbols.setCurrencySymbol(currencySymbol.trim());
+			df.setDecimalFormatSymbols(symbols);
+		}
 		DateTimeFormatter dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)
 		        .withLocale(Context.getLocale());
 		
