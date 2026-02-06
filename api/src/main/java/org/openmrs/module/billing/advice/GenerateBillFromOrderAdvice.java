@@ -42,7 +42,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 	
-
 	final BillService billService = Context.getService(BillService.class);
 	
 	final StockManagementService stockService = Context.getService(StockManagementService.class);
@@ -106,7 +105,7 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 			}
 		}
 		catch (Exception e) {
-            log.error("Error intercepting order before creation: {}", e.getMessage(), e);
+			log.error("Error intercepting order before creation: {}", e.getMessage(), e);
 		}
 	}
 	
@@ -216,7 +215,7 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 			
 		}
 		catch (Exception ex) {
-            log.error("Error sending the bill item: {}", ex.getMessage(), ex);
+			log.error("Error sending the bill item: {}", ex.getMessage(), ex);
 		}
 	}
 }

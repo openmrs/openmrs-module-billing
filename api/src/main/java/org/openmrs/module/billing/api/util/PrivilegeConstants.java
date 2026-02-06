@@ -80,7 +80,6 @@ public class PrivilegeConstants {
 	        TASK_CASHIER_TIMESHEETS_PAGE, TASK_MANAGE_CASHIER_MODULE_PAGE, TASK_VIEW_CASHIER_REPORTS,
 	        APP_ACCESS_CASHIER_TASKS_PAGE };
 	
-
 	/**
 	 * Gets all the privileges defined by the module.
 	 *

@@ -20,7 +20,6 @@ import org.openmrs.Concept;
 import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.api.ConceptService;
-import org.openmrs.api.OrderService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.TestConstants;
@@ -52,8 +51,6 @@ public class ExemptionRuleEngineTest extends BaseModuleContextSensitiveTest {
 	
 	private PatientService patientService;
 	
-	private OrderService orderService;
-	
 	@BeforeEach
 	public void setup() {
 		List<ExemptionEvaluator> evaluators = new ArrayList<>();
@@ -63,7 +60,6 @@ public class ExemptionRuleEngineTest extends BaseModuleContextSensitiveTest {
 		billExemptionService = Context.getService(BillExemptionService.class);
 		conceptService = Context.getConceptService();
 		patientService = Context.getPatientService();
-		orderService = Context.getOrderService();
 		
 		executeDataSet(TestConstants.CORE_DATASET2);
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "BillExemptionTest.xml");
