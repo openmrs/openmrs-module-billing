@@ -15,8 +15,7 @@ package org.openmrs.module.billing.web.base.resource;
 
 import java.lang.reflect.ParameterizedType;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.base.PagingInfo;
@@ -34,9 +33,8 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceD
  *
  * @param <E> The model class
  */
+@Slf4j
 public abstract class BaseRestObjectResource<E extends OpenmrsObject> extends DelegatingCrudResource<E> implements IObjectDataServiceResource<E, IObjectDataService<E>> {
-	
-	private static final Log LOG = LogFactory.getLog(BaseRestObjectResource.class);
 	
 	private Class<E> entityClass = null;
 	
@@ -93,7 +91,7 @@ public abstract class BaseRestObjectResource<E extends OpenmrsObject> extends De
 				result = service.getByUuid(uniqueId);
 			}
 			catch (PrivilegeException p) {
-				LOG.error("Exception occured when trying to get entity with ID <" + uniqueId + "> as privilege is missing",
+				log.error("Exception occured when trying to get entity with ID <" + uniqueId + "> as privilege is missing",
 				    p);
 				throw new PrivilegeException("Can't get entity with ID <" + uniqueId + "> as privilege is missing");
 			}

@@ -18,8 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.openmrs.Privilege;
 import org.openmrs.api.UserService;
 import org.openmrs.api.context.Context;
@@ -27,9 +26,8 @@ import org.openmrs.api.context.Context;
 /**
  * Constants class for module privilege constants.
  */
+@Slf4j
 public class PrivilegeConstants {
-	
-	private static final Log LOG = LogFactory.getLog(PrivilegeConstants.class);
 	
 	public static final String MANAGE_BILLS = "Manage Cashier Bills";
 	
@@ -137,7 +135,7 @@ public class PrivilegeConstants {
 			if (privilege != null) {
 				privileges.add(privilege);
 			} else {
-				LOG.debug("------------NULL PRIVILEGE: " + name);
+				log.debug("------------NULL PRIVILEGE: " + name);
 			}
 		}
 		

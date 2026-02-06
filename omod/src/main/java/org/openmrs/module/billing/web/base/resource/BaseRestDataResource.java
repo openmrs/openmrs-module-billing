@@ -18,9 +18,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openmrs.OpenmrsData;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.api.context.Context;
@@ -44,9 +43,8 @@ import org.springframework.beans.BeanUtils;
  *
  * @param <E> The model class
  */
+@Slf4j
 public abstract class BaseRestDataResource<E extends OpenmrsData> extends DataDelegatingCrudResource<E> implements IEntityDataServiceResource<E> {
-	
-	private static final Log LOG = LogFactory.getLog(BaseRestDataResource.class);
 	
 	private Class<E> entityClass = null;
 	
@@ -157,7 +155,7 @@ public abstract class BaseRestDataResource<E extends OpenmrsData> extends DataDe
 				result = service.getByUuid(uniqueId);
 			}
 			catch (PrivilegeException p) {
-				LOG.error("Exception occured when trying to get entity with ID <" + uniqueId + "> as privilege is missing",
+				log.error("Exception occured when trying to get entity with ID <" + uniqueId + "> as privilege is missing",
 				    p);
 				throw new PrivilegeException("Can't get entity with ID <" + uniqueId + "> as privilege is missing");
 			}

@@ -13,9 +13,8 @@
  */
 package org.openmrs.module.billing.web.legacyweb.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.billing.web.base.controller.HeaderController;
 import org.openmrs.module.billing.ModuleSettings;
@@ -33,9 +32,8 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * Abstract Receipt Number Generator Functionality.
  */
+@Slf4j
 public abstract class AbstractReceiptNumberGenerator {
-	
-	private static final Log LOG = LogFactory.getLog(AbstractReceiptNumberGenerator.class);
 	
 	public abstract String getReceiptNumberGeneratorUrl();
 	
@@ -72,7 +70,7 @@ public abstract class AbstractReceiptNumberGenerator {
 			
 			// Load the generator configuration page, if defined
 			if (selectedGenerator == null) {
-				LOG.warn("Could not locate a receipt number generator named '" + generatorName + "'.");
+				log.warn("Could not locate a receipt number generator named '" + generatorName + "'.");
 			} else if (StringUtils.isEmpty(selectedGenerator.getConfigurationPage())) {
 				// There is no generator configuration page so just set the system generator and reload the page
 				ReceiptNumberGeneratorFactory.setGenerator(selectedGenerator);

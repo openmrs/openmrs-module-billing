@@ -21,8 +21,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.openmrs.DrugOrder;
 import org.openmrs.Order;
 import org.openmrs.Patient;
@@ -48,9 +47,8 @@ import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
 import org.springframework.aop.MethodBeforeAdvice;
 
+@Slf4j
 public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
-	
-	private static final Log LOG = LogFactory.getLog(OrderCreationMethodBeforeAdvice.class);
 	
 	final OrderService orderService = Context.getOrderService();
 	
@@ -104,8 +102,7 @@ public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 			}
 		}
 		catch (Exception e) {
-			LOG.error(e);
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 	}
 	
@@ -162,8 +159,7 @@ public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 			
 		}
 		catch (Exception ex) {
-			LOG.error(ex);
-			ex.printStackTrace();
+			log.error(ex.getMessage(), ex);
 		}
 	}
 	

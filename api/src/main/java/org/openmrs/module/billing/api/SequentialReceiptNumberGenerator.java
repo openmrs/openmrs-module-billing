@@ -17,9 +17,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.SequentialReceiptNumberGeneratorModel;
@@ -29,9 +28,8 @@ import org.openmrs.patient.impl.LuhnIdentifierValidator;
 /**
  * Implements {@link IReceiptNumberGenerator} to generate sequential receipt numbers
  */
+@Slf4j
 public class SequentialReceiptNumberGenerator implements IReceiptNumberGenerator {
-	
-	private static final Log LOG = LogFactory.getLog(ReceiptNumberGeneratorFactory.class);
 	
 	private final ISequentialReceiptNumberGeneratorService service;
 	
@@ -93,13 +91,13 @@ public class SequentialReceiptNumberGenerator implements IReceiptNumberGenerator
 			throw new NullPointerException("The bill must be defined.");
 		}
 		
-		LOG.debug("Generating receipt number for bill " + bill.getUuid() + "...");
+		log.debug("Generating receipt number for bill " + bill.getUuid() + "...");
 		
 		String grouping = createGrouping(bill);
 		String sequence = getSequence(grouping);
 		
 		String number = buildReceiptNumber(grouping, sequence);
-		LOG.debug("Generated receipt number '" + number + "' for bill " + bill.getUuid() + ".");
+		log.debug("Generated receipt number '" + number + "' for bill " + bill.getUuid() + ".");
 		
 		return number;
 	}

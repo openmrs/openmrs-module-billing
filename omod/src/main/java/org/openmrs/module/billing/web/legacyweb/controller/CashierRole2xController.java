@@ -15,8 +15,6 @@ package org.openmrs.module.billing.web.legacyweb.controller;
 
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openmrs.Privilege;
 import org.openmrs.api.UserService;
 import org.openmrs.api.context.Context;
@@ -32,8 +30,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping(CashierWebConstants.CASHIER_ROLE_2X_ROOT)
 public class CashierRole2xController extends RoleCreationControllerBase {
-	
-	private static final Log LOG = LogFactory.getLog(CashierRole2xController.class);
 	
 	public CashierRole2xController() {
 		

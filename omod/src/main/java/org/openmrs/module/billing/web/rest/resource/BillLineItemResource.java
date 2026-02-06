@@ -13,9 +13,8 @@
  */
 package org.openmrs.module.billing.web.rest.resource;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillableServiceService;
 import org.openmrs.module.billing.api.BillLineItemService;
@@ -43,9 +42,8 @@ import java.math.BigDecimal;
  */
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
         + "/billLineItem", supportedClass = BillLineItem.class, supportedOpenmrsVersions = { "2.0 - 2.*" })
+@Slf4j
 public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
-	
-	private static final Log LOG = LogFactory.getLog(BillLineItemResource.class);
 	
 	@Override
 	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
@@ -138,7 +136,7 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
 			return "";
 		}
 		catch (Exception e) {
-			LOG.warn("Price probably was deleted", e);
+			log.warn("Price probably was deleted", e);
 			return "";
 		}
 	}

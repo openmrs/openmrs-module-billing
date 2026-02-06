@@ -18,16 +18,14 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * General utility methods.
  */
+@Slf4j
 public class Utility {
-	
-	private static final Log LOG = LogFactory.getLog(Utility.class);
 	
 	private static final int DATE_ONLY_TEXT_LENGTH = 10;
 	
@@ -93,13 +91,13 @@ public class Utility {
 		
 		Date result = null;
 		if (dateFormat == null) {
-			LOG.warn("Could not parse the date string '" + dateText + "'.");
+			log.warn("Could not parse the date string '" + dateText + "'.");
 		} else {
 			try {
 				result = dateFormat.parse(dateText);
 			}
 			catch (ParseException pex) {
-				LOG.warn("Could not parse the date string '" + dateText + "'.", pex);
+				log.warn("Could not parse the date string '" + dateText + "'.", pex);
 			}
 		}
 		

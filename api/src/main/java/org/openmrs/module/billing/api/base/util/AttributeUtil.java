@@ -13,8 +13,7 @@
  */
 package org.openmrs.module.billing.api.base.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.openmrs.Attributable;
 import org.openmrs.customdatatype.NotYetPersistedException;
 import org.openmrs.module.billing.api.base.Utility;
@@ -23,9 +22,8 @@ import org.openmrs.util.OpenmrsClassLoader;
 /**
  * Utility class for working with {@link org.openmrs.attribute.Attribute}'s.
  */
+@Slf4j
 public class AttributeUtil {
-	
-	private static final Log LOG = LogFactory.getLog(AttributeUtil.class);
 	
 	private AttributeUtil() {
 	}
@@ -65,7 +63,7 @@ public class AttributeUtil {
 					}
 					catch (InstantiationException e) {
 						// try to hydrate the object with the String constructor
-						LOG.trace("Unable to call no-arg constructor for class: " + c.getName());
+						log.trace("Unable to call no-arg constructor for class: " + c.getName());
 						
 						result = c.getConstructor(String.class).newInstance(value);
 					}
@@ -74,12 +72,12 @@ public class AttributeUtil {
 					result = null;
 				}
 				catch (Exception ex) {
-					LOG.warn("Unable to hydrate value: " + value + " for type: " + className, ex);
+					log.warn("Unable to hydrate value: " + value + " for type: " + className, ex);
 				}
 			}
 		}
 		catch (ClassNotFoundException cnfe) {
-			LOG.warn("Unable to parse '" + className + "' to a known class.");
+			log.warn("Unable to parse '" + className + "' to a known class.");
 		}
 		
 		return result;

@@ -13,10 +13,9 @@
  */
 package org.openmrs.module.billing.web.rest.resource;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openmrs.Concept;
 import org.openmrs.Location;
 import org.openmrs.Provider;
@@ -50,9 +49,8 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceD
  */
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
         + "/paymentAttribute", supportedClass = PaymentAttribute.class, supportedOpenmrsVersions = { "2.0 - 2.*" })
+@Slf4j
 public class PaymentAttributeResource extends BaseRestAttributeDataResource<PaymentAttribute, PaymentModeAttributeType> {
-	
-	private static final Log LOG = LogFactory.getLog(PaymentAttributeResource.class);
 	
 	@Override
 	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
@@ -89,7 +87,7 @@ public class PaymentAttributeResource extends BaseRestAttributeDataResource<Paym
 						if (user != null) {
 							names = (user.getDisplayString());
 						} else {
-							LOG.error("The user could not be found");
+							log.error("The user could not be found");
 						}
 					} else if (instanceFormat.contains("Location")) {
 						LocationService locationService = Context.getLocationService();
@@ -97,7 +95,7 @@ public class PaymentAttributeResource extends BaseRestAttributeDataResource<Paym
 						if (location != null) {
 							names = location.getDisplayString();
 						} else {
-							LOG.error("The location could not be found");
+							log.error("The location could not be found");
 						}
 					} else if (instanceFormat.contains("Provider")) {
 						ProviderService providerService = Context.getProviderService();
@@ -105,7 +103,7 @@ public class PaymentAttributeResource extends BaseRestAttributeDataResource<Paym
 						if (provider != null) {
 							names = provider.getName();
 						} else {
-							LOG.error("The Provider could not be found");
+							log.error("The Provider could not be found");
 						}
 					} else if (instanceFormat.contains("Concept")) {
 						ConceptService conceptService = Context.getConceptService();
@@ -113,7 +111,7 @@ public class PaymentAttributeResource extends BaseRestAttributeDataResource<Paym
 						if (concept != null) {
 							names = concept.getDisplayString();
 						} else {
-							LOG.error("The Concept could not be found");
+							log.error("The Concept could not be found");
 						}
 					} else if (instanceFormat.contains("Patient")) {
 						PatientService patientService = Context.getPatientService();
@@ -121,7 +119,7 @@ public class PaymentAttributeResource extends BaseRestAttributeDataResource<Paym
 						if (patient != null) {
 							names = patient.getPersonName().getFullName();
 						} else {
-							LOG.error("The Patient could not be found");
+							log.error("The Patient could not be found");
 						}
 					} else if (instanceFormat.contains("Encounter")) {
 						EncounterService encounterService = Context.getEncounterService();
@@ -129,7 +127,7 @@ public class PaymentAttributeResource extends BaseRestAttributeDataResource<Paym
 						if (encounter != null) {
 							names = encounter.toString();
 						} else {
-							LOG.error("The Encounter could not be found");
+							log.error("The Encounter could not be found");
 						}
 					} else if (instanceFormat.contains("ProgramWorkflow")) {
 						ProgramWorkflowService programWorkflowService = Context.getProgramWorkflowService();
@@ -137,19 +135,19 @@ public class PaymentAttributeResource extends BaseRestAttributeDataResource<Paym
 						if (program != null) {
 							names = program.getName();
 						} else {
-							LOG.error("The Program could not be found");
+							log.error("The Program could not be found");
 						}
 					} else {
 						names = instance.getValue();
 					}
 				} else {
-					LOG.error("The instance cannot be null or empty");
+					log.error("The instance cannot be null or empty");
 				}
 			} else {
 				names = instance.getValue();
 			}
 		} else {
-			LOG.error("The Instance Format should not be empty");
+			log.error("The Instance Format should not be empty");
 		}
 		
 		return instance.getAttributeType().getName() + ": " + names;

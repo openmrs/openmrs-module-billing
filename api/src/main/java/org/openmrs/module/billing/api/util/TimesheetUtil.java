@@ -13,8 +13,7 @@
  */
 package org.openmrs.module.billing.api.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.openmrs.Provider;
 import org.openmrs.api.APIException;
 import org.openmrs.api.AdministrationService;
@@ -28,9 +27,8 @@ import org.openmrs.module.billing.api.model.Timesheet;
 /**
  * Utility class fo {@link Timesheet}
  */
+@Slf4j
 public class TimesheetUtil {
-	
-	private static final Log LOG = LogFactory.getLog(TimesheetUtil.class);
 	
 	protected TimesheetUtil() {
 	}
@@ -51,7 +49,7 @@ public class TimesheetUtil {
 			timesheet = tsService.getCurrentTimesheet(provider);
 		}
 		catch (Exception e) {
-			LOG.error("Error occured while trying to get the current timesheet" + e);
+			log.error("Error occured while trying to get the current timesheet" + e);
 			return null;
 		}
 		
@@ -66,7 +64,7 @@ public class TimesheetUtil {
 			        .parseBoolean(adminService.getGlobalProperty(ModuleSettings.TIMESHEET_REQUIRED_PROPERTY));
 		}
 		catch (Exception e) {
-			LOG.error("Error occured while trying to parse the boolean value" + e);
+			log.error("Error occured while trying to parse the boolean value" + e);
 			timesheetRequired = false;
 		}
 		return timesheetRequired;

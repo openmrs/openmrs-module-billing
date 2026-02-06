@@ -13,9 +13,8 @@
  */
 package org.openmrs.module.billing.api.base.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.idgen.IdentifierSource;
@@ -24,9 +23,8 @@ import org.openmrs.module.idgen.service.IdentifierSourceService;
 /**
  * Utility class for generating identifiers using the Idgen module.
  */
+@Slf4j
 public class IdgenUtil {
-	
-	private static final Log LOG = LogFactory.getLog(IdgenUtil.class);
 	
 	private IdgenUtil() {
 	}
@@ -55,7 +53,7 @@ public class IdgenUtil {
 			source = service.getIdentifierSource(sourceId);
 		}
 		catch (Exception ex) {
-			LOG.warn("Could not convert '" + property + "' into an integer.");
+			log.warn("Could not convert '" + property + "' into an integer.");
 		}
 		
 		return source;
