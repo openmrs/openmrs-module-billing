@@ -19,13 +19,11 @@ import org.openmrs.module.billing.ModuleSettings;
 import org.openmrs.module.billing.api.model.CashierSettings;
 import org.openmrs.web.WebConstants;
 import org.springframework.ui.ModelMap;
-import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
 
 /**
  * Base Controller to manage the settings pages.
@@ -39,8 +37,7 @@ public abstract class CashierSettingsControllerBase {
 	}
 	
 	@RequestMapping(method = RequestMethod.POST)
-	public void submit(HttpServletRequest request, CashierSettings cashierSettings, Errors errors, ModelMap modelMap)
-	        throws IOException {
+	public void submit(HttpServletRequest request, CashierSettings cashierSettings, ModelMap modelMap) {
 		ModuleSettings.saveSettings(cashierSettings);
 		
 		HttpSession session = request.getSession();

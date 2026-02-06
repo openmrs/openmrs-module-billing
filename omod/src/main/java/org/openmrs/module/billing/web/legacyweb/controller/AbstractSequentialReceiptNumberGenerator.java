@@ -13,8 +13,6 @@
  */
 package org.openmrs.module.billing.web.legacyweb.controller;
 
-import java.io.IOException;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.openmrs.module.billing.web.base.controller.HeaderController;

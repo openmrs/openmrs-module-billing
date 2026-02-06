@@ -15,7 +15,6 @@ package org.openmrs.module.billing.web.base.controller;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -53,8 +52,7 @@ public abstract class RoleCreationControllerBase {
 	}
 	
 	@RequestMapping(method = RequestMethod.POST)
-	public void submit(HttpServletRequest request, RoleCreationViewModel viewModel, Errors errors, ModelMap model)
-	        throws IOException {
+	public void submit(HttpServletRequest request, RoleCreationViewModel viewModel, Errors errors, ModelMap model) {
 		HttpSession session = request.getSession();
 		String action = request.getParameter("action");
 		
