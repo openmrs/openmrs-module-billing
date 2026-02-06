@@ -26,6 +26,7 @@ import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.Payment;
 import org.openmrs.util.ConfigUtil;
+import org.openmrs.util.LocaleUtility;
 import org.openmrs.util.OpenmrsClassLoader;
 import org.openmrs.util.OpenmrsUtil;
 import org.slf4j.Logger;
@@ -55,7 +56,7 @@ public class ReceiptGenerator {
 	
 	//TODO: Try to clean this up more
 	public static byte[] createBillReceipt(Bill bill) {
-		NumberFormat nf = NumberFormat.getCurrencyInstance(Context.getLocale());
+		NumberFormat nf = NumberFormat.getCurrencyInstance(LocaleUtility.getDefaultLocale());
 		String currencySymbol = ConfigUtil.getGlobalProperty(CashierModuleConstants.GLOBAL_PROPERTY_BILLING_CURRENCY);
 		if (StringUtils.isNotBlank(currencySymbol) && nf instanceof DecimalFormat) {
 			DecimalFormat df = (DecimalFormat) nf;
@@ -64,7 +65,7 @@ public class ReceiptGenerator {
 			df.setDecimalFormatSymbols(symbols);
 		}
 		DateTimeFormatter dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)
-		        .withLocale(Context.getLocale());
+		        .withLocale(LocaleUtility.getDefaultLocale());
 		
 		Patient patient = bill.getPatient();
 		String fullName = patient.getPersonName().getFullName();
