@@ -1,7 +1,6 @@
 package org.openmrs.module.billing.advice;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.openmrs.DrugOrder;
 import org.openmrs.Order;
 import org.openmrs.Patient;
@@ -9,7 +8,6 @@ import org.openmrs.PatientProgram;
 import org.openmrs.Provider;
 import org.openmrs.TestOrder;
 import org.openmrs.User;
-import org.openmrs.api.OrderService;
 import org.openmrs.api.ProgramWorkflowService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillExemptionService;
@@ -41,12 +39,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 	
-	private static final Log LOG = LogFactory.getLog(GenerateBillFromOrderAdvice.class);
-	
-	OrderService orderService = Context.getOrderService();
-	
+
 	final BillService billService = Context.getService(BillService.class);
 	
 	final StockManagementService stockService = Context.getService(StockManagementService.class);
@@ -110,7 +106,7 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 			}
 		}
 		catch (Exception e) {
-			LOG.error("Error intercepting order before creation: " + e.getMessage(), e);
+            log.error("Error intercepting order before creation: {}", e.getMessage(), e);
 		}
 	}
 	
@@ -215,12 +211,12 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 				activeBill.setStatus(BillStatus.PENDING);
 				billService.saveBill(activeBill);
 			} else {
-				LOG.error("User is not a provider");
+				log.error("User is not a provider");
 			}
 			
 		}
 		catch (Exception ex) {
-			LOG.error("Error sending the bill item: " + ex.getMessage(), ex);
+            log.error("Error sending the bill item: {}", ex.getMessage(), ex);
 		}
 	}
 }

@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.Privilege;
 import org.openmrs.api.UserService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.billing.api.base.compatibility.PrivilegeConstantsCompatibility;
 
 /**
  * Constants class for module privilege constants.
@@ -31,8 +30,6 @@ import org.openmrs.module.billing.api.base.compatibility.PrivilegeConstantsCompa
 public class PrivilegeConstants {
 	
 	private static final Log LOG = LogFactory.getLog(PrivilegeConstants.class);
-	
-	private static PrivilegeConstantsCompatibility privilegeConstantsCompatibility;
 	
 	public static final String MANAGE_BILLS = "Manage Cashier Bills";
 	
@@ -83,13 +80,7 @@ public class PrivilegeConstants {
 	        TASK_CASHIER_TIMESHEETS_PAGE, TASK_MANAGE_CASHIER_MODULE_PAGE, TASK_VIEW_CASHIER_REPORTS,
 	        APP_ACCESS_CASHIER_TASKS_PAGE };
 	
-	private static PrivilegeConstantsCompatibility getPrivilegeConstantsCompatibility() {
-		if (privilegeConstantsCompatibility == null) {
-			privilegeConstantsCompatibility = Context.getRegisteredComponents(PrivilegeConstantsCompatibility.class).get(0);
-		}
-		return privilegeConstantsCompatibility;
-	}
-	
+
 	/**
 	 * Gets all the privileges defined by the module.
 	 *
@@ -133,18 +124,14 @@ public class PrivilegeConstants {
 		names.add(org.openmrs.util.PrivilegeConstants.EDIT_ENCOUNTERS);
 		names.add(org.openmrs.util.PrivilegeConstants.EDIT_PATIENTS);
 		names.add(org.openmrs.util.PrivilegeConstants.EDIT_VISITS);
-		names.add(PrivilegeConstantsCompatibility.DASHBOARD_SUMMARY);
-		names.add(PrivilegeConstantsCompatibility.DASHBOARD_DEMOGRAPHICS);
-		names.add(PrivilegeConstantsCompatibility.DASHBOARD_OVERVIEW);
-		names.add(PrivilegeConstantsCompatibility.DASHBOARD_VISITS);
 		names.add(org.openmrs.util.PrivilegeConstants.VIEW_ADMIN_FUNCTIONS);
-		names.add(PrivilegeConstantsCompatibility.GET_CONCEPTS);
-		names.add(PrivilegeConstantsCompatibility.GET_ENCOUNTERS);
+		names.add(org.openmrs.util.PrivilegeConstants.GET_CONCEPTS);
+		names.add(org.openmrs.util.PrivilegeConstants.GET_ENCOUNTERS);
 		names.add(org.openmrs.util.PrivilegeConstants.VIEW_NAVIGATION_MENU);
-		names.add(PrivilegeConstantsCompatibility.GET_OBS);
-		names.add(PrivilegeConstantsCompatibility.GET_PATIENTS);
-		names.add(PrivilegeConstantsCompatibility.GET_PROVIDERS);
-		names.add(PrivilegeConstantsCompatibility.GET_VISITS);
+		names.add(org.openmrs.util.PrivilegeConstants.GET_OBS);
+		names.add(org.openmrs.util.PrivilegeConstants.GET_PATIENTS);
+		names.add(org.openmrs.util.PrivilegeConstants.GET_PROVIDERS);
+		names.add(org.openmrs.util.PrivilegeConstants.GET_VISITS);
 		
 		for (String name : names) {
 			Privilege privilege = service.getPrivilege(name);
