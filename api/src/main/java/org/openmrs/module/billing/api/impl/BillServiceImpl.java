@@ -18,8 +18,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.billing.api.BillService;
-import org.openmrs.module.billing.api.IReceiptNumberGenerator;
-import org.openmrs.module.billing.api.ReceiptNumberGeneratorFactory;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.db.BillDAO;
 import org.openmrs.module.billing.api.model.Bill;
