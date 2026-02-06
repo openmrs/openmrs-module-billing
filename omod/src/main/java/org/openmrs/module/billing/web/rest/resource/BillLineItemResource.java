@@ -27,6 +27,7 @@ import org.openmrs.module.billing.api.base.entity.IEntityDataService;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
+import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.PropertyGetter;
 import org.openmrs.module.webservices.rest.web.annotation.PropertySetter;
@@ -162,5 +163,18 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
 		// BillLineItemService doesn't implement IEntityDataService, so return null
 		// Line items are managed through BillService, not directly
 		return null;
+	}
+	
+	@Override
+	protected void delete(BillLineItem delegate, String reason, RequestContext context) {
+		if (delegate == null) {
+			throw new IllegalArgumentException("The line item to void cannot be null.");
+		}
+		if (StringUtils.isEmpty(reason)) {
+			throw new IllegalArgumentException("The reason to void must be defined.");
+		}
+		
+		BillLineItemService billLineItemService = Context.getService(BillLineItemService.class);
+		billLineItemService.voidBillLineItem(delegate.getUuid(), reason);
 	}
 }
