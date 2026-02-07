@@ -21,11 +21,12 @@ import com.itextpdf.layout.properties.UnitValue;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.openmrs.Patient;
-import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.Payment;
+import org.openmrs.module.billing.api.util.CashierModuleConstants;
 import org.openmrs.util.ConfigUtil;
+import org.openmrs.util.LocaleUtility;
 import org.openmrs.util.OpenmrsClassLoader;
 import org.openmrs.util.OpenmrsUtil;
 import org.slf4j.Logger;
@@ -37,8 +38,11 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.time.LocalDate;
+
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -51,9 +55,16 @@ public class ReceiptGenerator {
 	
 	//TODO: Try to clean this up more
 	public static byte[] createBillReceipt(Bill bill) {
-		NumberFormat nf = NumberFormat.getCurrencyInstance(Context.getLocale());
+		NumberFormat nf = NumberFormat.getCurrencyInstance(LocaleUtility.getDefaultLocale());
+		String currencySymbol = ConfigUtil.getGlobalProperty(CashierModuleConstants.GLOBAL_PROPERTY_BILLING_CURRENCY);
+		if (StringUtils.isNotBlank(currencySymbol) && nf instanceof DecimalFormat) {
+			DecimalFormat df = (DecimalFormat) nf;
+			DecimalFormatSymbols symbols = df.getDecimalFormatSymbols();
+			symbols.setCurrencySymbol(currencySymbol.trim());
+			df.setDecimalFormatSymbols(symbols);
+		}
 		DateTimeFormatter dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)
-		        .withLocale(Context.getLocale());
+		        .withLocale(LocaleUtility.getDefaultLocale());
 		
 		Patient patient = bill.getPatient();
 		String fullName = patient.getPersonName().getFullName();
