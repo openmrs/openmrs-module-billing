@@ -41,7 +41,7 @@ public class ICashPointServiceTest extends BaseModuleContextSensitiveTest {
 	private CashPointService service;
 	
 	@BeforeEach
-	public void before() throws Exception {
+	public void before() {
 		service = Context.getService(CashPointService.class);
 		executeDataSet(TestConstants.CORE_DATASET2);
 		executeDataSet(CASH_POINT_DATASET);
@@ -79,7 +79,7 @@ public class ICashPointServiceTest extends BaseModuleContextSensitiveTest {
 	 * @see CashPointService#getCashPointsByLocation(Location, boolean)
 	 */
 	@Test
-	public void getCashPointsByLocation_shouldReturnCashPointsForLocationWithCashPoints() throws Exception {
+	public void getCashPointsByLocation_shouldReturnCashPointsForLocationWithCashPoints() {
 		Location location = Context.getLocationService().getLocation(1);
 		
 		List<CashPoint> results = service.getCashPointsByLocation(location, false);
@@ -91,7 +91,7 @@ public class ICashPointServiceTest extends BaseModuleContextSensitiveTest {
 	 * @see CashPointService#getCashPointsByLocation(Location, boolean)
 	 */
 	@Test
-	public void getCashPointsByLocation_shouldNotReturnRetiredCashPointsUnlessSpecified() throws Exception {
+	public void getCashPointsByLocation_shouldNotReturnRetiredCashPointsUnlessSpecified() {
 		CashPoint cashPoint = service.getCashPoint(0);
 		cashPoint.setRetired(true);
 		cashPoint.setRetireReason("reason");
@@ -116,7 +116,7 @@ public class ICashPointServiceTest extends BaseModuleContextSensitiveTest {
 	 * @see CashPointService#getCashPointsByLocation(Location, boolean)
 	 */
 	@Test
-	public void getCashPointsByLocation_shouldReturnAllCashPointsForTheSpecifiedLocation() throws Exception {
+	public void getCashPointsByLocation_shouldReturnAllCashPointsForTheSpecifiedLocation() {
 		List<CashPoint> cashPoint = service.getCashPointsByLocation(Context.getLocationService().getLocation(0), false);
 		assertNotNull(cashPoint);
 		assertEquals(3, cashPoint.size());
@@ -147,8 +147,7 @@ public class ICashPointServiceTest extends BaseModuleContextSensitiveTest {
 	/**
 	 * @see CashPointService#getCashPointsByLocationAndName(Location, String, boolean)
 	 */
-	public void getCashPointsByLocationAndName_shouldThrowIllegalArgumentExceptionIfNameExceeds255Characters()
-	        throws Exception {
+	public void getCashPointsByLocationAndName_shouldThrowIllegalArgumentExceptionIfNameExceeds255Characters() {
 		assertThrows(IllegalArgumentException.class,
 		    () -> service.getCashPointsByLocationAndName(Context.getLocationService().getLocation(1),
 		        StringUtils.repeat("A", 256), false));
@@ -158,7 +157,7 @@ public class ICashPointServiceTest extends BaseModuleContextSensitiveTest {
 	 * @see CashPointService#getCashPointsByLocationAndName(Location, String, boolean)
 	 */
 	@Test
-	public void getCashPointsByLocationAndName_shouldReturnCashPointsMatchingLocationAndName() throws Exception {
+	public void getCashPointsByLocationAndName_shouldReturnCashPointsMatchingLocationAndName() {
 		Location location = Context.getLocationService().getLocation(1);
 		
 		List<CashPoint> results = service.getCashPointsByLocationAndName(location, "Test", false);
@@ -170,7 +169,7 @@ public class ICashPointServiceTest extends BaseModuleContextSensitiveTest {
 	 * @see CashPointService#getCashPointsByLocationAndName(Location, String, boolean)
 	 */
 	@Test
-	public void getCashPointsByLocationAndName_shouldNotReturnRetiredCashPointsUnlessSpecified() throws Exception {
+	public void getCashPointsByLocationAndName_shouldNotReturnRetiredCashPointsUnlessSpecified() {
 		CashPoint cashPoint = service.getCashPoint(0);
 		cashPoint.setRetired(true);
 		cashPoint.setRetireReason("reason");
@@ -195,7 +194,7 @@ public class ICashPointServiceTest extends BaseModuleContextSensitiveTest {
 	 * @see CashPointService#getCashPointsByLocationAndName(Location, String, boolean)
 	 */
 	@Test
-	public void getCashPointsByLocationAndName_shouldReturnCashPointsContainingTheSpecifiedName() throws Exception {
+	public void getCashPointsByLocationAndName_shouldReturnCashPointsContainingTheSpecifiedName() {
 		List<CashPoint> results = service.getCashPointsByLocationAndName(Context.getLocationService().getLocation(0),
 		    "Test 1", false);
 		assertNotNull(results);
@@ -217,7 +216,7 @@ public class ICashPointServiceTest extends BaseModuleContextSensitiveTest {
 	 * @see CashPointService#getCashPointsByLocationAndName(Location, String, boolean)
 	 */
 	@Test
-	public void getCashPointsByLocationAndName_shouldReturnCashPointsForOnlyTheSpecifiedLocation() throws Exception {
+	public void getCashPointsByLocationAndName_shouldReturnCashPointsForOnlyTheSpecifiedLocation() {
 		List<CashPoint> cashPoint = service.getCashPointsByLocationAndName(Context.getLocationService().getLocation(0),
 		    "Test", false);
 		assertNotNull(cashPoint);
@@ -241,7 +240,7 @@ public class ICashPointServiceTest extends BaseModuleContextSensitiveTest {
 	 * @see CashPointService#getCashPointsByLocationAndName(Location, String, boolean)
 	 */
 	@Test
-	public void getCashPointsByLocationAndName_shouldThrowIllegalArgumentExceptionIfLocationIsNull() throws Exception {
+	public void getCashPointsByLocationAndName_shouldThrowIllegalArgumentExceptionIfLocationIsNull() {
 		Location location = null;
 		assertThrows(IllegalArgumentException.class, () -> service.getCashPointsByLocationAndName(location, "Test", false));
 	}

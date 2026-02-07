@@ -14,7 +14,6 @@
 package org.openmrs.module.billing.util;
 
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import java.io.BufferedReader;
@@ -22,7 +21,6 @@ import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -197,7 +195,7 @@ public class Utils {
 			builder.loadTrustMaterial(null, new TrustStrategy() {
 				
 				@Override
-				public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+				public boolean isTrusted(X509Certificate[] chain, String authType) {
 					return true;
 				}
 			});
@@ -221,15 +219,15 @@ public class Utils {
 		SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext, new X509HostnameVerifier() {
 			
 			@Override
-			public void verify(String host, SSLSocket ssl) throws IOException {
+			public void verify(String host, SSLSocket ssl) {
 			}
 			
 			@Override
-			public void verify(String host, X509Certificate cert) throws SSLException {
+			public void verify(String host, X509Certificate cert) {
 			}
 			
 			@Override
-			public void verify(String host, String[] cns, String[] subjectAlts) throws SSLException {
+			public void verify(String host, String[] cns, String[] subjectAlts) {
 			}
 			
 			@Override

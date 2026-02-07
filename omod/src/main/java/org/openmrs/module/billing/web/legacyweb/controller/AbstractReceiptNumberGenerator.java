@@ -13,9 +13,8 @@
  */
 package org.openmrs.module.billing.web.legacyweb.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.billing.web.base.controller.HeaderController;
 import org.openmrs.module.billing.ModuleSettings;
@@ -29,20 +28,18 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 
 /**
  * Abstract Receipt Number Generator Functionality.
  */
+@Slf4j
 public abstract class AbstractReceiptNumberGenerator {
-	
-	private static final Log LOG = LogFactory.getLog(AbstractReceiptNumberGenerator.class);
 	
 	public abstract String getReceiptNumberGeneratorUrl();
 	
 	@RequestMapping(method = RequestMethod.GET)
 	@Authorized(PrivilegeConstants.MANAGE_BILLS)
-	public void render(ModelMap model, HttpServletRequest request) throws IOException {
+	public void render(ModelMap model, HttpServletRequest request) {
 		IReceiptNumberGenerator currentGenerator = ReceiptNumberGeneratorFactory.getGenerator();
 		IReceiptNumberGenerator[] generators = ReceiptNumberGeneratorFactory.locateGenerators();
 		
@@ -56,7 +53,7 @@ public abstract class AbstractReceiptNumberGenerator {
 	
 	@RequestMapping(method = RequestMethod.POST)
 	@Authorized(PrivilegeConstants.MANAGE_BILLS)
-	public String submit(ModelMap model, @RequestParam(value = "selectedGenerator", required = true) String generatorName) {
+	public String submit(ModelMap model, @RequestParam(value = "selectedGenerator") String generatorName) {
 		IReceiptNumberGenerator[] generators = ReceiptNumberGeneratorFactory.locateGenerators();
 		IReceiptNumberGenerator selectedGenerator = null;
 		
@@ -73,7 +70,7 @@ public abstract class AbstractReceiptNumberGenerator {
 			
 			// Load the generator configuration page, if defined
 			if (selectedGenerator == null) {
-				LOG.warn("Could not locate a receipt number generator named '" + generatorName + "'.");
+                log.warn("Could not locate a receipt number generator named '{}'.", generatorName);
 			} else if (StringUtils.isEmpty(selectedGenerator.getConfigurationPage())) {
 				// There is no generator configuration page so just set the system generator and reload the page
 				ReceiptNumberGeneratorFactory.setGenerator(selectedGenerator);

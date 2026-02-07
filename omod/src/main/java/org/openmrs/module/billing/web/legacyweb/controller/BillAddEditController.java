@@ -17,8 +17,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.api.APIException;
@@ -47,9 +46,8 @@ import org.springframework.web.util.UriUtils;
  */
 @Controller
 @RequestMapping(value = CashierWebConstants.BILL_PAGE)
+@Slf4j
 public class BillAddEditController {
-	
-	private static final Log LOG = LogFactory.getLog(BillAddEditController.class);
 	
 	public BillAddEditController() {
 		
@@ -63,8 +61,7 @@ public class BillAddEditController {
 			timesheet = TimesheetUtil.getCurrentTimesheet();
 		}
 		catch (Exception e) {
-			LOG.error("Error retrieving provider for current user. ", e);
-			timesheet = null;
+			log.error("Error retrieving provider for current user. ", e);
 			return "redirect:/login.htm";
 			
 		}
@@ -147,7 +144,7 @@ public class BillAddEditController {
 			patient = service.getPatientByUuid(patientUuid);
 		}
 		catch (APIException e) {
-			LOG.error("Error when trying to get Patient with ID <" + patientUuid + ">", e);
+            log.error("Error when trying to get Patient with ID <{}>", patientUuid, e);
 			throw new APIException("Error when trying to get Patient with ID <" + patientUuid + ">");
 		}
 		
@@ -174,7 +171,7 @@ public class BillAddEditController {
 			bill = service.getBillByUuid(billUuid);
 		}
 		catch (APIException e) {
-			LOG.error("Error when trying to get bill with ID <" + billUuid + ">", e);
+            log.error("Error when trying to get bill with ID <{}>", billUuid, e);
 			throw new APIException("Error when trying to get bill with ID <" + billUuid + ">");
 		}
 		

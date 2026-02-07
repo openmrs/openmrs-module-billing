@@ -13,9 +13,8 @@
  */
 package org.openmrs.module.billing.api.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.ModuleSettings;
 import org.openmrs.module.billing.api.ICashierOptionsService;
@@ -27,9 +26,8 @@ import org.openmrs.module.stockmanagement.api.model.StockItem;
  *
  * @author daniel
  */
+@Slf4j
 public class CashierOptionsServiceGpImpl implements ICashierOptionsService {
-	
-	private static final Log LOG = LogFactory.getLog(CashierOptionsServiceGpImpl.class);
 	
 	public CashierOptionsServiceGpImpl() {
 		
@@ -80,23 +78,23 @@ public class CashierOptionsServiceGpImpl implements ICashierOptionsService {
 							//							roundingItem = Context.getService(IItemDataService.class).getById(itemId);
 						}
 						catch (Exception e) {
-							LOG.error("Did not find rounding item by ID with ID <" + roundingItemId + ">", e);
+                            log.error("Did not find rounding item by ID with ID <{}>", roundingItemId, e);
 						}
 						if (roundingItem != null) {
 							options.setRoundingItemUuid(roundingItem.getUuid());
 						} else {
-							LOG.error("Rounding item is NULL. Check your ID");
+							log.error("Rounding item is NULL. Check your ID");
 						}
 					}
 				}
 			}
 			catch (IllegalArgumentException iae) {
 				/* Use default if option is not set */
-				LOG.error("IllegalArgumentException occured", iae);
+				log.error("IllegalArgumentException occured", iae);
 			}
 			catch (NullPointerException e) {
 				/* Use default if option is not set */
-				LOG.error("NullPointerException occured", e);
+				log.error("NullPointerException occured", e);
 			}
 		}
 	}
@@ -110,7 +108,7 @@ public class CashierOptionsServiceGpImpl implements ICashierOptionsService {
 			}
 			catch (NumberFormatException e) {
 				/* Leave unset; must be handled, e.g. in ReceiptController */
-				LOG.error("Error parsing ReceiptReportId <" + receiptReportIdProperty + ">", e);
+                log.error("Error parsing ReceiptReportId <{}>", receiptReportIdProperty, e);
 			}
 		}
 	}

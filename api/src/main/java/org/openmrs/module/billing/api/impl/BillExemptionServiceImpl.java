@@ -5,13 +5,10 @@ import org.openmrs.module.billing.api.BillExemptionService;
 import org.openmrs.module.billing.api.db.BillExemptionDAO;
 import org.openmrs.module.billing.api.model.BillExemption;
 import org.openmrs.module.billing.api.model.ExemptionType;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Service("billing.billingExemptionService")
-@Transactional
 public class BillExemptionServiceImpl implements BillExemptionService {
 	
 	private final BillExemptionDAO billExemptionDAO;

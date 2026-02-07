@@ -13,8 +13,6 @@
  */
 package org.openmrs.module.billing.web.legacyweb.controller;
 
-import java.io.IOException;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class CashPointsController {
 	
 	@RequestMapping(method = RequestMethod.GET)
-	public void cashPoints(ModelMap model) throws IOException {
+	public void cashPoints(ModelMap model) {
 		model.addAttribute("modelBase", "openhmis.cashier.cashPoint");
 	}
 }

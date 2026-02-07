@@ -60,7 +60,7 @@ public class SequentialReceiptNumberGeneratorTest {
 	 * @see SequentialReceiptNumberGenerator#generateNumber(Bill)
 	 */
 	@Test
-	public void generateNumber_shouldCreateANewReceiptNumberByGroupingType() throws Exception {
+	public void generateNumber_shouldCreateANewReceiptNumberByGroupingType() {
 		SequentialReceiptNumberGeneratorModel model = new SequentialReceiptNumberGeneratorModel();
 		model.setGroupingType(SequentialReceiptNumberGenerator.GroupingType.NONE);
 		model.setSeparator("");
@@ -113,7 +113,7 @@ public class SequentialReceiptNumberGeneratorTest {
 	 * @see SequentialReceiptNumberGenerator#generateNumber(Bill)
 	 */
 	@Test
-	public void generateNumber_shouldCreateANewReceiptNumberBySequenceType() throws Exception {
+	public void generateNumber_shouldCreateANewReceiptNumberBySequenceType() {
 		SequentialReceiptNumberGeneratorModel model = new SequentialReceiptNumberGeneratorModel();
 		model.setGroupingType(SequentialReceiptNumberGenerator.GroupingType.NONE);
 		model.setSeparator("");
@@ -162,7 +162,7 @@ public class SequentialReceiptNumberGeneratorTest {
 	 * @see SequentialReceiptNumberGenerator#generateNumber(Bill)
 	 */
 	@Test
-	public void generateNumber_shouldCreateANewReceiptNumberUsingTheSpecifiedSeparator() throws Exception {
+	public void generateNumber_shouldCreateANewReceiptNumberUsingTheSpecifiedSeparator() {
 		SequentialReceiptNumberGeneratorModel model = new SequentialReceiptNumberGeneratorModel();
 		model.setGroupingType(SequentialReceiptNumberGenerator.GroupingType.NONE);
 		model.setSeparator("-");
@@ -213,7 +213,7 @@ public class SequentialReceiptNumberGeneratorTest {
 	 * @see SequentialReceiptNumberGenerator#generateNumber(Bill)
 	 */
 	@Test
-	public void generateNumber_shouldGenerateAndSetTheCorrectCheckDigit() throws Exception {
+	public void generateNumber_shouldGenerateAndSetTheCorrectCheckDigit() {
 		SequentialReceiptNumberGeneratorModel model = new SequentialReceiptNumberGeneratorModel();
 		model.setGroupingType(SequentialReceiptNumberGenerator.GroupingType.NONE);
 		model.setSeparator("");
@@ -257,7 +257,7 @@ public class SequentialReceiptNumberGeneratorTest {
 	 * @see SequentialReceiptNumberGenerator#generateNumber(Bill)
 	 */
 	@Test
-	public void generateNumber_shouldUpdateSequenceTableWithTheNewSequenceByGroup() throws Exception {
+	public void generateNumber_shouldUpdateSequenceTableWithTheNewSequenceByGroup() {
 		SequentialReceiptNumberGeneratorModel model = new SequentialReceiptNumberGeneratorModel();
 		model.setGroupingType(SequentialReceiptNumberGenerator.GroupingType.NONE);
 		model.setSeparator("");
@@ -316,7 +316,7 @@ public class SequentialReceiptNumberGeneratorTest {
 	 * @see SequentialReceiptNumberGenerator#generateNumber(Bill)
 	 */
 	@Test(expected = NullPointerException.class)
-	public void generateNumber_shouldThrowNullPointerExceptionIfBillIsNull() throws Exception {
+	public void generateNumber_shouldThrowNullPointerExceptionIfBillIsNull() {
 		generator.generateNumber(null);
 	}
 	

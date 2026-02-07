@@ -13,8 +13,7 @@
  */
 package org.openmrs.module.billing;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.openmrs.module.BaseModuleActivator;
 import org.openmrs.module.Module;
 import org.openmrs.module.ModuleFactory;
@@ -24,16 +23,15 @@ import org.openmrs.module.web.WebModuleUtil;
 /**
  * This class contains the logic that is run every time this module is either started or stopped.
  */
+@Slf4j
 public class BillingModuleActivator extends BaseModuleActivator {
-	
-	private static final Log LOG = LogFactory.getLog(BillingModuleActivator.class);
 	
 	/**
 	 * @see BaseModuleActivator#contextRefreshed()
 	 */
 	@Override
 	public void contextRefreshed() {
-		LOG.info("OpenMRS Billing Module refreshed");
+		log.info("OpenMRS Billing Module refreshed");
 	}
 	
 	/**
@@ -41,9 +39,7 @@ public class BillingModuleActivator extends BaseModuleActivator {
 	 */
 	@Override
 	public void started() {
-		//		RoundingUtil.setupRoundingDeptAndItem(LOG);
-		
-		LOG.info("OpenMRS Billing Module started");
+		log.info("OpenMRS Billing Module started");
 	}
 	
 	/**
@@ -54,6 +50,6 @@ public class BillingModuleActivator extends BaseModuleActivator {
 		Module module = ModuleFactory.getModuleById(CashierWebConstants.OPENHMIS_CASHIER_MODULE_ID);
 		WebModuleUtil.unloadFilters(module);
 		
-		LOG.info("OpenMRS Billing Module stopped");
+		log.info("OpenMRS Billing Module stopped");
 	}
 }

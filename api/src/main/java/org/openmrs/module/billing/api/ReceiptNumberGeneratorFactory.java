@@ -17,9 +17,8 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openmrs.GlobalProperty;
 import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
@@ -31,9 +30,8 @@ import org.springframework.transaction.annotation.Transactional;
  * Implements {@link IReceiptNumberGenerator}
  */
 @Transactional
+@Slf4j
 public class ReceiptNumberGeneratorFactory {
-	
-	private static final Log LOG = LogFactory.getLog(ReceiptNumberGeneratorFactory.class);
 	
 	private static volatile IReceiptNumberGenerator generator;
 	
@@ -95,7 +93,7 @@ public class ReceiptNumberGeneratorFactory {
 			return generator;
 		}
 		catch (ClassNotFoundException classEx) {
-			LOG.warn("Attempt to load unknown receipt number generator type", classEx);
+			log.warn("Attempt to load unknown receipt number generator type", classEx);
 			throw new APIException("Could not locate receipt number generator class.", classEx);
 		}
 		catch (InstantiationException instantiationEx) {
@@ -137,7 +135,7 @@ public class ReceiptNumberGeneratorFactory {
 				}
 				catch (Exception ex) {
 					// We don't care about specific exceptions here.  Just log and ignore the class
-					LOG.warn("Could not instantiate the '" + cls.getName() + "' class.  It will be ignored.");
+                    log.warn("Could not instantiate the '{}' class.  It will be ignored.", cls.getName());
 				}
 			}
 		}
@@ -171,11 +169,11 @@ public class ReceiptNumberGeneratorFactory {
 			String propertyValue = Context.getAdministrationService()
 			        .getGlobalProperty(ModuleSettings.SYSTEM_RECEIPT_NUMBER_GENERATOR);
 			if (!StringUtils.isEmpty(propertyValue)) {
-				LOG.debug("Loading receipt number generator '" + propertyValue + "'...");
+                log.debug("Loading receipt number generator '{}'...", propertyValue);
 				result = (Class<? super IReceiptNumberGenerator>) Class.forName(propertyValue);
-				LOG.debug("Receipt number generator loaded.");
+				log.debug("Receipt number generator loaded.");
 			} else {
-				LOG.warn("Request for receipt number generator when none has been defined.");
+				log.warn("Request for receipt number generator when none has been defined.");
 			}
 			
 			return result;

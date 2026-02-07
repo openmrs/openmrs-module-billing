@@ -16,8 +16,6 @@ package org.openmrs.module.billing.web.base.resource;
 import java.lang.reflect.ParameterizedType;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openmrs.OpenmrsMetadata;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.base.PagingInfo;
@@ -40,8 +38,6 @@ import org.springframework.dao.DataIntegrityViolationException;
  * @param <E> The model class
  */
 public abstract class BaseRestMetadataResource<E extends OpenmrsMetadata> extends MetadataDelegatingCrudResource<E> implements IMetadataDataServiceResource<E> {
-	
-	private static final Log LOG = LogFactory.getLog(BaseRestMetadataResource.class);
 	
 	private Class<E> entityClass = null;
 	
@@ -68,7 +64,7 @@ public abstract class BaseRestMetadataResource<E extends OpenmrsMetadata> extend
 			return getService().save(entity);
 		}
 		catch (PrivilegeException p) {
-			LOG.error("Exception occured when trying to save entity <" + entity.getName() + "> as privilege is missing", p);
+			log.error("Exception occured when trying to save entity <" + entity.getName() + "> as privilege is missing", p);
 			throw new PrivilegeException("Can't save entity with name <" + entity.getName() + "> as privilege is missing");
 		}
 	}
@@ -133,7 +129,7 @@ public abstract class BaseRestMetadataResource<E extends OpenmrsMetadata> extend
 				result = service.getByUuid(uniqueId);
 			}
 			catch (PrivilegeException p) {
-				LOG.error("Exception occured when trying to get entity with ID <" + uniqueId + "> as privilege is missing",
+				log.error("Exception occured when trying to get entity with ID <" + uniqueId + "> as privilege is missing",
 				    p);
 				throw new PrivilegeException("Can't get entity with ID <" + uniqueId + "> as privilege is missing");
 			}
@@ -154,11 +150,11 @@ public abstract class BaseRestMetadataResource<E extends OpenmrsMetadata> extend
 			getService().purge(entity);
 		}
 		catch (PrivilegeException p) {
-			LOG.error("Exception occured when trying to purge entity <" + entity.getName() + "> as privilege is missing", p);
+			log.error("Exception occured when trying to purge entity <" + entity.getName() + "> as privilege is missing", p);
 			throw new PrivilegeException("Can't purge entity with name <" + entity.getName() + "> as privilege is missing");
 		}
 		catch (DataIntegrityViolationException e) {
-			LOG.error("Exception occured when trying to purge entity <" + entity.getName() + ">", e);
+			log.error("Exception occured when trying to purge entity <" + entity.getName() + ">", e);
 			throw new DataIntegrityViolationException(
 			        "Can't purge entity with name <" + entity.getName() + "> as it is still in use");
 		}

@@ -13,9 +13,8 @@
  */
 package org.openmrs.module.billing.web.legacyweb.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openmrs.Provider;
 import org.openmrs.api.APIException;
 import org.openmrs.api.ProviderService;
@@ -50,9 +49,8 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = CashierWebConstants.CASHIER_PAGE)
+@Slf4j
 public class CashierController {
-	
-	private static final Log LOG = LogFactory.getLog(CashierController.class);
 	
 	public CashierController() {
 		
@@ -101,7 +99,7 @@ public class CashierController {
 					}
 				}
 				catch (MalformedURLException e) {
-					LOG.warn("Could not parse referrer url '" + returnTo + "'");
+                    log.warn("Could not parse referrer url '{}'", returnTo);
 					returnTo = "";
 				}
 			}

@@ -52,7 +52,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 *      String)
 	 */
 	@Test
-	public void retire_shouldRetireTheMetadataSuccessfully() throws Exception {
+	public void retire_shouldRetireTheMetadataSuccessfully() {
 		String reason = "test retire";
 		E entity = service.getById(0);
 		
@@ -75,7 +75,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 *      String)
 	 */
 	@Test(expected = NullPointerException.class)
-	public void retire_shouldThrowNullPointerExceptionWhenTheMetadataIsNull() throws Exception {
+	public void retire_shouldThrowNullPointerExceptionWhenTheMetadataIsNull() {
 		service.retire(null, "something");
 	}
 	
@@ -85,7 +85,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 *      String)
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void retire_shouldThrowIllegalArgumentExceptionWhenNoReasonIsGiven() throws Exception {
+	public void retire_shouldThrowIllegalArgumentExceptionWhenNoReasonIsGiven() {
 		E entity = service.getById(0);
 		
 		service.retire(entity, null);
@@ -96,7 +96,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IMetadataDataService#unretire(OpenmrsMetadata)
 	 */
 	@Test(expected = NullPointerException.class)
-	public void unretire_shouldThrowNullPointerExceptionIfTheMetadataIsNull() throws Exception {
+	public void unretire_shouldThrowNullPointerExceptionIfTheMetadataIsNull() {
 		service.unretire(null);
 	}
 	
@@ -105,7 +105,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IMetadataDataService#unretire(OpenmrsMetadata)
 	 */
 	@Test
-	public void unretire_shouldUnretireTheMetadata() throws Exception {
+	public void unretire_shouldUnretireTheMetadata() {
 		String reason = "test retire";
 		E entity = service.getById(0);
 		service.retire(entity, reason);
@@ -131,7 +131,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IMetadataDataService#getAll(boolean)
 	 */
 	@Test
-	public void getAll_shouldReturnAllMetadataWhenIncludeRetiredIsSetToTrue() throws Exception {
+	public void getAll_shouldReturnAllMetadataWhenIncludeRetiredIsSetToTrue() {
 		String reason = "test retire";
 		E entity = service.getById(0);
 		service.retire(entity, reason);
@@ -148,7 +148,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IMetadataDataService#getAll(boolean)
 	 */
 	@Test
-	public void getAll_shouldReturnAllUnretiredMetadataWhenRetiredIsSetToFalse() throws Exception {
+	public void getAll_shouldReturnAllUnretiredMetadataWhenRetiredIsSetToFalse() {
 		String reason = "test retire";
 		E entity = service.getById(0);
 		service.retire(entity, reason);
@@ -165,7 +165,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IMetadataDataService#getAll(boolean)
 	 */
 	@Test
-	public void getAll_shouldReturnAllUnretiredMetadataWhenRetiredIsNotSpecified() throws Exception {
+	public void getAll_shouldReturnAllUnretiredMetadataWhenRetiredIsNotSpecified() {
 		String reason = "test retire";
 		E entity = service.getById(0);
 		service.retire(entity, reason);
@@ -179,7 +179,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	
 	@Test
 	@Override
-	public void getAll_shouldReturnAnEmptyListIfThereAreNoObjects() throws Exception {
+	public void getAll_shouldReturnAnEmptyListIfThereAreNoObjects() {
 		List<E> entities = service.getAll();
 		for (E entity : entities) {
 			service.retire(entity, "test");
@@ -198,7 +198,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 *      boolean)
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void getByNameFragment_shouldThrowIllegalArgumentExceptionIfTheNameIsNull() throws Exception {
+	public void getByNameFragment_shouldThrowIllegalArgumentExceptionIfTheNameIsNull() {
 		service.getByNameFragment(null, true);
 	}
 	
@@ -208,7 +208,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 *      boolean)
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void getByNameFragment_shouldThrowIllegalArgumentExceptionIfTheNameIsEmpty() throws Exception {
+	public void getByNameFragment_shouldThrowIllegalArgumentExceptionIfTheNameIsEmpty() {
 		service.getByNameFragment("", true);
 	}
 	
@@ -218,7 +218,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 *      boolean)
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void getByNameFragment_shouldThrowIllegalArgumentExceptionIfTheNameIsLongerThan255Characters() throws Exception {
+	public void getByNameFragment_shouldThrowIllegalArgumentExceptionIfTheNameIsLongerThan255Characters() {
 		service.getByNameFragment(StringUtils.repeat("A", 256), true);
 	}
 	
@@ -228,7 +228,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 *      boolean)
 	 */
 	@Test
-	public void getByNameFragment_shouldReturnAnEmptyListIfNoMetadataAreFound() throws Exception {
+	public void getByNameFragment_shouldReturnAnEmptyListIfNoMetadataAreFound() {
 		List<E> entities = service.getByNameFragment("NotAValidName", true);
 		
 		Assert.assertNotNull(entities);
@@ -241,7 +241,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 *      boolean)
 	 */
 	@Test
-	public void getByNameFragment_shouldNotReturnRetiredMetadataUnlessSpecified() throws Exception {
+	public void getByNameFragment_shouldNotReturnRetiredMetadataUnlessSpecified() {
 		E entity = service.getById(0);
 		service.retire(entity, "something");
 		Context.flushSession();
@@ -261,7 +261,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 *      boolean)
 	 */
 	@Test
-	public void getByNameFragment_shouldReturnMetadataThatStartWithTheSpecifiedName() throws Exception {
+	public void getByNameFragment_shouldReturnMetadataThatStartWithTheSpecifiedName() {
 		E entity = service.getById(0);
 		
 		// Search using the first four characters in the name
@@ -285,7 +285,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 * @see IMetadataDataService#getByNameFragment(String, boolean, PagingInfo)
 	 */
 	@Test
-	public void getByNameFragment_shouldReturnAllSpecifiedMetadataRecordsIfPagingIsNull() throws Exception {
+	public void getByNameFragment_shouldReturnAllSpecifiedMetadataRecordsIfPagingIsNull() {
 		E entity = service.getById(0);
 		
 		// This assumes that the entity name is unique
@@ -301,7 +301,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 * @see IMetadataDataService#getByNameFragment(String, boolean, PagingInfo)
 	 */
 	@Test
-	public void getByNameFragment_shouldReturnAllSpecifiedMetadataRecordsIfPagingPageOrSizeIsLessThanOne() throws Exception {
+	public void getByNameFragment_shouldReturnAllSpecifiedMetadataRecordsIfPagingPageOrSizeIsLessThanOne() {
 		E entity = service.getById(0);
 		
 		PagingInfo paging = new PagingInfo(0, 1);
@@ -326,7 +326,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 *      boolean, PagingInfo)
 	 */
 	@Test
-	public void getByNameFragment_shouldSetThePagingTotalRecordsToTheTotalNumberOfMetadataRecords() throws Exception {
+	public void getByNameFragment_shouldSetThePagingTotalRecordsToTheTotalNumberOfMetadataRecords() {
 		PagingInfo paging = new PagingInfo(1, 1);
 		List<E> entities = service.getByNameFragment("T", false, paging);
 		
@@ -341,7 +341,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 *      boolean, PagingInfo)
 	 */
 	@Test
-	public void getByNameFragment_shouldNotGetTheTotalPagingRecordCountIfItIsMoreThanZero() throws Exception {
+	public void getByNameFragment_shouldNotGetTheTotalPagingRecordCountIfItIsMoreThanZero() {
 		E entity = service.getById(0);
 		PagingInfo paging = new PagingInfo(1, 1);
 		
@@ -376,7 +376,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 *      boolean, PagingInfo)
 	 */
 	@Test
-	public void getByNameFragment_shouldReturnPagedMetadataRecordsIfPagingIsSpecified() throws Exception {
+	public void getByNameFragment_shouldReturnPagedMetadataRecordsIfPagingIsSpecified() {
 		List<E> allEntities = service.getByNameFragment("T", false);
 		
 		PagingInfo paging = new PagingInfo(1, 1);
@@ -400,7 +400,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 *      PagingInfo)
 	 */
 	@Test
-	public void getAll_shouldReturnAllSpecifiedMetadataRecordsIfPagingIsNull() throws Exception {
+	public void getAll_shouldReturnAllSpecifiedMetadataRecordsIfPagingIsNull() {
 		String reason = "test retire";
 		E entity = service.getById(0);
 		service.retire(entity, reason);
@@ -419,7 +419,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 *      PagingInfo)
 	 */
 	@Test
-	public void getAll_shouldReturnAllSpecifiedMetadataRecordsIfPagingPageOrSizeIsLessThanOne() throws Exception {
+	public void getAll_shouldReturnAllSpecifiedMetadataRecordsIfPagingPageOrSizeIsLessThanOne() {
 		String reason = "test retire";
 		E entity = service.getById(0);
 		service.retire(entity, reason);
@@ -445,7 +445,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 *      PagingInfo)
 	 */
 	@Test
-	public void getAll_shouldSetThePagingTotalRecordsToTheTotalNumberOfMetadataRecords() throws Exception {
+	public void getAll_shouldSetThePagingTotalRecordsToTheTotalNumberOfMetadataRecords() {
 		PagingInfo paging = new PagingInfo(1, 1);
 		List<E> entities = service.getAll(false, paging);
 		
@@ -460,7 +460,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 *      PagingInfo)
 	 */
 	@Test
-	public void getAll_shouldNotGetTheTotalPagingRecordCountIfItIsMoreThanZero() throws Exception {
+	public void getAll_shouldNotGetTheTotalPagingRecordCountIfItIsMoreThanZero() {
 		PagingInfo paging = new PagingInfo(1, 1);
 		
 		// First check that the full total is set
@@ -493,7 +493,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 * @see IMetadataDataService#getAll(boolean, PagingInfo)
 	 */
 	@Test
-	public void getAll_shouldReturnPagedMetadataRecordsIfPagingIsSpecified() throws Exception {
+	public void getAll_shouldReturnPagedMetadataRecordsIfPagingIsSpecified() {
 		List<E> allEntities = service.getAll();
 		
 		PagingInfo paging = new PagingInfo(1, 1);

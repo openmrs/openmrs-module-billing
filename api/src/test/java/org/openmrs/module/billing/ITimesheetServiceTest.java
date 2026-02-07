@@ -119,7 +119,7 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 	 * @see ITimesheetService#getCurrentTimesheet(org.openmrs.Provider)
 	 */
 	@Test
-	public void getCurrentTimesheet_shouldReturnTheCurrentTimesheetForTheCashier() throws Exception {
+	public void getCurrentTimesheet_shouldReturnTheCurrentTimesheetForTheCashier() {
 		Timesheet timesheet = createEntity(true);
 		timesheet.setClockOut(null);
 		
@@ -137,7 +137,7 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 	 * @see ITimesheetService#getCurrentTimesheet(org.openmrs.Provider)
 	 */
 	@Test
-	public void getCurrentTimesheet_shouldReturnNullIfTheCashierHasNoTimesheets() throws Exception {
+	public void getCurrentTimesheet_shouldReturnNullIfTheCashierHasNoTimesheets() {
 		Provider cashier = providerService.getProvider(2);
 		Assert.assertNotNull(cashier);
 		
@@ -150,8 +150,7 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 	 * @see ITimesheetService#getCurrentTimesheet(org.openmrs.Provider)
 	 */
 	@Test
-	public void getCurrentTimesheet_shouldReturnTheMostRecentTimesheetIfTheCashierIsClockedIntoMultipleTimesheets()
-	        throws Exception {
+	public void getCurrentTimesheet_shouldReturnTheMostRecentTimesheetIfTheCashierIsClockedIntoMultipleTimesheets() {
 		Provider cashier = providerService.getProvider(0);
 		Timesheet original = service.getCurrentTimesheet(cashier);
 		
@@ -174,7 +173,7 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 	 * @see ITimesheetService#getCurrentTimesheet(org.openmrs.Provider)
 	 */
 	@Test
-	public void getCurrentTimesheet_shouldReturnNullIfTheTimesheetIsClockedOut() throws Exception {
+	public void getCurrentTimesheet_shouldReturnNullIfTheTimesheetIsClockedOut() {
 		Provider cashier = providerService.getProvider(1);
 		Assert.assertNotNull(cashier);
 		
@@ -187,7 +186,7 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 	 * @see ITimesheetService#getTimesheetsByDate(org.openmrs.Provider, java.util.Date)
 	 */
 	@Test
-	public void getTimesheetsByDate_shouldReturnEmptyListIfThereAreNoTimesheetsForDate() throws Exception {
+	public void getTimesheetsByDate_shouldReturnEmptyListIfThereAreNoTimesheetsForDate() {
 		Provider cashier = providerService.getProvider(0);
 		List<Timesheet> results = service.getTimesheetsByDate(cashier, new GregorianCalendar(2011, 0, 1).getTime());
 		
@@ -200,7 +199,7 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 	 * @see ITimesheetService#getTimesheetsByDate(org.openmrs.Provider, java.util.Date)
 	 */
 	@Test
-	public void getTimesheetsByDate_shouldReturnTimesheetsThatStartAndEndOnDate() throws Exception {
+	public void getTimesheetsByDate_shouldReturnTimesheetsThatStartAndEndOnDate() {
 		Provider cashier = providerService.getProvider(0);
 		List<Timesheet> results = service.getTimesheetsByDate(cashier, new GregorianCalendar(2011, 1, 10).getTime());
 		
@@ -214,7 +213,7 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 	 * @see ITimesheetService#getTimesheetsByDate(org.openmrs.Provider, java.util.Date)
 	 */
 	@Test
-	public void getTimesheetsByDate_shouldReturnTimesheetsThatStartOnDateAndEndOnDifferentDate() throws Exception {
+	public void getTimesheetsByDate_shouldReturnTimesheetsThatStartOnDateAndEndOnDifferentDate() {
 		Provider cashier = providerService.getProvider(0);
 		List<Timesheet> results = service.getTimesheetsByDate(cashier, new GregorianCalendar(2011, 1, 11).getTime());
 		
@@ -228,7 +227,7 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 	 * @see ITimesheetService#getTimesheetsByDate(org.openmrs.Provider, java.util.Date)
 	 */
 	@Test
-	public void getTimesheetsByDate_shouldReturnTimesheetThatStartOnDifferentDateAndEndOnDate() throws Exception {
+	public void getTimesheetsByDate_shouldReturnTimesheetThatStartOnDifferentDateAndEndOnDate() {
 		Provider cashier = providerService.getProvider(0);
 		List<Timesheet> results = service.getTimesheetsByDate(cashier, new GregorianCalendar(2011, 1, 14).getTime());
 		
@@ -242,7 +241,7 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 	 * @see ITimesheetService#getTimesheetsByDate(org.openmrs.Provider, java.util.Date)
 	 */
 	@Test
-	public void getTimesheetsByDate_shouldReturnTimesheetsThatStartBeforeDateButEndAfterDate() throws Exception {
+	public void getTimesheetsByDate_shouldReturnTimesheetsThatStartBeforeDateButEndAfterDate() {
 		Provider cashier = providerService.getProvider(0);
 		List<Timesheet> results = service.getTimesheetsByDate(cashier, new GregorianCalendar(2011, 1, 16).getTime());
 		
@@ -256,7 +255,7 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 	 * @see ITimesheetService#getTimesheetsByDate(org.openmrs.Provider, java.util.Date)
 	 */
 	@Test
-	public void getTimesheetsByDate_shouldReturnTimesheetsThatStartBeforeDateAndHaveNotEnded() throws Exception {
+	public void getTimesheetsByDate_shouldReturnTimesheetsThatStartBeforeDateAndHaveNotEnded() {
 		Provider cashier = providerService.getProvider(0);
 		List<Timesheet> results = service.getTimesheetsByDate(cashier, new GregorianCalendar(2011, 1, 20).getTime());
 		

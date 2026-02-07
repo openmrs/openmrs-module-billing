@@ -13,8 +13,6 @@
  */
 package org.openmrs.module.billing.web.legacyweb.controller;
 
-import java.io.IOException;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.openmrs.module.billing.web.base.controller.HeaderController;
@@ -40,7 +38,7 @@ public abstract class AbstractSequentialReceiptNumberGenerator {
 	public abstract String getReceiptNumberGeneratorUrl();
 	
 	@RequestMapping(method = RequestMethod.GET)
-	public void render(ModelMap modelMap, HttpServletRequest request) throws IOException {
+	public void render(ModelMap modelMap, HttpServletRequest request) {
 		SequentialReceiptNumberGeneratorModel model = getService().getOnly();
 		
 		modelMap.addAttribute("generator", model);
