@@ -144,7 +144,7 @@ public class BillAddEditController {
 			patient = service.getPatientByUuid(patientUuid);
 		}
 		catch (APIException e) {
-			log.error("Error when trying to get Patient with ID <" + patientUuid + ">", e);
+            log.error("Error when trying to get Patient with ID <{}>", patientUuid, e);
 			throw new APIException("Error when trying to get Patient with ID <" + patientUuid + ">");
 		}
 		
@@ -171,7 +171,7 @@ public class BillAddEditController {
 			bill = service.getBillByUuid(billUuid);
 		}
 		catch (APIException e) {
-			log.error("Error when trying to get bill with ID <" + billUuid + ">", e);
+            log.error("Error when trying to get bill with ID <{}>", billUuid, e);
 			throw new APIException("Error when trying to get bill with ID <" + billUuid + ">");
 		}
 		

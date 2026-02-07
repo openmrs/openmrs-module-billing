@@ -48,7 +48,7 @@ public class CriteriaImplWrapper {
 		Class<?> cls;
 		
 		try {
-			log.debug("Hibernate version: " + Version.getVersionString());
+            log.debug("Hibernate version: {}", Version.getVersionString());
 			if (org.hibernate.Version.getVersionString().startsWith("3.")) {
 				cls = Class.forName(VERSION_3_CRITERIA_CLASS);
 			} else {

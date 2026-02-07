@@ -90,14 +90,14 @@ public class SequentialReceiptNumberGenerator implements IReceiptNumberGenerator
 		if (bill == null) {
 			throw new NullPointerException("The bill must be defined.");
 		}
-		
-		log.debug("Generating receipt number for bill " + bill.getUuid() + "...");
+
+        log.debug("Generating receipt number for bill {}...", bill.getUuid());
 		
 		String grouping = createGrouping(bill);
 		String sequence = getSequence(grouping);
 		
 		String number = buildReceiptNumber(grouping, sequence);
-		log.debug("Generated receipt number '" + number + "' for bill " + bill.getUuid() + ".");
+        log.debug("Generated receipt number '{}' for bill {}.", number, bill.getUuid());
 		
 		return number;
 	}

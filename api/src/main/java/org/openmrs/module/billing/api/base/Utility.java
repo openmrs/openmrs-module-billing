@@ -91,13 +91,13 @@ public class Utility {
 		
 		Date result = null;
 		if (dateFormat == null) {
-			log.warn("Could not parse the date string '" + dateText + "'.");
+            log.warn("Could not parse the date string '{}'.", dateText);
 		} else {
 			try {
 				result = dateFormat.parse(dateText);
 			}
 			catch (ParseException pex) {
-				log.warn("Could not parse the date string '" + dateText + "'.", pex);
+                log.warn("Could not parse the date string '{}'.", dateText, pex);
 			}
 		}
 		

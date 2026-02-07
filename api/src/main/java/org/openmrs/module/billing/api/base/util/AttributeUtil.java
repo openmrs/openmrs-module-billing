@@ -63,7 +63,7 @@ public class AttributeUtil {
 					}
 					catch (InstantiationException e) {
 						// try to hydrate the object with the String constructor
-						log.trace("Unable to call no-arg constructor for class: " + c.getName());
+                        log.trace("Unable to call no-arg constructor for class: {}", c.getName());
 						
 						result = c.getConstructor(String.class).newInstance(value);
 					}
@@ -72,12 +72,12 @@ public class AttributeUtil {
 					result = null;
 				}
 				catch (Exception ex) {
-					log.warn("Unable to hydrate value: " + value + " for type: " + className, ex);
+                    log.warn("Unable to hydrate value: {} for type: {}", value, className, ex);
 				}
 			}
 		}
 		catch (ClassNotFoundException cnfe) {
-			log.warn("Unable to parse '" + className + "' to a known class.");
+            log.warn("Unable to parse '{}' to a known class.", className);
 		}
 		
 		return result;

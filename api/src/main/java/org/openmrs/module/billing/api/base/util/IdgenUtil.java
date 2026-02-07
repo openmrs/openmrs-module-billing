@@ -53,7 +53,7 @@ public class IdgenUtil {
 			source = service.getIdentifierSource(sourceId);
 		}
 		catch (Exception ex) {
-			log.warn("Could not convert '" + property + "' into an integer.");
+            log.warn("Could not convert '{}' into an integer.", property);
 		}
 		
 		return source;

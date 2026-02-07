@@ -135,7 +135,7 @@ public class PrivilegeConstants {
 			if (privilege != null) {
 				privileges.add(privilege);
 			} else {
-				log.debug("------------NULL PRIVILEGE: " + name);
+                log.debug("------------NULL PRIVILEGE: {}", name);
 			}
 		}
 		
