@@ -258,10 +258,12 @@ public class ModuleSettings {
 	
 	private static void getIntProperty(String propertyName, Integer defaultValue, Action1<Integer> action) {
 		String property = administrationService.getGlobalProperty(propertyName);
-		if (!StringUtils.isEmpty(property) && NumberUtils.isNumber(property)) {
+		try {
 			action.apply(Integer.parseInt(property));
-		} else if (defaultValue != null) {
-			action.apply(defaultValue);
+		}catch (Exception e){
+			if (defaultValue != null){
+				action.apply(defaultValue);
+			}
 		}
 	}
 	
