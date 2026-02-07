@@ -22,7 +22,7 @@ public class CashierModuleConstants {
 	
 	public static final String BILLING_EXEMPTIONS_CONFIG_FILE_PATH = "billing.exemptions.config";
 	
-	public static final String GLOBAL_PROPERTY_BILLING_CURRENCY = "billing.currency";
+	public static final String GLOBAL_PROPERTY_BILLING_CURRENCY = "billing.currencySymbol";
 	
 	protected CashierModuleConstants() {
 	}
