@@ -13,8 +13,11 @@
  */
 package org.openmrs.module.billing.api;
 
+import org.openmrs.annotation.Authorized;
 import org.openmrs.api.OpenmrsService;
+import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
+import org.openmrs.module.billing.api.util.PrivilegeConstants;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -37,5 +40,23 @@ public interface BillLineItemService extends OpenmrsService {
 	 */
 	@Nullable
 	BillLineItem getBillLineItemByUuid(String uuid);
+	
+	/**
+	 * Voids (soft deletes) a bill line item with a specified reason.
+	 * <p>
+	 * Voided line items are hidden from normal queries but remain in the database for audit purposes.
+	 * The line item must belong to a bill, and the bill will be saved to persist the voided line item.
+	 * </p>
+	 *
+	 * @param lineItemUuid the UUID of the line item to void
+	 * @param voidReason the reason for voiding the line item (required)
+	 * @return the bill containing the voided line item
+	 * @throws org.openmrs.api.APIAuthenticationException if the user lacks MANAGE_BILLS privilege
+	 * @throws IllegalArgumentException if lineItemUuid is null/empty, voidReason is null/empty, or line
+	 *             item not found
+	 * @throws IllegalStateException if the line item has no associated bill or bill not found
+	 */
+	@Authorized(PrivilegeConstants.MANAGE_BILLS)
+	Bill voidBillLineItem(String lineItemUuid, String voidReason);
 	
 }
