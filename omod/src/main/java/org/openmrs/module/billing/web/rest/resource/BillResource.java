@@ -90,7 +90,7 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 	
 	@PropertySetter("lineItems")
 	public void setBillLineItems(Bill instance, List<BillLineItem> lineItems) {
-	  	if (instance.getLineItems() == null) {
+		if (instance.getLineItems() == null) {
 			instance.setLineItems(new ArrayList<>(lineItems.size()));
 		}
     	for (BillLineItem item : lineItems) {
