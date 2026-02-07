@@ -13,8 +13,6 @@
  */
 package org.openmrs.module.billing.web.legacyweb.controller;
 
-import java.io.IOException;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,8 +24,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 @RequestMapping("/module/billing/paymentModes")
 public class PaymentModesController {
-    @RequestMapping(method = RequestMethod.GET)
-    public void paymentModes(ModelMap model) throws IOException {
-        model.addAttribute("modelBase", "openhmis.cashier.paymentMode");
-    }
+	
+	@RequestMapping(method = RequestMethod.GET)
+	public void paymentModes(ModelMap model) {
+		model.addAttribute("modelBase", "openhmis.cashier.paymentMode");
+	}
 }

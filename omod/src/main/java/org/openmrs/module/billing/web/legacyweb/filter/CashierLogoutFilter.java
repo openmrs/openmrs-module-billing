@@ -23,8 +23,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.openmrs.Provider;
 import org.openmrs.User;
 import org.openmrs.api.context.Context;
@@ -38,65 +37,67 @@ import org.springframework.stereotype.Component;
  * Performs the neccessary filters when a cashier logs out. Implements {@link Filter}
  */
 @Component
+@Slf4j
 public class CashierLogoutFilter implements Filter {
-    private static final Log LOG = LogFactory.getLog(CashierLogoutFilter.class);
-    private static final String PROVIDER_ERROR_LOG_MESSAGE = "Could not locate the Provider";
-    private static final Object TIMESHEET_ERROR_LOG_MESSAGE = "Could not locate Timesheet";
-
-    @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
-            ServletException {
-        LOG.debug("doCashierLogoutFilter");
-        clockOutCashier();
-        chain.doFilter(request, response);
-    }
-
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-
-    }
-
-    @Override
-    public void destroy() {
-
-    }
-
-    private void clockOutCashier() {
-        if (!userIsCashier()) {
-            return;
-        }
-
-        Provider provider = ProviderUtil.getCurrentProvider(Context.getProviderService());
-        if (provider == null) {
-            LOG.error(PROVIDER_ERROR_LOG_MESSAGE);
-            return;
-        }
-
-        ITimesheetService timesheetService = Context.getService(ITimesheetService.class);
-        Timesheet timesheet = timesheetService.getCurrentTimesheet(provider);
-        if (timesheet == null) {
-            LOG.error(TIMESHEET_ERROR_LOG_MESSAGE);
-            return;
-        }
-
-        if (cashierIsClockedIn(timesheet)) {
-            timesheet.setClockOut(new Date());
-            timesheetService.save(timesheet);
-        }
-    }
-
-    private boolean userIsCashier() {
-        boolean result = false;
-        User authenticatedUser = Context.getAuthenticatedUser();
-        if (authenticatedUser != null) {
-            result = authenticatedUser.hasPrivilege(PrivilegeConstants.MANAGE_TIMESHEETS);
-        }
-
-        return result;
-    }
-
-    private boolean cashierIsClockedIn(Timesheet timesheet) {
-        return timesheet != null && timesheet.getClockIn() != null;
-    }
-
+	
+	private static final String PROVIDER_ERROR_LOG_MESSAGE = "Could not locate the Provider";
+	
+	private static final String TIMESHEET_ERROR_LOG_MESSAGE = "Could not locate Timesheet";
+	
+	@Override
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+	        throws IOException, ServletException {
+		log.debug("doCashierLogoutFilter");
+		clockOutCashier();
+		chain.doFilter(request, response);
+	}
+	
+	@Override
+	public void init(FilterConfig filterConfig) {
+		
+	}
+	
+	@Override
+	public void destroy() {
+		
+	}
+	
+	private void clockOutCashier() {
+		if (!userIsCashier()) {
+			return;
+		}
+		
+		Provider provider = ProviderUtil.getCurrentProvider(Context.getProviderService());
+		if (provider == null) {
+			log.error(PROVIDER_ERROR_LOG_MESSAGE);
+			return;
+		}
+		
+		ITimesheetService timesheetService = Context.getService(ITimesheetService.class);
+		Timesheet timesheet = timesheetService.getCurrentTimesheet(provider);
+		if (timesheet == null) {
+			log.error(TIMESHEET_ERROR_LOG_MESSAGE);
+			return;
+		}
+		
+		if (cashierIsClockedIn(timesheet)) {
+			timesheet.setClockOut(new Date());
+			timesheetService.save(timesheet);
+		}
+	}
+	
+	private boolean userIsCashier() {
+		boolean result = false;
+		User authenticatedUser = Context.getAuthenticatedUser();
+		if (authenticatedUser != null) {
+			result = authenticatedUser.hasPrivilege(PrivilegeConstants.MANAGE_TIMESHEETS);
+		}
+		
+		return result;
+	}
+	
+	private boolean cashierIsClockedIn(Timesheet timesheet) {
+		return timesheet != null && timesheet.getClockIn() != null;
+	}
+	
 }

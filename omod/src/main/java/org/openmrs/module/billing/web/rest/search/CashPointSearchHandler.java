@@ -38,32 +38,33 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class CashPointSearchHandler implements SearchHandler {
-    private final SearchConfig searchConfig = new SearchConfig("default", CashierRestConstants.CASH_POINT_RESOURCE,
-            Collections.singletonList("*"), Collections.singletonList(new SearchQuery.Builder(
-            "Find a cashpoint by its name, optionally filtering by location").withRequiredParameters("q")
-            .withOptionalParameters("location_uuid").build()));
-
-    @Override
-    public PageableResult search(RequestContext context) {
-        String query = context.getParameter("q");
-        String locationUuid = context.getParameter("location_uuid");
-        boolean includeRetired = BooleanUtils.toBoolean(context.getParameter("includeAll"));
-        query = query.isEmpty() ? null : query;
-        locationUuid = StringUtils.isEmpty(locationUuid) ? null : locationUuid;
-
-        CashPointSearch cashPointSearch = CashPointSearch.builder()
-                .locationUuid(locationUuid)
-                .name(query)
-                .includeRetired(includeRetired).build();
-
-        PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
-
-        List<CashPoint> cashPoints = Context.getService(CashPointService.class).getCashPoints(cashPointSearch, pagingInfo);
-        return new AlreadyPagedWithLength<>(context, cashPoints, pagingInfo.hasMoreResults(), pagingInfo.getTotalRecordCount());
-    }
-
-    @Override
-    public SearchConfig getSearchConfig() {
-        return searchConfig;
-    }
+	
+	private final SearchConfig searchConfig = new SearchConfig("default", CashierRestConstants.CASH_POINT_RESOURCE,
+	        Collections.singletonList("*"),
+	        Collections
+	                .singletonList(new SearchQuery.Builder("Find a cashpoint by its name, optionally filtering by location")
+	                        .withRequiredParameters("q").withOptionalParameters("location_uuid").build()));
+	
+	@Override
+	public PageableResult search(RequestContext context) {
+		String query = context.getParameter("q");
+		String locationUuid = context.getParameter("location_uuid");
+		boolean includeRetired = BooleanUtils.toBoolean(context.getParameter("includeAll"));
+		query = query.isEmpty() ? null : query;
+		locationUuid = StringUtils.isEmpty(locationUuid) ? null : locationUuid;
+		
+		CashPointSearch cashPointSearch = CashPointSearch.builder().locationUuid(locationUuid).name(query)
+		        .includeRetired(includeRetired).build();
+		
+		PagingInfo pagingInfo = PagingUtil.getPagingInfoFromContext(context);
+		
+		List<CashPoint> cashPoints = Context.getService(CashPointService.class).getCashPoints(cashPointSearch, pagingInfo);
+		return new AlreadyPagedWithLength<>(context, cashPoints, pagingInfo.hasMoreResults(),
+		        pagingInfo.getTotalRecordCount());
+	}
+	
+	@Override
+	public SearchConfig getSearchConfig() {
+		return searchConfig;
+	}
 }

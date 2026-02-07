@@ -15,8 +15,7 @@ package org.openmrs.module.billing.api.impl;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -28,10 +27,9 @@ import org.openmrs.module.billing.api.model.CashierItemPrice;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Transactional
 public class ItemPriceServiceImpl extends BaseMetadataDataServiceImpl<CashierItemPrice> implements IMetadataAuthorizationPrivileges, ItemPriceService {
-	
-	private static final Log LOG = LogFactory.getLog(ItemPriceServiceImpl.class);
 	
 	@Override
 	protected IMetadataAuthorizationPrivileges getPrivileges() {
@@ -45,7 +43,7 @@ public class ItemPriceServiceImpl extends BaseMetadataDataServiceImpl<CashierIte
 	
 	@Override
 	public CashierItemPrice save(CashierItemPrice object) {
-		LOG.debug("Processing save Price");
+		log.debug("Processing save Price");
 		return super.save(object);
 	}
 	

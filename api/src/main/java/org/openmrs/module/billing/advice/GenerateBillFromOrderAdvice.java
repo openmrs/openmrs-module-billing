@@ -1,7 +1,6 @@
 package org.openmrs.module.billing.advice;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.openmrs.DrugOrder;
 import org.openmrs.Order;
 import org.openmrs.Patient;
@@ -9,7 +8,6 @@ import org.openmrs.PatientProgram;
 import org.openmrs.Provider;
 import org.openmrs.TestOrder;
 import org.openmrs.User;
-import org.openmrs.api.OrderService;
 import org.openmrs.api.ProgramWorkflowService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillExemptionService;
@@ -28,7 +26,6 @@ import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
 import org.openmrs.module.billing.api.model.ExemptionType;
 import org.openmrs.module.billing.api.search.BillableServiceSearch;
-import org.openmrs.module.billing.api.search.CashPointSearch;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
 import org.springframework.aop.AfterReturningAdvice;
@@ -42,29 +39,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 	
-	private static final Log LOG = LogFactory.getLog(GenerateBillFromOrderAdvice.class);
+	final BillService billService = Context.getService(BillService.class);
 	
-	OrderService orderService = Context.getOrderService();
+	final StockManagementService stockService = Context.getService(StockManagementService.class);
 	
-	BillService billService = Context.getService(BillService.class);
+	final ItemPriceService priceService = Context.getService(ItemPriceService.class);
 	
-	StockManagementService stockService = Context.getService(StockManagementService.class);
+	final CashPointService cashPointService = Context.getService(CashPointService.class);
 	
-	ItemPriceService priceService = Context.getService(ItemPriceService.class);
+	final ExemptionRuleEngine exemptionRuleEngine = Context.getRegisteredComponent("ruleEngine", ExemptionRuleEngine.class);
 	
-	CashPointService cashPointService = Context.getService(CashPointService.class);
-	
-	ExemptionRuleEngine exemptionRuleEngine = Context.getRegisteredComponent("ruleEngine", ExemptionRuleEngine.class);
-	
-	BillExemptionService billExemptionService = Context.getService(BillExemptionService.class);
+	final BillExemptionService billExemptionService = Context.getService(BillExemptionService.class);
 	
 	/**
 	 * This is called immediately an order is saved
 	 */
 	@Override
-	public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
+	public void afterReturning(Object returnValue, Method method, Object[] args, Object target) {
 		try {
 			ProgramWorkflowService workflowService = Context.getProgramWorkflowService();
 			if (method.getName().equals("saveOrder") && args.length > 0 && args[0] instanceof Order) {
@@ -111,7 +105,7 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 			}
 		}
 		catch (Exception e) {
-			LOG.error("Error intercepting order before creation: " + e.getMessage(), e);
+			log.error("Error intercepting order before creation: {}", e.getMessage(), e);
 		}
 	}
 	
@@ -216,12 +210,12 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 				activeBill.setStatus(BillStatus.PENDING);
 				billService.saveBill(activeBill);
 			} else {
-				LOG.error("User is not a provider");
+				log.error("User is not a provider");
 			}
 			
 		}
 		catch (Exception ex) {
-			LOG.error("Error sending the bill item: " + ex.getMessage(), ex);
+			log.error("Error sending the bill item: {}", ex.getMessage(), ex);
 		}
 	}
 }

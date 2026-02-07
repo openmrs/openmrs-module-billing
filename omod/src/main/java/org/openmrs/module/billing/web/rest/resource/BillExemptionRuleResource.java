@@ -39,15 +39,15 @@ import java.util.List;
 /**
  * REST sub-resource representing a {@link BillExemptionRule}.
  */
-@SubResource(parent = BillExemptionResource.class, path = "rule", supportedClass = BillExemptionRule.class,
-        supportedOpenmrsVersions = {"2.0 - 2.*"})
+@SubResource(parent = BillExemptionResource.class, path = "rule", supportedClass = BillExemptionRule.class, supportedOpenmrsVersions = {
+        "2.0 - 2.*" })
 public class BillExemptionRuleResource extends DelegatingSubResource<BillExemptionRule, BillExemption, BillExemptionResource> {
-
+	
 	@Override
 	public BillExemptionRule newDelegate() {
 		return new BillExemptionRule();
 	}
-
+	
 	@Override
 	public BillExemptionRule save(BillExemptionRule delegate) {
 		BillExemption exemption = delegate.getBillingExemption();
@@ -56,17 +56,17 @@ public class BillExemptionRuleResource extends DelegatingSubResource<BillExempti
 		}
 		return delegate;
 	}
-
+	
 	@Override
 	public BillExemption getParent(BillExemptionRule instance) {
 		return instance.getBillingExemption();
 	}
-
+	
 	@Override
 	public void setParent(BillExemptionRule instance, BillExemption parent) {
 		instance.setBillingExemption(parent);
 	}
-
+	
 	@Override
 	public PageableResult doGetAll(BillExemption parent, RequestContext context) throws ResponseException {
 		List<BillExemptionRule> rules = parent.getRules();
@@ -75,12 +75,12 @@ public class BillExemptionRuleResource extends DelegatingSubResource<BillExempti
 		}
 		return new NeedsPaging<>(rules, context);
 	}
-
+	
 	@Override
 	public BillExemptionRule getByUniqueId(String uniqueId) {
 		throw new ResourceDoesNotSupportOperationException("BillingExemptionRule does not support lookup by UUID");
 	}
-
+	
 	@Override
 	protected void delete(BillExemptionRule delegate, String reason, RequestContext context) throws ResponseException {
 		if (delegate.getVoided()) {
@@ -93,7 +93,7 @@ public class BillExemptionRuleResource extends DelegatingSubResource<BillExempti
 			getService().save(exemption);
 		}
 	}
-
+	
 	@Override
 	public void purge(BillExemptionRule delegate, RequestContext context) throws ResponseException {
 		BillExemption exemption = delegate.getBillingExemption();
@@ -102,11 +102,11 @@ public class BillExemptionRuleResource extends DelegatingSubResource<BillExempti
 			getService().save(exemption);
 		}
 	}
-
+	
 	@Override
 	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
 		DelegatingResourceDescription description = new DelegatingResourceDescription();
-
+		
 		if (rep instanceof RefRepresentation) {
 			description.addProperty("uuid");
 			description.addProperty("scriptType");
@@ -124,10 +124,10 @@ public class BillExemptionRuleResource extends DelegatingSubResource<BillExempti
 			description.addProperty("voidReason");
 			description.addProperty("auditInfo");
 		}
-
+		
 		return description;
 	}
-
+	
 	@Override
 	public DelegatingResourceDescription getCreatableProperties() {
 		DelegatingResourceDescription description = new DelegatingResourceDescription();
@@ -135,26 +135,26 @@ public class BillExemptionRuleResource extends DelegatingSubResource<BillExempti
 		description.addProperty("script");
 		return description;
 	}
-
+	
 	@Override
 	public DelegatingResourceDescription getUpdatableProperties() {
 		return getCreatableProperties();
 	}
-
+	
 	@PropertySetter("scriptType")
 	public void setScriptType(BillExemptionRule instance, String scriptType) {
 		if (scriptType != null) {
 			instance.setScriptType(ScriptType.valueOf(scriptType));
 		}
 	}
-
+	
 	@PropertySetter("script")
 	public void setScript(BillExemptionRule instance, String script) {
 		if (script != null) {
 			instance.setScript(StringEscapeUtils.unescapeHtml(script));
 		}
 	}
-
+	
 	private BillExemptionService getService() {
 		return Context.getService(BillExemptionService.class);
 	}

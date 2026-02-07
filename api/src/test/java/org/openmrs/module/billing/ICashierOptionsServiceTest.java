@@ -39,7 +39,7 @@ public class ICashierOptionsServiceTest extends BaseModuleContextTest {
 	 * @see ICashierOptionsService#getOptions()
 	 */
 	@Test
-	public void getOptions_shouldLoadOptions() throws Exception {
+	public void getOptions_shouldLoadOptions() {
 		executeDataSet(OPTIONS_DATASET_VALID);
 		//		executeDataSet(IDepartmentDataServiceTest.DEPARTMENT_DATASET);
 		//		executeDataSet(IItemDataServiceTest.ITEM_DATASET);
@@ -57,7 +57,7 @@ public class ICashierOptionsServiceTest extends BaseModuleContextTest {
 	 * @see ICashierOptionsService#getOptions()
 	 */
 	@Test
-	public void getOptions_shouldRevertToDefaultsIfThereAreProblemsLoadingOptions() throws Exception {
+	public void getOptions_shouldRevertToDefaultsIfThereAreProblemsLoadingOptions() {
 		executeDataSet(OPTIONS_DATASET_INVALID);
 		CashierOptions reference = new CashierOptions();
 		CashierOptions options = cashierOptionsService.getOptions();

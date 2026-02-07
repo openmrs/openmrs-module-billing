@@ -3,7 +3,6 @@ package org.openmrs.module.billing.api.db;
 import org.openmrs.Concept;
 import org.openmrs.module.billing.api.model.BillExemption;
 import org.openmrs.module.billing.api.model.ExemptionType;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 

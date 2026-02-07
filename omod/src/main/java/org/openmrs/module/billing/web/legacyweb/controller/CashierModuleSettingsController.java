@@ -32,40 +32,41 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller(value = "cashierModuleSettings")
 @RequestMapping(CashierWebConstants.MODULE_SETTINGS_PAGE)
 public class CashierModuleSettingsController {
-
-    public CashierModuleSettingsController() {
-
-    }
-
-    @ResponseBody
-    @RequestMapping(method = RequestMethod.GET)
-    public SimpleObject get(@RequestParam("setting") String setting) {
-        SimpleObject results = new SimpleObject();
-        if (StringUtils.isNotEmpty(setting)) {
-            if (StringUtils.equalsIgnoreCase(setting, "timesheet")) {
-                results.put("isTimeSheetRequired", TimesheetUtil.isTimesheetRequired());
-                Timesheet currentTimesheet = getCurrentTimesheet();
-                if (currentTimesheet != null) {
-                    SimpleObject cashPoint = new SimpleObject();
-                    cashPoint.put("name", currentTimesheet.getCashPoint().getName());
-                    cashPoint.put("uuid", currentTimesheet.getCashPoint().getUuid());
-                    results.put("cashPoint", cashPoint);
-                    results.put("cashier", currentTimesheet.getCashier().getName());
-                }
-            } else {
-                results.put("results", Context.getAdministrationService().getGlobalProperty(setting));
-            }
-        }
-        return results;
-    }
-
-    private Timesheet getCurrentTimesheet() {
-        Timesheet timesheet;
-        try {
-            timesheet = TimesheetUtil.getCurrentTimesheet();
-        } catch (Exception e) {
-            timesheet = null;
-        }
-        return timesheet;
-    }
+	
+	public CashierModuleSettingsController() {
+		
+	}
+	
+	@ResponseBody
+	@RequestMapping(method = RequestMethod.GET)
+	public SimpleObject get(@RequestParam("setting") String setting) {
+		SimpleObject results = new SimpleObject();
+		if (StringUtils.isNotEmpty(setting)) {
+			if (StringUtils.equalsIgnoreCase(setting, "timesheet")) {
+				results.put("isTimeSheetRequired", TimesheetUtil.isTimesheetRequired());
+				Timesheet currentTimesheet = getCurrentTimesheet();
+				if (currentTimesheet != null) {
+					SimpleObject cashPoint = new SimpleObject();
+					cashPoint.put("name", currentTimesheet.getCashPoint().getName());
+					cashPoint.put("uuid", currentTimesheet.getCashPoint().getUuid());
+					results.put("cashPoint", cashPoint);
+					results.put("cashier", currentTimesheet.getCashier().getName());
+				}
+			} else {
+				results.put("results", Context.getAdministrationService().getGlobalProperty(setting));
+			}
+		}
+		return results;
+	}
+	
+	private Timesheet getCurrentTimesheet() {
+		Timesheet timesheet;
+		try {
+			timesheet = TimesheetUtil.getCurrentTimesheet();
+		}
+		catch (Exception e) {
+			timesheet = null;
+		}
+		return timesheet;
+	}
 }

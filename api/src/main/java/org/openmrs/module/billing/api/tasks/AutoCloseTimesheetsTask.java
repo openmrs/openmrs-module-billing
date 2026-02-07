@@ -13,8 +13,7 @@
  */
 package org.openmrs.module.billing.api.tasks;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.ITimesheetService;
 import org.openmrs.scheduler.tasks.AbstractTask;
@@ -22,15 +21,14 @@ import org.openmrs.scheduler.tasks.AbstractTask;
 /**
  * A scheduled task that automatically closes all open timesheets
  */
+@Slf4j
 public class AutoCloseTimesheetsTask extends AbstractTask {
-	
-	private static final Log LOG = LogFactory.getLog(AutoCloseTimesheetsTask.class);
 	
 	@Override
 	public void execute() {
 		if (!isExecuting) {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("Starting Auto Close Timesheets Task...");
+			if (log.isDebugEnabled()) {
+				log.debug("Starting Auto Close Timesheets Task...");
 			}
 			
 			startExecuting();
@@ -41,7 +39,7 @@ public class AutoCloseTimesheetsTask extends AbstractTask {
 				timesheetService.closeOpenTimesheets();
 			}
 			catch (Exception e) {
-				LOG.error("Error while auto closing open timesheets:", e);
+				log.error("Error while auto closing open timesheets:", e);
 			}
 			finally {
 				stopExecuting();

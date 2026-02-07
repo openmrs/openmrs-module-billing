@@ -13,9 +13,8 @@
  */
 package org.openmrs.module.billing.api.base.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openmrs.User;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.base.exception.PrivilegeException;
@@ -24,9 +23,8 @@ import org.openmrs.module.billing.api.base.f.Func1;
 /**
  * Helper class for working with {@link org.openmrs.Privilege}s.
  */
+@Slf4j
 public class PrivilegeUtil {
-	
-	private static final Log LOG = LogFactory.getLog(PrivilegeUtil.class);
 	
 	private PrivilegeUtil() {
 	}
@@ -99,7 +97,7 @@ public class PrivilegeUtil {
 	public static void requirePrivileges(User user, String privileges) {
 		boolean hasPrivileges = hasPrivileges(user, privileges);
 		if (!hasPrivileges) {
-			LOG.error("Privileges are missing. The required privilege is <" + privileges + ">");
+            log.error("Privileges are missing. The required privilege is <{}>", privileges);
 			throw new PrivilegeException();
 		}
 	}

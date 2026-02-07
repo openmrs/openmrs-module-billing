@@ -13,9 +13,8 @@
  */
 package org.openmrs.module.billing.web.legacyweb.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openmrs.Provider;
 import org.openmrs.api.APIException;
 import org.openmrs.api.ProviderService;
@@ -50,101 +49,102 @@ import java.util.List;
  */
 @Controller
 @RequestMapping(value = CashierWebConstants.CASHIER_PAGE)
+@Slf4j
 public class CashierController {
-    private static final Log LOG = LogFactory.getLog(CashierController.class);
-
-    public CashierController() {
-
-    }
-
-    @InitBinder
-    public void initBinder(WebDataBinder binder) {
-        binder.registerCustomEditor(CashPoint.class, new CashPointPropertyEditor());
-        binder.registerCustomEditor(Provider.class, new ProviderPropertyEditor());
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm");
-        dateFormat.setLenient(false);
-
-        binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
-    }
-
-    @RequestMapping(method = RequestMethod.GET)
-    public void render(@RequestParam(value = "providerId", required = false) Integer providerId,
-                       @RequestParam(value = "returnUrl", required = false) String returnUrl, ModelMap modelMap) {
-        Provider provider;
-        ProviderService providerService = Context.getProviderService();
-        if (providerId != null) {
-            provider = providerService.getProvider(providerId);
-        } else {
-            provider = ProviderUtil.getCurrentProvider(providerService);
-        }
-
-        if (provider == null) {
-            throw new APIException("ERROR: Could not locate the provider. Please make sure the user is listed as provider "
-                    + "(Admin -> Manage providers)");
-        }
-
-        String returnTo = returnUrl;
-        if (StringUtils.isEmpty(returnTo)) {
-            HttpServletRequest req = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-            returnTo = req.getHeader("Referer");
-
-            if (!StringUtils.isEmpty(returnTo)) {
-                try {
-                    URL url = new URL(returnTo);
-
-                    returnTo = url.getPath();
-                    if (StringUtils.startsWith(returnTo, req.getContextPath())) {
-
-                        returnTo = returnTo.substring(req.getContextPath().length());
-                    }
-                } catch (MalformedURLException e) {
-                    LOG.warn("Could not parse referrer url '" + returnTo + "'");
-                    returnTo = "";
-                }
-            }
-        }
-
-        // Load the current timesheet information
-        Timesheet timesheet = Context.getService(ITimesheetService.class).getCurrentTimesheet(provider);
-        if (timesheet == null) {
-            timesheet = new Timesheet();
-            timesheet.setCashier(provider);
-            timesheet.setClockIn(new Date());
-        }
-
-        addRenderAttributes(modelMap, timesheet, provider, returnTo);
-    }
-
-    @RequestMapping(method = RequestMethod.POST)
-    public String post(Timesheet timesheet, Errors errors, WebRequest request, ModelMap modelMap) {
-        String returnUrl = request.getParameter("returnUrl");
-
-        new TimesheetEntryValidator().validate(timesheet, errors);
-        if (errors.hasErrors()) {
-            addRenderAttributes(modelMap, timesheet, timesheet.getCashier(), returnUrl);
-
-            return null;
-        }
-
-        Context.getService(ITimesheetService.class).save(timesheet);
-
-        if (StringUtils.isEmpty(returnUrl)) {
-            returnUrl = "redirect:";
-        } else {
-            returnUrl = "redirect:" + returnUrl;
-        }
-        return returnUrl;
-    }
-
-    @ModelAttribute("cashPoints")
-    public List<CashPoint> getCashPoints() {
-        return Context.getService(CashPointService.class).getAllCashPoints(false);
-    }
-
-    private void addRenderAttributes(ModelMap modelMap, Timesheet timesheet, Provider cashier, String returnUrl) {
-        modelMap.addAttribute("returnUrl", returnUrl);
-        modelMap.addAttribute("cashier", cashier);
-        modelMap.addAttribute("timesheet", timesheet);
-    }
+	
+	public CashierController() {
+		
+	}
+	
+	@InitBinder
+	public void initBinder(WebDataBinder binder) {
+		binder.registerCustomEditor(CashPoint.class, new CashPointPropertyEditor());
+		binder.registerCustomEditor(Provider.class, new ProviderPropertyEditor());
+		
+		SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm");
+		dateFormat.setLenient(false);
+		
+		binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
+	}
+	
+	@RequestMapping(method = RequestMethod.GET)
+	public void render(@RequestParam(value = "providerId", required = false) Integer providerId,
+	        @RequestParam(value = "returnUrl", required = false) String returnUrl, ModelMap modelMap) {
+		Provider provider;
+		ProviderService providerService = Context.getProviderService();
+		if (providerId != null) {
+			provider = providerService.getProvider(providerId);
+		} else {
+			provider = ProviderUtil.getCurrentProvider(providerService);
+		}
+		
+		if (provider == null) {
+			throw new APIException("ERROR: Could not locate the provider. Please make sure the user is listed as provider "
+			        + "(Admin -> Manage providers)");
+		}
+		
+		String returnTo = returnUrl;
+		if (StringUtils.isEmpty(returnTo)) {
+			HttpServletRequest req = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+			returnTo = req.getHeader("Referer");
+			
+			if (!StringUtils.isEmpty(returnTo)) {
+				try {
+					URL url = new URL(returnTo);
+					
+					returnTo = url.getPath();
+					if (StringUtils.startsWith(returnTo, req.getContextPath())) {
+						
+						returnTo = returnTo.substring(req.getContextPath().length());
+					}
+				}
+				catch (MalformedURLException e) {
+                    log.warn("Could not parse referrer url '{}'", returnTo);
+					returnTo = "";
+				}
+			}
+		}
+		
+		// Load the current timesheet information
+		Timesheet timesheet = Context.getService(ITimesheetService.class).getCurrentTimesheet(provider);
+		if (timesheet == null) {
+			timesheet = new Timesheet();
+			timesheet.setCashier(provider);
+			timesheet.setClockIn(new Date());
+		}
+		
+		addRenderAttributes(modelMap, timesheet, provider, returnTo);
+	}
+	
+	@RequestMapping(method = RequestMethod.POST)
+	public String post(Timesheet timesheet, Errors errors, WebRequest request, ModelMap modelMap) {
+		String returnUrl = request.getParameter("returnUrl");
+		
+		new TimesheetEntryValidator().validate(timesheet, errors);
+		if (errors.hasErrors()) {
+			addRenderAttributes(modelMap, timesheet, timesheet.getCashier(), returnUrl);
+			
+			return null;
+		}
+		
+		Context.getService(ITimesheetService.class).save(timesheet);
+		
+		if (StringUtils.isEmpty(returnUrl)) {
+			returnUrl = "redirect:";
+		} else {
+			returnUrl = "redirect:" + returnUrl;
+		}
+		return returnUrl;
+	}
+	
+	@ModelAttribute("cashPoints")
+	public List<CashPoint> getCashPoints() {
+		return Context.getService(CashPointService.class).getAllCashPoints(false);
+	}
+	
+	private void addRenderAttributes(ModelMap modelMap, Timesheet timesheet, Provider cashier, String returnUrl) {
+		modelMap.addAttribute("returnUrl", returnUrl);
+		modelMap.addAttribute("cashier", cashier);
+		modelMap.addAttribute("timesheet", timesheet);
+	}
 }

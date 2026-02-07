@@ -111,7 +111,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	 * @see ISequentialReceiptNumberGeneratorService#reserveNextSequence(String)
 	 */
 	@Test
-	public void reserveNextSequence_shouldIncrementAndReturnTheSequenceValueForExistingGroups() throws Exception {
+	public void reserveNextSequence_shouldIncrementAndReturnTheSequenceValueForExistingGroups() {
 		GroupSequence sequence = createSequence("test", 1);
 		service.saveSequence(sequence);
 		sequence = createSequence("test2", 53);
@@ -153,7 +153,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	 * @see ISequentialReceiptNumberGeneratorService#reserveNextSequence(String)
 	 */
 	@Test
-	public void reserveNextSequence_shouldCreateANewSequenceWithAValueOfOneIfTheGroupDoesNotExist() throws Exception {
+	public void reserveNextSequence_shouldCreateANewSequenceWithAValueOfOneIfTheGroupDoesNotExist() {
 		GroupSequence sequence = service.getSequence("test");
 		Assert.assertNull(sequence);
 		
@@ -172,7 +172,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	 * @see ISequentialReceiptNumberGeneratorService#reserveNextSequence(String)
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void reserveNextSequence_shouldThrowIllegalArgumentExceptionIfTheGroupIsNull() throws Exception {
+	public void reserveNextSequence_shouldThrowIllegalArgumentExceptionIfTheGroupIsNull() {
 		service.reserveNextSequence(null);
 	}
 	
@@ -181,7 +181,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	 * @see ISequentialReceiptNumberGeneratorService#getSequences()
 	 */
 	@Test
-	public void getSequences_shouldReturnAllSequences() throws Exception {
+	public void getSequences_shouldReturnAllSequences() {
 		List<GroupSequence> sequences = service.getSequences();
 		
 		Assert.assertNotNull(sequences);
@@ -193,7 +193,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	 * @see ISequentialReceiptNumberGeneratorService#getSequences()
 	 */
 	@Test
-	public void getSequences_shouldReturnAnEmptyListIfNoSequencesHaveBeenDefined() throws Exception {
+	public void getSequences_shouldReturnAnEmptyListIfNoSequencesHaveBeenDefined() {
 		List<GroupSequence> sequences = service.getSequences();
 		for (GroupSequence sequence : sequences) {
 			service.purgeSequence(sequence);
@@ -211,7 +211,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	 * @see ISequentialReceiptNumberGeneratorService#saveSequence(GroupSequence)
 	 */
 	@Test(expected = NullPointerException.class)
-	public void saveSequence_shouldThrowANullPointerExceptionIfSequenceIsNull() throws Exception {
+	public void saveSequence_shouldThrowANullPointerExceptionIfSequenceIsNull() {
 		service.saveSequence(null);
 	}
 	
@@ -220,7 +220,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	 * @see ISequentialReceiptNumberGeneratorService#saveSequence(GroupSequence)
 	 */
 	@Test
-	public void saveSequence_shouldReturnTheSavedSequence() throws Exception {
+	public void saveSequence_shouldReturnTheSavedSequence() {
 		GroupSequence sequence = new GroupSequence();
 		sequence.setGroup("New Group");
 		sequence.setValue(50);
@@ -238,7 +238,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	 * @see ISequentialReceiptNumberGeneratorService#saveSequence(GroupSequence)
 	 */
 	@Test
-	public void saveSequence_shouldUpdateTheSequenceSuccessfully() throws Exception {
+	public void saveSequence_shouldUpdateTheSequenceSuccessfully() {
 		GroupSequence sequence = service.getSequence("Test Seq 1");
 		int oldValue = sequence.getValue();
 		sequence.setValue(oldValue + 10);
@@ -257,7 +257,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	 * @see ISequentialReceiptNumberGeneratorService#saveSequence(GroupSequence)
 	 */
 	@Test
-	public void saveSequence_shouldCreateTheSequenceSuccessfully() throws Exception {
+	public void saveSequence_shouldCreateTheSequenceSuccessfully() {
 		GroupSequence sequence = new GroupSequence();
 		sequence.setGroup("New Group");
 		sequence.setValue(50);
@@ -275,7 +275,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	 * @see ISequentialReceiptNumberGeneratorService#purgeSequence(GroupSequence)
 	 */
 	@Test(expected = NullPointerException.class)
-	public void purgeSequence_shouldThrowANullPointerExceptionIfTheSequenceIsNull() throws Exception {
+	public void purgeSequence_shouldThrowANullPointerExceptionIfTheSequenceIsNull() {
 		service.purgeSequence(null);
 	}
 	
@@ -284,7 +284,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	 * @see ISequentialReceiptNumberGeneratorService#purgeSequence(GroupSequence)
 	 */
 	@Test
-	public void purgeSequence_shouldDeleteTheSequenceFromTheDatabase() throws Exception {
+	public void purgeSequence_shouldDeleteTheSequenceFromTheDatabase() {
 		GroupSequence sequence = service.getSequence("Test Seq 1");
 		service.purgeSequence(sequence);
 		
@@ -299,7 +299,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	 * @see ISequentialReceiptNumberGeneratorService#purgeSequence(GroupSequence)
 	 */
 	@Test
-	public void purgeSequence_shouldNotThrowAnExceptionIfTheSequenceIsNotInTheDatabase() throws Exception {
+	public void purgeSequence_shouldNotThrowAnExceptionIfTheSequenceIsNotInTheDatabase() {
 		GroupSequence sequence = service.getSequence("Test Seq 1");
 		service.purgeSequence(sequence);
 		
@@ -313,7 +313,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	 * @see ISequentialReceiptNumberGeneratorService#getSequence(String)
 	 */
 	@Test(expected = IllegalArgumentException.class)
-	public void getSequence_shouldThrowAnIllegalArgumentExceptionIfGroupIsNull() throws Exception {
+	public void getSequence_shouldThrowAnIllegalArgumentExceptionIfGroupIsNull() {
 		service.getSequence(null);
 	}
 	
@@ -322,7 +322,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	 * @see ISequentialReceiptNumberGeneratorService#getSequence(String)
 	 */
 	@Test
-	public void getSequence_shouldReturnTheSequenceIfGroupIsEmpty() throws Exception {
+	public void getSequence_shouldReturnTheSequenceIfGroupIsEmpty() {
 		GroupSequence sequence = service.getSequence("");
 		Assert.assertNotNull(sequence);
 		Assert.assertEquals("", sequence.getGroup());
@@ -334,7 +334,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	 * @see ISequentialReceiptNumberGeneratorService#getSequence(String)
 	 */
 	@Test
-	public void getSequence_shouldReturnTheSpecifiedSequence() throws Exception {
+	public void getSequence_shouldReturnTheSpecifiedSequence() {
 		GroupSequence sequence = service.getSequence("Test Seq 1");
 		
 		Assert.assertNotNull(sequence);
@@ -347,7 +347,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	 * @see ISequentialReceiptNumberGeneratorService#getSequence(String)
 	 */
 	@Test
-	public void getSequence_shouldReturnNullIfTheSequenceCannotBeFound() throws Exception {
+	public void getSequence_shouldReturnNullIfTheSequenceCannotBeFound() {
 		GroupSequence sequence = service.getSequence("Not A Valid Sequence");
 		
 		Assert.assertNull(sequence);
@@ -358,7 +358,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	 * @see ISequentialReceiptNumberGeneratorService#getOnly()
 	 */
 	@Test
-	public void getOnly_shouldReturnTheFirstModel() throws Exception {
+	public void getOnly_shouldReturnTheFirstModel() {
 		SequentialReceiptNumberGeneratorModel model = service.getOnly();
 		
 		Assert.assertNotNull(model);
@@ -370,7 +370,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	 * @see ISequentialReceiptNumberGeneratorService#getOnly()
 	 */
 	@Test
-	public void getOnly_shouldReturnANewModelIfNoneHasBeenDefined() throws Exception {
+	public void getOnly_shouldReturnANewModelIfNoneHasBeenDefined() {
 		SequentialReceiptNumberGeneratorModel model = service.getOnly();
 		service.purge(model);
 		

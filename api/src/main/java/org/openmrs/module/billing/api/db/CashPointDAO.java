@@ -20,7 +20,6 @@ import javax.annotation.Nonnull;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.search.CashPointSearch;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Data access object for {@link CashPoint} entities.

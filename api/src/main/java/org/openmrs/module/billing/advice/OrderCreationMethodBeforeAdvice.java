@@ -21,8 +21,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.openmrs.DrugOrder;
 import org.openmrs.Order;
 import org.openmrs.Patient;
@@ -48,22 +47,21 @@ import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
 import org.springframework.aop.MethodBeforeAdvice;
 
+@Slf4j
 public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 	
-	private static final Log LOG = LogFactory.getLog(OrderCreationMethodBeforeAdvice.class);
+	final OrderService orderService = Context.getOrderService();
 	
-	OrderService orderService = Context.getOrderService();
+	final BillService billService = Context.getService(BillService.class);
 	
-	BillService billService = Context.getService(BillService.class);
+	final StockManagementService stockService = Context.getService(StockManagementService.class);
 	
-	StockManagementService stockService = Context.getService(StockManagementService.class);
+	final ItemPriceService priceService = Context.getService(ItemPriceService.class);
 	
-	ItemPriceService priceService = Context.getService(ItemPriceService.class);
-	
-	CashPointService cashPointService = Context.getService(CashPointService.class);
+	final CashPointService cashPointService = Context.getService(CashPointService.class);
 	
 	@Override
-	public void before(Method method, Object[] args, Object target) throws Throwable {
+	public void before(Method method, Object[] args, Object target) {
 		try {
 			// Extract the Order object from the arguments
 			if (method.getName().equals("saveOrder") && args.length > 0 && args[0] instanceof Order) {
@@ -104,8 +102,7 @@ public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 			}
 		}
 		catch (Exception e) {
-			LOG.error(e);
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 	}
 	
@@ -162,8 +159,7 @@ public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 			
 		}
 		catch (Exception ex) {
-			LOG.error(ex);
-			ex.printStackTrace();
+			log.error(ex.getMessage(), ex);
 		}
 	}
 	
