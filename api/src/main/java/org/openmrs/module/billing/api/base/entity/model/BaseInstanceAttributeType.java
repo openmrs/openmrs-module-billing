@@ -20,7 +20,7 @@ package org.openmrs.module.billing.api.base.entity.model;
  */
 public class BaseInstanceAttributeType<TOwner extends IInstanceType<?>> extends BaseAttributeType implements IInstanceAttributeType<TOwner> {
 	
-	public static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 	
 	private TOwner owner;
 	

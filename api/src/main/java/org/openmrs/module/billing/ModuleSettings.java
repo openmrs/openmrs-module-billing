@@ -245,7 +245,7 @@ public class ModuleSettings {
 	private static Integer getIntProperty(String propertyName) {
 		Integer result = null;
 		String property = administrationService.getGlobalProperty(propertyName);
-		if (!StringUtils.isEmpty(property) && NumberUtils.isNumber(property)) {
+		if (!StringUtils.isEmpty(property) && NumberUtils.isCreatable(property)) {
 			result = Integer.parseInt(property);
 		}
 		
@@ -258,7 +258,7 @@ public class ModuleSettings {
 	
 	private static void getIntProperty(String propertyName, Integer defaultValue, Action1<Integer> action) {
 		String property = administrationService.getGlobalProperty(propertyName);
-		if (!StringUtils.isEmpty(property) && NumberUtils.isNumber(property)) {
+		if (!StringUtils.isEmpty(property) && NumberUtils.isCreatable(property)) {
 			action.apply(Integer.parseInt(property));
 		} else if (defaultValue != null) {
 			action.apply(defaultValue);

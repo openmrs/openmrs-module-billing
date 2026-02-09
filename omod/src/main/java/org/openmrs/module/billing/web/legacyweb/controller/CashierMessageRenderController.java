@@ -21,6 +21,8 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Vector;
@@ -35,14 +37,13 @@ public class CashierMessageRenderController {
 	@RequestMapping(method = RequestMethod.GET)
 	public ModelAndView render(HttpServletRequest request) {
 		// object to store keys from cashier and backboneforms
-		Vector<String> keys = new Vector<String>();
-		
-		// locate and retrieve cashier messages
+
+        // locate and retrieve cashier messages
 		Locale locale = RequestContextUtils.getLocale(request);
 		ResourceBundle resourceBundle = ResourceBundle.getBundle("messages", locale);
 		
 		// store cashier message keys in the vector object
-		keys.addAll(resourceBundle.keySet());
+        List<String> keys = new ArrayList<>(resourceBundle.keySet());
 		
 		// retrieve backboneforms messages
 		/**
@@ -54,6 +55,6 @@ public class CashierMessageRenderController {
 		 * messageKey.nextElement(); if (!keys.contains(key)) keys.add(key); } }
 		 */
 		
-		return new ModelAndView(CashierWebConstants.MESSAGE_PAGE, "keys", keys.elements());
+		return new ModelAndView(CashierWebConstants.MESSAGE_PAGE, "keys", keys);
 	}
 }

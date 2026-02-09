@@ -90,14 +90,14 @@ public class SequentialReceiptNumberGenerator implements IReceiptNumberGenerator
 		if (bill == null) {
 			throw new NullPointerException("The bill must be defined.");
 		}
-
-        log.debug("Generating receipt number for bill {}...", bill.getUuid());
+		
+		log.debug("Generating receipt number for bill {}...", bill.getUuid());
 		
 		String grouping = createGrouping(bill);
 		String sequence = getSequence(grouping);
 		
 		String number = buildReceiptNumber(grouping, sequence);
-        log.debug("Generated receipt number '{}' for bill {}.", number, bill.getUuid());
+		log.debug("Generated receipt number '{}' for bill {}.", number, bill.getUuid());
 		
 		return number;
 	}
@@ -105,7 +105,7 @@ public class SequentialReceiptNumberGenerator implements IReceiptNumberGenerator
 	public String generateCheckDigit(String number) {
 		// Remove the separator from the number
 		String numberWithoutSep = number;
-		if (!model.getSeparator().equals("")) {
+		if (!model.getSeparator().isEmpty()) {
 			numberWithoutSep = numberWithoutSep.replace(model.getSeparator(), "");
 		}
 		
@@ -140,7 +140,7 @@ public class SequentialReceiptNumberGenerator implements IReceiptNumberGenerator
 	private String getSequence(String grouping) {
 		// Do not include the separator when getting the next sequence
 		String groupingWithoutSep = grouping;
-		if (!model.getSeparator().equals("")) {
+		if (!model.getSeparator().isEmpty()) {
 			groupingWithoutSep = groupingWithoutSep.replace(model.getSeparator(), "");
 		}
 		

@@ -21,7 +21,7 @@ import org.openmrs.module.billing.api.SequentialReceiptNumberGenerator;
  */
 public class SequentialReceiptNumberGeneratorModel extends BaseOpenmrsObject {
 	
-	public static final long serialVersionUID = 0L;
+	private static final long serialVersionUID = 0L;
 	
 	public static final String DEFAULT_SEPARATOR = "-";
 	

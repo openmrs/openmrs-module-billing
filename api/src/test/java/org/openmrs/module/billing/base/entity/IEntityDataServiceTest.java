@@ -36,7 +36,7 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 		Assert.assertEquals(expected.getCreator(), actual.getCreator());
 		Assert.assertEquals(expected.getDateChanged(), actual.getDateChanged());
 		Assert.assertEquals(expected.getDateCreated(), actual.getDateCreated());
-		Assert.assertEquals(expected.isVoided(), actual.isVoided());
+		Assert.assertEquals(expected.getVoided(), actual.getVoided());
 		Assert.assertEquals(expected.getVoidedBy(), actual.getVoidedBy());
 		Assert.assertEquals(expected.getVoidReason(), actual.getVoidReason());
 		Assert.assertEquals(expected.getDateVoided(), actual.getDateVoided());
@@ -61,7 +61,7 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 		Context.flushSession();
 		
 		entity = service.getById(0);
-		Assert.assertTrue(entity.isVoided());
+		Assert.assertTrue(entity.getVoided());
 		Assert.assertEquals(Context.getAuthenticatedUser(), entity.getVoidedBy());
 		Assert.assertEquals(reason, entity.getVoidReason());
 		Date now = new Date();
@@ -103,7 +103,7 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 		Context.flushSession();
 		
 		entity = service.getById(0);
-		Assert.assertTrue(entity.isVoided());
+		Assert.assertTrue(entity.getVoided());
 		
 		service.unvoidEntity(entity);
 		
@@ -111,7 +111,7 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 		
 		entity = service.getById(0);
 		
-		Assert.assertFalse(entity.isVoided());
+		Assert.assertFalse(entity.getVoided());
 		Assert.assertNull(entity.getVoidedBy());
 		Assert.assertNull(entity.getVoidReason());
 		Assert.assertNotNull(entity.getDateVoided());

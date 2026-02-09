@@ -34,6 +34,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -162,7 +163,7 @@ public class BillExemptionDAOImplTest extends BaseModuleContextSensitiveTest {
 		List<BillExemption> serviceExemptions = dao.getExemptionsByItemType(ExemptionType.SERVICE, false);
 		
 		assertNotNull(serviceExemptions);
-		assertTrue(!serviceExemptions.isEmpty());
+		assertFalse(serviceExemptions.isEmpty());
 		assertTrue(
 		    serviceExemptions.stream().allMatch(e -> e.getExemptionType() == ExemptionType.SERVICE && !e.getRetired()));
 	}
@@ -249,7 +250,7 @@ public class BillExemptionDAOImplTest extends BaseModuleContextSensitiveTest {
 		assertNotNull(updated);
 		assertEquals(1, updated.getExemptionId());
 		assertEquals(newName, updated.getName());
-		assertTrue(!originalName.equals(updated.getName()));
+		assertNotEquals(originalName, updated.getName());
 	}
 	
 	/**

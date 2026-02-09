@@ -45,7 +45,7 @@ public class SequentialReceiptNumberGeneratorServiceImpl extends BaseObjectDataS
 	public SequentialReceiptNumberGeneratorModel getOnly() {
 		List<SequentialReceiptNumberGeneratorModel> records = getAll();
 		
-		if (records.size() > 0) {
+		if (!records.isEmpty()) {
 			return records.get(0);
 		} else {
 			return new SequentialReceiptNumberGeneratorModel();

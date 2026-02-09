@@ -18,5 +18,5 @@ package org.openmrs.module.billing.api.base.entity.model;
  */
 public class BaseSimpleAttributeType extends BaseAttributeType implements ISimpleAttributeType {
 	
-	public static final long serialVersionUID = 0L;
+	private static final long serialVersionUID = 0L;
 }

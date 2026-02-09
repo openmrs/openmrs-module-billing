@@ -20,7 +20,7 @@ import org.openmrs.module.billing.api.base.entity.model.BaseInstanceCustomizable
  */
 public class PaymentMode extends BaseInstanceCustomizableType<PaymentModeAttributeType> {
 	
-	public static final long serialVersionUID = 0L;
+	private static final long serialVersionUID = 0L;
 	
 	private Integer sortOrder;
 	

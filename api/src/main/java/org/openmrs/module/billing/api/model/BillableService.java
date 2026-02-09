@@ -21,7 +21,7 @@ import org.openmrs.Concept;
 
 public class BillableService extends BaseChangeableOpenmrsMetadata {
 	
-	public static final long serialVersionUID = 0L;
+	private static final long serialVersionUID = 0L;
 	
 	private int billableServiceId;
 	

@@ -55,7 +55,7 @@ public class MetadataSearcher<E extends OpenmrsMetadata> {
 		
 		List<E> results = service.getByNameFragment(nameFragment, context.getIncludeAll(), pagingInfo);
 		
-		Boolean hasMoreResults = ((long) pagingInfo.getPage() * pagingInfo.getPageSize()) < pagingInfo.getTotalRecordCount();
+		boolean hasMoreResults = ((long) pagingInfo.getPage() * pagingInfo.getPageSize()) < pagingInfo.getTotalRecordCount();
 		return new AlreadyPagedWithLength<E>(context, results, hasMoreResults, pagingInfo.getTotalRecordCount());
 	}
 	

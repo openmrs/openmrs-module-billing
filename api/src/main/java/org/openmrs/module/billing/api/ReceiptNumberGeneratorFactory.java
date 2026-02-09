@@ -97,10 +97,10 @@ public class ReceiptNumberGeneratorFactory {
 			throw new APIException("Could not locate receipt number generator class.", classEx);
 		}
 		catch (InstantiationException instantiationEx) {
-			throw new APIException("Could not instantiate the '" + cls.getClass().getName() + "' class.", instantiationEx);
+			throw new APIException("Could not instantiate the '" + cls.getName() + "' class.", instantiationEx);
 		}
 		catch (IllegalAccessException accessEx) {
-			throw new APIException("Could not access the '" + cls.getClass().getName() + "' class.", accessEx);
+			throw new APIException("Could not access the '" + cls.getName() + "' class.", accessEx);
 		}
 	}
 	
@@ -135,7 +135,7 @@ public class ReceiptNumberGeneratorFactory {
 				}
 				catch (Exception ex) {
 					// We don't care about specific exceptions here.  Just log and ignore the class
-                    log.warn("Could not instantiate the '{}' class.  It will be ignored.", cls.getName());
+					log.warn("Could not instantiate the '{}' class.  It will be ignored.", cls.getName());
 				}
 			}
 		}
@@ -169,7 +169,7 @@ public class ReceiptNumberGeneratorFactory {
 			String propertyValue = Context.getAdministrationService()
 			        .getGlobalProperty(ModuleSettings.SYSTEM_RECEIPT_NUMBER_GENERATOR);
 			if (!StringUtils.isEmpty(propertyValue)) {
-                log.debug("Loading receipt number generator '{}'...", propertyValue);
+				log.debug("Loading receipt number generator '{}'...", propertyValue);
 				result = (Class<? super IReceiptNumberGenerator>) Class.forName(propertyValue);
 				log.debug("Receipt number generator loaded.");
 			} else {

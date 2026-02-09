@@ -25,7 +25,7 @@ public class PagingUtil {
 	}
 	
 	public static PagingInfo getPagingInfoFromContext(RequestContext context) {
-		Integer page = (context.getStartIndex() / context.getLimit()) + 1;
+		int page = (context.getStartIndex() / context.getLimit()) + 1;
 		return new PagingInfo(page, context.getLimit());
 	}
 }

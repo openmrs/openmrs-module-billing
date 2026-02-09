@@ -34,8 +34,8 @@ public class TimesheetUtil {
 	}
 	
 	public static Timesheet getCurrentTimesheet() {
-		Provider provider = null;
-		Timesheet timesheet = null;
+		Provider provider;
+		Timesheet timesheet;
 		ProviderService providerService = Context.getProviderService();
 		try {
 			provider = ProviderUtil.getCurrentProvider(providerService);
@@ -49,7 +49,7 @@ public class TimesheetUtil {
 			timesheet = tsService.getCurrentTimesheet(provider);
 		}
 		catch (Exception e) {
-            log.error("Error occured while trying to get the current timesheet{}", String.valueOf(e));
+			log.error("Error occured while trying to get the current timesheet{}", String.valueOf(e));
 			return null;
 		}
 		
@@ -64,7 +64,7 @@ public class TimesheetUtil {
 			        .parseBoolean(adminService.getGlobalProperty(ModuleSettings.TIMESHEET_REQUIRED_PROPERTY));
 		}
 		catch (Exception e) {
-            log.error("Error occured while trying to parse the boolean value{}", String.valueOf(e));
+			log.error("Error occured while trying to parse the boolean value{}", String.valueOf(e));
 			timesheetRequired = false;
 		}
 		return timesheetRequired;

@@ -328,10 +328,8 @@ public abstract class BaseObjectDataServiceImpl<E extends OpenmrsObject, P exten
 				
 				CriteriaImplWrapper impl = new CriteriaImplWrapper(criteria);
 				//CriteriaImpl impl = Utility.as(CriteriaImpl.class, criteria);
-				if (impl != null) {
-					projection = impl.getProjection();
-					transformer = impl.getResultTransformer();
-				}
+				projection = impl.getProjection();
+				transformer = impl.getResultTransformer();
 				
 				try {
 					criteria.setProjection(Projections.rowCount());

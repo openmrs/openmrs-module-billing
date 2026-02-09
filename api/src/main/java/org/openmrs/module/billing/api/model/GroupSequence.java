@@ -20,7 +20,7 @@ import org.openmrs.BaseOpenmrsObject;
  */
 public class GroupSequence extends BaseOpenmrsObject {
 	
-	public static final long serialVersionUID = 0L;
+	private static final long serialVersionUID = 0L;
 	
 	private Integer groupSequenceId;
 	

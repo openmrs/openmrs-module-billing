@@ -30,6 +30,8 @@ import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
 import org.springframework.aop.AfterReturningAdvice;
 
+import javax.annotation.Nullable;
+import javax.validation.constraints.Null;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -190,7 +192,7 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 				if (stockitem != null && stockitem.getPurchasePrice() != null) {
 					billLineItem.setPrice(stockitem.getPurchasePrice());
 				} else {
-					billLineItem.setPrice(new BigDecimal(0.0));
+					billLineItem.setPrice(BigDecimal.ZERO);
 				}
 			}
 			billLineItem.setQuantity(quantity);

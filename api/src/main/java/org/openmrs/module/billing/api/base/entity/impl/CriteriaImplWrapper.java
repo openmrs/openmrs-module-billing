@@ -48,7 +48,7 @@ public class CriteriaImplWrapper {
 		Class<?> cls;
 		
 		try {
-            log.debug("Hibernate version: {}", Version.getVersionString());
+			log.debug("Hibernate version: {}", Version.getVersionString());
 			if (org.hibernate.Version.getVersionString().startsWith("3.")) {
 				cls = Class.forName(VERSION_3_CRITERIA_CLASS);
 			} else {
@@ -59,14 +59,12 @@ public class CriteriaImplWrapper {
 			getResultTransformerMethod = cls.getMethod(RESULT_TRANSFORMER_METHOD_NAME);
 		}
 		catch (ClassNotFoundException ex) {
-			cls = null;
 			getProjectionMethod = null;
 			getResultTransformerMethod = null;
 			
 			log.error("Could not determine hibernate version.", ex);
 		}
 		catch (NoSuchMethodException e) {
-			cls = null;
 			getProjectionMethod = null;
 			getResultTransformerMethod = null;
 			

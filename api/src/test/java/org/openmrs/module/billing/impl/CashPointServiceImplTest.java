@@ -121,7 +121,7 @@ public class CashPointServiceImplTest extends BaseModuleContextSensitiveTest {
 	@Test
 	public void getCashPointsByLocationAndName_shouldThrowIllegalArgumentExceptionIfNameIsTooLong() {
 		Location location = locationService.getLocation(0);
-		String longName = RandomStringUtils.randomAlphanumeric(256);
+		String longName = RandomStringUtils.insecure().nextAlphanumeric(256);
 		assertThrows(IllegalArgumentException.class,
 		    () -> cashPointService.getCashPointsByLocationAndName(location, longName, false));
 	}

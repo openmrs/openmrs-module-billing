@@ -66,8 +66,7 @@ public class Utils {
 	 * @return
 	 */
 	public static JsonNodeFactory getJsonNodeFactory() {
-		final JsonNodeFactory factory = JsonNodeFactory.instance;
-		return factory;
+		return JsonNodeFactory.instance;
 	}
 	
 	/**
@@ -77,19 +76,18 @@ public class Utils {
 	 * @return
 	 */
 	public static String fetchRequestBody(BufferedReader reader) {
-		String requestBodyJsonStr = "";
+		StringBuilder requestBodyJsonStr = new StringBuilder();
 		try {
 			
-			BufferedReader br = new BufferedReader(reader);
-			String output = "";
+			String output;
 			while ((output = reader.readLine()) != null) {
-				requestBodyJsonStr += output;
+				requestBodyJsonStr.append(output);
 			}
 		}
 		catch (IOException e) {
 			
 		}
-		return requestBodyJsonStr;
+		return requestBodyJsonStr.toString();
 	}
 	
 	/**
@@ -122,7 +120,7 @@ public class Utils {
 	public static Encounter lastEncounter(Patient patient, EncounterType type) {
 		List<Encounter> encounters = Context.getEncounterService().getEncounters(patient, null, null, null, null,
 		    Collections.singleton(type), null, null, null, false);
-		return encounters.size() > 0 ? encounters.get(encounters.size() - 1) : null;
+		return !encounters.isEmpty() ? encounters.get(encounters.size() - 1) : null;
 	}
 	
 	/**
@@ -134,7 +132,7 @@ public class Utils {
 	public static Obs getLatestObs(Patient patient, String conceptIdentifier) {
 		Concept concept = Context.getConceptService().getConceptByUuid(conceptIdentifier);
 		List<Obs> obs = Context.getObsService().getObservationsByPersonAndConcept(patient, concept);
-		if (obs.size() > 0) {
+		if (!obs.isEmpty()) {
 			// these are in reverse chronological order
 			return obs.get(0);
 		}
@@ -206,7 +204,7 @@ public class Utils {
 		catch (KeyStoreException e) {
 			throw new RuntimeException(e);
 		}
-		SSLContext sslContext = null;
+		SSLContext sslContext;
 		try {
 			sslContext = builder.build();
 		}
@@ -216,7 +214,7 @@ public class Utils {
 		catch (KeyManagementException e) {
 			throw new RuntimeException(e);
 		}
-		SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext, new X509HostnameVerifier() {
+		return new SSLConnectionSocketFactory(sslContext, new X509HostnameVerifier() {
 			
 			@Override
 			public void verify(String host, SSLSocket ssl) {
@@ -235,7 +233,6 @@ public class Utils {
 				return true;
 			}
 		});
-		return sslsf;
 	}
 	
 	/**
@@ -244,9 +241,8 @@ public class Utils {
 	 * @return
 	 */
 	public static SSLConnectionSocketFactory sslConnectionSocketFactoryDefault() {
-		SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(SSLContexts.createDefault(),
-		        new String[] { "TLSv1.2" }, null, SSLConnectionSocketFactory.getDefaultHostnameVerifier());
-		return sslsf;
+		return new SSLConnectionSocketFactory(SSLContexts.createDefault(), new String[] { "TLSv1.2" }, null,
+		        SSLConnectionSocketFactory.getDefaultHostnameVerifier());
 	}
 	
 }

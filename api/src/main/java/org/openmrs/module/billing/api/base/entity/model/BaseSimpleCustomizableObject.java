@@ -22,5 +22,5 @@ public abstract class BaseSimpleCustomizableObject<TAttribute extends ISimpleAtt
 		extends BaseCustomizableObject<TAttribute>
 		implements ISimpleCustomizable<TAttribute> {
 // @formatter:on
-	public static final long serialVersionUID = 0L;
+	private static final long serialVersionUID = 0L;
 }

@@ -27,7 +27,7 @@ public abstract class BaseAttributeMetadata<
 		extends BaseSerializableOpenmrsMetadata
 		implements IAttribute<TOwner, TAttributeType> {
 // @formatter:on
-	public static final long serialVersionUID = 0L;
+	private static final long serialVersionUID = 0L;
 	
 	private Integer attributeId;
 	

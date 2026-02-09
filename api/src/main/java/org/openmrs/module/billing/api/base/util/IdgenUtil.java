@@ -46,14 +46,14 @@ public class IdgenUtil {
 		
 		IdentifierSource source = null;
 		String property = administrationService.getGlobalProperty(propertyName);
-		Integer sourceId;
+		int sourceId;
 		try {
 			sourceId = Integer.parseInt(property);
 			
 			source = service.getIdentifierSource(sourceId);
 		}
 		catch (Exception ex) {
-            log.warn("Could not convert '{}' into an integer.", property);
+			log.warn("Could not convert '{}' into an integer.", property);
 		}
 		
 		return source;

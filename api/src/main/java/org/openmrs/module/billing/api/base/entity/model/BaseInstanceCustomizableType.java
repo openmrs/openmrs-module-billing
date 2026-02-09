@@ -26,7 +26,7 @@ import org.openmrs.api.APIException;
 public abstract class BaseInstanceCustomizableType<TAttributeType extends IInstanceAttributeType<?>>
         extends BaseSerializableOpenmrsMetadata implements IInstanceType<TAttributeType> {
 // @formatter:on
-	public static final long serialVersionUID = 0L;
+	private static final long serialVersionUID = 0L;
 	
 	private Integer customizableInstanceTypeId;
 	

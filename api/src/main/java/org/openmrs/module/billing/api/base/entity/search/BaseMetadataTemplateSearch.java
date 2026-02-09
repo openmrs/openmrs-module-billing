@@ -110,8 +110,8 @@ public class BaseMetadataTemplateSearch<T extends OpenmrsMetadata> extends BaseA
 			if (!includeRetired) {
 				criteria.add(Restrictions.eq("retired", false));
 			}
-		} else if (t.isRetired() != null) {
-			criteria.add(Restrictions.eq("retired", t.isRetired()));
+		} else if (t.getRetired() != null) {
+			criteria.add(Restrictions.eq("retired", t.getRetired()));
 		}
 		
 		if (t.getRetiredBy() != null) {

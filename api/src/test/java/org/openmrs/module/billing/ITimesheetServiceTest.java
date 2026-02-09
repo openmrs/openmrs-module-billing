@@ -188,7 +188,8 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 	@Test
 	public void getTimesheetsByDate_shouldReturnEmptyListIfThereAreNoTimesheetsForDate() {
 		Provider cashier = providerService.getProvider(0);
-		List<Timesheet> results = service.getTimesheetsByDate(cashier, new GregorianCalendar(2011, 0, 1).getTime());
+		List<Timesheet> results = service.getTimesheetsByDate(cashier,
+		    new GregorianCalendar(2011, Calendar.JANUARY, 1).getTime());
 		
 		Assert.assertNotNull(results);
 		Assert.assertEquals(0, results.size());
@@ -201,7 +202,8 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 	@Test
 	public void getTimesheetsByDate_shouldReturnTimesheetsThatStartAndEndOnDate() {
 		Provider cashier = providerService.getProvider(0);
-		List<Timesheet> results = service.getTimesheetsByDate(cashier, new GregorianCalendar(2011, 1, 10).getTime());
+		List<Timesheet> results = service.getTimesheetsByDate(cashier,
+		    new GregorianCalendar(2011, Calendar.FEBRUARY, 10).getTime());
 		
 		Assert.assertNotNull(results);
 		Assert.assertEquals(1, results.size());
@@ -215,7 +217,8 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 	@Test
 	public void getTimesheetsByDate_shouldReturnTimesheetsThatStartOnDateAndEndOnDifferentDate() {
 		Provider cashier = providerService.getProvider(0);
-		List<Timesheet> results = service.getTimesheetsByDate(cashier, new GregorianCalendar(2011, 1, 11).getTime());
+		List<Timesheet> results = service.getTimesheetsByDate(cashier,
+		    new GregorianCalendar(2011, Calendar.FEBRUARY, 11).getTime());
 		
 		Assert.assertNotNull(results);
 		Assert.assertEquals(1, results.size());
@@ -229,7 +232,8 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 	@Test
 	public void getTimesheetsByDate_shouldReturnTimesheetThatStartOnDifferentDateAndEndOnDate() {
 		Provider cashier = providerService.getProvider(0);
-		List<Timesheet> results = service.getTimesheetsByDate(cashier, new GregorianCalendar(2011, 1, 14).getTime());
+		List<Timesheet> results = service.getTimesheetsByDate(cashier,
+		    new GregorianCalendar(2011, Calendar.FEBRUARY, 14).getTime());
 		
 		Assert.assertNotNull(results);
 		Assert.assertEquals(1, results.size());
@@ -243,7 +247,8 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 	@Test
 	public void getTimesheetsByDate_shouldReturnTimesheetsThatStartBeforeDateButEndAfterDate() {
 		Provider cashier = providerService.getProvider(0);
-		List<Timesheet> results = service.getTimesheetsByDate(cashier, new GregorianCalendar(2011, 1, 16).getTime());
+		List<Timesheet> results = service.getTimesheetsByDate(cashier,
+		    new GregorianCalendar(2011, Calendar.FEBRUARY, 16).getTime());
 		
 		Assert.assertNotNull(results);
 		Assert.assertEquals(1, results.size());
@@ -257,7 +262,8 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 	@Test
 	public void getTimesheetsByDate_shouldReturnTimesheetsThatStartBeforeDateAndHaveNotEnded() {
 		Provider cashier = providerService.getProvider(0);
-		List<Timesheet> results = service.getTimesheetsByDate(cashier, new GregorianCalendar(2011, 1, 20).getTime());
+		List<Timesheet> results = service.getTimesheetsByDate(cashier,
+		    new GregorianCalendar(2011, Calendar.FEBRUARY, 20).getTime());
 		
 		Assert.assertNotNull(results);
 		Assert.assertEquals(1, results.size());

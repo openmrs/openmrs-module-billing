@@ -26,5 +26,5 @@ public abstract class BaseInstanceAttributeMetadata<
 		extends BaseAttributeMetadata<TOwner, TAttributeType>
 		implements IInstanceAttribute<TOwner, TInstanceType, TAttributeType> {
 // @formatter:on
-	public static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 }

@@ -108,7 +108,7 @@ public class CashierOptionsServiceGpImpl implements ICashierOptionsService {
 			}
 			catch (NumberFormatException e) {
 				/* Leave unset; must be handled, e.g. in ReceiptController */
-                log.error("Error parsing ReceiptReportId <{}>", receiptReportIdProperty, e);
+				log.error("Error parsing ReceiptReportId <{}>", receiptReportIdProperty, e);
 			}
 		}
 	}
