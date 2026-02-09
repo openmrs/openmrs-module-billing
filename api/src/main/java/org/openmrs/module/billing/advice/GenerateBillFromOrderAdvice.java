@@ -192,7 +192,7 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 				if (stockitem != null && stockitem.getPurchasePrice() != null) {
 					billLineItem.setPrice(stockitem.getPurchasePrice());
 				} else {
-					billLineItem.setPrice(new BigDecimal("0.0"));
+					billLineItem.setPrice(BigDecimal.ZERO);
 				}
 			}
 			billLineItem.setQuantity(quantity);

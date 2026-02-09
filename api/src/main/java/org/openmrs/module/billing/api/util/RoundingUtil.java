@@ -92,12 +92,16 @@ public class RoundingUtil {
 	public static void handleRoundingLineItem(Bill bill) {
 		ICashierOptionsService cashOptService = Context.getService(ICashierOptionsService.class);
 		CashierOptions options = cashOptService.getOptions();
-		
+
+		if (options.getRoundToNearest() == 0) {
+			return;
+		}
+
 		if (options.getRoundingItemUuid() == null) {
 			throw new APIException(
 			        "No rounding item specified in options. This must be set in order to use rounding for bill totals.");
 		}
-		
+
 		// Get rounding item
 		StockManagementService itemService = Context.getService(StockManagementService.class);
 		StockItem roundingItem = itemService.getStockItemByUuid(options.getRoundingItemUuid());
