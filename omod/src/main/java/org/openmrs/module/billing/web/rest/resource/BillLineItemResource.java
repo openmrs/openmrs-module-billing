@@ -164,15 +164,7 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
 	}
 	
 	@Override
-	protected void delete(BillLineItem delegate, String reason, RequestContext context) {
-		if (delegate == null) {
-			throw new IllegalArgumentException("The line item to void cannot be null.");
-		}
-		if (StringUtils.isEmpty(reason)) {
-			throw new IllegalArgumentException("The reason to void must be defined.");
-		}
-		
-		BillLineItemService billLineItemService = Context.getService(BillLineItemService.class);
-		billLineItemService.voidBillLineItem(delegate.getUuid(), reason);
+	protected void delete(BillLineItem lineItem, String reason, RequestContext context) {
+		Context.getService(BillLineItemService.class).voidBillLineItem(lineItem, reason);
 	}
 }

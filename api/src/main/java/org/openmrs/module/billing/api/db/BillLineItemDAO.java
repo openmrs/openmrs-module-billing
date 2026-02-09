@@ -32,4 +32,16 @@ public interface BillLineItemDAO {
 	@Nullable
 	BillLineItem getBillLineItemByUuid(@Nonnull String uuid);
 	
+	/**
+	 * Persists a bill line item to the database.
+	 * <p>
+	 * If the bill line item has no ID, it will be created as a new record. If it has an ID, the
+	 * existing record will be updated.
+	 * </p>
+	 *
+	 * @param billLineItem the bill line item to save (must not be null)
+	 * @return the saved bill line item with updated metadata (timestamps, IDs, etc.)
+	 */
+	BillLineItem saveBillLineItem(@Nonnull BillLineItem billLineItem);
+	
 }
