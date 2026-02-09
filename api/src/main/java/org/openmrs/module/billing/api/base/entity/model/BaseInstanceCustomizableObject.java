@@ -32,7 +32,7 @@ public abstract class BaseInstanceCustomizableObject<
 		extends BaseCustomizableObject<TAttribute>
 		implements IInstanceCustomizable<TInstanceType, TAttribute> {
 // @formatter:on
-	public static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 	
 	private TInstanceType instanceType;
 	
@@ -68,7 +68,7 @@ public abstract class BaseInstanceCustomizableObject<
 		Set<TA> ret = new HashSet<TA>();
 		if (instance.getAttributes() != null) {
 			for (TA attr : instance.getAttributes()) {
-				if (!attr.getAttributeType().isRetired()) {
+				if (!attr.getAttributeType().getRetired()) {
 					ret.add(attr);
 				}
 			}
@@ -83,7 +83,7 @@ public abstract class BaseInstanceCustomizableObject<
 		Set<TA> ret = new HashSet<TA>();
 		if (instance.getAttributes() != null) {
 			for (TA attr : instance.getAttributes()) {
-				if (attr.getAttributeType().equals(ofType) && !attr.getAttributeType().isRetired()) {
+				if (attr.getAttributeType().equals(ofType) && !attr.getAttributeType().getRetired()) {
 					ret.add(attr);
 				}
 			}

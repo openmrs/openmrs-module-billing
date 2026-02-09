@@ -20,7 +20,7 @@ import org.openmrs.module.stockmanagement.api.model.StockItem;
 
 public class CashierItemPrice extends BaseChangeableOpenmrsMetadata {
 	
-	public static final long serialVersionUID = 0L;
+	private static final long serialVersionUID = 0L;
 	
 	private Integer itemPriceId;
 	

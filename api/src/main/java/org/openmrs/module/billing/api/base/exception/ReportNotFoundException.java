@@ -20,7 +20,7 @@ import org.openmrs.api.APIException;
  */
 public class ReportNotFoundException extends APIException {
 	
-	public static final long serialVersionUID = 22323L;
+	private static final long serialVersionUID = 22323L;
 	
 	public ReportNotFoundException() {
 		super();

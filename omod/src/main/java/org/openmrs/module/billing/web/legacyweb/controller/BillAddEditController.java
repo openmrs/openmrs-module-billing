@@ -56,7 +56,7 @@ public class BillAddEditController {
 	@RequestMapping(method = RequestMethod.GET)
 	public String bill(ModelMap model, @RequestParam(value = "billUuid", required = false) String billUuid,
 	        @RequestParam(value = "patientUuid", required = false) String patientUuid, HttpServletRequest request) {
-		Timesheet timesheet = null;
+		Timesheet timesheet;
 		try {
 			timesheet = TimesheetUtil.getCurrentTimesheet();
 		}
@@ -196,7 +196,7 @@ public class BillAddEditController {
 	}
 	
 	private String encodeRequestQuery(HttpServletRequest request) {
-		String requestQueryParam = "";
+		String requestQueryParam;
 		requestQueryParam = UriUtils.encodeQuery("?" + request.getQueryString(), "UTF-8");
 		
 		return requestQueryParam;

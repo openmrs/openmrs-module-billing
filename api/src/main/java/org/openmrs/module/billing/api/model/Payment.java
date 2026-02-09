@@ -30,7 +30,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class Payment extends BaseInstanceCustomizableData<PaymentMode, PaymentAttribute> {
 	
-	public static final long serialVersionUID = 0L;
+	private static final long serialVersionUID = 0L;
 	
 	private Integer paymentId;
 	

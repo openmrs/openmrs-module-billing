@@ -102,8 +102,7 @@ public class CashierItemPriceResource extends MetadataDelegatingCrudResource<Cas
 	public void setPrice(CashierItemPrice instance, Object price) {
 		double amount;
 		if (price instanceof Integer) {
-			int rawAmount = (Integer) price;
-			amount = rawAmount;
+            amount = (int) (Integer) price;
 			instance.setPrice(BigDecimal.valueOf(amount));
 		} else {
 			instance.setPrice(BigDecimal.valueOf((Double) price));

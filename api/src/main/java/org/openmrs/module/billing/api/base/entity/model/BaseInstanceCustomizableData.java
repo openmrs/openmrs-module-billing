@@ -23,7 +23,7 @@ package org.openmrs.module.billing.api.base.entity.model;
 public abstract class BaseInstanceCustomizableData<TInstanceType extends IInstanceType<?>, TAttribute extends IInstanceAttribute<?, ?, ?>> extends BaseCustomizableData<TAttribute> implements IInstanceCustomizable<TInstanceType, TAttribute> {
 	
 	// @formatter:on
-	public static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 	
 	private TInstanceType instanceType;
 	

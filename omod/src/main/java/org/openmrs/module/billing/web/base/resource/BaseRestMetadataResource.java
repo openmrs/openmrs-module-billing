@@ -196,7 +196,7 @@ public abstract class BaseRestMetadataResource<E extends OpenmrsMetadata> extend
 	 */
 	@PropertyGetter("retired")
 	public Boolean getRetired(E entity) {
-		return entity.isRetired();
+		return entity.getRetired();
 	}
 	
 	/**

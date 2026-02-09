@@ -18,16 +18,13 @@ package org.openmrs.module.billing.api.model;
  */
 public enum BillStatus {
 	
-	PENDING(0),
-	POSTED(4),
-	PAID(1),
-	CANCELLED(2),
-	ADJUSTED(3),
-	EXEMPTED(5);
+	PENDING(),
+	POSTED(),
+	PAID(),
+	CANCELLED(),
+	ADJUSTED(),
+	EXEMPTED();
 	
-	private final int value;
-	
-	BillStatus(int value) {
-		this.value = value;
+	BillStatus() {
 	}
 }

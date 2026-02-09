@@ -232,8 +232,7 @@ public class ICashPointServiceTest extends BaseModuleContextSensitiveTest {
 	 */
 	@Test
 	public void getCashPointsByLocation_shouldThrowIllegalArgumentExceptionIfLocationIsNull() {
-		Location location = null;
-		assertThrows(IllegalArgumentException.class, () -> service.getCashPointsByLocation(location, false));
+		assertThrows(IllegalArgumentException.class, () -> service.getCashPointsByLocation(null, false));
 	}
 	
 	/**
@@ -241,7 +240,6 @@ public class ICashPointServiceTest extends BaseModuleContextSensitiveTest {
 	 */
 	@Test
 	public void getCashPointsByLocationAndName_shouldThrowIllegalArgumentExceptionIfLocationIsNull() {
-		Location location = null;
-		assertThrows(IllegalArgumentException.class, () -> service.getCashPointsByLocationAndName(location, "Test", false));
+		assertThrows(IllegalArgumentException.class, () -> service.getCashPointsByLocationAndName(null, "Test", false));
 	}
 }

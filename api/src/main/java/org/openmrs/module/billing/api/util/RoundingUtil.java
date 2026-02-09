@@ -92,9 +92,6 @@ public class RoundingUtil {
 	public static void handleRoundingLineItem(Bill bill) {
 		ICashierOptionsService cashOptService = Context.getService(ICashierOptionsService.class);
 		CashierOptions options = cashOptService.getOptions();
-		if (options.getRoundToNearest().equals(BigDecimal.ZERO)) {
-			return;
-		}
 		
 		if (options.getRoundingItemUuid() == null) {
 			throw new APIException(

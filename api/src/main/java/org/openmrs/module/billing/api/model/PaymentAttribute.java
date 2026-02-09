@@ -20,5 +20,5 @@ import org.openmrs.module.billing.api.base.entity.model.BaseInstanceAttributeDat
  */
 public class PaymentAttribute extends BaseInstanceAttributeData<Payment, PaymentMode, PaymentModeAttributeType> {
 	
-	public static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 }

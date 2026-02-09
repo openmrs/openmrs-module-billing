@@ -1,6 +1,7 @@
 package org.openmrs.module.billing.api.model;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -214,7 +215,7 @@ public class BillTest {
 		assertEquals(BillStatus.PAID, lineItem1.getPaymentStatus());
 		assertEquals(BillStatus.PAID, lineItem2.getPaymentStatus());
 		// Voided line items should not be updated
-		assertEquals(null, voidedLineItem.getPaymentStatus());
+		assertNull(voidedLineItem.getPaymentStatus());
 	}
 	
 	@Test

@@ -97,7 +97,7 @@ public class PrivilegeUtil {
 	public static void requirePrivileges(User user, String privileges) {
 		boolean hasPrivileges = hasPrivileges(user, privileges);
 		if (!hasPrivileges) {
-            log.error("Privileges are missing. The required privilege is <{}>", privileges);
+			log.error("Privileges are missing. The required privilege is <{}>", privileges);
 			throw new PrivilegeException();
 		}
 	}

@@ -36,7 +36,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 		Assert.assertEquals(expected.getDateRetired(), actual.getDateRetired());
 		Assert.assertEquals(expected.getDescription(), actual.getDescription());
 		Assert.assertEquals(expected.getName(), actual.getName());
-		Assert.assertEquals(expected.isRetired(), actual.isRetired());
+		Assert.assertEquals(expected.getRetired(), actual.getRetired());
 		Assert.assertEquals(expected.getRetiredBy(), actual.getRetiredBy());
 		Assert.assertEquals(expected.getRetireReason(), actual.getRetireReason());
 	}
@@ -62,7 +62,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 		
 		entity = service.getById(entity.getId());
 		
-		Assert.assertTrue(entity.isRetired());
+		Assert.assertTrue(entity.getRetired());
 		Assert.assertEquals(Context.getAuthenticatedUser(), entity.getRetiredBy());
 		Assert.assertEquals(reason, entity.getRetireReason());
 		Date now = new Date();
@@ -114,13 +114,13 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 		
 		entity = service.getById(entity.getId());
 		Date dateRetired = entity.getDateRetired();
-		Assert.assertTrue(entity.isRetired());
+		Assert.assertTrue(entity.getRetired());
 		service.unretire(entity);
 		
 		Context.flushSession();
 		
 		entity = service.getById(entity.getId());
-		Assert.assertFalse(entity.isRetired());
+		Assert.assertFalse(entity.getRetired());
 		Assert.assertNull(entity.getRetiredBy());
 		Assert.assertNull(entity.getRetireReason());
 		Assert.assertEquals(dateRetired, entity.getDateRetired());
@@ -266,7 +266,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 		
 		// Search using the first four characters in the name
 		List<E> entities = service.getByNameFragment(entity.getName(), false);
-		Assert.assertTrue(entities.size() > 0);
+		Assert.assertFalse(entities.isEmpty());
 		
 		// Make sure the entity is in the results
 		E found = null;

@@ -78,13 +78,9 @@ public class CashierOptionsServiceGpImpl implements ICashierOptionsService {
 							//							roundingItem = Context.getService(IItemDataService.class).getById(itemId);
 						}
 						catch (Exception e) {
-                            log.error("Did not find rounding item by ID with ID <{}>", roundingItemId, e);
+							log.error("Did not find rounding item by ID with ID <{}>", roundingItemId, e);
 						}
-						if (roundingItem != null) {
-							options.setRoundingItemUuid(roundingItem.getUuid());
-						} else {
-							log.error("Rounding item is NULL. Check your ID");
-						}
+						options.setRoundingItemUuid(roundingItem.getUuid());
 					}
 				}
 			}
@@ -108,7 +104,7 @@ public class CashierOptionsServiceGpImpl implements ICashierOptionsService {
 			}
 			catch (NumberFormatException e) {
 				/* Leave unset; must be handled, e.g. in ReceiptController */
-                log.error("Error parsing ReceiptReportId <{}>", receiptReportIdProperty, e);
+				log.error("Error parsing ReceiptReportId <{}>", receiptReportIdProperty, e);
 			}
 		}
 	}

@@ -27,7 +27,7 @@ import org.openmrs.module.webservices.rest.web.resource.impl.AlreadyPaged;
  */
 public class AlreadyPagedWithLength<T> extends AlreadyPaged<T> {
 	
-	private long length = 0;
+	private final long length;
 	
 	public AlreadyPagedWithLength(RequestContext context, List<T> results, boolean hasMoreResults, long length) {
 		super(context, results, hasMoreResults);

@@ -76,15 +76,11 @@ public class CashierOptions {
 	 */
 	public enum RoundingMode {
 		
-		FLOOR(1),
-		MID(2),
-		CEILING(3);
+		FLOOR(),
+		MID(),
+		CEILING();
 		
-		@SuppressWarnings("unused")
-		private final int value;
-		
-		RoundingMode(int value) {
-			this.value = value;
+		RoundingMode() {
 		}
 	}
 }

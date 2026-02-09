@@ -28,7 +28,7 @@ public abstract class BaseCustomizableData<TAttribute extends IAttribute<?, ?>>
 		extends BaseSerializableOpenmrsData
 		implements ICustomizable<TAttribute> {
 // @formatter:on
-	public static final long serialVersionUID = 0L;
+	private static final long serialVersionUID = 0L;
 	
 	private Set<TAttribute> attributes = new HashSet<>();
 	
@@ -61,7 +61,7 @@ public abstract class BaseCustomizableData<TAttribute extends IAttribute<?, ?>>
 		if (getAttributes() != null) {
 			for (TAttribute attribute : getAttributes()) {
 				if ((ofType == null || attribute.getAttributeType().equals(ofType))
-				        && !attribute.getAttributeType().isRetired()) {
+				        && !attribute.getAttributeType().getRetired()) {
 					result.add(attribute);
 				}
 			}

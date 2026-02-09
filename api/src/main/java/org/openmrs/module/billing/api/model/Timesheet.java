@@ -23,7 +23,7 @@ import org.openmrs.Provider;
  */
 public class Timesheet extends BaseOpenmrsData {
 	
-	public static final long serialVersionUID = 0L;
+	private static final long serialVersionUID = 0L;
 	
 	private Integer timesheetId;
 	

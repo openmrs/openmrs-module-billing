@@ -26,7 +26,7 @@ public abstract class BaseInstanceCustomizableMetadata<
 		extends BaseCustomizableMetadata<TAttribute>
 		implements IInstanceCustomizable<TInstanceType, TAttribute> {
 // @formatter:on
-	public static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 	
 	private TInstanceType instanceType;
 	

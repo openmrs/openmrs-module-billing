@@ -24,5 +24,5 @@ public abstract class BaseSimpleAttributeData<
 		extends BaseAttributeData<TOwner, TAttributeType>
 		implements ISimpleAttribute<TOwner, TAttributeType> {
 // @formatter:on
-	public static final long serialVersionUID = 0L;
+	private static final long serialVersionUID = 0L;
 }
