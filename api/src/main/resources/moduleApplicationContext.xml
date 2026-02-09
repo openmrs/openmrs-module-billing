@@ -209,6 +209,7 @@
 		<property name="target">
 			<bean class="org.openmrs.module.billing.api.impl.BillLineItemServiceImpl">
 				<property name="billLineItemDAO" ref="billLineItemDAO"/>
+				<property name="billLineItemValidator" ref="billLineItemValidator"/>
 			</bean>
 		</property>
 		<property name="preInterceptors" ref="serviceInterceptors"/>
@@ -259,6 +260,8 @@
 	</bean>
 
 	<bean id="billValidator" class="org.openmrs.module.billing.validator.BillValidator"/>
+
+	<bean id="billLineItemValidator" class="org.openmrs.module.billing.validator.BillLineItemValidator"/>
 
 	<bean id="ruleEngine"
 		  class="org.openmrs.module.billing.api.evaluator.ExemptionRuleEngine">

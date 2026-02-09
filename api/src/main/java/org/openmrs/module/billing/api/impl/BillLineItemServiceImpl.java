@@ -14,12 +14,10 @@
 package org.openmrs.module.billing.api.impl;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
-import org.openmrs.User;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.billing.api.BillLineItemService;
@@ -27,12 +25,18 @@ import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.db.BillLineItemDAO;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
+import org.openmrs.module.billing.validator.BillLineItemValidator;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
 
 public class BillLineItemServiceImpl extends BaseOpenmrsService implements BillLineItemService {
 	
 	@Setter
 	private BillLineItemDAO billLineItemDAO;
+	
+	@Setter
+	private BillLineItemValidator billLineItemValidator;
 	
 	@Override
 	@Transactional(readOnly = true)
@@ -58,11 +62,13 @@ public class BillLineItemServiceImpl extends BaseOpenmrsService implements BillL
 	@Override
 	@Transactional
 	public Bill voidBillLineItem(String lineItemUuid, String voidReason) {
-		if (StringUtils.isEmpty(lineItemUuid)) {
-			throw new IllegalArgumentException("lineItemUuid cannot be null or empty");
-		}
-		if (StringUtils.isEmpty(voidReason)) {
-			throw new IllegalArgumentException("voidReason cannot be null or empty");
+		BillLineItemValidator.VoidRequest request = new BillLineItemValidator.VoidRequest(lineItemUuid, voidReason);
+		BindingResult errors = new BeanPropertyBindingResult(request, "request");
+		billLineItemValidator.validate(request, errors);
+		if (errors.hasErrors()) {
+			String message = errors.getFieldError() != null ? errors.getFieldError().getDefaultMessage()
+			        : (errors.getGlobalError() != null ? errors.getGlobalError().getDefaultMessage() : "Validation failed");
+			throw new IllegalArgumentException(message);
 		}
 		
 		BillLineItem lineItem = getBillLineItemByUuid(lineItemUuid);
@@ -75,37 +81,11 @@ public class BillLineItemServiceImpl extends BaseOpenmrsService implements BillL
 			throw new IllegalStateException("Cannot void a line item without an associated bill.");
 		}
 		
-		// Reload the bill to ensure we have a fully managed entity with all relationships loaded
 		BillService billService = Context.getService(BillService.class);
-		Bill managedBill = billService.getBill(bill.getId());
-		if (managedBill == null) {
-			throw new IllegalStateException("Cannot find the bill associated with this line item.");
-		}
 		
-		// Find the line item in the bill's line items collection
-		BillLineItem lineItemToVoid = null;
-		if (managedBill.getLineItems() != null) {
-			for (BillLineItem item : managedBill.getLineItems()) {
-				if (item.getUuid().equals(lineItemUuid)) {
-					lineItemToVoid = item;
-					break;
-				}
-			}
-		}
+		lineItem.setVoided(true);
+		lineItem.setVoidReason(voidReason);
 		
-		if (lineItemToVoid == null) {
-			throw new IllegalStateException("Line item not found in the bill's line items collection.");
-		}
-		
-		// Set void properties on the line item
-		User user = Context.getAuthenticatedUser();
-		Date dateVoided = new Date();
-		lineItemToVoid.setVoided(true);
-		lineItemToVoid.setVoidReason(voidReason);
-		lineItemToVoid.setVoidedBy(user);
-		lineItemToVoid.setDateVoided(dateVoided);
-		
-		// Save the bill, which will persist the voided line item
-		return billService.saveBill(managedBill);
+		return billService.saveBill(bill);
 	}
 }
