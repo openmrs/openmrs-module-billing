@@ -13,6 +13,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillLineItemService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
+import org.openmrs.module.billing.api.model.Payment;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
@@ -36,6 +37,7 @@ public class BillValidator implements Validator {
 			}
 			
 			validateLineItemsNotModified(bill, errors);
+			validatePaymentsHaveCashier(bill, errors);
 		}
 	}
 	
@@ -78,6 +80,25 @@ public class BillValidator implements Validator {
 			boolean hasNewLineItems = bill.getLineItems().stream().anyMatch(item -> item.getId() == null);
 			if (hasNewLineItems) {
 				errors.reject("billing.error.lineItemsCannotBeAddedToNonPendingBill");
+			}
+		}
+	}
+	
+	/**
+	 * Validates that all non-voided payments on the bill have an associated cashier (Provider). This
+	 * ensures accountability by tracking which cashier processed each payment.
+	 *
+	 * @param bill the bill whose payments to validate
+	 * @param errors the errors object to add validation errors to
+	 */
+	private void validatePaymentsHaveCashier(Bill bill, Errors errors) {
+		if (bill.getPayments() == null) {
+			return;
+		}
+		for (Payment payment : bill.getPayments()) {
+			if (payment != null && !payment.getVoided() && payment.getCashier() == null) {
+				errors.reject("billing.payment.error.cashierRequired", "Each payment must have an associated cashier");
+				return;
 			}
 		}
 	}

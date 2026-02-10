@@ -200,6 +200,8 @@
 		<property name="amount" type="java.math.BigDecimal" column="amount" not-null="true"/>
 		<property name="amountTendered" type="java.math.BigDecimal" column="amount_tendered" not-null="true"/>
 
+		<many-to-one name="cashier" class="org.openmrs.Provider" column="provider_id" not-null="false"/>
+
 		<set name="attributes" lazy="false" inverse="true" cascade="all-delete-orphan">
 			<key column="bill_payment_id"/>
 			<one-to-many class="org.openmrs.module.billing.api.model.PaymentAttribute"/>
