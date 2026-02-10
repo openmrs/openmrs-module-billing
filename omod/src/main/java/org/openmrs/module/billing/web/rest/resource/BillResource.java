@@ -15,6 +15,7 @@ package org.openmrs.module.billing.web.rest.resource;
 
 import java.security.AccessControlException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -79,6 +80,11 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			description.addProperty("receiptNumber");
 			description.addProperty("status");
 			description.addProperty("adjustmentReason");
+			description.addProperty("refundReason");
+			description.addProperty("refundRequestedBy", Representation.REF);
+			description.addProperty("dateRefundRequested");
+			description.addProperty("refundApprovedBy", Representation.REF);
+			description.addProperty("dateRefundApproved");
 			description.addProperty("uuid");
 			return description;
 		}
@@ -125,10 +131,19 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 		} else if (instance.getStatus() == BillStatus.PENDING && status == BillStatus.POSTED) {
 			instance.setStatus(status);
 		} else if (instance.getStatus() == BillStatus.PAID && status == BillStatus.REFUND_REQUESTED) {
+			instance.setRefundRequestedBy(Context.getAuthenticatedUser());
+			instance.setDateRefundRequested(new Date());
 			instance.setStatus(status);
 		} else if (instance.getStatus() == BillStatus.REFUND_REQUESTED && status == BillStatus.REFUNDED) {
 			if (!Context.hasPrivilege(PrivilegeConstants.REFUND_MONEY)) {
 				throw new AccessControlException("Access denied to issue refund.");
+			}
+			instance.setRefundApprovedBy(Context.getAuthenticatedUser());
+			instance.setDateRefundApproved(new Date());
+			instance.setStatus(status);
+		} else if (instance.getStatus() == BillStatus.REFUND_REQUESTED && status == BillStatus.PAID) {
+			if (!Context.hasPrivilege(PrivilegeConstants.REFUND_MONEY)) {
+				throw new AccessControlException("Access denied to reject refund request.");
 			}
 			instance.setStatus(status);
 		}
