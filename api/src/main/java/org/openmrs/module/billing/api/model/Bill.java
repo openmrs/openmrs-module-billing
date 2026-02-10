@@ -169,6 +169,9 @@ public class Bill extends BaseOpenmrsData {
 	}
 	
 	public void synchronizeBillStatus() {
+		if (this.status == BillStatus.REFUND_REQUESTED || this.status == BillStatus.REFUNDED) {
+			return;
+		}
 		if (!this.getPayments().isEmpty() && getTotalPayments().compareTo(BigDecimal.ZERO) > 0) {
 			boolean billFullySettled = getTotalPayments().compareTo(getTotal()) >= 0;
 			if (billFullySettled) {
