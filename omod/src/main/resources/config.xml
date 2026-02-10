@@ -159,6 +159,12 @@
 		</description>
 	</globalProperty>
 
+	<globalProperty>
+		<property>${project.parent.artifactId}.discountEnabled</property>
+		<description>True/false whether or not the bill discount feature should be enabled.</description>
+		<defaultValue>false</defaultValue>
+	</globalProperty>
+
 
 	<!-- Extensions -->
 	<!--	<extension>-->
@@ -198,6 +204,11 @@
 	<privilege>
 		<name>Refund Money</name>
 		<description>Able to create/adjust a bill so that it refunds money.</description>
+	</privilege>
+
+	<privilege>
+		<name>Manage Discounts</name>
+		<description>Able to approve or reject bill discounts</description>
 	</privilege>
 
 	<privilege>

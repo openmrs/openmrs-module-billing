@@ -139,6 +139,28 @@
 		<property name="uuid" type="java.lang.String" column="uuid" length="38" unique="true"/>
 		<property name="adjustmentReason" type="java.lang.String" column="adjustment_reason" length="500"
 		          not-null="false"/>
+
+		<property name="discountType" column="discount_type" not-null="false">
+			<type name="org.hibernate.type.EnumType">
+				<param name="enumClass">org.openmrs.module.billing.api.model.DiscountType</param>
+				<param name="type">12</param>
+			</type>
+		</property>
+		<property name="discountValue" type="java.math.BigDecimal" column="discount_value" not-null="false"/>
+		<property name="discountAmount" type="java.math.BigDecimal" column="discount_amount" not-null="false"/>
+		<property name="discountReason" type="java.lang.String" column="discount_reason" length="500" not-null="false"/>
+		<property name="discountStatus" column="discount_status" not-null="false">
+			<type name="org.hibernate.type.EnumType">
+				<param name="enumClass">org.openmrs.module.billing.api.model.DiscountStatus</param>
+				<param name="type">12</param>
+			</type>
+		</property>
+		<many-to-one name="discountInitiator" class="org.openmrs.User" column="discount_initiator" not-null="false"/>
+		<many-to-one name="discountApprover" class="org.openmrs.User" column="discount_approver" not-null="false"/>
+		<property name="discountDateInitiated" type="java.util.Date" column="discount_date_initiated" length="19"
+		          not-null="false"/>
+		<property name="discountDateApproved" type="java.util.Date" column="discount_date_approved" length="19"
+		          not-null="false"/>
 	</class>
 
 	<class name="org.openmrs.module.billing.api.model.BillLineItem" table="cashier_bill_line_item">

@@ -14,17 +14,22 @@
 package org.openmrs.module.billing.api.model;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.security.AccessControlException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
+import org.openmrs.User;
+import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.util.PrivilegeConstants;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
@@ -63,7 +68,25 @@ public class Bill extends BaseOpenmrsData {
 	
 	private String adjustmentReason;
 	
-	public BigDecimal getTotal() {
+	private DiscountType discountType;
+	
+	private BigDecimal discountValue;
+	
+	private BigDecimal discountAmount;
+	
+	private String discountReason;
+	
+	private DiscountStatus discountStatus;
+	
+	private User discountInitiator;
+	
+	private User discountApprover;
+	
+	private Date discountDateInitiated;
+	
+	private Date discountDateApproved;
+	
+	public BigDecimal getLineItemsTotal() {
 		BigDecimal total = BigDecimal.ZERO;
 		
 		List<BillLineItem> lineItems = getLineItems();
@@ -73,6 +96,16 @@ public class Bill extends BaseOpenmrsData {
 					total = total.add(line.getTotal());
 				}
 			}
+		}
+		
+		return total;
+	}
+	
+	public BigDecimal getTotal() {
+		BigDecimal total = getLineItemsTotal();
+		
+		if (discountStatus == DiscountStatus.APPROVED && discountAmount != null) {
+			total = total.subtract(discountAmount);
 		}
 		
 		return total;
@@ -185,6 +218,64 @@ public class Bill extends BaseOpenmrsData {
 				this.setStatus(BillStatus.POSTED);
 			}
 		}
+	}
+	
+	public void initiateDiscount(DiscountType type, BigDecimal value, String reason) {
+		if (status != null && status != BillStatus.PENDING && status != BillStatus.POSTED) {
+			throw new APIException("billing.discount.invalidBillStatus");
+		}
+		if (discountStatus != null) {
+			throw new APIException("billing.discount.alreadyExists");
+		}
+		if (type == null || value == null || value.compareTo(BigDecimal.ZERO) <= 0) {
+			throw new APIException("Discount type and a positive discount value are required.");
+		}
+		if (StringUtils.isBlank(reason)) {
+			throw new APIException("A discount reason is required.");
+		}
+		
+		BigDecimal computedAmount;
+		BigDecimal lineTotal = getLineItemsTotal();
+		if (type == DiscountType.PERCENTAGE) {
+			if (value.compareTo(new BigDecimal("100")) > 0) {
+				throw new APIException("billing.discount.percentageExceeds100");
+			}
+			computedAmount = lineTotal.multiply(value).divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
+		} else {
+			computedAmount = value;
+		}
+		
+		if (computedAmount.compareTo(lineTotal) > 0) {
+			throw new APIException("billing.discount.exceedsBillTotal");
+		}
+		
+		this.discountType = type;
+		this.discountValue = value;
+		this.discountReason = reason;
+		this.discountAmount = computedAmount;
+		this.discountStatus = DiscountStatus.PENDING;
+		this.discountInitiator = Context.getAuthenticatedUser();
+		this.discountDateInitiated = new Date();
+	}
+	
+	public void approveDiscount() {
+		if (!Context.hasPrivilege(PrivilegeConstants.MANAGE_DISCOUNTS)) {
+			throw new APIException("You do not have permission to approve discounts.");
+		}
+		if (discountStatus != DiscountStatus.PENDING) {
+			throw new APIException("billing.discount.notPending");
+		}
+		this.discountStatus = DiscountStatus.APPROVED;
+		this.discountApprover = Context.getAuthenticatedUser();
+		this.discountDateApproved = new Date();
+		synchronizeBillStatus();
+	}
+	
+	public void rejectDiscount() {
+		if (discountStatus != DiscountStatus.PENDING) {
+			throw new APIException("billing.discount.notPending");
+		}
+		this.discountStatus = DiscountStatus.REJECTED;
 	}
 	
 	public void removePayment(Payment payment) {
