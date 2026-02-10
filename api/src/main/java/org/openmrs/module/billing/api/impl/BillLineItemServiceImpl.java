@@ -41,7 +41,7 @@ public class BillLineItemServiceImpl extends BaseOpenmrsService implements BillL
 	@Override
 	@Transactional(readOnly = true)
 	public BillLineItem getBillLineItemByUuid(String uuid) {
-		if (StringUtils.isEmpty(uuid)) {
+		if (StringUtils.isBlank(uuid)) {
 			return null;
 		}
 		return billLineItemDAO.getBillLineItemByUuid(uuid);
@@ -49,8 +49,7 @@ public class BillLineItemServiceImpl extends BaseOpenmrsService implements BillL
 	
 	@Override
 	@Transactional
-	public BillLineItem voidBillLineItem(BillLineItem lineItem, String voidReason)
-	        throws IllegalArgumentException, IllegalStateException {
+	public BillLineItem voidBillLineItem(BillLineItem lineItem, String voidReason) {
 		if (StringUtils.isBlank(voidReason)) {
 			throw new IllegalArgumentException("voidReason cannot be null or empty");
 		}
