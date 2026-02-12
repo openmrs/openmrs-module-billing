@@ -18,11 +18,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillableServiceService;
 import org.openmrs.module.billing.api.BillLineItemService;
+import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
 import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
 import org.openmrs.module.billing.api.base.entity.IEntityDataService;
+import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
@@ -164,7 +166,14 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
 	}
 	
 	@Override
-	protected void delete(BillLineItem lineItem, String reason, RequestContext context) {
-		Context.getService(BillLineItemService.class).voidBillLineItem(lineItem, reason);
+	public void delete(BillLineItem lineItem, String reason, RequestContext context) {
+		BillService service = Context.getService(BillService.class);
+		Bill bill = lineItem.getBill();
+		
+		lineItem.setVoided(true);
+		lineItem.setVoidReason(reason);
+		lineItem.setVoidedBy(Context.getAuthenticatedUser());
+		
+		service.saveBill(bill);
 	}
 }

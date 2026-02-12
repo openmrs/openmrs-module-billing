@@ -35,10 +35,4 @@ public class HibernateBillLineItemDAO implements BillLineItemDAO {
 		return query.getResultStream().findFirst().orElse(null);
 	}
 	
-	@Override
-	public BillLineItem saveBillLineItem(@Nonnull BillLineItem billLineItem) {
-		sessionFactory.getCurrentSession().saveOrUpdate(billLineItem);
-		return billLineItem;
-	}
-	
 }
