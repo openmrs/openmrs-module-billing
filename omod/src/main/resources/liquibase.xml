@@ -1095,4 +1095,24 @@
                                  baseTableName="bill_exemption_rule" baseColumnNames="voided_by"
                                  referencedTableName="users" referencedColumnNames="user_id"/>
     </changeSet>
+
+    <changeSet id="openmrs.billing-004-20260213-add-visit-to-bill" author="billing-module">
+        <comment>Add visit_id column to cashier_bill table to associate bills with visits</comment>
+        <addColumn tableName="cashier_bill">
+            <column name="visit_id" type="int">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <addForeignKeyConstraint
+            constraintName="cashier_bill_visit_fk"
+            baseTableName="cashier_bill"
+            baseColumnNames="visit_id"
+            referencedTableName="visit"
+            referencedColumnNames="visit_id"/>
+
+        <createIndex indexName="cashier_bill_visit_id_idx" tableName="cashier_bill">
+            <column name="visit_id"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>

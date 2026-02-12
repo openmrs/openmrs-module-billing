@@ -16,11 +16,13 @@ package org.openmrs.module.billing.web.rest.resource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Provider;
 import org.openmrs.User;
@@ -58,6 +60,7 @@ import org.springframework.web.client.RestClientException;
 /**
  * REST resource representing a {@link Bill}.
  */
+@Slf4j
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
         + "/bill", supportedClass = Bill.class, supportedOpenmrsVersions = { "2.0 - 2.*" })
 public class BillResource extends DataDelegatingCrudResource<Bill> {
@@ -73,6 +76,7 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			description.addProperty("dateCreated");
 			description.addProperty("lineItems");
 			description.addProperty("patient", Representation.REF);
+			description.addProperty("visit", Representation.REF);
 			description.addProperty("payments", Representation.FULL);
 			description.addProperty("receiptNumber");
 			description.addProperty("status");
@@ -153,7 +157,11 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			if (bill.getCashPoint() == null) {
 				loadBillCashPoint(bill);
 			}
-			
+
+			if (bill.getVisit() == null) {
+				loadBillVisit(bill);
+			}
+
 			// Now that all attributes have been set (i.e., payments and bill status) we can check to see if the bill
 			// is fully paid.
 			bill.synchronizeBillStatus();
@@ -244,6 +252,29 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 				throw new RestClientException("No cash points defined for the current timesheet!");
 			}
 			bill.setCashPoint(cashPoint);
+		}
+	}
+
+	private void loadBillVisit(Bill bill) {
+		if (bill.getPatient() == null) {
+			return;
+		}
+
+		try {
+			org.openmrs.api.VisitService visitService = Context.getVisitService();
+			List<org.openmrs.Visit> activeVisits = visitService.getActiveVisitsByPatient(bill.getPatient());
+
+			if (activeVisits != null && !activeVisits.isEmpty()) {
+				org.openmrs.Visit mostRecentVisit = activeVisits.stream()
+				        .max(Comparator.comparing(org.openmrs.Visit::getStartDatetime)).orElse(null);
+
+				if (mostRecentVisit != null) {
+					bill.setVisit(mostRecentVisit);
+				}
+			}
+		}
+		catch (Exception e) {
+			log.error("Failed to associate bill with visit for patient {}", bill.getPatient().getUuid(), e);
 		}
 	}
 	

@@ -104,7 +104,7 @@ public abstract class RoleCreationControllerBase {
 		newRole.setPrivileges(privileges());
 		
 		Role inheritedRole = getUserService().getRole(RoleConstants.PROVIDER);
-		Set<Role> inheritedRoles = new HashSet<Role>();
+		Set<Role> inheritedRoles = new HashSet<>();
 		inheritedRoles.add(inheritedRole);
 		newRole.setInheritedRoles(inheritedRoles);
 		

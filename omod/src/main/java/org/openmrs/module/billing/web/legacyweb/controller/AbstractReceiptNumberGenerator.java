@@ -70,7 +70,7 @@ public abstract class AbstractReceiptNumberGenerator {
 			
 			// Load the generator configuration page, if defined
 			if (selectedGenerator == null) {
-                log.warn("Could not locate a receipt number generator named '{}'.", generatorName);
+				log.warn("Could not locate a receipt number generator named '{}'.", generatorName);
 			} else if (StringUtils.isEmpty(selectedGenerator.getConfigurationPage())) {
 				// There is no generator configuration page so just set the system generator and reload the page
 				ReceiptNumberGeneratorFactory.setGenerator(selectedGenerator);

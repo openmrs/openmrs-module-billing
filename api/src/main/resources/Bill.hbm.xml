@@ -96,6 +96,7 @@
 		<many-to-one name="patient" class="org.openmrs.Patient" not-null="true" column="patient_id"/>
 		<many-to-one name="cashPoint" class="org.openmrs.module.billing.api.model.CashPoint" not-null="true"
 		             column="cash_point_id"/>
+		<many-to-one name="visit" class="org.openmrs.Visit" column="visit_id" not-null="false"/>
 		<many-to-one name="billAdjusted" class="org.openmrs.module.billing.api.model.Bill" column="adjusted_bill_id"/>
 
 		<property name="status" column="status" not-null="true">

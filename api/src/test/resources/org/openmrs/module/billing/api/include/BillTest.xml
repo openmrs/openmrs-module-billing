@@ -1,5 +1,21 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <dataset>
+	<!-- Visit types for visit test data -->
+	<visit_type visit_type_id="1" name="Test Visit Type" description="For testing" creator="1"
+	            date_created="2012-01-01 00:00:00.0" retired="false"
+	            uuid="c0c579b0-8e59-401d-8a4a-976a0b183599"/>
+
+	<!-- Visits for bill-visit association testing -->
+	<visit visit_id="1" patient_id="0" visit_type_id="1" date_started="2012-01-01 10:00:00.0"
+	       location_id="1" creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	       uuid="b0c579b0-8e59-401d-8a4a-976a0b183599"/>
+	<visit visit_id="2" patient_id="1" visit_type_id="1" date_started="2012-02-01 10:00:00.0"
+	       location_id="1" creator="1" date_created="2012-02-01 00:00:00.0" voided="false"
+	       uuid="b1c579b0-8e59-401d-8a4a-976a0b183599"/>
+	<visit visit_id="3" patient_id="2" visit_type_id="1" date_started="2012-03-01 10:00:00.0"
+	       location_id="1" creator="1" date_created="2012-03-01 00:00:00.0" voided="false"
+	       uuid="b2c579b0-8e59-401d-8a4a-976a0b183599"/>
+
 	<!-- Stock items referenced by bill line items -->
 	<stockmgmt_stock_item stock_item_id="0" concept_id="1067" has_expiration="false" is_drug="false"
 	                      creator="1" date_created="2012-01-01 00:00:00.0" voided="false"

@@ -99,7 +99,7 @@ public class CashierController {
 					}
 				}
 				catch (MalformedURLException e) {
-                    log.warn("Could not parse referrer url '{}'", returnTo);
+					log.warn("Could not parse referrer url '{}'", returnTo);
 					returnTo = "";
 				}
 			}

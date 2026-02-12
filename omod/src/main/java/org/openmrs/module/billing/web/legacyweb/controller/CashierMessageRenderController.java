@@ -33,18 +33,18 @@ import java.util.Vector;
 @Controller
 @RequestMapping(CashierWebConstants.MESSAGE_PROPERTIES_JS_URI)
 public class CashierMessageRenderController {
-	
+
 	@RequestMapping(method = RequestMethod.GET)
 	public ModelAndView render(HttpServletRequest request) {
 		// object to store keys from cashier and backboneforms
 
-        // locate and retrieve cashier messages
+		// locate and retrieve cashier messages
 		Locale locale = RequestContextUtils.getLocale(request);
 		ResourceBundle resourceBundle = ResourceBundle.getBundle("messages", locale);
-		
+
 		// store cashier message keys in the vector object
-        List<String> keys = new ArrayList<>(resourceBundle.keySet());
-		
+		List<String> keys = new ArrayList<>(resourceBundle.keySet());
+
 		// retrieve backboneforms messages
 		/**
 		 * BackboneMessageRenderController backboneController = new BackboneMessageRenderController();
@@ -54,7 +54,7 @@ public class CashierMessageRenderController {
 		 * (Enumeration<String>)messageKeys.getValue(); while (messageKey.hasMoreElements()) { String key =
 		 * messageKey.nextElement(); if (!keys.contains(key)) keys.add(key); } }
 		 */
-		
+
 		return new ModelAndView(CashierWebConstants.MESSAGE_PAGE, "keys", keys);
 	}
 }

@@ -208,6 +208,9 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 				activeBill.setCashier(providers.get(0));
 				List<CashPoint> cashPoints = cashPointService.getAllCashPoints(false);
 				activeBill.setCashPoint(cashPoints.get(0));
+				if (order != null && order.getEncounter() != null && order.getEncounter().getVisit() != null) {
+					activeBill.setVisit(order.getEncounter().getVisit());
+				}
 				activeBill.addLineItem(billLineItem);
 				activeBill.setStatus(BillStatus.PENDING);
 				billService.saveBill(activeBill);
