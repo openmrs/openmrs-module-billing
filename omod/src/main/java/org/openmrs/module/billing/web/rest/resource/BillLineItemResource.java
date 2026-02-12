@@ -167,13 +167,10 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
 	
 	@Override
 	public void delete(BillLineItem lineItem, String reason, RequestContext context) {
-		BillService service = Context.getService(BillService.class);
-		Bill bill = lineItem.getBill();
-		
 		lineItem.setVoided(true);
 		lineItem.setVoidReason(reason);
 		lineItem.setVoidedBy(Context.getAuthenticatedUser());
 		
-		service.saveBill(bill);
+		Context.getService(BillService.class).saveBill(lineItem.getBill());
 	}
 }

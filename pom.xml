@@ -57,6 +57,7 @@
 		<stockmanagementVersion>1.4.0</stockmanagementVersion>
 		<fhir2Version>2.4.0</fhir2Version>
 		<lombokVersion>1.18.38</lombokVersion>
+		<byteBuddyVersion>1.17.6</byteBuddyVersion>
 	</properties>
 
 	<dependencyManagement>
