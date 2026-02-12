@@ -16,6 +16,7 @@ package org.openmrs.module.billing.web.rest.resource;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -99,11 +100,11 @@ public class BillLineItemResourceTest {
 	}
 	
 	/**
-	 * @verifies handle null reason gracefully
+	 * @verifies throw IllegalArgumentException when reason is null or blank
 	 * @see BillLineItemResource#delete(BillLineItem, String, RequestContext)
 	 */
 	@Test
-	public void delete_shouldHandleNullReasonGracefully() {
+	public void delete_shouldThrowExceptionWhenReasonIsNull() {
 		Bill bill = new Bill();
 		bill.setId(1);
 		
@@ -114,16 +115,6 @@ public class BillLineItemResourceTest {
 		String reason = null;
 		RequestContext context = mock(RequestContext.class);
 		
-		Bill savedBill = new Bill();
-		savedBill.setId(1);
-		when(billService.saveBill(bill)).thenReturn(savedBill);
-		
-		resource.delete(lineItem, reason, context);
-		
-		assertTrue("Line item should be voided", lineItem.getVoided());
-		assertNull("Void reason should be null when reason is null", lineItem.getVoidReason());
-		assertNotNull("Voided by should be set", lineItem.getVoidedBy());
-		
-		verify(billService).saveBill(bill);
+		assertThrows(IllegalArgumentException.class, () -> resource.delete(lineItem, reason, context));
 	}
 }

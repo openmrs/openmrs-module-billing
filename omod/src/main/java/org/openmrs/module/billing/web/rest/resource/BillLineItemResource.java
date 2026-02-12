@@ -167,6 +167,10 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
 	
 	@Override
 	public void delete(BillLineItem lineItem, String reason, RequestContext context) {
+		if (StringUtils.isBlank(reason)) {
+			throw new IllegalArgumentException("Reason is required");
+		}
+		
 		lineItem.setVoided(true);
 		lineItem.setVoidReason(reason);
 		lineItem.setVoidedBy(Context.getAuthenticatedUser());
