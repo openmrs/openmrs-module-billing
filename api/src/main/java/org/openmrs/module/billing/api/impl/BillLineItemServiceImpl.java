@@ -41,7 +41,7 @@ public class BillLineItemServiceImpl extends BaseOpenmrsService implements BillL
 	@Override
 	@Transactional(readOnly = true)
 	public BillLineItem getBillLineItemByUuid(String uuid) {
-		if (StringUtils.isEmpty(uuid)) {
+		if (StringUtils.isBlank(uuid)) {
 			return null;
 		}
 		return billLineItemDAO.getBillLineItemByUuid(uuid);

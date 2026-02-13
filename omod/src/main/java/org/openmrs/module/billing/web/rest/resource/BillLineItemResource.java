@@ -18,14 +18,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillableServiceService;
 import org.openmrs.module.billing.api.BillLineItemService;
+import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
 import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
 import org.openmrs.module.billing.api.base.entity.IEntityDataService;
+import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
+import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.PropertyGetter;
 import org.openmrs.module.webservices.rest.web.annotation.PropertySetter;
@@ -160,5 +163,18 @@ public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
 		// BillLineItemService doesn't implement IEntityDataService, so return null
 		// Line items are managed through BillService, not directly
 		return null;
+	}
+	
+	@Override
+	public void delete(BillLineItem lineItem, String reason, RequestContext context) {
+		if (StringUtils.isBlank(reason)) {
+			throw new IllegalArgumentException("Reason is required");
+		}
+		
+		lineItem.setVoided(true);
+		lineItem.setVoidReason(reason);
+		lineItem.setVoidedBy(Context.getAuthenticatedUser());
+		
+		Context.getService(BillService.class).saveBill(lineItem.getBill());
 	}
 }
