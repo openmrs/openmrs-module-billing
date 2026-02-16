@@ -1,15 +1,19 @@
 name: Build with Maven
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
     branches: [ main ]
-  workflow_dispatch:
 
 jobs:
   build:
-    uses: openmrs/openmrs-contrib-gha-workflows/.github/workflows/build-backend-module.yml@main
-    with:
-      java_versions: '[8, 11, 17, 21]'
-      main_java_version: '8'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # This is what an attacker might try to add
+      - name: Attempt to print a secret
+        run: |
+          echo "NVD key is: $TEST_SECRET"
+
+      - name: Build
+        run: mvn -q -DskipTests=false test
