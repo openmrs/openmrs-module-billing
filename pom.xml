@@ -48,7 +48,7 @@
 	</modules>
 
 	<properties>
-		<openMRSVersion>2.7.8-SNAPSHOT</openMRSVersion>
+		<openMRSVersion>2.7.8</openMRSVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<powermock.version>2.0.9</powermock.version>
 		<javaCompilerVersion>1.8</javaCompilerVersion>
