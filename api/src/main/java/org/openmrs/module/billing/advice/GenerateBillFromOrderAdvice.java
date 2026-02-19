@@ -1,3 +1,12 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
 package org.openmrs.module.billing.advice;
 
 import org.apache.commons.logging.Log;
@@ -70,10 +79,9 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 			if (method.getName().equals("saveOrder") && args.length > 0 && args[0] instanceof Order) {
 				Order order = (Order) args[0];
 				
-				// Check if the order is a discontinuation, revision, or renewal
+				// Skip discontinuation, revision, or renewal actions
 				if (order.getAction().equals(Order.Action.DISCONTINUE) || order.getAction().equals(Order.Action.REVISE)
 				        || order.getAction().equals(Order.Action.RENEW)) {
-					// Do nothing for these actions
 					return;
 				}
 				
@@ -87,11 +95,28 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 					List<StockItem> stockItems = stockService.getStockItemByDrug(drugID);
 					
 					if (!stockItems.isEmpty()) {
-						// check from the list for all exemptions
+						// Primary path: bill via StockManagement item
 						boolean isExempted = checkIfOrderIsExempted(workflowService, order, ExemptionType.COMMODITY);
 						BillStatus lineItemStatus = isExempted ? BillStatus.EXEMPTED : BillStatus.PENDING;
 						addBillItemToBill(order, patient, cashierUUID, stockItems.get(0), null, (int) drugQuantity,
 						    order.getDateActivated(), lineItemStatus);
+					} else if (drugOrder.getConcept() != null) {
+						// Fallback path: bill via BillableService matched by drug concept UUID
+						// This supports configuration via Iniz when StockManagement is not set up
+						BillableServiceSearch searchTemplate = new BillableServiceSearch();
+						searchTemplate.setConceptUuid(drugOrder.getConcept().getUuid());
+						searchTemplate.setServiceStatus(BillableServiceStatus.ENABLED);
+						
+						BillableServiceService billableServiceService = Context.getService(BillableServiceService.class);
+						List<BillableService> searchResult = billableServiceService.getBillableServices(searchTemplate,
+						    null);
+						
+						if (!searchResult.isEmpty()) {
+							boolean isExempted = checkIfOrderIsExempted(workflowService, order, ExemptionType.COMMODITY);
+							BillStatus lineItemStatus = isExempted ? BillStatus.EXEMPTED : BillStatus.PENDING;
+							addBillItemToBill(order, patient, cashierUUID, null, searchResult.get(0), (int) drugQuantity,
+							    order.getDateActivated(), lineItemStatus);
+						}
 					}
 				} else if (order instanceof TestOrder) {
 					TestOrder testOrder = (TestOrder) order;
@@ -143,7 +168,6 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 		
 		Patient patient = order.getPatient();
 		variables.put("patient", patient);
-		// We cannot call getAge() method from Java Script
 		if (patient != null) {
 			variables.put("patientAge", patient.getAge());
 		}
@@ -167,14 +191,10 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 	
 	/**
 	 * Adds a bill item to the cashier module
-	 *
-	 * @param patient
-	 * @param cashierUUID
 	 */
 	public void addBillItemToBill(Order order, Patient patient, String cashierUUID, StockItem stockitem,
 	        BillableService service, Integer quantity, Date orderDate, BillStatus lineItemStatus) {
 		try {
-			// Search for a bill
 			Bill activeBill = new Bill();
 			activeBill.setPatient(patient);
 			activeBill.setStatus(BillStatus.PENDING);
@@ -189,8 +209,6 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 			}
 			
 			if (!itemPrices.isEmpty()) {
-				//List<CashierItemPrice> matchingPrices = itemPrices.stream().filter(p -> p.getPaymentMode().getUuid().equals(fetchPatientPayment(order))).collect(Collectors.toList());
-				// billLineItem.setPrice(matchingPrices.isEmpty() ? itemPrices.get(0).getPrice() : matchingPrices.get(0).getPrice());
 				billLineItem.setPrice(itemPrices.get(0).getPrice());
 			} else {
 				if (stockitem != null && stockitem.getPurchasePrice() != null) {
@@ -204,7 +222,6 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 			billLineItem.setLineItemOrder(0);
 			billLineItem.setOrder(order);
 			
-			// Bill
 			User user = Context.getAuthenticatedUser();
 			List<Provider> providers = new ArrayList<>(Context.getProviderService().getProvidersByPerson(user.getPerson()));
 			
@@ -218,7 +235,6 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 			} else {
 				LOG.error("User is not a provider");
 			}
-			
 		}
 		catch (Exception ex) {
 			LOG.error("Error sending the bill item: " + ex.getMessage(), ex);
