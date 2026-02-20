@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+    <concept concept_id="2000" retired="false" datatype_id="4" class_id="11" is_set="false" creator="1"
+             date_created="2012-01-01 00:00:00.0" uuid="a1b2c3d4-aaaa-bbbb-cccc-000000000001"/>
+    <concept_name concept_id="2000" name="Amoxicillin" locale="en" creator="1"
+                  date_created="2012-01-01 00:00:00.0" concept_name_id="20000" voided="false"
+                  uuid="a1b2c3d4-aaaa-bbbb-cccc-000000000002"
+                  concept_name_type="FULLY_SPECIFIED" locale_preferred="1"/>
+
+    <concept concept_id="2001" retired="false" datatype_id="4" class_id="11" is_set="false" creator="1"
+             date_created="2012-01-01 00:00:00.0" uuid="a1b2c3d4-aaaa-bbbb-cccc-000000000003"/>
+    <concept_name concept_id="2001" name="Full Blood Count" locale="en" creator="1"
+                  date_created="2012-01-01 00:00:00.0" concept_name_id="20001" voided="false"
+                  uuid="a1b2c3d4-aaaa-bbbb-cccc-000000000004"
+                  concept_name_type="FULLY_SPECIFIED" locale_preferred="1"/>
+
+    <concept concept_id="2002" retired="false" datatype_id="4" class_id="11" is_set="false" creator="1"
+             date_created="2012-01-01 00:00:00.0" uuid="a1b2c3d4-aaaa-bbbb-cccc-000000000005"/>
+    <concept_name concept_id="2002" name="Drug Service" locale="en" creator="1"
+                  date_created="2012-01-01 00:00:00.0" concept_name_id="20002" voided="false"
+                  uuid="a1b2c3d4-aaaa-bbbb-cccc-000000000006"
+                  concept_name_type="FULLY_SPECIFIED" locale_preferred="1"/>
+
+    <cashier_billable_service service_id="10" name="Amoxicillin" short_name="AMOX"
+                              concept_id="2000" service_type="2002"
+                              service_status="ENABLED"
+                              creator="1" date_created="2012-01-01 00:00:00.0" retired="false"
+                              uuid="b1c2d3e4-aaaa-bbbb-cccc-000000000010"/>
+
+    <cashier_billable_service service_id="11" name="Full Blood Count" short_name="FBC"
+                              concept_id="2001" service_type="2002"
+                              service_status="ENABLED"
+                              creator="1" date_created="2012-01-01 00:00:00.0" retired="false"
+                              uuid="b1c2d3e4-aaaa-bbbb-cccc-000000000011"/>
+
+    <cashier_billable_service service_id="12" name="Disabled Drug" short_name="DIS"
+                              concept_id="2000" service_type="2002"
+                              service_status="DISABLED"
+                              creator="1" date_created="2012-01-01 00:00:00.0" retired="false"
+                              uuid="b1c2d3e4-aaaa-bbbb-cccc-000000000012"/>
+
+    <cashier_item_price item_price_id="10" service_id="10" name="Standard" price="25.00"
+                        creator="1" date_created="2012-01-01 00:00:00.0" retired="false"
+                        uuid="c1d2e3f4-aaaa-bbbb-cccc-000000000010"/>
+
+    <cashier_item_price item_price_id="11" service_id="11" name="Standard" price="50.00"
+                        creator="1" date_created="2012-01-01 00:00:00.0" retired="false"
+                        uuid="c1d2e3f4-aaaa-bbbb-cccc-000000000011"/>
+
+    <cashier_cash_point cash_point_id="10" name="Advice Test Cash Point"
+                        description="Cash point for advice test"
+                        creator="1" date_created="2012-01-01 00:00:00.0" retired="false"
+                        uuid="d1e2f3a4-aaaa-bbbb-cccc-000000000010"
+                        location_id="0"/>
+    <!-- Link admin user (person_id=1) to a provider so bills can be saved -->
+    <!-- Link admin user (person_id=1) to a provider so bills can be saved -->
+    <provider provider_id="100" name="Admin Provider" person_id="1" identifier="ADMIN-001" creator="1" date_created="2005-01-01 00:00:00.0" retired="0" uuid="ff401f88-0000-0000-0000-000000000099"/>
+</dataset>
