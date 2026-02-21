@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="org.openmrs.module.billing.api.model">
+
+	<class name="BillAudit" table="billing_bill_audit">
+
+		<id name="billAuditId" type="int" column="bill_audit_id">
+			<generator class="native">
+				<param name="sequence">billing_bill_audit_bill_audit_id_seq</param>
+			</generator>
+		</id>
+
+		<discriminator column="bill_audit_id" insert="false" />
+
+		<many-to-one name="bill" class="Bill" column="bill_id" not-null="true" />
+
+		<property name="action" column="action" type="org.openmrs.module.billing.api.model.BillAuditAction" not-null="true" length="50" />
+
+		<property name="fieldName" column="field_name" type="string" length="100" />
+
+		<property name="oldValue" column="old_value" type="text" />
+
+		<property name="newValue" column="new_value" type="text" />
+
+		<property name="reason" column="reason" type="text" />
+
+		<many-to-one name="user" class="org.openmrs.User" column="user_id" />
+
+		<property name="auditDate" column="audit_date" type="timestamp" not-null="true" />
+
+		<property name="uuid" type="string" column="uuid" length="38" unique="true" not-null="true" />
+
+		<many-to-one name="creator" class="org.openmrs.User" column="creator" not-null="true" />
+
+		<property name="dateCreated" type="timestamp" column="date_created" not-null="true" />
+
+		<many-to-one name="changedBy" class="org.openmrs.User" column="changed_by" />
+
+		<property name="dateChanged" type="timestamp" column="date_changed" />
+
+		<property name="voided" type="boolean" column="voided" not-null="true" />
+
+		<many-to-one name="voidedBy" class="org.openmrs.User" column="voided_by" />
+
+		<property name="dateVoided" type="timestamp" column="date_voided" />
+
+		<property name="voidReason" type="string" column="void_reason" length="255" />
+
+	</class>
+
+</hibernate-mapping>
