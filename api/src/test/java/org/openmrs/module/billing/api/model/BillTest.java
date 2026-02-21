@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import org.junit.Test;
+import org.openmrs.api.APIException;
 
 /**
  * Test for verifying Bill model methods, particularly getTotalPayments()
@@ -232,6 +233,128 @@ public class BillTest {
 		// Should not throw exception for new bill (no ID)
 		bill.setLineItems(lineItems);
 		assertEquals(1, bill.getLineItems().size());
+	}
+	
+	@Test
+	public void getTotal_shouldSubtractApprovedDiscount() {
+		Bill bill = createBillWithLineItems(BigDecimal.valueOf(100), BigDecimal.valueOf(50));
+		
+		bill.setDiscountStatus(DiscountStatus.APPROVED);
+		bill.setDiscountAmount(BigDecimal.valueOf(30));
+		
+		assertEquals(BigDecimal.valueOf(120), bill.getTotal());
+	}
+	
+	@Test
+	public void getTotal_shouldNotSubtractPendingDiscount() {
+		Bill bill = createBillWithLineItems(BigDecimal.valueOf(100), BigDecimal.valueOf(50));
+		
+		bill.setDiscountStatus(DiscountStatus.PENDING);
+		bill.setDiscountAmount(BigDecimal.valueOf(30));
+		
+		assertEquals(BigDecimal.valueOf(150), bill.getTotal());
+	}
+	
+	@Test
+	public void getTotal_shouldNotSubtractRejectedDiscount() {
+		Bill bill = createBillWithLineItems(BigDecimal.valueOf(100), BigDecimal.valueOf(50));
+		
+		bill.setDiscountStatus(DiscountStatus.REJECTED);
+		bill.setDiscountAmount(BigDecimal.valueOf(30));
+		
+		assertEquals(BigDecimal.valueOf(150), bill.getTotal());
+	}
+	
+	@Test
+	public void getLineItemsTotal_shouldReturnOriginalTotal() {
+		Bill bill = createBillWithLineItems(BigDecimal.valueOf(100), BigDecimal.valueOf(50));
+		
+		bill.setDiscountStatus(DiscountStatus.APPROVED);
+		bill.setDiscountAmount(BigDecimal.valueOf(30));
+		
+		assertEquals(BigDecimal.valueOf(150), bill.getLineItemsTotal());
+	}
+	
+	@Test
+	public void synchronizeBillStatus_shouldUseTotalAfterDiscount() {
+		Bill bill = new Bill();
+		bill.setLineItems(new ArrayList<>());
+		bill.setPayments(new HashSet<>());
+		
+		BillLineItem lineItem = new BillLineItem();
+		lineItem.setPrice(BigDecimal.valueOf(100));
+		lineItem.setQuantity(1);
+		lineItem.setVoided(false);
+		bill.getLineItems().add(lineItem);
+		
+		bill.setDiscountStatus(DiscountStatus.APPROVED);
+		bill.setDiscountAmount(BigDecimal.valueOf(30));
+		
+		Payment payment = new Payment();
+		payment.setAmountTendered(BigDecimal.valueOf(70));
+		payment.setVoided(false);
+		bill.getPayments().add(payment);
+		
+		bill.synchronizeBillStatus();
+		
+		assertEquals(BillStatus.PAID, bill.getStatus());
+	}
+	
+	@Test(expected = APIException.class)
+	public void initiateDiscount_shouldRejectWhenBillStatusIsPaid() {
+		Bill bill = createBillWithLineItems(BigDecimal.valueOf(100));
+		bill.setStatus(BillStatus.PAID);
+		bill.initiateDiscount(DiscountType.FIXED_AMOUNT, BigDecimal.valueOf(10), "Test reason");
+	}
+	
+	@Test(expected = APIException.class)
+	public void initiateDiscount_shouldRejectWhenDiscountAlreadyExists() {
+		Bill bill = createBillWithLineItems(BigDecimal.valueOf(100));
+		bill.setStatus(BillStatus.POSTED);
+		bill.setDiscountStatus(DiscountStatus.PENDING);
+		bill.initiateDiscount(DiscountType.FIXED_AMOUNT, BigDecimal.valueOf(10), "Test reason");
+	}
+	
+	@Test(expected = APIException.class)
+	public void initiateDiscount_shouldRejectPercentageOver100() {
+		Bill bill = createBillWithLineItems(BigDecimal.valueOf(100));
+		bill.setStatus(BillStatus.POSTED);
+		bill.initiateDiscount(DiscountType.PERCENTAGE, BigDecimal.valueOf(150), "Test reason");
+	}
+	
+	@Test(expected = APIException.class)
+	public void initiateDiscount_shouldRejectAmountExceedingTotal() {
+		Bill bill = createBillWithLineItems(BigDecimal.valueOf(100));
+		bill.setStatus(BillStatus.POSTED);
+		bill.initiateDiscount(DiscountType.FIXED_AMOUNT, BigDecimal.valueOf(200), "Test reason");
+	}
+	
+	@Test
+	public void rejectDiscount_shouldSetRejectedStatus() {
+		Bill bill = createBillWithLineItems(BigDecimal.valueOf(100));
+		bill.setDiscountStatus(DiscountStatus.PENDING);
+		bill.rejectDiscount();
+		assertEquals(DiscountStatus.REJECTED, bill.getDiscountStatus());
+	}
+	
+	@Test(expected = APIException.class)
+	public void rejectDiscount_shouldRejectWhenNotPending() {
+		Bill bill = createBillWithLineItems(BigDecimal.valueOf(100));
+		bill.setDiscountStatus(DiscountStatus.APPROVED);
+		bill.rejectDiscount();
+	}
+	
+	private Bill createBillWithLineItems(BigDecimal... prices) {
+		Bill bill = new Bill();
+		bill.setLineItems(new ArrayList<>());
+		for (BigDecimal price : prices) {
+			BillLineItem lineItem = new BillLineItem();
+			lineItem.setPrice(price);
+			lineItem.setQuantity(1);
+			lineItem.setVoided(false);
+			bill.getLineItems().add(lineItem);
+		}
+		return bill;
 	}
 	
 }

@@ -1095,4 +1095,30 @@
                                  baseTableName="bill_exemption_rule" baseColumnNames="voided_by"
                                  referencedTableName="users" referencedColumnNames="user_id"/>
     </changeSet>
+
+	<changeSet id="billing-add-discount-columns-to-bill" author="UjjawalPrabhat">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<columnExists tableName="cashier_bill" columnName="discount_type"/>
+			</not>
+		</preConditions>
+		<comment>Add discount fields to cashier_bill for bill discount management with audit trail</comment>
+		<addColumn tableName="cashier_bill">
+			<column name="discount_type" type="varchar(20)"/>
+			<column name="discount_value" type="decimal(10,2)"/>
+			<column name="discount_amount" type="decimal(10,2)"/>
+			<column name="discount_reason" type="varchar(500)"/>
+			<column name="discount_status" type="varchar(20)"/>
+			<column name="discount_initiator" type="int"/>
+			<column name="discount_approver" type="int"/>
+			<column name="discount_date_initiated" type="datetime"/>
+			<column name="discount_date_approved" type="datetime"/>
+		</addColumn>
+		<addForeignKeyConstraint constraintName="bill_discount_initiator_fk"
+								 baseTableName="cashier_bill" baseColumnNames="discount_initiator"
+								 referencedTableName="users" referencedColumnNames="user_id"/>
+		<addForeignKeyConstraint constraintName="bill_discount_approver_fk"
+								 baseTableName="cashier_bill" baseColumnNames="discount_approver"
+								 referencedTableName="users" referencedColumnNames="user_id"/>
+	</changeSet>
 </databaseChangeLog>
