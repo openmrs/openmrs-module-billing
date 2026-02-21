@@ -155,7 +155,7 @@ public abstract class BaseRestDataResource<E extends OpenmrsData> extends DataDe
 				result = service.getByUuid(uniqueId);
 			}
 			catch (PrivilegeException p) {
-                log.error("Exception occured when trying to get entity with ID <{}> as privilege is missing", uniqueId, p);
+				log.error("Exception occured when trying to get entity with ID <{}> as privilege is missing", uniqueId, p);
 				throw new PrivilegeException("Can't get entity with ID <" + uniqueId + "> as privilege is missing");
 			}
 		}

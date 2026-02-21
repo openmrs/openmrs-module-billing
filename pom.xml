@@ -383,6 +383,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.15.0</version>
 					<configuration>
 						<target>${javaCompilerVersion}</target>
 						<source>${javaCompilerVersion}</source>
@@ -425,12 +426,13 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-release-plugin</artifactId>
-					<version>2.5.1</version>
+					<version>3.1.1</version>
 					<configuration>
 						<tagNameFormat>v@{project.version}</tagNameFormat>
 						<autoVersionSubmodules>true</autoVersionSubmodules>
 						<pushChanges>true</pushChanges>
 						<localCheckout>true</localCheckout>
+						<useReleaseProfile>false</useReleaseProfile>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -441,7 +443,16 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>2.9.1</version>
+					<version>3.12.0</version>
+					<configuration>
+						<tags>
+							<tag>
+								<name>should</name>
+								<placement>a</placement>
+								<head>Should:</head>
+							</tag>
+						</tags>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.jacoco</groupId>
