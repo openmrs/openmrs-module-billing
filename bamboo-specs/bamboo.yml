@@ -35,7 +35,7 @@ Build and Test JDK 8:
         docker run -v ${PWD}:/module --rm -w="/module" maven:3.9.9-amazoncorretto-8 bash -c 'chmod -R 777 .'
       description: Resolve file permissions
   - checkout:
-      force-clean-build: true
+      force-clean-build: 'false'
       description: Checkout default repository
   - script:
       interpreter: SHELL
@@ -62,7 +62,7 @@ Deploy to Maven:
         docker run -v ${PWD}:/module --rm -w="/module" maven:3.9.9-amazoncorretto-8 bash -c 'chmod -R 777 .'
       description: Resolve file permissions
   - checkout:
-      force-clean-build: true
+      force-clean-build: 'false'
       description: Checkout default repository
   - script:
       interpreter: SHELL
@@ -91,12 +91,12 @@ Release to Maven:
         docker run -v ${PWD}:/module --rm -w="/module" maven:3.9.9-amazoncorretto-8 bash -c 'chmod -R 777 .'
       description: Resolve file permissions
   - checkout:
-      force-clean-build: true
+      force-clean-build: 'false'
       description: Checkout Default Repository
   - checkout:
       repository: Release scripts
       path: release-scripts
-      force-clean-build: true
+      force-clean-build: 'false'
       description: Checkout Release Scripts Repository
   - script:
       interpreter: SHELL
@@ -152,7 +152,17 @@ variables:
   maven.release.version: 1.3.3
 repositories:
 - openmrs-module-billing:
-    scope: global
+    type: git
+    url: https://github.com/openmrs/openmrs-module-billing
+    branch: main
+    command-timeout-minutes: '180'
+    lfs: 'false'
+    verbose-logs: 'false'
+    use-shallow-clones: 'false'
+    cache-on-agents: 'false'
+    submodules: 'false'
+    ssh-key-applies-to-submodules: 'false'
+    fetch-all: 'false'
 - Release scripts:
     scope: global
 triggers:
