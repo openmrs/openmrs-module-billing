@@ -24,16 +24,6 @@ stages:
 Build and Test JDK 8:
   key: BTJ8
   tasks:
-  - script:
-      interpreter: SHELL
-      scripts:
-      - |-
-        #!/bin/bash -eu
-
-        set -x
-
-        docker run -v ${PWD}:/module --rm -w="/module" maven:3.9.9-amazoncorretto-8 bash -c 'chmod -R 777 .'
-      description: Resolve file permissions
   - checkout:
       force-clean-build: 'false'
       description: Checkout default repository
@@ -45,12 +35,15 @@ Build and Test JDK 8:
 
         set -x
 
-        docker run -v m2-repo:/root/.m2/repository -v ${PWD}:/module --rm -w="/module" maven:3.9.9-amazoncorretto-8 bash -c 'mvn clean package -B && chmod -R 777 .'
+        docker run \
+          -v m2-repo:/root/.m2/repository \
+          -v ${PWD}:/module \
+          --rm \
+          -w="/module" \
+          ${bamboo.build.docker.image.id} \
+          bash -c 'mvn clean package -B'
       description: Build and test
-  artifact-subscriptions: []
-Deploy to Maven:
-  key: DTM
-  tasks:
+  final-tasks:
   - script:
       interpreter: SHELL
       scripts:
@@ -59,8 +52,22 @@ Deploy to Maven:
 
         set -x
 
-        docker run -v ${PWD}:/module --rm -w="/module" maven:3.9.9-amazoncorretto-8 bash -c 'chmod -R 777 .'
-      description: Resolve file permissions
+        myUID=$(id -u)
+        myGID=$(id -g)
+
+        docker run \
+          -v ${PWD}:/module \
+          --rm \
+          -w="/module" \
+          -e myUID=$myUID \
+          -e myGIT=$myGID \
+          ${bamboo.build.docker.image.id} \
+          bash -c 'chown -R $myUID:$myGID .'
+      description: Fix file owners
+  artifact-subscriptions: []
+Deploy to Maven:
+  key: DTM
+  tasks:
   - checkout:
       force-clean-build: 'false'
       description: Checkout default repository
@@ -74,12 +81,16 @@ Deploy to Maven:
 
         docker pull ${bamboo.build.docker.image.id}
 
-        docker run -v m2-repo:/root/.m2/repository -v ~/.m2/settings.xml:/.m2/settings.xml:ro -v ${PWD}:/module --rm -w="/module" ${bamboo.build.docker.image.id} bash -c 'mvn deploy -B -DskipTests --settings /.m2/settings.xml && chmod -R 777 .'
+        docker run \
+          -v m2-repo:/root/.m2/repository \
+          -v ~/.m2/settings.xml:/.m2/settings.xml:ro \
+          -v ${PWD}:/module \
+          --rm \
+          -w="/module" \
+          ${bamboo.build.docker.image.id} \
+          bash -c 'mvn deploy -B -DskipTests --settings /.m2/settings.xml'
       description: Deploy
-  artifact-subscriptions: []
-Release to Maven:
-  key: RTM
-  tasks:
+  final-tasks:
   - script:
       interpreter: SHELL
       scripts:
@@ -88,8 +99,22 @@ Release to Maven:
 
         set -x
 
-        docker run -v ${PWD}:/module --rm -w="/module" maven:3.9.9-amazoncorretto-8 bash -c 'chmod -R 777 .'
-      description: Resolve file permissions
+        myUID=$(id -u)
+        myGID=$(id -g)
+
+        docker run \
+          -v ${PWD}:/module \
+          --rm \
+          -w="/module" \
+          -e myUID=$myUID \
+          -e myGIT=$myGID \
+          ${bamboo.build.docker.image.id} \
+          bash -c 'chown -R $myUID:$myGID .'
+      description: Fix file owners
+  artifact-subscriptions: []
+Release to Maven:
+  key: RTM
+  tasks:
   - checkout:
       force-clean-build: 'false'
       description: Checkout Default Repository
@@ -128,7 +153,8 @@ Release to Maven:
             ./release-scripts/release-prepare-perform.sh \
               -r ${bamboo.maven.release.version} \
               -d ${bamboo.maven.development.version} \
-              -e ${bamboo.planRepository.repositoryUrl}
+              -e ${bamboo.planRepository.repositoryUrl} \
+              -s
           '
       environment: GIT_USER_NAME=${bamboo.git.user.name} GIT_USER_EMAIL=${bamboo.git.user.email}
       description: Release prepare perform
@@ -145,6 +171,26 @@ Release to Maven:
         variable: maven.development.version
         variableScope: JOB
       description: Retrieve next snaphot version
+  final-tasks:
+  - script:
+      interpreter: SHELL
+      scripts:
+      - |-
+        #!/bin/bash -eu
+
+        set -x
+
+        myUID=$(id -u)
+        myGID=$(id -g)
+
+        docker run \
+          -v ${PWD}:/module \
+          --rm \
+          -w="/module" \
+          -e myUID=$myUID \
+          -e myGIT=$myGID \
+          ${bamboo.build.docker.image.id} \
+          bash -c 'chown -R $myUID:$myGID .'
   artifact-subscriptions: []
 variables:
   build.docker.image.id: maven:3.9.9-amazoncorretto-8
