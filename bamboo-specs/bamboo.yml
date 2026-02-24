@@ -60,7 +60,7 @@ Build and Test JDK 8:
           --rm \
           -w="/module" \
           -e myUID=$myUID \
-          -e myGIT=$myGID \
+          -e myGID=$myGID \
           ${bamboo.build.docker.image.id} \
           bash -c 'chown -R $myUID:$myGID .'
       description: Fix file owners
@@ -107,7 +107,7 @@ Deploy to Maven:
           --rm \
           -w="/module" \
           -e myUID=$myUID \
-          -e myGIT=$myGID \
+          -e myGID=$myGID \
           ${bamboo.build.docker.image.id} \
           bash -c 'chown -R $myUID:$myGID .'
       description: Fix file owners
@@ -188,7 +188,7 @@ Release to Maven:
           --rm \
           -w="/module" \
           -e myUID=$myUID \
-          -e myGIT=$myGID \
+          -e myGID=$myGID \
           ${bamboo.build.docker.image.id} \
           bash -c 'chown -R $myUID:$myGID .'
   artifact-subscriptions: []
