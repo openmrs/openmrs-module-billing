@@ -151,7 +151,7 @@ variables:
   maven.development.version: 1.4.0-SNAPSHOT
   maven.release.version: 1.3.3
 repositories:
-- openmrs-module-billing.git:
+- openmrs-module-billing:
     scope: global
 - Release scripts:
     scope: global
@@ -159,7 +159,7 @@ triggers:
 - polling:
     period: '180'
     repositories:
-    - openmrs-module-billing.git
+    - openmrs-module-billing
 branches:
   create: manually
   delete: never
