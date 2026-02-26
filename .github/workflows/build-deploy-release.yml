@@ -102,6 +102,7 @@ jobs:
 
       - name: Release prepare and perform
         run: |
+          export MAVEN_HOME="$(dirname $(dirname $(readlink -f $(which mvn))))"
           git config --global user.email "$GIT_USER_EMAIL"
           git config --global user.name "$GIT_USER_NAME"
           ./release-scripts/release-prepare-perform.sh \
@@ -112,6 +113,5 @@ jobs:
         env:
           GIT_USER_NAME: openmrs-bot
           GIT_USER_EMAIL: info@openmrs.org
-          MAVEN_HOME: /usr/share/apache-maven-3
           MAVEN_REPO_USERNAME: ${{ secrets.MAVEN_REPO_USERNAME }}
           MAVEN_REPO_API_KEY: ${{ secrets.MAVEN_REPO_API_KEY }}
