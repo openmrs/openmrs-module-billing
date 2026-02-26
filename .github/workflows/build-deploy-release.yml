@@ -103,7 +103,8 @@ jobs:
       - name: Release prepare and perform
         run: |
           export MAVEN_HOME="$(dirname $(dirname $(readlink -f $(which mvn))))"
-          git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git"
+          git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "git@github.com:"
+          git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "ssh://git@github.com/"
           git config --global user.email "$GIT_USER_EMAIL"
           git config --global user.name "$GIT_USER_NAME"
           ./release-scripts/release-prepare-perform.sh \
