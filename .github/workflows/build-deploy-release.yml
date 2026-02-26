@@ -70,7 +70,7 @@ jobs:
       - name: Checkout release scripts
         uses: actions/checkout@v4
         with:
-          repository: openmrs/openmrs-contrib-release-scripts
+          repository: openmrs/openmrs-contrib-bamboo
           path: release-scripts
 
       - name: Set up JDK 8
