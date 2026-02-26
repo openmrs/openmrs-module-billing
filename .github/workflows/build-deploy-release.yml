@@ -112,5 +112,6 @@ jobs:
         env:
           GIT_USER_NAME: openmrs-bot
           GIT_USER_EMAIL: info@openmrs.org
+          MAVEN_HOME: /usr/share/apache-maven-3
           MAVEN_REPO_USERNAME: ${{ secrets.MAVEN_REPO_USERNAME }}
           MAVEN_REPO_API_KEY: ${{ secrets.MAVEN_REPO_API_KEY }}
