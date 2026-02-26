@@ -47,7 +47,7 @@ jobs:
           distribution: corretto
           java-version: 8
           cache: maven
-          server-id: openmrs-repo-modules-pom-snapshots
+          server-id: openmrs-repo-snapshots
           server-username: MAVEN_REPO_USERNAME
           server-password: MAVEN_REPO_PASSWORD
 
@@ -79,9 +79,26 @@ jobs:
           distribution: corretto
           java-version: 8
           cache: maven
-          server-id: openmrs-repo-modules-pom-snapshots
-          server-username: MAVEN_REPO_USERNAME
-          server-password: MAVEN_REPO_PASSWORD
+
+      - name: Configure Maven settings
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml << 'EOF'
+          <settings>
+            <servers>
+              <server>
+                <id>openmrs-repo-modules</id>
+                <username>${env.MAVEN_REPO_USERNAME}</username>
+                <password>${env.MAVEN_REPO_PASSWORD}</password>
+              </server>
+              <server>
+                <id>openmrs-repo-snapshots</id>
+                <username>${env.MAVEN_REPO_USERNAME}</username>
+                <password>${env.MAVEN_REPO_PASSWORD}</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
 
       - name: Release prepare and perform
         run: |
