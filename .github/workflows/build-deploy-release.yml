@@ -26,7 +26,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: corretto
-          java-version: 8
+          java-version: '8'
           cache: maven
 
       - name: Build and test
@@ -46,7 +46,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: corretto
-          java-version: 8
+          java-version: '8'
           cache: maven
           server-id: openmrs-repo-snapshots
           server-username: MAVEN_REPO_USERNAME
@@ -86,7 +86,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: corretto
-          java-version: 8
+          java-version: '8'
           cache: maven
 
       - name: Configure Maven settings
