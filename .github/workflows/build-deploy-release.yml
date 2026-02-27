@@ -79,6 +79,8 @@ jobs:
         with:
           repository: openmrs/openmrs-contrib-bamboo
           path: release-scripts
+          sparse-checkout: release-prepare-perform.sh
+          sparse-checkout-cone-mode: false
 
       - name: Set up JDK 8
         uses: actions/setup-java@v4
