@@ -148,7 +148,7 @@ jobs:
 
       - name: Release prepare and perform
         run: |
-          export MAVEN_HOME="$(dirname $(dirname $(readlink -f $(which mvn))))"
+          export MAVEN_HOME="$(mvn -v 2>/dev/null | grep 'Maven home:' | sed 's/Maven home: //')"
           # Rewrite SSH SCM URLs to HTTPS so git push uses the checkout token
           git config --global url."https://github.com/".insteadOf "git@github.com:"
           git config --global --add url."https://github.com/".insteadOf "ssh://git@github.com/"
