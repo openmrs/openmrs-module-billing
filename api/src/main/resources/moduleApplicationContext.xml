@@ -101,6 +101,14 @@
 			</list>
 		</property>
 	</bean>
+	<bean parent="serviceContext">
+		<property name="moduleService">
+			<list merge="true">
+				<value>org.openmrs.module.billing.api.BillAuditService</value>
+				<ref bean="billAuditService"/>
+			</list>
+		</property>
+	</bean>
 
 	<!-- Service Bean Definitions -->
 	<bean id="itemPriceService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
@@ -199,6 +207,7 @@
 		<property name="target">
 			<bean class="org.openmrs.module.billing.api.impl.BillServiceImpl">
 				<property name="billDAO" ref="billDAO"/>
+				<property name="billAuditService" ref="billAuditService"/>
 			</bean>
 		</property>
 		<property name="preInterceptors" ref="serviceInterceptors"/>
@@ -224,7 +233,16 @@
 		<property name="preInterceptors" ref="serviceInterceptors"/>
 		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
 	</bean>
-
+    <bean id="billAuditService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target">
+			<bean class="org.openmrs.module.billing.api.impl.BillAuditServiceImpl">
+				<property name="billAuditDAO" ref="billAuditDAO"/>
+			</bean>
+		</property>
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+	</bean>
 
 	<bean id="genericRepositoryDao"
 	      class="org.openmrs.module.billing.api.base.entity.db.hibernate.BaseHibernateRepositoryImpl">
@@ -247,6 +265,10 @@
 	</bean>
 	<bean id="paymentModeDAO"
 		  class="org.openmrs.module.billing.api.db.hibernate.HibernatePaymentModeDAOImpl">
+		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	<bean id="billAuditDAO"
+		  class="org.openmrs.module.billing.api.db.hibernate.HibernateBillAuditDAO">
 		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
 	</bean>
 	<bean id="cashPointDAO"
