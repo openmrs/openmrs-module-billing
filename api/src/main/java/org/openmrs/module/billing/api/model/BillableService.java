@@ -23,7 +23,7 @@ public class BillableService extends BaseChangeableOpenmrsMetadata {
 	
 	private static final long serialVersionUID = 0L;
 	
-	private int billableServiceId;
+	private Integer billableServiceId;
 	
 	private String name;
 	
@@ -39,11 +39,11 @@ public class BillableService extends BaseChangeableOpenmrsMetadata {
 	
 	private BillableServiceStatus serviceStatus = BillableServiceStatus.ENABLED;
 	
-	public int getBillableServiceId() {
+	public Integer getBillableServiceId() {
 		return billableServiceId;
 	}
 	
-	public void setBillableServiceId(int billableServiceId) {
+	public void setBillableServiceId(Integer billableServiceId) {
 		this.billableServiceId = billableServiceId;
 	}
 	
