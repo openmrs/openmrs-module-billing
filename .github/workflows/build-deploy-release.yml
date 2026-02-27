@@ -15,6 +15,7 @@ on:
 jobs:
   build:
     name: Build and Test JDK 8
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
