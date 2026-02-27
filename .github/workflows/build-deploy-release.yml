@@ -109,11 +109,13 @@ jobs:
           git config --global user.email "$GIT_USER_EMAIL"
           git config --global user.name "$GIT_USER_NAME"
           ./release-scripts/release-prepare-perform.sh \
-            -r ${{ inputs.release_version }} \
-            -d ${{ inputs.development_version }} \
+            -r "$RELEASE_VERSION" \
+            -d "$DEVELOPMENT_VERSION" \
             -e "https://github.com/${{ github.repository }}.git" \
             -s
         env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+          DEVELOPMENT_VERSION: ${{ inputs.development_version }}
           GIT_USER_NAME: openmrs-bot
           GIT_USER_EMAIL: info@openmrs.org
           MAVEN_REPO_USERNAME: ${{ secrets.MAVEN_REPO_USERNAME }}
