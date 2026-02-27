@@ -93,6 +93,11 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 		if (instance.getLineItems() == null) {
 			instance.setLineItems(new ArrayList<>(lineItems.size()));
 		}
+    	for (BillLineItem item : lineItems) {
+		  	if (item.getQuantity() <= 1 || item.getQuantity() > 100) {
+			  	throw new IllegalArgumentException("Quantity can't be less than 1 or exceed 100");
+		  	}
+	  	}
 		BaseRestDataResource.syncCollection(instance.getLineItems(), lineItems);
 		for (BillLineItem item : instance.getLineItems()) {
 			item.setBill(instance);
