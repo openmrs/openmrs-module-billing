@@ -29,7 +29,8 @@ public class ImmutableBillInterceptor extends ImmutableEntityInterceptor {
 	
 	private static final String[] MUTABLE_PROPERTY_NAMES = new String[] { "changedBy", "dateChanged", "voided", "dateVoided",
 	        "voidedBy", "voidReason", "payment", "billAdjusted", "adjustmentReason", "adjustedBy", "receiptPrinted",
-	        "status", "receiptNumber" };
+	        "status", "receiptNumber", "refundReason", "refundRequestedBy", "dateRefundRequested", "refundApprovedBy",
+	        "dateRefundApproved" };
 	
 	@Override
 	protected Class<?> getSupportedType() {

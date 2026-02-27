@@ -219,6 +219,52 @@ public class BillTest {
 	}
 	
 	@Test
+	public void synchronizeBillStatus_shouldNotOverwriteRefundRequestedStatus() {
+		Bill bill = new Bill();
+		bill.setLineItems(new ArrayList<>());
+		bill.setPayments(new HashSet<>());
+		bill.setStatus(BillStatus.REFUND_REQUESTED);
+		
+		BillLineItem lineItem = new BillLineItem();
+		lineItem.setPrice(BigDecimal.valueOf(100));
+		lineItem.setQuantity(1);
+		lineItem.setVoided(false);
+		bill.getLineItems().add(lineItem);
+		
+		Payment payment = new Payment();
+		payment.setAmountTendered(BigDecimal.valueOf(100));
+		payment.setVoided(false);
+		bill.getPayments().add(payment);
+		
+		bill.synchronizeBillStatus();
+		
+		assertEquals(BillStatus.REFUND_REQUESTED, bill.getStatus());
+	}
+	
+	@Test
+	public void synchronizeBillStatus_shouldNotOverwriteRefundedStatus() {
+		Bill bill = new Bill();
+		bill.setLineItems(new ArrayList<>());
+		bill.setPayments(new HashSet<>());
+		bill.setStatus(BillStatus.REFUNDED);
+		
+		BillLineItem lineItem = new BillLineItem();
+		lineItem.setPrice(BigDecimal.valueOf(100));
+		lineItem.setQuantity(1);
+		lineItem.setVoided(false);
+		bill.getLineItems().add(lineItem);
+		
+		Payment payment = new Payment();
+		payment.setAmountTendered(BigDecimal.valueOf(100));
+		payment.setVoided(false);
+		bill.getPayments().add(payment);
+		
+		bill.synchronizeBillStatus();
+		
+		assertEquals(BillStatus.REFUNDED, bill.getStatus());
+	}
+	
+	@Test
 	public void setLineItems_shouldAllowSettingLineItemsOnNewBill() {
 		Bill bill = new Bill();
 		bill.setStatus(BillStatus.PENDING);
