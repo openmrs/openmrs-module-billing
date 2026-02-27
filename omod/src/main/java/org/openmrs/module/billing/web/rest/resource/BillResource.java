@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Provider;
 import org.openmrs.User;
+import org.openmrs.api.APIException;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
@@ -35,6 +36,7 @@ import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.model.CashPoint;
+import org.openmrs.module.billing.api.model.DiscountStatus;
 import org.openmrs.module.billing.api.model.Payment;
 import org.openmrs.module.billing.api.model.Timesheet;
 import org.openmrs.module.billing.api.search.BillSearch;
@@ -77,6 +79,16 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			description.addProperty("receiptNumber");
 			description.addProperty("status");
 			description.addProperty("adjustmentReason");
+			description.addProperty("discountType");
+			description.addProperty("discountValue");
+			description.addProperty("discountAmount");
+			description.addProperty("discountReason");
+			description.addProperty("discountStatus");
+			description.addProperty("discountInitiator", Representation.REF);
+			description.addProperty("discountApprover", Representation.REF);
+			description.addProperty("discountDateInitiated");
+			description.addProperty("discountDateApproved");
+			description.addProperty("lineItemsTotal");
 			description.addProperty("uuid");
 			return description;
 		}
@@ -132,6 +144,27 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 	public void setAdjustReason(Bill instance, String adjustReason) {
 		if (instance.getBillAdjusted().getUuid() != null) {
 			instance.getBillAdjusted().setAdjustmentReason(adjustReason);
+		}
+	}
+	
+	@PropertySetter("discountStatus")
+	public void setDiscountStatus(Bill instance, DiscountStatus discountStatus) {
+		checkDiscountEnabled();
+		
+		if (discountStatus == DiscountStatus.PENDING) {
+			instance.initiateDiscount(instance.getDiscountType(), instance.getDiscountValue(), instance.getDiscountReason());
+		} else if (discountStatus == DiscountStatus.APPROVED) {
+			instance.approveDiscount();
+		} else if (discountStatus == DiscountStatus.REJECTED) {
+			instance.rejectDiscount();
+		}
+	}
+	
+	private void checkDiscountEnabled() {
+		AdministrationService adminService = Context.getAdministrationService();
+		boolean enabled = Boolean.parseBoolean(adminService.getGlobalProperty(ModuleSettings.DISCOUNT_ENABLED_PROPERTY));
+		if (!enabled) {
+			throw new APIException("billing.discount.featureDisabled");
 		}
 	}
 	
