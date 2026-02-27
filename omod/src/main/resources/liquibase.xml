@@ -1095,4 +1095,17 @@
                                  baseTableName="bill_exemption_rule" baseColumnNames="voided_by"
                                  referencedTableName="users" referencedColumnNames="user_id"/>
     </changeSet>
+
+	<changeSet id="openmrs.billing-004-20260210-add-cashier-to-payment" author="Wikum Weerakutti">
+		<comment>Add cashier (provider) to each payment for tracking which cashier processed the payment</comment>
+		<addColumn tableName="cashier_bill_payment">
+			<column name="provider_id" type="int">
+				<!--Keeping this nullable for the sake of existing legacy data-->
+				<constraints nullable="true"/>
+			</column>
+		</addColumn>
+		<addForeignKeyConstraint constraintName="cashier_bill_payment_provider_fk"
+								 baseTableName="cashier_bill_payment" baseColumnNames="provider_id"
+								 referencedTableName="provider" referencedColumnNames="provider_id"/>
+	</changeSet>
 </databaseChangeLog>
