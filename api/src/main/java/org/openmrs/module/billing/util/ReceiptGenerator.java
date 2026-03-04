@@ -63,7 +63,7 @@ public class ReceiptGenerator {
 			symbols.setCurrencySymbol(currencySymbol.trim());
 			df.setDecimalFormatSymbols(symbols);
 		}
-		DateTimeFormatter dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT)
+		DateTimeFormatter dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
 		        .withLocale(LocaleUtility.getDefaultLocale());
 		
 		Patient patient = bill.getPatient();
