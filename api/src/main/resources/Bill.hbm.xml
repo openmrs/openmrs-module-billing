@@ -139,6 +139,12 @@
 		<property name="uuid" type="java.lang.String" column="uuid" length="38" unique="true"/>
 		<property name="adjustmentReason" type="java.lang.String" column="adjustment_reason" length="500"
 		          not-null="false"/>
+		<property name="refundReason" type="java.lang.String" column="refund_reason" length="500"
+		          not-null="false"/>
+		<many-to-one name="refundRequestedBy" class="org.openmrs.User" column="refund_requested_by"/>
+		<property name="dateRefundRequested" type="java.util.Date" column="date_refund_requested" length="19"/>
+		<many-to-one name="refundApprovedBy" class="org.openmrs.User" column="refund_approved_by"/>
+		<property name="dateRefundApproved" type="java.util.Date" column="date_refund_approved" length="19"/>
 	</class>
 
 	<class name="org.openmrs.module.billing.api.model.BillLineItem" table="cashier_bill_line_item">
