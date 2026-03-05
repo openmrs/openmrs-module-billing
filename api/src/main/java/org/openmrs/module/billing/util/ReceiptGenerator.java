@@ -23,6 +23,7 @@ import org.apache.commons.text.WordUtils;
 import org.openmrs.Patient;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
+import org.openmrs.module.billing.api.model.DiscountStatus;
 import org.openmrs.module.billing.api.model.Payment;
 import org.openmrs.module.billing.api.util.CashierModuleConstants;
 import org.openmrs.util.ConfigUtil;
@@ -195,6 +196,25 @@ public class ReceiptGenerator {
 		float[] totalColWidth = { 1f, 5f, 2f, 2f };
 		Table totalsSection = new Table(totalColWidth);
 		totalsSection.setWidth(UnitValue.createPercentValue(100f));
+		
+		boolean hasApprovedDiscount = bill.getDiscountStatus() == DiscountStatus.APPROVED
+		        && bill.getDiscountAmount() != null;
+		
+		if (hasApprovedDiscount) {
+			totalsSection.addCell(new Paragraph(" "));
+			totalsSection.addCell(new Paragraph(" "));
+			totalsSection.addCell(new Paragraph("Subtotal")).setFontSize(10).setTextAlignment(TextAlignment.RIGHT)
+			        .setFont(helvetica).setBold();
+			totalsSection.addCell(new Paragraph(nf.format(bill.getLineItemsTotal()))).setFontSize(10)
+			        .setTextAlignment(TextAlignment.RIGHT).setFont(helvetica).setBold();
+			
+			totalsSection.addCell(new Paragraph(" "));
+			totalsSection.addCell(new Paragraph(" "));
+			totalsSection.addCell(new Paragraph("Discount")).setFontSize(10).setTextAlignment(TextAlignment.RIGHT)
+			        .setFont(helvetica).setBold();
+			totalsSection.addCell(new Paragraph("-" + nf.format(bill.getDiscountAmount()))).setFontSize(10)
+			        .setTextAlignment(TextAlignment.RIGHT).setFont(helvetica).setBold();
+		}
 		
 		totalsSection.addCell(new Paragraph(" "));
 		totalsSection.addCell(new Paragraph(" "));
