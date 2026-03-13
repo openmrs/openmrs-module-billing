@@ -80,6 +80,7 @@ public class HibernateBillDAO implements BillDAO {
 		
 		Predicate predicate = cb.equal(root.get("patient").get("uuid"), patientUuid);
 		cq.where(predicate);
+		cq.orderBy(cb.desc(root.get("dateCreated")));
 		
 		TypedQuery<Bill> query = session.createQuery(cq);
 		
@@ -106,6 +107,7 @@ public class HibernateBillDAO implements BillDAO {
 		if (!predicates.isEmpty()) {
 			cq.where(predicates.toArray(new Predicate[0]));
 		}
+		cq.orderBy(cb.desc(root.get("dateCreated")));
 		
 		TypedQuery<Bill> query = session.createQuery(cq);
 		

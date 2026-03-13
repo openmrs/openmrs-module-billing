@@ -48,7 +48,8 @@ public interface BillDAO {
 	Bill getBillByReceiptNumber(@Nonnull String receiptNumber);
 	
 	/**
-	 * Retrieves all bills for a specific patient.
+	 * Retrieves all bills for a specific patient, ordered by date created descending (most recent
+	 * first).
 	 * <p>
 	 * Note: This method may return voided bills. Consider filtering voided records at the service layer
 	 * if needed.
@@ -56,12 +57,14 @@ public interface BillDAO {
 	 *
 	 * @param patientUuid the UUID of the patient (must not be null)
 	 * @param pagingInfo optional paging information (can be null for no paging)
-	 * @return a list of bills for the patient, or an empty list if none found
+	 * @return a list of bills for the patient sorted by dateCreated descending, or an empty list if
+	 *         none found
 	 */
 	List<Bill> getBillsByPatientUuid(@Nonnull String patientUuid, PagingInfo pagingInfo);
 	
 	/**
-	 * Searches for bills using the specified search criteria.
+	 * Searches for bills using the specified search criteria, ordered by date created descending (most
+	 * recent first).
 	 * <p>
 	 * By default, voided bills are excluded from results unless
 	 * {@link BillSearch#setIncludeVoided(Boolean)} is set to true. The search criteria support
@@ -71,7 +74,8 @@ public interface BillDAO {
 	 * @param billSearch the search criteria (must not be null)
 	 * @param pagingInfo optional paging information (can be null for no paging). When provided with
 	 *            {@code loadRecordCount=true}, the total count will be populated in the pagingInfo
-	 * @return a list of bills matching the search criteria, or an empty list if none found
+	 * @return a list of bills matching the search criteria sorted by dateCreated descending, or an
+	 *         empty list if none found
 	 * @see BillSearch
 	 */
 	List<Bill> getBills(@Nonnull BillSearch billSearch, PagingInfo pagingInfo);
