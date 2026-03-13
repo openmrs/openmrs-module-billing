@@ -61,6 +61,8 @@ public class ModuleSettings {
 	
 	public static final String PAYMENTS_BY_PAYMENT_MODE_REPORT_ID_PROPERTY = "billing.reports.paymentsByPaymentMode";
 	
+	public static final String DISCOUNT_ENABLED_PROPERTY = "billing.discountEnabled";
+	
 	private static final AdministrationService administrationService;
 	
 	static {
