@@ -365,4 +365,28 @@ public class BillableServiceServiceImplTest extends BaseModuleContextSensitiveTe
 		assertFalse(unretiredService.getRetired());
 		assertNull(unretiredService.getRetireReason());
 	}
+
+	@Test
+	public void saveBillableService_shouldFailIfNameExists() {
+		Concept concept = conceptService.getConcept(1002);
+		BillableService newService = new BillableService();
+		newService.setName("General Consultation");
+		newService.setShortName("Unique Short");
+		newService.setConcept(concept);
+		newService.setServiceStatus(BillableServiceStatus.ENABLED);
+
+		assertThrows(org.openmrs.api.APIException.class, () -> billableServiceService.saveBillableService(newService));
+	}
+
+	@Test
+	public void saveBillableService_shouldFailIfShortNameExists() {
+		Concept concept = conceptService.getConcept(1002);
+		BillableService newService = new BillableService();
+		newService.setName("Unique Name");
+		newService.setShortName("Gen Consult");
+		newService.setConcept(concept);
+		newService.setServiceStatus(BillableServiceStatus.ENABLED);
+
+		assertThrows(org.openmrs.api.APIException.class, () -> billableServiceService.saveBillableService(newService));
+	}
 }
