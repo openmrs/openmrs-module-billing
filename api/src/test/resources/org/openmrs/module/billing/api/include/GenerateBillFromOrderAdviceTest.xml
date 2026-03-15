@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+	<!--
+	  Test data for GenerateBillFromOrderAdviceTest.
+	  Depends on: CoreTest-2.0.xml (patients, locations), CashPointTest.xml (cash points),
+	              StockOperationType.xml (stock management tables).
+	-->
+
+	<!--
+	  Provider linked to person_id=1 (the admin user authenticated in BaseModuleContextSensitiveTest).
+	  The advice calls Context.getProviderService().getProvidersByPerson(user.getPerson()) to find
+	  the cashier; without this record the advice silently skips bill creation.
+	-->
+	<provider provider_id="100" name="Admin Test Provider" person_id="1" identifier="TEST-ADMIN-100"
+	          creator="1" date_created="2012-01-01 00:00:00.0" retired="0"
+	          uuid="a2c3868a-6b90-11e0-93c3-18a905e04400"/>
+
+	<!-- Lab order concept (CBC) used as the TestOrder concept in tests -->
+	<concept concept_id="5000" retired="false" datatype_id="4" class_id="11" is_set="false"
+	         creator="1" date_created="2012-01-01 00:00:00.0"
+	         uuid="cbc00000-0000-0000-0000-000000000001"/>
+	<concept_name concept_name_id="50000" concept_id="5000" name="Complete Blood Count" locale="en"
+	              creator="1" date_created="2012-01-01 00:00:00.0"
+	              voided="false" uuid="cbc00000-0000-0000-0000-000000000002"
+	              concept_name_type="FULLY_SPECIFIED" locale_preferred="1"/>
+
+	<!--
+	  ENABLED BillableService for the lab concept.
+	  The advice searches by concept UUID + serviceStatus=ENABLED; this row must match.
+	-->
+	<cashier_billable_service service_id="100" name="Complete Blood Count" short_name="CBC"
+	                          concept_id="5000" service_status="ENABLED"
+	                          creator="1" date_created="2012-01-01 00:00:00.0" retired="false"
+	                          uuid="cbc00000-0000-0000-0000-000000000003"/>
+
+	<!--
+	  Price for the CBC service. The advice picks itemPrices.get(0) (ordered by id DESC).
+	  Tests assert that the created bill line item has price=500.00.
+	-->
+	<cashier_item_price item_price_id="100" service_id="100" name="CBC Standard Price" price="500.00"
+	                    creator="1" date_created="2012-01-01 00:00:00.0" retired="false"
+	                    uuid="cbc00000-0000-0000-0000-000000000004"/>
+</dataset>

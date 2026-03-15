@@ -88,6 +88,10 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 						BillStatus lineItemStatus = isExempted ? BillStatus.EXEMPTED : BillStatus.PENDING;
 						addBillItemToBill(order, patient, cashierUUID, stockItems.get(0), null, (int) drugQuantity,
 						    order.getDateActivated(), lineItemStatus);
+					} else {
+						log.info("No StockItem found for DrugOrder drug ID: {} — skipping bill generation. "
+						        + "Configure a StockItem for this drug to enable auto-billing.",
+						    drugID);
 					}
 				} else if (order instanceof TestOrder) {
 					TestOrder testOrder = (TestOrder) order;
@@ -102,6 +106,11 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 						BillStatus lineItemStatus = isExempted ? BillStatus.EXEMPTED : BillStatus.PENDING;
 						addBillItemToBill(order, patient, cashierUUID, null, searchResult.get(0), 1,
 						    order.getDateActivated(), lineItemStatus);
+					} else {
+						log.info(
+						    "No BillableService found for TestOrder concept UUID: {} — skipping bill generation. "
+						            + "Configure a BillableService for this concept to enable auto-billing.",
+						    testOrder.getConcept().getUuid());
 					}
 				}
 			}

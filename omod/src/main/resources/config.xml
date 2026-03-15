@@ -38,11 +38,6 @@
 		<class>${project.parent.groupId}.${project.parent.artifactId}.advice.GenerateBillFromOrderAdvice</class>
 	</advice>
 
-	<advice>
-		<point>org.openmrs.api.OrderService</point>
-		<class>${project.parent.groupId}.${project.parent.artifactId}.advice.OrderCreationMethodBeforeAdvice</class>
-	</advice>
-
 	<globalProperty>
 		<property>${project.parent.artifactId}.defaultReceiptReportId</property>
 		<description>ID of the default Jasper report to use for generating a receipt on the Bill page</description>
