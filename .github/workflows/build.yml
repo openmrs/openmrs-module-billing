@@ -2,7 +2,7 @@ name: Build
 
 on:
   push:
-    branches: [ main, vulnerability-dashboard ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   build:
-    uses: openmrs/openmrs-contrib-gha-workflows/.github/workflows/build-backend-module.yml@vulnerability-dashboard
+    uses: openmrs/openmrs-contrib-gha-workflows/.github/workflows/build-backend-module.yml@main
     with:
       java_versions: '["8", "11", "17", "21"]'
       main_java_version: '8'
