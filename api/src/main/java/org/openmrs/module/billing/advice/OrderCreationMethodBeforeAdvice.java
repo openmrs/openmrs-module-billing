@@ -37,6 +37,7 @@ import org.openmrs.module.billing.api.CashPointService;
 import org.openmrs.module.billing.api.ItemPriceService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
+import org.openmrs.module.billing.api.model.BillLineItemStatus;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.model.BillableServiceStatus;
@@ -141,7 +142,7 @@ public class OrderCreationMethodBeforeAdvice implements MethodBeforeAdvice {
 				billLineItem.setPrice(new BigDecimal("0.0"));
 			}
 			billLineItem.setQuantity(quantity);
-			billLineItem.setPaymentStatus(BillStatus.PENDING);
+			billLineItem.setPaymentStatus(BillLineItemStatus.PENDING);
 			billLineItem.setLineItemOrder(0);
 			
 			// Bill
