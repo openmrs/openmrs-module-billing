@@ -45,8 +45,7 @@ public class BillLineItem extends BaseChangeableOpenmrsData {
 	
 	private Integer lineItemOrder;
 	
-	private BillStatus paymentStatus; // this should only be set to either
-	// pending or paid
+	private BillLineItemStatus paymentStatus; 
 	
 	private Order order;
 	
@@ -133,11 +132,11 @@ public class BillLineItem extends BaseChangeableOpenmrsData {
 		this.lineItemOrder = lineItemOrder;
 	}
 	
-	public BillStatus getPaymentStatus() {
+	public BillLineItemStatus getPaymentStatus() {
 		return paymentStatus;
 	}
 	
-	public void setPaymentStatus(BillStatus paymentStatus) {
+	public void setPaymentStatus(BillLineItemStatus paymentStatus) {
 		this.paymentStatus = paymentStatus;
 	}
 	

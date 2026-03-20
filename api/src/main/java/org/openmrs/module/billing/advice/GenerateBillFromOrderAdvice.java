@@ -19,6 +19,7 @@ import org.openmrs.module.billing.api.evaluator.ExemptionRuleEngine;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillExemption;
 import org.openmrs.module.billing.api.model.BillLineItem;
+import org.openmrs.module.billing.api.model.BillLineItemStatus;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.model.BillableServiceStatus;
@@ -85,7 +86,8 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 					if (!stockItems.isEmpty()) {
 						// check from the list for all exemptions
 						boolean isExempted = checkIfOrderIsExempted(workflowService, order, ExemptionType.COMMODITY);
-						BillStatus lineItemStatus = isExempted ? BillStatus.EXEMPTED : BillStatus.PENDING;
+						BillLineItemStatus lineItemStatus = isExempted ? BillLineItemStatus.EXEMPTED
+						        : BillLineItemStatus.PENDING;
 						addBillItemToBill(order, patient, cashierUUID, stockItems.get(0), null, (int) drugQuantity,
 						    order.getDateActivated(), lineItemStatus);
 					}
@@ -99,7 +101,8 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 					List<BillableService> searchResult = service.getBillableServices(searchTemplate, null);
 					if (!searchResult.isEmpty()) {
 						boolean isExempted = checkIfOrderIsExempted(workflowService, order, ExemptionType.SERVICE);
-						BillStatus lineItemStatus = isExempted ? BillStatus.EXEMPTED : BillStatus.PENDING;
+						BillLineItemStatus lineItemStatus = isExempted ? BillLineItemStatus.EXEMPTED
+						        : BillLineItemStatus.PENDING;
 						addBillItemToBill(order, patient, cashierUUID, null, searchResult.get(0), 1,
 						    order.getDateActivated(), lineItemStatus);
 					}
@@ -168,7 +171,7 @@ public class GenerateBillFromOrderAdvice implements AfterReturningAdvice {
 	 * @param cashierUUID
 	 */
 	public void addBillItemToBill(Order order, Patient patient, String cashierUUID, StockItem stockitem,
-	        BillableService service, Integer quantity, Date orderDate, BillStatus lineItemStatus) {
+	        BillableService service, Integer quantity, Date orderDate, BillLineItemStatus lineItemStatus) {
 		try {
 			// Search for a bill
 			Bill activeBill = new Bill();
