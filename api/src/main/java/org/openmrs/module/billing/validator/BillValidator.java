@@ -36,8 +36,8 @@ public class BillValidator implements Validator {
 				errors.rejectValue("voided", "error.null");
 			}
 			
-			validateLineItemsNotModified(bill, errors);
 			validateNewPaymentsHaveCashier(bill, errors);
+			validateLineItemsNotModified(bill, errors);
 		}
 	}
 	

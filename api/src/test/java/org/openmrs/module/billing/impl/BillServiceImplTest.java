@@ -325,6 +325,37 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
+	public void saveBill_shouldThrowExceptionWhenNewPaymentHasNoCashier() {
+		Bill postedBill = billService.getBill(0);
+		assertNotNull(postedBill);
+		assertEquals(BillStatus.POSTED, postedBill.getStatus());
+		
+		PaymentMode paymentMode = paymentModeService.getPaymentMode(0);
+		
+		Payment payment = Payment.builder().amount(BigDecimal.valueOf(10.0)).amountTendered(BigDecimal.valueOf(10.0))
+		        .build();
+		payment.setInstanceType(paymentMode);
+		// cashier intentionally NOT set
+		
+		postedBill.addPayment(payment);
+		
+		assertThrows(ValidationException.class, () -> billService.saveBill(postedBill));
+	}
+	
+	@Test
+	public void saveBill_shouldTolerateExistingPaymentsWithNoCashier() {
+		// Legacy payments (with ID) that have no cashier must be tolerated
+		Bill paidBill = billService.getBill(1);
+		assertNotNull(paidBill);
+		assertFalse(paidBill.getPayments().isEmpty());
+		
+		Payment existingPayment = paidBill.getPayments().iterator().next();
+		assertNotNull(existingPayment.getId(), "Existing payment should have an ID");
+		
+		assertDoesNotThrow(() -> billService.saveBill(paidBill));
+	}
+	
+	@Test
 	public void saveBill_shouldAllowPaymentsForPostedBill() {
 		Bill postedBill = billService.getBill(0);
 		assertNotNull(postedBill);
