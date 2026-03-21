@@ -21,6 +21,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openmrs.Patient;
+import org.openmrs.Provider;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.api.UnchangeableObjectException;
@@ -331,9 +332,12 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		
 		PaymentMode paymentMode = paymentModeService.getPaymentMode(0);
 		
+		Provider cashier = Context.getProviderService().getProvider(1);
+		
 		Payment payment = Payment.builder().amount(BigDecimal.valueOf(10.0)).amountTendered(BigDecimal.valueOf(10.0))
 		        .build();
 		payment.setInstanceType(paymentMode);
+		payment.setCashier(cashier);
 		
 		postedBill.addPayment(payment);
 		billService.saveBill(postedBill);
