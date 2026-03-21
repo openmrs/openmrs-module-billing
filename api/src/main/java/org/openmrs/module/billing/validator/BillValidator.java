@@ -13,6 +13,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillLineItemService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
+import org.openmrs.module.billing.api.model.Payment;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
@@ -36,6 +37,7 @@ public class BillValidator implements Validator {
 			}
 			
 			validateLineItemsNotModified(bill, errors);
+			validateNewPaymentsHaveCashier(bill, errors);
 		}
 	}
 	
@@ -78,6 +80,22 @@ public class BillValidator implements Validator {
 			boolean hasNewLineItems = bill.getLineItems().stream().anyMatch(item -> item.getId() == null);
 			if (hasNewLineItems) {
 				errors.reject("billing.error.lineItemsCannotBeAddedToNonPendingBill");
+			}
+		}
+	}
+	
+	/**
+	 * Validates that any new (unsaved) non-voided payment has a cashier. Existing persisted payments
+	 * (id != null) are exempt to allow legacy data.
+	 */
+	private void validateNewPaymentsHaveCashier(Bill bill, Errors errors) {
+		if (bill.getPayments() == null) {
+			return;
+		}
+		for (Payment payment : bill.getPayments()) {
+			if (payment != null && !payment.getVoided() && payment.getId() == null && payment.getCashier() == null) {
+				errors.reject("billing.error.paymentCashierRequired");
+				return;
 			}
 		}
 	}
