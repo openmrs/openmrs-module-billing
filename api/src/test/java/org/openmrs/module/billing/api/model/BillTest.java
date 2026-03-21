@@ -121,7 +121,7 @@ public class BillTest {
 		bill.synchronizeBillStatus();
 		
 		assertEquals(BillStatus.PAID, bill.getStatus());
-		assertEquals(BillStatus.PAID, lineItem.getPaymentStatus());
+		assertEquals(BillLineItemStatus.PAID, lineItem.getPaymentStatus());
 	}
 	
 	@Test
@@ -177,7 +177,7 @@ public class BillTest {
 		bill.synchronizeBillStatus();
 		assertEquals(BillStatus.PAID, bill.getStatus());
 		// Only non-voided line items should be set to PAID
-		assertEquals(BillStatus.PAID, lineItem1.getPaymentStatus());
+		assertEquals(BillLineItemStatus.PAID, lineItem1.getPaymentStatus());
 	}
 	
 	@Test
@@ -212,8 +212,8 @@ public class BillTest {
 		bill.synchronizeBillStatus();
 		
 		assertEquals(BillStatus.PAID, bill.getStatus());
-		assertEquals(BillStatus.PAID, lineItem1.getPaymentStatus());
-		assertEquals(BillStatus.PAID, lineItem2.getPaymentStatus());
+		assertEquals(BillLineItemStatus.PAID, lineItem1.getPaymentStatus());
+		assertEquals(BillLineItemStatus.PAID, lineItem2.getPaymentStatus());
 		// Voided line items should not be updated
 		assertNull(voidedLineItem.getPaymentStatus());
 	}

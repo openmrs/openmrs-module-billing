@@ -177,7 +177,7 @@ public class Bill extends BaseOpenmrsData {
 				if (this.lineItems != null) {
 					for (BillLineItem lineItem : this.lineItems) {
 						if (lineItem != null && !lineItem.getVoided()) {
-							lineItem.setPaymentStatus(BillStatus.PAID);
+							lineItem.setPaymentStatus(BillLineItemStatus.PAID);
 						}
 					}
 				}

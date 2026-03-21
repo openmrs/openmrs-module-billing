@@ -1095,4 +1095,18 @@
                                  baseTableName="bill_exemption_rule" baseColumnNames="voided_by"
                                  referencedTableName="users" referencedColumnNames="user_id"/>
     </changeSet>
+	<changeSet id="openmrs.billing-004-20260320-migrate-line-item-payment-status" author="Edson Wasswa">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="1">
+				SELECT CASE WHEN EXISTS (
+					SELECT 1 FROM cashier_bill_line_item WHERE payment_status = 'POSTED'
+				) THEN 1 ELSE 0 END
+			</sqlCheck>
+		</preConditions>
+		<sql>
+			UPDATE cashier_bill_line_item
+			SET payment_status = 'PENDING'
+			WHERE payment_status = 'POSTED'
+		</sql>
+	</changeSet>
 </databaseChangeLog>
