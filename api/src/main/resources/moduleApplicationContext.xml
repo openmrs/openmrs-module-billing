@@ -259,6 +259,7 @@
 	</bean>
 
 	<bean id="billValidator" class="org.openmrs.module.billing.validator.BillValidator"/>
+	<bean id="billableServiceValidator" class="org.openmrs.module.billing.validator.BillableServiceValidator"/>
 
 	<bean id="ruleEngine"
 		  class="org.openmrs.module.billing.api.evaluator.ExemptionRuleEngine">
