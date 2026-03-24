@@ -1099,8 +1099,9 @@
     <changeSet id="openmrs.billing-004-20260320-add-provider-id-to-bill-payment" author="Nethmi Rodrigo">
 		<comment>Add cashier (provider) for each payment to track which cashier processed the payment</comment>
         <addColumn tableName="cashier_bill_payment">
-            <column name="provider_id" type="int"/>
-			<constraints nullable="true"/>
+            <column name="provider_id" type="int">
+      		<constraints nullable="true"/>
+  			</column>
         </addColumn>
         <addForeignKeyConstraint
             constraintName="cashier_bill_payment_provider_id_fk"
