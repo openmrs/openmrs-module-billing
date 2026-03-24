@@ -104,6 +104,50 @@ public class PaymentResourceTest {
 	}
 	
 	@Test
+	public void save_shouldUseClientProvidedCashierWhenSet() {
+		Provider clientCashier = new Provider();
+		clientCashier.setId(2);
+		
+		Provider authenticatedCashier = new Provider();
+		authenticatedCashier.setId(99);
+		providerUtilMock.when(ProviderUtil::getCurrentProvider).thenReturn(authenticatedCashier);
+		
+		Bill bill = new Bill();
+		bill.setId(1);
+		Payment payment = new Payment();
+		payment.setBill(bill);
+		payment.setAmount(BigDecimal.TEN);
+		payment.setAmountTendered(BigDecimal.TEN);
+		payment.setCashier(clientCashier);
+		
+		when(billService.saveBill(bill)).thenReturn(bill);
+		
+		resource.save(payment);
+		
+		assertSame("Client-provided cashier should not be overwritten", clientCashier, payment.getCashier());
+	}
+	
+	@Test
+	public void save_shouldFallbackToAuthenticatedUserWhenNoCashierProvided() {
+		Provider cashier = new Provider();
+		cashier.setId(1);
+		providerUtilMock.when(ProviderUtil::getCurrentProvider).thenReturn(cashier);
+		
+		Bill bill = new Bill();
+		bill.setId(1);
+		Payment payment = new Payment();
+		payment.setBill(bill);
+		payment.setAmount(BigDecimal.TEN);
+		payment.setAmountTendered(BigDecimal.TEN);
+		
+		when(billService.saveBill(bill)).thenReturn(bill);
+		
+		resource.save(payment);
+		
+		assertSame("Authenticated user's provider should be used as fallback", cashier, payment.getCashier());
+	}
+	
+	@Test
 	public void save_shouldSetCashierBeforeAddingPaymentToBill() {
 		Provider cashier = new Provider();
 		cashier.setId(1);

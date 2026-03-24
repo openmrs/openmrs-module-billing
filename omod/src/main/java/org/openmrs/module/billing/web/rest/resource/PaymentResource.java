@@ -74,8 +74,18 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
 		description.addProperty("attributes");
 		description.addProperty("amount");
 		description.addProperty("amountTendered");
+		description.addProperty("cashier");
 		
 		return description;
+	}
+	
+	@PropertySetter("cashier")
+	public void setCashier(Payment instance, String uuid) {
+		Provider provider = Context.getProviderService().getProviderByUuid(uuid);
+		if (provider == null) {
+			throw new ObjectNotFoundException();
+		}
+		instance.setCashier(provider);
 	}
 	
 	// Work around TypeVariable issue on base generic property (BaseCustomizableInstanceData.getInstanceType)
@@ -136,11 +146,14 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
 	
 	@Override
 	public Payment save(Payment delegate) {
-		Provider cashier = ProviderUtil.getCurrentProvider();
-		if (cashier == null) {
-			throw new APIException("The authenticated user is not associated with a Provider and cannot process payments.");
+		if (delegate.getCashier() == null) {
+			Provider cashier = ProviderUtil.getCurrentProvider();
+			if (cashier == null) {
+				throw new APIException(
+				        "The authenticated user is not associated with a Provider and cannot process payments.");
+			}
+			delegate.setCashier(cashier);
 		}
-		delegate.setCashier(cashier);
 		
 		BillService service = Context.getService(BillService.class);
 		Bill bill = delegate.getBill();
