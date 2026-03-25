@@ -328,17 +328,36 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		Bill postedBill = billService.getBill(0);
 		assertNotNull(postedBill);
 		assertEquals(BillStatus.POSTED, postedBill.getStatus());
-		
+
 		PaymentMode paymentMode = paymentModeService.getPaymentMode(0);
-		
+
 		Payment payment = Payment.builder().amount(BigDecimal.valueOf(10.0)).amountTendered(BigDecimal.valueOf(10.0))
 		        .build();
 		payment.setInstanceType(paymentMode);
-		
+		payment.setCashier(providerService.getProvider(0));
+
 		postedBill.addPayment(payment);
 		billService.saveBill(postedBill);
-		
+
 		assertDoesNotThrow(Context::flushSession);
+	}
+
+	@Test
+	public void saveBill_shouldThrowValidationExceptionWhenPaymentHasNoCashier() {
+		Bill postedBill = billService.getBill(0);
+		assertNotNull(postedBill);
+		assertEquals(BillStatus.POSTED, postedBill.getStatus());
+
+		PaymentMode paymentMode = paymentModeService.getPaymentMode(0);
+
+		Payment payment = Payment.builder().amount(BigDecimal.valueOf(10.0)).amountTendered(BigDecimal.valueOf(10.0))
+		        .build();
+		payment.setInstanceType(paymentMode);
+		// cashier intentionally NOT set — BillValidator must reject this
+
+		postedBill.addPayment(payment);
+
+		assertThrows(ValidationException.class, () -> billService.saveBill(postedBill));
 	}
 	
 	@Test

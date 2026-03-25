@@ -106,6 +106,14 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 		}
 		BaseRestDataResource.syncCollection(instance.getPayments(), payments);
 		for (Payment payment : instance.getPayments()) {
+			if (payment.getId() == null && payment.getCashier() == null) {
+				Provider cashier = getCurrentCashier();
+				if (cashier == null) {
+					throw new RestClientException("Couldn't find Provider for the current user ("
+					        + Context.getAuthenticatedUser().getUsername() + ")");
+				}
+				payment.setCashier(cashier);
+			}
 			instance.addPayment(payment);
 		}
 	}

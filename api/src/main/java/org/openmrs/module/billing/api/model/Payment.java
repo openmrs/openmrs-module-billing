@@ -13,14 +13,16 @@
  */
 package org.openmrs.module.billing.api.model;
 
+import java.math.BigDecimal;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.openmrs.module.billing.api.base.entity.model.BaseInstanceCustomizableData;
 
-import java.math.BigDecimal;
+import org.openmrs.Provider;
+import org.openmrs.module.billing.api.base.entity.model.BaseInstanceCustomizableData;
 
 /**
  * Model class that represents the {@link Bill} payment information.
@@ -45,6 +47,10 @@ public class Payment extends BaseInstanceCustomizableData<PaymentMode, PaymentAt
 	@Getter
 	@Setter
 	private BigDecimal amountTendered;
+	
+	@Getter
+	@Setter
+	private Provider cashier;
 	
 	public Integer getId() {
 		return paymentId;
