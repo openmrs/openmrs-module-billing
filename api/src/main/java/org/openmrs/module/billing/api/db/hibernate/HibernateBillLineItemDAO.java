@@ -2,6 +2,7 @@ package org.openmrs.module.billing.api.db.hibernate;
 
 import lombok.AllArgsConstructor;
 import org.hibernate.SessionFactory;
+import org.openmrs.Order;
 import org.openmrs.module.billing.api.db.BillLineItemDAO;
 import org.openmrs.module.billing.api.model.BillLineItem;
 
@@ -32,6 +33,15 @@ public class HibernateBillLineItemDAO implements BillLineItemDAO {
 		TypedQuery<BillLineItem> query = sessionFactory.getCurrentSession()
 		        .createQuery("select b from BillLineItem b where b.uuid = :uuid", BillLineItem.class);
 		query.setParameter("uuid", uuid);
+		return query.getResultStream().findFirst().orElse(null);
+	}
+	
+	@Override
+	@Nullable
+	public BillLineItem getBillLineItemByOrder(@Nonnull Order order) {
+		TypedQuery<BillLineItem> query = sessionFactory.getCurrentSession()
+		        .createQuery("select b from BillLineItem b where b.order = :order and b.voided = false", BillLineItem.class);
+		query.setParameter("order", order);
 		return query.getResultStream().findFirst().orElse(null);
 	}
 	
