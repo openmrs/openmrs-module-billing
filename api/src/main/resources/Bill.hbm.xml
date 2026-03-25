@@ -157,6 +157,7 @@
 		<many-to-one name="billableService" class="org.openmrs.module.billing.api.model.BillableService"
 		             column="service_id" not-null="false"/>
 		<many-to-one name="itemPrice" class="org.openmrs.module.billing.api.model.CashierItemPrice" column="price_id"/>
+		<many-to-one name="order" class="org.openmrs.Order" column="order_id" not-null="false"/>
 		<property name="price" type="java.math.BigDecimal" column="price" not-null="true"/>
 		<property name="priceName" type="java.lang.String" column="price_name" length="255"/>
 		<property name="quantity" type="int" column="quantity" not-null="true"/>

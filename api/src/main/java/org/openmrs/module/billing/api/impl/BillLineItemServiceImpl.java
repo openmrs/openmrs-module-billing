@@ -18,6 +18,7 @@ import java.util.List;
 
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
+import org.openmrs.Order;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.billing.api.BillLineItemService;
 import org.openmrs.module.billing.api.db.BillLineItemDAO;
@@ -45,5 +46,14 @@ public class BillLineItemServiceImpl extends BaseOpenmrsService implements BillL
 			return null;
 		}
 		return billLineItemDAO.getBillLineItemByUuid(uuid);
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public BillLineItem getBillLineItemByOrder(Order order) {
+		if (order == null) {
+			return null;
+		}
+		return billLineItemDAO.getBillLineItemByOrder(order);
 	}
 }
