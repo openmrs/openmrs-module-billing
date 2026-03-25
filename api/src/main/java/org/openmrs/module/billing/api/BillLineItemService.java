@@ -13,6 +13,7 @@
  */
 package org.openmrs.module.billing.api;
 
+import org.openmrs.Order;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.billing.api.model.BillLineItem;
 
@@ -37,5 +38,14 @@ public interface BillLineItemService extends OpenmrsService {
 	 */
 	@Nullable
 	BillLineItem getBillLineItemByUuid(String uuid);
+	
+	/**
+	 * Retrieves the active (non-voided) bill line item linked to the given order.
+	 *
+	 * @param order the order to look up
+	 * @return the bill line item for that order, or null if none exists
+	 */
+	@Nullable
+	BillLineItem getBillLineItemByOrder(Order order);
 	
 }
