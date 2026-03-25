@@ -16,13 +16,19 @@ package org.openmrs.module.billing.validator;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.math.BigDecimal;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.TestConstants;
 import org.openmrs.module.billing.api.BillService;
+import org.openmrs.module.billing.api.PaymentModeService;
 import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
+import org.openmrs.module.billing.api.model.Payment;
+import org.openmrs.module.billing.api.model.PaymentMode;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
@@ -36,10 +42,13 @@ public class BillValidatorTest extends BaseModuleContextSensitiveTest {
 	
 	private BillService billService;
 	
+	private PaymentModeService paymentModeService;
+	
 	@BeforeEach
 	public void setup() {
 		billValidator = new BillValidator();
 		billService = Context.getService(BillService.class);
+		paymentModeService = Context.getService(PaymentModeService.class);
 		
 		executeDataSet(TestConstants.CORE_DATASET2);
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "StockOperationType.xml");
@@ -71,6 +80,65 @@ public class BillValidatorTest extends BaseModuleContextSensitiveTest {
 		
 		// Unmodified PAID bills should pass validation - rejection happens only when
 		// attempting to modify line items
+		assertFalse(errors.hasErrors());
+	}
+	
+	@Test
+	public void validate_shouldRejectNewPaymentWithNoCashier() {
+		Bill postedBill = billService.getBill(0);
+		assertNotNull(postedBill);
+		assertEquals(BillStatus.POSTED, postedBill.getStatus());
+		
+		PaymentMode paymentMode = paymentModeService.getPaymentMode(0);
+		
+		Payment payment = Payment.builder().amount(BigDecimal.valueOf(10.0)).amountTendered(BigDecimal.valueOf(10.0))
+		        .build();
+		payment.setInstanceType(paymentMode);
+		// cashier intentionally NOT set
+		
+		postedBill.addPayment(payment);
+		
+		Errors errors = new BindException(postedBill, "bill");
+		billValidator.validate(postedBill, errors);
+		
+		assertTrue(errors.hasErrors());
+	}
+	
+	@Test
+	public void validate_shouldTolerateExistingPaymentsWithNoCashier() {
+		// Legacy payments (with ID) that have no cashier must be tolerated
+		Bill paidBill = billService.getBill(1);
+		assertNotNull(paidBill);
+		assertFalse(paidBill.getPayments().isEmpty());
+		
+		Payment existingPayment = paidBill.getPayments().iterator().next();
+		assertNotNull(existingPayment.getId(), "Existing payment should have an ID");
+		
+		Errors errors = new BindException(paidBill, "bill");
+		billValidator.validate(paidBill, errors);
+		
+		assertFalse(errors.hasErrors());
+	}
+	
+	@Test
+	public void validate_shouldTolerateVoidedNewPaymentWithNoCashier() {
+		Bill postedBill = billService.getBill(0);
+		assertNotNull(postedBill);
+		assertEquals(BillStatus.POSTED, postedBill.getStatus());
+		
+		PaymentMode paymentMode = paymentModeService.getPaymentMode(0);
+		
+		Payment payment = Payment.builder().amount(BigDecimal.valueOf(10.0)).amountTendered(BigDecimal.valueOf(10.0))
+		        .build();
+		payment.setInstanceType(paymentMode);
+		payment.setVoided(true);
+		// cashier intentionally NOT set
+		
+		postedBill.addPayment(payment);
+		
+		Errors errors = new BindException(postedBill, "bill");
+		billValidator.validate(postedBill, errors);
+		
 		assertFalse(errors.hasErrors());
 	}
 	
