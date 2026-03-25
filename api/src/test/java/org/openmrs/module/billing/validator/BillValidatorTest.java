@@ -25,7 +25,6 @@ import org.openmrs.module.billing.TestConstants;
 import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.PaymentModeService;
 import org.openmrs.module.billing.api.model.Bill;
-import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.model.Payment;
 import org.openmrs.module.billing.api.model.PaymentMode;

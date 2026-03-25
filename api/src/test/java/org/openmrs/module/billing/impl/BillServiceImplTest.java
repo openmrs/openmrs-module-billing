@@ -21,10 +21,10 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openmrs.Patient;
-import org.openmrs.Provider;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.api.UnchangeableObjectException;
+import org.openmrs.api.ValidationException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.TestConstants;
 import org.openmrs.module.billing.api.BillService;
@@ -241,6 +241,28 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#saveBill(Bill)
 	 */
 	@Test
+	public void saveBill_shouldThrowExceptionWhenAddingLineItemsToPaidBill() {
+		// Get the PAID bill from test data (bill_id=1)
+		Bill paidBill = billService.getBill(1);
+		assertNotNull(paidBill);
+		assertEquals(BillStatus.PAID, paidBill.getStatus());
+		
+		// Try to add a new line item
+		BillLineItem newLineItem = new BillLineItem();
+		newLineItem.setPrice(BigDecimal.valueOf(25.50));
+		newLineItem.setQuantity(2);
+		newLineItem.setPaymentStatus(BillStatus.PENDING);
+		paidBill.addLineItem(newLineItem);
+		
+		// Should throw exception when saving (BillValidator catches line item
+		// additions)
+		assertThrows(ValidationException.class, () -> billService.saveBill(paidBill));
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#saveBill(Bill)
+	 */
+	@Test
 	public void saveBill_shouldAllowRemovingLineItemsFromPendingBill() {
 		// Get the PENDING bill from test data (bill_id=2)
 		Bill pendingBill = billService.getBill(2);
@@ -258,6 +280,23 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		Bill savedBill = billService.saveBill(pendingBill);
 		assertNotNull(savedBill);
 		assertTrue(savedBill.getLineItems().size() < originalSize);
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#saveBill(Bill)
+	 */
+	@Test
+	public void saveBill_shouldThrowExceptionWhenRemovingLineItemsFromPaidBill() {
+		// Get the POSTED bill from test data (bill_id=1)
+		Bill postedBill = billService.getBill(1);
+		assertNotNull(postedBill);
+		assertEquals(BillStatus.PAID, postedBill.getStatus());
+		
+		BillLineItem itemToRemove = postedBill.getLineItems().get(0);
+		postedBill.removeLineItem(itemToRemove);
+		
+		// Should throw exception when saving (BillValidator catches line item removals)
+		assertThrows(ValidationException.class, () -> billService.saveBill(postedBill));
 	}
 	
 	@Test
@@ -289,20 +328,36 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		Bill postedBill = billService.getBill(0);
 		assertNotNull(postedBill);
 		assertEquals(BillStatus.POSTED, postedBill.getStatus());
-		
+
 		PaymentMode paymentMode = paymentModeService.getPaymentMode(0);
-		
-		Provider cashier = Context.getProviderService().getProvider(1);
-		
+
 		Payment payment = Payment.builder().amount(BigDecimal.valueOf(10.0)).amountTendered(BigDecimal.valueOf(10.0))
 		        .build();
 		payment.setInstanceType(paymentMode);
-		payment.setCashier(cashier);
-		
+		payment.setCashier(providerService.getProvider(0));
+
 		postedBill.addPayment(payment);
 		billService.saveBill(postedBill);
-		
+
 		assertDoesNotThrow(Context::flushSession);
+	}
+
+	@Test
+	public void saveBill_shouldThrowValidationExceptionWhenPaymentHasNoCashier() {
+		Bill postedBill = billService.getBill(0);
+		assertNotNull(postedBill);
+		assertEquals(BillStatus.POSTED, postedBill.getStatus());
+
+		PaymentMode paymentMode = paymentModeService.getPaymentMode(0);
+
+		Payment payment = Payment.builder().amount(BigDecimal.valueOf(10.0)).amountTendered(BigDecimal.valueOf(10.0))
+		        .build();
+		payment.setInstanceType(paymentMode);
+		// cashier intentionally NOT set — BillValidator must reject this
+
+		postedBill.addPayment(payment);
+
+		assertThrows(ValidationException.class, () -> billService.saveBill(postedBill));
 	}
 	
 	@Test
