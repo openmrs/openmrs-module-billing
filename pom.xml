@@ -56,6 +56,7 @@
 		<itextPdfVersion>8.0.2</itextPdfVersion>
 		<stockmanagementVersion>1.4.0</stockmanagementVersion>
 		<fhir2Version>2.4.0</fhir2Version>
+		<eventVersion>4.0.0</eventVersion>
 		<lombokVersion>1.18.38</lombokVersion>
 		<byteBuddyVersion>1.17.6</byteBuddyVersion>
 	</properties>
@@ -181,6 +182,13 @@
 				<groupId>org.openmrs.module</groupId>
 				<artifactId>fhir2-omod</artifactId>
 				<version>${fhir2Version}</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.openmrs</groupId>
+				<artifactId>event-api</artifactId>
+				<version>${eventVersion}</version>
 				<scope>provided</scope>
 			</dependency>
 

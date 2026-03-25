@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+	<!-- Provider for admin user (person_id=1) so order creator resolves to a provider -->
+	<provider provider_id="10" person_id="1" identifier="ADMIN" creator="1"
+	          date_created="2005-01-01 00:00:00.0" retired="0"
+	          uuid="b2c3868a-6b90-11e0-93c3-18a905e044dc"/>
+
+	<!-- Billable service linked to concept 5497 (CD4 COUNT, class_id=1 "Test") from standard test data -->
+	<cashier_billable_service service_id="10" name="CD4 Count Test" short_name="CD4"
+	                          concept_id="5497" service_status="ENABLED"
+	                          creator="1" date_created="2012-01-01 00:00:00.0" retired="false"
+	                          uuid="9631b434-78aa-102b-91a0-001e378eb670"/>
+
+	<!-- Price for the CD4 Count Test billable service -->
+	<cashier_item_price item_price_id="10" service_id="10" name="Standard Price" price="75.00"
+	                    creator="1" date_created="2012-01-01 00:00:00.0" retired="false"
+	                    uuid="9631b434-78aa-102b-91a0-001e378eb680"/>
+</dataset>
