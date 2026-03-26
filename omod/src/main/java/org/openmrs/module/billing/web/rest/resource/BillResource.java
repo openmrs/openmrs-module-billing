@@ -130,22 +130,6 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			instance.setStatus(status);
 		} else if (instance.getStatus() == BillStatus.PENDING && status == BillStatus.POSTED) {
 			instance.setStatus(status);
-		} else if (instance.getStatus() == BillStatus.PAID && status == BillStatus.REFUND_REQUESTED) {
-			instance.setRefundRequestedBy(Context.getAuthenticatedUser());
-			instance.setDateRefundRequested(new Date());
-			instance.setStatus(status);
-		} else if (instance.getStatus() == BillStatus.REFUND_REQUESTED && status == BillStatus.REFUNDED) {
-			if (!Context.hasPrivilege(PrivilegeConstants.REFUND_MONEY)) {
-				throw new AccessControlException("Access denied to issue refund.");
-			}
-			instance.setRefundApprovedBy(Context.getAuthenticatedUser());
-			instance.setDateRefundApproved(new Date());
-			instance.setStatus(status);
-		} else if (instance.getStatus() == BillStatus.REFUND_REQUESTED && status == BillStatus.PAID) {
-			if (!Context.hasPrivilege(PrivilegeConstants.REFUND_MONEY)) {
-				throw new AccessControlException("Access denied to reject refund request.");
-			}
-			instance.setStatus(status);
 		}
 		if (status == BillStatus.POSTED) {
 			RoundingUtil.handleRoundingLineItem(instance);
@@ -302,5 +286,63 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 		}
 		
 		return billSearch;
+	}
+	
+	public Bill requestRefund(String billUuid, String refundReason) {
+		Bill bill = getByUniqueId(billUuid);
+		if (bill == null) {
+			throw new RestClientException("Bill not found with UUID: " + billUuid);
+		}
+		
+		if (bill.getStatus() != BillStatus.PAID) {
+			throw new RestClientException("Only PAID bills can have a refund requested. Current status: " + bill.getStatus());
+		}
+		
+		bill.setRefundReason(refundReason);
+		bill.setRefundRequestedBy(Context.getAuthenticatedUser());
+		bill.setDateRefundRequested(new Date());
+		bill.setStatus(BillStatus.REFUND_REQUESTED);
+		
+		return Context.getService(BillService.class).saveBill(bill);
+	}
+	
+	public Bill approveRefund(String billUuid) {
+		if (!Context.hasPrivilege(PrivilegeConstants.REFUND_MONEY)) {
+			throw new AccessControlException("Access denied to issue refund.");
+		}
+		
+		Bill bill = getByUniqueId(billUuid);
+		if (bill == null) {
+			throw new RestClientException("Bill not found with UUID: " + billUuid);
+		}
+		
+		if (bill.getStatus() != BillStatus.REFUND_REQUESTED) {
+			throw new RestClientException("Only bills with REFUND_REQUESTED status can be approved. Current status: " + bill.getStatus());
+		}
+		
+		bill.setRefundApprovedBy(Context.getAuthenticatedUser());
+		bill.setDateRefundApproved(new Date());
+		bill.setStatus(BillStatus.REFUNDED);
+		
+		return Context.getService(BillService.class).saveBill(bill);
+	}
+	
+	public Bill rejectRefund(String billUuid) {
+		if (!Context.hasPrivilege(PrivilegeConstants.REFUND_MONEY)) {
+			throw new AccessControlException("Access denied to reject refund request.");
+		}
+		
+		Bill bill = getByUniqueId(billUuid);
+		if (bill == null) {
+			throw new RestClientException("Bill not found with UUID: " + billUuid);
+		}
+		
+		if (bill.getStatus() != BillStatus.REFUND_REQUESTED) {
+			throw new RestClientException("Only bills with REFUND_REQUESTED status can be rejected. Current status: " + bill.getStatus());
+		}
+		
+		bill.setStatus(BillStatus.PAID);
+		
+		return Context.getService(BillService.class).saveBill(bill);
 	}
 }
