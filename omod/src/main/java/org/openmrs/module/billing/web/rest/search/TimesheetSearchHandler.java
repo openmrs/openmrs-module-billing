@@ -59,7 +59,7 @@ public class TimesheetSearchHandler implements SearchHandler {
 			throw new APIException("Invalid date parameter: " + context.getParameter("date"));
 		}
 		List<Timesheet> timesheets = service.getTimesheetsByDate(provider, date);
-        return new AlreadyPagedWithLength<>(context, timesheets, false, timesheets.size());
+		return new AlreadyPagedWithLength<>(context, timesheets, false, timesheets.size());
 	}
 	
 	@Override
