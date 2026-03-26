@@ -1095,4 +1095,34 @@
                                  baseTableName="bill_exemption_rule" baseColumnNames="voided_by"
                                  referencedTableName="users" referencedColumnNames="user_id"/>
     </changeSet>
+
+    <changeSet id="openmrs.billing-004-20260210-refund-support" author="UjjawalPrabhat">
+        <comment>Widen status columns for REFUND_REQUESTED and add refund audit fields to cashier_bill</comment>
+
+        <modifyDataType tableName="cashier_bill" columnName="status" newDataType="varchar(50)"/>
+        <modifyDataType tableName="cashier_bill_line_item" columnName="payment_status" newDataType="varchar(50)"/>
+
+        <addColumn tableName="cashier_bill">
+            <column name="refund_reason" type="varchar(500)"><constraints nullable="true"/></column>
+        </addColumn>
+        <addColumn tableName="cashier_bill">
+            <column name="refund_requested_by" type="int"><constraints nullable="true"/></column>
+        </addColumn>
+        <addColumn tableName="cashier_bill">
+            <column name="date_refund_requested" type="datetime"><constraints nullable="true"/></column>
+        </addColumn>
+        <addColumn tableName="cashier_bill">
+            <column name="refund_approved_by" type="int"><constraints nullable="true"/></column>
+        </addColumn>
+        <addColumn tableName="cashier_bill">
+            <column name="date_refund_approved" type="datetime"><constraints nullable="true"/></column>
+        </addColumn>
+
+        <addForeignKeyConstraint constraintName="cashier_bill_refund_requested_by_fk"
+                                 baseTableName="cashier_bill" baseColumnNames="refund_requested_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="cashier_bill_refund_approved_by_fk"
+                                 baseTableName="cashier_bill" baseColumnNames="refund_approved_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+    </changeSet>
 </databaseChangeLog>
