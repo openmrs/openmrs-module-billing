@@ -28,20 +28,11 @@
 		<aware_of_module version="2.8">org.openmrs.module.idgen</aware_of_module>
 		<require_module version="${stockmanagementVersion}">org.openmrs.module.stockmanagement</require_module>
 		<require_module version="${fhir2Version}">org.openmrs.module.fhir2</require_module>
+		<require_module version="${eventVersion}">org.openmrs.event</require_module>
 	</require_modules>
 
 	<!-- Module Activator -->
 	<activator>org.openmrs.module.billing.BillingModuleActivator</activator>
-
-	<advice>
-		<point>org.openmrs.api.OrderService</point>
-		<class>${project.parent.groupId}.${project.parent.artifactId}.advice.GenerateBillFromOrderAdvice</class>
-	</advice>
-
-	<advice>
-		<point>org.openmrs.api.OrderService</point>
-		<class>${project.parent.groupId}.${project.parent.artifactId}.advice.OrderCreationMethodBeforeAdvice</class>
-	</advice>
 
 	<globalProperty>
 		<property>${project.parent.artifactId}.defaultReceiptReportId</property>
