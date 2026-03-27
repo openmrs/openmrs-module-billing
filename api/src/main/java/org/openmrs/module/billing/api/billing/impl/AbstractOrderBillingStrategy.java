@@ -54,6 +54,13 @@ public abstract class AbstractOrderBillingStrategy implements OrderBillingStrate
 		try {
 			switch (order.getAction()) {
 				case NEW:
+					BillLineItemService itemService = Context.getService(BillLineItemService.class);
+					BillLineItem existingLineItem = itemService.getBillLineItemByOrder(order);
+					if (existingLineItem != null) {
+						log.info("Bill line item already exists for order: {}, skipping duplicate bill creation",
+						    order.getUuid());
+						return Optional.of(existingLineItem.getBill());
+					}
 					return handleNewOrder(order);
 				case REVISE:
 					return handleRevisedOrder(order);
@@ -98,7 +105,7 @@ public abstract class AbstractOrderBillingStrategy implements OrderBillingStrate
 		existingLineItem.setVoided(true);
 		existingLineItem.setVoidReason(reason);
 		existingLineItem.setDateVoided(new Date());
-		existingLineItem.setVoidedBy(Context.getAuthenticatedUser());
+		existingLineItem.setVoidedBy(order.getCreator());
 		
 		BillService billService = Context.getService(BillService.class);
 		billService.saveBill(existingLineItem.getBill());
