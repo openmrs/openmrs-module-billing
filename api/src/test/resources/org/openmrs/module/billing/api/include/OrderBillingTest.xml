@@ -15,4 +15,10 @@
 	<cashier_item_price item_price_id="10" service_id="10" name="Standard Price" price="75.00"
 	                    creator="1" date_created="2012-01-01 00:00:00.0" retired="false"
 	                    uuid="9631b434-78aa-102b-91a0-001e378eb680"/>
+
+	<!-- Stock item linked to drug_id=2 (Triomune-30) from standard test data, with purchase_price for pricing -->
+	<stockmgmt_stock_item stock_item_id="100" drug_id="2" concept_id="1067"
+	                      has_expiration="false" is_drug="true" purchase_price="150.00"
+	                      creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                      uuid="aaa1b434-78aa-102b-91a0-001e378eb670"/>
 </dataset>
