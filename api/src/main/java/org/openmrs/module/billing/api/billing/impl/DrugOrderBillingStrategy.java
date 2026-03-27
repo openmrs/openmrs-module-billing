@@ -50,8 +50,13 @@ public class DrugOrderBillingStrategy extends AbstractOrderBillingStrategy {
 	protected Optional<Bill> handleNewOrder(Order order) {
 		DrugOrder drugOrder = (DrugOrder) order;
 		
+		if (drugOrder.getDrug() == null) {
+			log.warn("DrugOrder {} has no drug set, cannot generate bill", order.getUuid());
+			return Optional.empty();
+		}
+		
 		StockManagementService stockService = Context.getService(StockManagementService.class);
-		Integer drugId = drugOrder.getDrug() != null ? drugOrder.getDrug().getDrugId() : 0;
+		Integer drugId = drugOrder.getDrug().getDrugId();
 		List<StockItem> stockItems = stockService.getStockItemByDrug(drugId);
 		
 		if (stockItems.isEmpty()) {

@@ -25,6 +25,8 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openmrs.Concept;
+import org.openmrs.Drug;
+import org.openmrs.DrugOrder;
 import org.openmrs.Encounter;
 import org.openmrs.Order;
 import org.openmrs.Patient;
@@ -265,6 +267,105 @@ public class OrderBillingEventListenerTest extends BaseModuleContextSensitiveTes
 		}
 		assertTrue(hasDrugStrategy, "DrugOrderBillingStrategy should be registered");
 		assertTrue(hasTestStrategy, "TestOrderBillingStrategy should be registered");
+	}
+	
+	@Test
+	public void shouldCreateBillWhenDrugOrderIsSaved() {
+		Encounter encounter = encounterService.getEncounter(3);
+		Patient patient = encounter.getPatient();
+		Drug drug = Context.getConceptService().getDrug(2); // Triomune-30, linked to stock_item_id=100
+		
+		DrugOrder drugOrder = new DrugOrder();
+		drugOrder.setPatient(patient);
+		drugOrder.setDrug(drug);
+		drugOrder.setConcept(drug.getConcept());
+		drugOrder.setEncounter(encounter);
+		drugOrder.setOrderer(Context.getProviderService().getProvider(1));
+		drugOrder.setCareSetting(orderService.getCareSetting(1));
+		drugOrder.setOrderType(orderService.getOrderType(1));
+		drugOrder.setDateActivated(new Date());
+		drugOrder.setQuantity(5.0);
+		drugOrder.setQuantityUnits(conceptService.getConcept(51));
+		drugOrder.setDose(1.0);
+		drugOrder.setDoseUnits(conceptService.getConcept(51));
+		drugOrder.setRoute(conceptService.getConcept(22));
+		drugOrder.setFrequency(orderService.getOrderFrequency(1));
+		drugOrder.setDosingType(org.openmrs.SimpleDosingInstructions.class);
+		drugOrder.setNumRefills(0);
+		
+		Order savedOrder = orderService.saveOrder(drugOrder, null);
+		assertNotNull(savedOrder.getId());
+		Context.flushSession();
+		
+		listener.processOrder(savedOrder);
+		Context.flushSession();
+		
+		List<Bill> bills = billService.getBillsByPatientUuid(patient.getUuid(), null);
+		assertNotNull(bills);
+		assertFalse(bills.isEmpty(), "A bill should have been created for the drug order");
+		
+		Bill bill = bills.get(0);
+		assertEquals(BillStatus.PENDING, bill.getStatus());
+		
+		BillLineItem lineItem = bill.getLineItems().get(0);
+		assertNotNull(lineItem.getItem(), "Line item should reference a stock item");
+		assertEquals(BillStatus.PENDING, lineItem.getPaymentStatus());
+		assertEquals(5, lineItem.getQuantity());
+		assertEquals(new BigDecimal("150.00"), lineItem.getPrice());
+		assertEquals(savedOrder.getId(), lineItem.getOrder().getId());
+	}
+	
+	@Test
+	public void shouldNotCreateBillForDrugOrderWhenNoStockItemExists() {
+		Encounter encounter = encounterService.getEncounter(3);
+		Patient patient = encounter.getPatient();
+		Drug drug = Context.getConceptService().getDrug(3); // Aspirin — no stock item in test data
+		
+		DrugOrder drugOrder = new DrugOrder();
+		drugOrder.setPatient(patient);
+		drugOrder.setDrug(drug);
+		drugOrder.setConcept(drug.getConcept());
+		drugOrder.setEncounter(encounter);
+		drugOrder.setOrderer(Context.getProviderService().getProvider(1));
+		drugOrder.setCareSetting(orderService.getCareSetting(2));
+		drugOrder.setOrderType(orderService.getOrderType(1));
+		drugOrder.setDateActivated(new Date());
+		drugOrder.setQuantity(2.0);
+		drugOrder.setQuantityUnits(conceptService.getConcept(51));
+		drugOrder.setDose(1.0);
+		drugOrder.setDoseUnits(conceptService.getConcept(51));
+		drugOrder.setRoute(conceptService.getConcept(22));
+		drugOrder.setFrequency(orderService.getOrderFrequency(1));
+		drugOrder.setDosingType(org.openmrs.SimpleDosingInstructions.class);
+		drugOrder.setNumRefills(0);
+		
+		Order savedOrder = orderService.saveOrder(drugOrder, null);
+		Context.flushSession();
+		
+		listener.processOrder(savedOrder);
+		Context.flushSession();
+		
+		List<Bill> bills = billService.getBillsByPatientUuid(patient.getUuid(), null);
+		assertTrue(bills == null || bills.isEmpty(), "No bill should be created when no stock item matches the drug");
+	}
+	
+	@Test
+	public void shouldNotCreateDuplicateBillForSameOrder() {
+		Concept testConcept = conceptService.getConcept(5497);
+		Encounter encounter = encounterService.getEncounter(3);
+		Patient patient = encounter.getPatient();
+		
+		Order savedOrder = saveNewTestOrder(patient, testConcept, encounter);
+		
+		// Process the same order twice
+		listener.processOrder(savedOrder);
+		Context.flushSession();
+		listener.processOrder(savedOrder);
+		Context.flushSession();
+		
+		List<Bill> bills = billService.getBillsByPatientUuid(patient.getUuid(), null);
+		assertNotNull(bills);
+		assertEquals(1, bills.size(), "Only one bill should exist — second call should be idempotent");
 	}
 	
 	private Order saveNewTestOrder(Patient patient, Concept concept, Encounter encounter) {
