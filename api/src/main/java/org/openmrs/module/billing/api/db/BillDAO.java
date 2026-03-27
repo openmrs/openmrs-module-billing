@@ -48,9 +48,9 @@ public interface BillDAO {
 	Bill getBillByReceiptNumber(@Nonnull String receiptNumber);
 	
 	/**
-	 * Retrieves all bills for a specific patient, ordered by date created descending (most recent
-	 * first).
+	 * Retrieves all bills for a specific patient.
 	 * <p>
+	 * Results are ordered by date created descending (most recent first).
 	 * Note: This method may return voided bills. Consider filtering voided records at the service layer
 	 * if needed.
 	 * </p>
@@ -63,9 +63,9 @@ public interface BillDAO {
 	List<Bill> getBillsByPatientUuid(@Nonnull String patientUuid, PagingInfo pagingInfo);
 	
 	/**
-	 * Searches for bills using the specified search criteria, ordered by date created descending (most
-	 * recent first).
+	 * Searches for bills using the specified search criteria.
 	 * <p>
+	 * Results are ordered by date created descending (most recent first).
 	 * By default, voided bills are excluded from results unless
 	 * {@link BillSearch#setIncludeVoided(Boolean)} is set to true. The search criteria support
 	 * filtering by patient, cashier, cash point, and status.
