@@ -57,8 +57,7 @@ public interface BillDAO {
 	 *
 	 * @param patientUuid the UUID of the patient (must not be null)
 	 * @param pagingInfo optional paging information (can be null for no paging)
-	 * @return a list of bills for the patient sorted by dateCreated descending, or an empty list if
-	 *         none found
+	 * @return a list of bills for the patient, or an empty list if none found
 	 */
 	List<Bill> getBillsByPatientUuid(@Nonnull String patientUuid, PagingInfo pagingInfo);
 	
@@ -74,8 +73,7 @@ public interface BillDAO {
 	 * @param billSearch the search criteria (must not be null)
 	 * @param pagingInfo optional paging information (can be null for no paging). When provided with
 	 *            {@code loadRecordCount=true}, the total count will be populated in the pagingInfo
-	 * @return a list of bills matching the search criteria sorted by dateCreated descending, or an
-	 *         empty list if none found
+	 * @return a list of bills matching the search criteria, or an empty list if none found
 	 * @see BillSearch
 	 */
 	List<Bill> getBills(@Nonnull BillSearch billSearch, PagingInfo pagingInfo);
