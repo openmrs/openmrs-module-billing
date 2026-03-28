@@ -255,14 +255,14 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 			Date next = bills.get(i + 1).getDateCreated();
 			assertNotNull(current);
 			assertNotNull(next);
-			assertTrue(!current.before(next), "Bill at index " + i + " (dateCreated=" + current
+			assertFalse(current.before(next), "Bill at index " + i + " (dateCreated=" + current
 			        + ") should be >= bill at index " + (i + 1) + " (dateCreated=" + next + ")");
 		}
 	}
-	
+
 	@Test
 	public void getBillsByPatientUuid_shouldReturnBillsOrderedByDateCreatedDescending() {
-		// Save a second bill for the same patient with a later date so we can assert ordering
+		// Save two bills for the same patient with explicit dateCreated values to assert ordering
 		Patient patient = patientService.getPatient(0);
 		assertNotNull(patient);
 		
@@ -272,14 +272,16 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 		olderBill.setCashPoint(cashPointService.getCashPoint(0));
 		olderBill.setReceiptNumber("OLDER-" + UUID.randomUUID());
 		olderBill.setStatus(BillStatus.PENDING);
+		olderBill.setDateCreated(new Date(System.currentTimeMillis() - 86400000));
 		billDAO.saveBill(olderBill);
-		
+
 		Bill newerBill = new Bill();
 		newerBill.setCashier(providerService.getProvider(0));
 		newerBill.setPatient(patient);
 		newerBill.setCashPoint(cashPointService.getCashPoint(0));
 		newerBill.setReceiptNumber("NEWER-" + UUID.randomUUID());
 		newerBill.setStatus(BillStatus.PENDING);
+		newerBill.setDateCreated(new Date());
 		billDAO.saveBill(newerBill);
 		
 		Context.flushSession();
@@ -295,7 +297,7 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 			Date next = bills.get(i + 1).getDateCreated();
 			assertNotNull(current);
 			assertNotNull(next);
-			assertTrue(!current.before(next), "Bill at index " + i + " (dateCreated=" + current
+			assertFalse(current.before(next), "Bill at index " + i + " (dateCreated=" + current
 			        + ") should be >= bill at index " + (i + 1) + " (dateCreated=" + next + ")");
 		}
 	}
