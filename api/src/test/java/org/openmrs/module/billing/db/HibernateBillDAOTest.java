@@ -15,6 +15,7 @@ package org.openmrs.module.billing.db;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -239,5 +240,62 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 		
 		Bill deletedBill = billDAO.getBill(billId);
 		assertNull(deletedBill);
+	}
+	
+	@Test
+	public void getBills_shouldReturnBillsOrderedByDateCreatedDescending() {
+		BillSearch billSearch = new BillSearch();
+		List<Bill> bills = billDAO.getBills(billSearch, null);
+		
+		assertNotNull(bills);
+		assertTrue(bills.size() >= 2, "Expected at least 2 bills in test dataset for ordering assertion");
+		
+		for (int i = 0; i < bills.size() - 1; i++) {
+			Date current = bills.get(i).getDateCreated();
+			Date next = bills.get(i + 1).getDateCreated();
+			assertNotNull(current);
+			assertNotNull(next);
+			assertFalse(current.before(next), "Bill at index " + i + " (dateCreated=" + current
+			        + ") should be >= bill at index " + (i + 1) + " (dateCreated=" + next + ")");
+		}
+	}
+	
+	@Test
+	public void getBillsByPatientUuid_shouldReturnBillsOrderedByDateCreatedDescending() {
+		// Save two bills for the same patient with explicit dateCreated values to assert ordering
+		Patient patient = patientService.getPatient(0);
+		assertNotNull(patient);
+		
+		Bill olderBill = new Bill();
+		olderBill.setCashier(providerService.getProvider(0));
+		olderBill.setPatient(patient);
+		olderBill.setCashPoint(cashPointService.getCashPoint(0));
+		olderBill.setReceiptNumber("OLDER-" + UUID.randomUUID());
+		olderBill.setStatus(BillStatus.PENDING);
+		olderBill.setDateCreated(new Date(System.currentTimeMillis() - 86400000));
+		billDAO.saveBill(olderBill);
+		
+		Bill newerBill = new Bill();
+		newerBill.setCashier(providerService.getProvider(0));
+		newerBill.setPatient(patient);
+		newerBill.setCashPoint(cashPointService.getCashPoint(0));
+		newerBill.setReceiptNumber("NEWER-" + UUID.randomUUID());
+		newerBill.setStatus(BillStatus.PENDING);
+		newerBill.setDateCreated(new Date());
+		billDAO.saveBill(newerBill);
+		
+		List<Bill> bills = billDAO.getBillsByPatientUuid(patient.getUuid(), null);
+		
+		assertNotNull(bills);
+		assertTrue(bills.size() >= 2, "Expected at least 2 bills for ordering assertion");
+		
+		for (int i = 0; i < bills.size() - 1; i++) {
+			Date current = bills.get(i).getDateCreated();
+			Date next = bills.get(i + 1).getDateCreated();
+			assertNotNull(current);
+			assertNotNull(next);
+			assertFalse(current.before(next), "Bill at index " + i + " (dateCreated=" + current
+			        + ") should be >= bill at index " + (i + 1) + " (dateCreated=" + next + ")");
+		}
 	}
 }
