@@ -259,7 +259,7 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 			        + ") should be >= bill at index " + (i + 1) + " (dateCreated=" + next + ")");
 		}
 	}
-
+	
 	@Test
 	public void getBillsByPatientUuid_shouldReturnBillsOrderedByDateCreatedDescending() {
 		// Save two bills for the same patient with explicit dateCreated values to assert ordering
@@ -274,7 +274,7 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 		olderBill.setStatus(BillStatus.PENDING);
 		olderBill.setDateCreated(new Date(System.currentTimeMillis() - 86400000));
 		billDAO.saveBill(olderBill);
-
+		
 		Bill newerBill = new Bill();
 		newerBill.setCashier(providerService.getProvider(0));
 		newerBill.setPatient(patient);
@@ -283,9 +283,6 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 		newerBill.setStatus(BillStatus.PENDING);
 		newerBill.setDateCreated(new Date());
 		billDAO.saveBill(newerBill);
-		
-		Context.flushSession();
-		Context.clearSession();
 		
 		List<Bill> bills = billDAO.getBillsByPatientUuid(patient.getUuid(), null);
 		
