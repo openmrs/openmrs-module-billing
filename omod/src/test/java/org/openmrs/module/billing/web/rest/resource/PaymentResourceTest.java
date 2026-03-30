@@ -13,9 +13,10 @@
  */
 package org.openmrs.module.billing.web.rest.resource;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
@@ -23,9 +24,9 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.openmrs.Provider;
 import org.openmrs.api.APIException;
@@ -48,7 +49,7 @@ public class PaymentResourceTest {
 	
 	private MockedStatic<ProviderUtil> providerUtilMock;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		resource = new PaymentResource();
 		billService = mock(BillService.class);
@@ -59,7 +60,7 @@ public class PaymentResourceTest {
 		providerUtilMock = mockStatic(ProviderUtil.class);
 	}
 	
-	@After
+	@AfterEach
 	public void tearDown() {
 		if (contextMock != null) {
 			contextMock.close();
@@ -86,12 +87,12 @@ public class PaymentResourceTest {
 		
 		resource.save(payment);
 		
-		assertNotNull("Cashier should be set on the payment", payment.getCashier());
-		assertSame("Cashier should be the current provider", cashier, payment.getCashier());
+		assertNotNull(payment.getCashier(), "Cashier should be set on the payment");
+		assertSame(cashier, payment.getCashier(), "Cashier should be the current provider");
 		verify(billService).saveBill(bill);
 	}
 	
-	@Test(expected = APIException.class)
+	@Test
 	public void save_shouldThrowAPIExceptionWhenNoProviderLinkedToUser() {
 		providerUtilMock.when(ProviderUtil::getCurrentProvider).thenReturn(null);
 		
@@ -100,7 +101,7 @@ public class PaymentResourceTest {
 		Payment payment = new Payment();
 		payment.setBill(bill);
 		
-		resource.save(payment);
+		assertThrows(APIException.class, () -> resource.save(payment));
 	}
 	
 	@Test
@@ -124,7 +125,7 @@ public class PaymentResourceTest {
 		
 		resource.save(payment);
 		
-		assertSame("Client-provided cashier should not be overwritten", clientCashier, payment.getCashier());
+		assertSame(clientCashier, payment.getCashier(), "Client-provided cashier should not be overwritten");
 	}
 	
 	@Test
@@ -144,7 +145,7 @@ public class PaymentResourceTest {
 		
 		resource.save(payment);
 		
-		assertSame("Authenticated user's provider should be used as fallback", cashier, payment.getCashier());
+		assertSame(cashier, payment.getCashier(), "Authenticated user's provider should be used as fallback");
 	}
 	
 	@Test

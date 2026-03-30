@@ -15,7 +15,6 @@ package org.openmrs.module.billing.web.rest.resource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,10 +22,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Provider;
-import org.openmrs.User;
 import org.openmrs.api.AdministrationService;
-import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.billing.api.base.ProviderUtil;
 import org.openmrs.module.billing.ModuleSettings;
 import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.ITimesheetService;
@@ -215,13 +213,7 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 	}
 	
 	private Provider getCurrentCashier() {
-		User currentUser = Context.getAuthenticatedUser();
-		ProviderService service = Context.getProviderService();
-		Collection<Provider> providers = service.getProvidersByPerson(currentUser.getPerson());
-		if (!providers.isEmpty()) {
-			return providers.iterator().next();
-		}
-		return null;
+		return ProviderUtil.getCurrentProvider();
 	}
 	
 	private void loadBillCashPoint(Bill bill) {

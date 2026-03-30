@@ -1106,6 +1106,7 @@
         <addForeignKeyConstraint
             constraintName="cashier_bill_payment_provider_id_fk"
             baseTableName="cashier_bill_payment" baseColumnNames="provider_id"
-            referencedTableName="provider" referencedColumnNames="provider_id"/>
+            referencedTableName="provider" referencedColumnNames="provider_id"
+            onDelete="SET NULL" onUpdate="CASCADE"/>
     </changeSet>
 </databaseChangeLog>
