@@ -107,8 +107,8 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			if (payment.getId() == null && payment.getCashier() == null) {
 				Provider cashier = getCurrentCashier();
 				if (cashier == null) {
-					throw new RestClientException("Couldn't find Provider for the current user ("
-					        + Context.getAuthenticatedUser().getUsername() + ")");
+					throw new RestClientException("The current user ("
+					        + Context.getAuthenticatedUser().getUsername() + ") is not a provider");
 				}
 				payment.setCashier(cashier);
 			}
@@ -149,10 +149,10 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			if (bill.getCashier() == null) {
 				Provider cashier = getCurrentCashier();
 				if (cashier == null) {
-					throw new RestClientException("Couldn't find Provider for the current user ("
-					        + Context.getAuthenticatedUser().getUsername() + ")");
+					throw new RestClientException("The current user ("
+					        + Context.getAuthenticatedUser().getUsername() + ") is not a provider");
 				}
-				
+
 				bill.setCashier(cashier);
 			}
 			

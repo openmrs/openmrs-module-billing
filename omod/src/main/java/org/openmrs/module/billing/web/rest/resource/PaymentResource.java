@@ -13,6 +13,7 @@
  */
 package org.openmrs.module.billing.web.rest.resource;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Provider;
 import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
@@ -81,6 +82,9 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
 	
 	@PropertySetter("cashier")
 	public void setCashier(Payment instance, String uuid) {
+		if (StringUtils.isBlank(uuid)) {
+			throw new APIException("Cashier UUID must not be null or blank.");
+		}
 		Provider provider = Context.getProviderService().getProviderByUuid(uuid);
 		if (provider == null) {
 			throw new ObjectNotFoundException();
