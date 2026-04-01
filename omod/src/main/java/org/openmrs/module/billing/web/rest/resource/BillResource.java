@@ -103,12 +103,15 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			instance.setPayments(new HashSet<Payment>(payments.size()));
 		}
 		BaseRestDataResource.syncCollection(instance.getPayments(), payments);
+		Provider cashier = null;
 		for (Payment payment : instance.getPayments()) {
 			if (payment.getId() == null && payment.getCashier() == null) {
-				Provider cashier = getCurrentCashier();
 				if (cashier == null) {
-					throw new RestClientException("The current user ("
-					        + Context.getAuthenticatedUser().getUsername() + ") is not a provider");
+					cashier = getCurrentCashier();
+					if (cashier == null) {
+						throw new RestClientException("The current user ("
+						        + Context.getAuthenticatedUser().getUsername() + ") is not a provider");
+					}
 				}
 				payment.setCashier(cashier);
 			}
