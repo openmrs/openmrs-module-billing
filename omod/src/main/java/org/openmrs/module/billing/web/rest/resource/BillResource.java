@@ -15,7 +15,6 @@ package org.openmrs.module.billing.web.rest.resource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,10 +22,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Provider;
-import org.openmrs.User;
 import org.openmrs.api.AdministrationService;
-import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.billing.api.base.ProviderUtil;
 import org.openmrs.module.billing.ModuleSettings;
 import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.ITimesheetService;
@@ -105,7 +103,18 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			instance.setPayments(new HashSet<Payment>(payments.size()));
 		}
 		BaseRestDataResource.syncCollection(instance.getPayments(), payments);
+		Provider cashier = null;
 		for (Payment payment : instance.getPayments()) {
+			if (payment.getId() == null && payment.getCashier() == null) {
+				if (cashier == null) {
+					cashier = getCurrentCashier();
+					if (cashier == null) {
+						throw new RestClientException("The current user ("
+						        + Context.getAuthenticatedUser().getUsername() + ") is not a provider");
+					}
+				}
+				payment.setCashier(cashier);
+			}
 			instance.addPayment(payment);
 		}
 	}
@@ -143,10 +152,10 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			if (bill.getCashier() == null) {
 				Provider cashier = getCurrentCashier();
 				if (cashier == null) {
-					throw new RestClientException("Couldn't find Provider for the current user ("
-					        + Context.getAuthenticatedUser().getUsername() + ")");
+					throw new RestClientException("The current user ("
+					        + Context.getAuthenticatedUser().getUsername() + ") is not a provider");
 				}
-				
+
 				bill.setCashier(cashier);
 			}
 			
@@ -207,13 +216,7 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 	}
 	
 	private Provider getCurrentCashier() {
-		User currentUser = Context.getAuthenticatedUser();
-		ProviderService service = Context.getProviderService();
-		Collection<Provider> providers = service.getProvidersByPerson(currentUser.getPerson());
-		if (!providers.isEmpty()) {
-			return providers.iterator().next();
-		}
-		return null;
+		return ProviderUtil.getCurrentProvider();
 	}
 	
 	private void loadBillCashPoint(Bill bill) {
