@@ -141,4 +141,56 @@ public class BillValidatorTest extends BaseModuleContextSensitiveTest {
 		assertFalse(errors.hasErrors());
 	}
 	
+	@Test
+	public void validate_shouldRejectRefundRequestedBillWithNoRefundReason() {
+		Bill paidBill = billService.getBill(1);
+		assertNotNull(paidBill);
+		paidBill.setStatus(BillStatus.REFUND_REQUESTED);
+		// refundReason intentionally NOT set
+		
+		Errors errors = new BindException(paidBill, "bill");
+		billValidator.validate(paidBill, errors);
+		
+		assertTrue(errors.hasErrors());
+	}
+	
+	@Test
+	public void validate_shouldNotRejectRefundRequestedBillWithRefundReason() {
+		Bill paidBill = billService.getBill(1);
+		assertNotNull(paidBill);
+		paidBill.setStatus(BillStatus.REFUND_REQUESTED);
+		paidBill.setRefundReason("Equipment failure");
+		
+		Errors errors = new BindException(paidBill, "bill");
+		billValidator.validate(paidBill, errors);
+		
+		assertFalse(errors.hasErrors());
+	}
+	
+	@Test
+	public void validate_shouldRejectRefundDeniedBillWithNoDenialReason() {
+		Bill paidBill = billService.getBill(1);
+		assertNotNull(paidBill);
+		paidBill.setStatus(BillStatus.REFUND_DENIED);
+		// denialReason intentionally NOT set
+		
+		Errors errors = new BindException(paidBill, "bill");
+		billValidator.validate(paidBill, errors);
+		
+		assertTrue(errors.hasErrors());
+	}
+	
+	@Test
+	public void validate_shouldNotRejectRefundDeniedBillWithDenialReason() {
+		Bill paidBill = billService.getBill(1);
+		assertNotNull(paidBill);
+		paidBill.setStatus(BillStatus.REFUND_DENIED);
+		paidBill.setRefundDenialReason("Service was already provided");
+		
+		Errors errors = new BindException(paidBill, "bill");
+		billValidator.validate(paidBill, errors);
+		
+		assertFalse(errors.hasErrors());
+	}
+	
 }
