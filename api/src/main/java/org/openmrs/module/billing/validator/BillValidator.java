@@ -13,6 +13,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillLineItemService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
+import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.model.Payment;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
@@ -38,6 +39,7 @@ public class BillValidator implements Validator {
 			
 			validateNewPaymentsHaveCashier(bill, errors);
 			validateLineItemsNotModified(bill, errors);
+			validateRefundFields(bill, errors);
 		}
 	}
 	
@@ -81,6 +83,18 @@ public class BillValidator implements Validator {
 			if (hasNewLineItems) {
 				errors.reject("billing.error.lineItemsCannotBeAddedToNonPendingBill");
 			}
+		}
+	}
+	
+	/**
+	 * Validates that refund-related fields are provided when transitioning to refund statuses.
+	 */
+	private void validateRefundFields(Bill bill, Errors errors) {
+		if (bill.getStatus() == BillStatus.REFUND_REQUESTED && StringUtils.isBlank(bill.getRefundReason())) {
+			errors.reject("billing.error.refundReasonRequired");
+		}
+		if (bill.getStatus() == BillStatus.REFUND_DENIED && StringUtils.isBlank(bill.getRefundDenialReason())) {
+			errors.reject("billing.error.denialReasonRequired");
 		}
 	}
 	
