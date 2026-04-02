@@ -23,7 +23,10 @@ public enum BillStatus {
 	PAID(),
 	CANCELLED(),
 	ADJUSTED(),
-	EXEMPTED();
+	EXEMPTED(),
+	REFUND_REQUESTED(),
+	REFUNDED(),
+	REFUND_DENIED();
 	
 	BillStatus() {
 	}

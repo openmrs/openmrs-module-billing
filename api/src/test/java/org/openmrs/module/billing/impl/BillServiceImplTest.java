@@ -509,4 +509,148 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		assertNotNull(savedBill.getReceiptNumber());
 		assertFalse(savedBill.getReceiptNumber().isEmpty());
 	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#requestRefund(Bill, String)
+	 */
+	@Test
+	public void requestRefund_shouldThrowIllegalArgumentExceptionIfBillIsNull() {
+		assertThrows(IllegalArgumentException.class, () -> billService.requestRefund(null, "reason"));
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#requestRefund(Bill, String)
+	 */
+	@Test
+	public void requestRefund_shouldThrowIllegalArgumentExceptionIfReasonIsBlank() {
+		Bill paidBill = billService.getBill(1);
+		assertNotNull(paidBill);
+		assertEquals(BillStatus.PAID, paidBill.getStatus());
+		
+		assertThrows(IllegalArgumentException.class, () -> billService.requestRefund(paidBill, ""));
+		assertThrows(IllegalArgumentException.class, () -> billService.requestRefund(paidBill, null));
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#requestRefund(Bill, String)
+	 */
+	@Test
+	public void requestRefund_shouldThrowIllegalArgumentExceptionIfBillIsNotPaid() {
+		Bill pendingBill = billService.getBill(2);
+		assertNotNull(pendingBill);
+		assertEquals(BillStatus.PENDING, pendingBill.getStatus());
+		
+		assertThrows(IllegalArgumentException.class, () -> billService.requestRefund(pendingBill, "Equipment failure"));
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#requestRefund(Bill, String)
+	 */
+	@Test
+	public void requestRefund_shouldTransitionPaidBillToRefundRequested() {
+		Bill paidBill = billService.getBill(1);
+		assertNotNull(paidBill);
+		assertEquals(BillStatus.PAID, paidBill.getStatus());
+		
+		Bill result = billService.requestRefund(paidBill, "Equipment failure");
+		
+		assertNotNull(result);
+		assertEquals(BillStatus.REFUND_REQUESTED, result.getStatus());
+		assertEquals("Equipment failure", result.getRefundReason());
+		assertNotNull(result.getRefundRequestedBy());
+		assertNotNull(result.getDateRefundRequested());
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#approveRefund(Bill)
+	 */
+	@Test
+	public void approveRefund_shouldThrowIllegalArgumentExceptionIfBillIsNull() {
+		assertThrows(IllegalArgumentException.class, () -> billService.approveRefund(null));
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#approveRefund(Bill)
+	 */
+	@Test
+	public void approveRefund_shouldThrowIllegalArgumentExceptionIfBillIsNotRefundRequested() {
+		Bill paidBill = billService.getBill(1);
+		assertNotNull(paidBill);
+		assertEquals(BillStatus.PAID, paidBill.getStatus());
+		
+		assertThrows(IllegalArgumentException.class, () -> billService.approveRefund(paidBill));
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#approveRefund(Bill)
+	 */
+	@Test
+	public void approveRefund_shouldTransitionRefundRequestedBillToRefunded() {
+		Bill paidBill = billService.getBill(1);
+		assertNotNull(paidBill);
+		
+		Bill requestedBill = billService.requestRefund(paidBill, "Equipment failure");
+		assertEquals(BillStatus.REFUND_REQUESTED, requestedBill.getStatus());
+		
+		Bill result = billService.approveRefund(requestedBill);
+		
+		assertNotNull(result);
+		assertEquals(BillStatus.REFUNDED, result.getStatus());
+		assertEquals("Equipment failure", result.getRefundReason());
+		assertNotNull(result.getRefundApprovedBy());
+		assertNotNull(result.getDateRefundApproved());
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#rejectRefund(Bill, String)
+	 */
+	@Test
+	public void rejectRefund_shouldThrowIllegalArgumentExceptionIfBillIsNull() {
+		assertThrows(IllegalArgumentException.class, () -> billService.rejectRefund(null, "reason"));
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#rejectRefund(Bill, String)
+	 */
+	@Test
+	public void rejectRefund_shouldThrowIllegalArgumentExceptionIfDenialReasonIsBlank() {
+		Bill paidBill = billService.getBill(1);
+		Bill requestedBill = billService.requestRefund(paidBill, "Equipment failure");
+		
+		assertThrows(IllegalArgumentException.class, () -> billService.rejectRefund(requestedBill, ""));
+		assertThrows(IllegalArgumentException.class, () -> billService.rejectRefund(requestedBill, null));
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#rejectRefund(Bill, String)
+	 */
+	@Test
+	public void rejectRefund_shouldThrowIllegalArgumentExceptionIfBillIsNotRefundRequested() {
+		Bill paidBill = billService.getBill(1);
+		assertNotNull(paidBill);
+		assertEquals(BillStatus.PAID, paidBill.getStatus());
+		
+		assertThrows(IllegalArgumentException.class, () -> billService.rejectRefund(paidBill, "Not eligible"));
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#rejectRefund(Bill, String)
+	 */
+	@Test
+	public void rejectRefund_shouldTransitionRefundRequestedBillToRefundDenied() {
+		Bill paidBill = billService.getBill(1);
+		assertNotNull(paidBill);
+		
+		Bill requestedBill = billService.requestRefund(paidBill, "Equipment failure");
+		assertEquals(BillStatus.REFUND_REQUESTED, requestedBill.getStatus());
+		
+		Bill result = billService.rejectRefund(requestedBill, "Service was already provided");
+		
+		assertNotNull(result);
+		assertEquals(BillStatus.REFUND_DENIED, result.getStatus());
+		assertEquals("Equipment failure", result.getRefundReason());
+		assertEquals("Service was already provided", result.getRefundDenialReason());
+		assertNotNull(result.getRefundRejectedBy());
+		assertNotNull(result.getDateRefundRejected());
+	}
 }
