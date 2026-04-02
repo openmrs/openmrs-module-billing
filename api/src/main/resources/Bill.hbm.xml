@@ -163,7 +163,7 @@
 		<property name="lineItemOrder" type="int" column="line_item_order"/>
 		<property name="paymentStatus" column="payment_status" not-null="true">
 			<type name="org.hibernate.type.EnumType">
-				<param name="enumClass">org.openmrs.module.billing.api.model.BillStatus</param>
+				<param name="enumClass">org.openmrs.module.billing.api.model.BillLineItemStatus</param>
 				<param name="type">12</param>
 			</type>
 		</property>
