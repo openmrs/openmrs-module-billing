@@ -13,8 +13,12 @@
  */
 package org.openmrs.module.billing.web.rest.resource;
 
+import org.apache.commons.lang3.StringUtils;
+import org.openmrs.Provider;
+import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillService;
+import org.openmrs.module.billing.api.base.ProviderUtil;
 import org.openmrs.module.billing.api.PaymentModeService;
 import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
 import org.openmrs.module.billing.api.model.Bill;
@@ -55,6 +59,7 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
 			description.addProperty("attributes");
 			description.addProperty("amount");
 			description.addProperty("amountTendered");
+			description.addProperty("cashier", Representation.REF);
 			description.addProperty("dateCreated");
 			description.addProperty("voided");
 			return description;
@@ -70,8 +75,21 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
 		description.addProperty("attributes");
 		description.addProperty("amount");
 		description.addProperty("amountTendered");
+		description.addProperty("cashier");
 		
 		return description;
+	}
+	
+	@PropertySetter("cashier")
+	public void setCashier(Payment instance, String uuid) {
+		if (StringUtils.isBlank(uuid)) {
+			throw new APIException("Cashier UUID must not be null or blank.");
+		}
+		Provider provider = Context.getProviderService().getProviderByUuid(uuid);
+		if (provider == null) {
+			throw new ObjectNotFoundException();
+		}
+		instance.setCashier(provider);
 	}
 	
 	// Work around TypeVariable issue on base generic property (BaseCustomizableInstanceData.getInstanceType)
@@ -132,6 +150,15 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
 	
 	@Override
 	public Payment save(Payment delegate) {
+		if (delegate.getCashier() == null) {
+			Provider cashier = ProviderUtil.getCurrentProvider();
+			if (cashier == null) {
+				throw new APIException(
+				        "The authenticated user is not associated with a Provider and cannot process payments.");
+			}
+			delegate.setCashier(cashier);
+		}
+		
 		BillService service = Context.getService(BillService.class);
 		Bill bill = delegate.getBill();
 		bill.addPayment(delegate);
