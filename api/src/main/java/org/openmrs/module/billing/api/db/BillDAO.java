@@ -50,9 +50,8 @@ public interface BillDAO {
 	/**
 	 * Retrieves all bills for a specific patient.
 	 * <p>
-	 * Results are ordered by date created descending (most recent first).
-	 * Note: This method may return voided bills. Consider filtering voided records at the service layer
-	 * if needed.
+	 * Results are ordered by date created descending (most recent first). Note: This method may return
+	 * voided bills. Consider filtering voided records at the service layer if needed.
 	 * </p>
 	 *
 	 * @param patientUuid the UUID of the patient (must not be null)
@@ -64,10 +63,9 @@ public interface BillDAO {
 	/**
 	 * Searches for bills using the specified search criteria.
 	 * <p>
-	 * Results are ordered by date created descending (most recent first).
-	 * By default, voided bills are excluded from results unless
-	 * {@link BillSearch#setIncludeVoided(Boolean)} is set to true. The search criteria support
-	 * filtering by patient, cashier, cash point, and status.
+	 * Results are ordered by date created descending (most recent first). By default, voided bills are
+	 * excluded from results unless {@link BillSearch#setIncludeVoided(Boolean)} is set to true. The
+	 * search criteria support filtering by patient, cashier, cash point, and status.
 	 * </p>
 	 *
 	 * @param billSearch the search criteria (must not be null)

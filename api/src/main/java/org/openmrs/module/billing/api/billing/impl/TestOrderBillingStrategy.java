@@ -21,9 +21,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.openmrs.Order;
 import org.openmrs.TestOrder;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.billing.api.BillableServiceService;
 import org.openmrs.module.billing.api.ItemPriceService;
-import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.model.BillableService;
@@ -41,15 +41,11 @@ public class TestOrderBillingStrategy extends AbstractOrderBillingStrategy {
 	
 	@Override
 	public boolean supports(Order order) {
-		if (!(order instanceof TestOrder)) {
-			return false;
-		}
-		Order.Action action = order.getAction();
-		return action == Order.Action.NEW || action == Order.Action.REVISE || action == Order.Action.DISCONTINUE;
+		return HibernateUtil.getRealObjectFromProxy(order) instanceof TestOrder && isSupportedAction(order);
 	}
 	
 	@Override
-	protected Optional<Bill> handleNewOrder(Order order) {
+	protected Optional<BillLineItem> handleNewOrder(Order order) {
 		TestOrder testOrder = (TestOrder) order;
 		
 		BillableServiceService serviceService = Context.getService(BillableServiceService.class);
@@ -67,29 +63,17 @@ public class TestOrderBillingStrategy extends AbstractOrderBillingStrategy {
 		BillStatus lineItemStatus = isExempted ? BillStatus.EXEMPTED : BillStatus.PENDING;
 		
 		BillableService billableService = searchResult.get(0);
-		BillLineItem lineItem = createLineItem(billableService, lineItemStatus, order);
-		
-		return saveBill(order.getPatient(), lineItem, order);
+		BillLineItem lineItem = createLineItem(resolvePrice(billableService), 1, lineItemStatus, order);
+		lineItem.setBillableService(billableService);
+		return Optional.of(lineItem);
 	}
 	
-	private BillLineItem createLineItem(BillableService billableService, BillStatus lineItemStatus, Order order) {
+	private BigDecimal resolvePrice(BillableService billableService) {
 		ItemPriceService priceService = Context.getService(ItemPriceService.class);
-		
-		BillLineItem lineItem = new BillLineItem();
-		lineItem.setBillableService(billableService);
-		
 		List<CashierItemPrice> itemPrices = priceService.getServicePrice(billableService);
 		if (!itemPrices.isEmpty()) {
-			lineItem.setPrice(itemPrices.get(0).getPrice());
-		} else {
-			lineItem.setPrice(BigDecimal.ZERO);
+			return itemPrices.get(0).getPrice();
 		}
-		
-		lineItem.setQuantity(1);
-		lineItem.setPaymentStatus(lineItemStatus);
-		lineItem.setLineItemOrder(0);
-		lineItem.setOrder(order);
-		
-		return lineItem;
+		return BigDecimal.ZERO;
 	}
 }

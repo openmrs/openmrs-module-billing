@@ -18,6 +18,9 @@ import javax.jms.MapMessage;
 import javax.jms.Message;
 
 import java.util.List;
+import java.util.Optional;
+
+import org.openmrs.module.billing.api.model.Bill;
 
 import lombok.Setter;
 import org.springframework.core.OrderComparator;
@@ -96,7 +99,9 @@ public class OrderBillingEventListener implements BillingEventListener {
 		
 		for (OrderBillingStrategy strategy : strategies) {
 			if (strategy.supports(order)) {
-				strategy.generateBill(order);
+				Optional<Bill> result = strategy.generateBill(order);
+				result.ifPresent(bill -> log.info("Bill {} created for order {} by {}", bill.getUuid(), order.getUuid(),
+				    strategy.getClass().getSimpleName()));
 				return;
 			}
 		}

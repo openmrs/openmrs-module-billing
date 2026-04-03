@@ -72,6 +72,10 @@ public class BillingModuleActivator extends BaseModuleActivator implements Daemo
 	}
 	
 	private void subscribeBillingEventListeners() {
+		if (daemonToken == null) {
+			log.error("Cannot subscribe billing event listeners: daemon token has not been set");
+			return;
+		}
 		List<BillingEventListener> listeners = Context.getRegisteredComponents(BillingEventListener.class);
 		for (BillingEventListener listener : listeners) {
 			try {

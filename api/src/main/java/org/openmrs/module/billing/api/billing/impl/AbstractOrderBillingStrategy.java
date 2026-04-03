@@ -13,7 +13,7 @@
  */
 package org.openmrs.module.billing.api.billing.impl;
 
-import java.util.ArrayList;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -62,7 +62,7 @@ public abstract class AbstractOrderBillingStrategy implements OrderBillingStrate
 						    order.getUuid());
 						return Optional.of(existingLineItem.getBill());
 					}
-					return handleNewOrder(order);
+					return handleNewOrder(order).flatMap(lineItem -> saveBill(order.getPatient(), lineItem, order));
 				case REVISE:
 					return handleRevisedOrder(order);
 				case DISCONTINUE:
@@ -83,18 +83,27 @@ public abstract class AbstractOrderBillingStrategy implements OrderBillingStrate
 		return Ordered.LOWEST_PRECEDENCE;
 	}
 	
-	protected abstract Optional<Bill> handleNewOrder(Order order);
-	
-	private Optional<Bill> handleRevisedOrder(Order order) {
-		voidPreviousLineItem(order, "Order revised");
-		return handleNewOrder(order);
+	/**
+	 * Whether the order's action is one that this base class handles (NEW, REVISE, DISCONTINUE).
+	 * Subclasses can call this from {@link #supports(Order)} to avoid repeating the action check.
+	 */
+	protected boolean isSupportedAction(Order order) {
+		Order.Action action = order.getAction();
+		return action == Order.Action.NEW || action == Order.Action.REVISE || action == Order.Action.DISCONTINUE;
 	}
 	
-	private void handleDiscontinuedOrder(Order order) {
+	protected abstract Optional<BillLineItem> handleNewOrder(Order order);
+	
+	protected Optional<Bill> handleRevisedOrder(Order order) {
+		voidPreviousLineItem(order, "Order revised");
+		return handleNewOrder(order).flatMap(lineItem -> saveBill(order.getPatient(), lineItem, order));
+	}
+	
+	protected void handleDiscontinuedOrder(Order order) {
 		voidPreviousLineItem(order, "Order discontinued");
 	}
 	
-	private void voidPreviousLineItem(Order order, String reason) {
+	protected void voidPreviousLineItem(Order order, String reason) {
 		Order previousOrder = order.getPreviousOrder();
 		if (previousOrder == null) {
 			log.warn("No previous order found for {} order: {}", order.getAction(), order.getUuid());
@@ -119,31 +128,60 @@ public abstract class AbstractOrderBillingStrategy implements OrderBillingStrate
 	
 	protected Optional<Bill> saveBill(Patient patient, BillLineItem lineItem, Order order) {
 		BillService billService = Context.getService(BillService.class);
-		CashPointService cashPointService = Context.getService(CashPointService.class);
 		
-		List<Provider> providers = new ArrayList<>(
-		        Context.getProviderService().getProvidersByPerson(order.getCreator().getPerson()));
-		
-		if (providers.isEmpty()) {
-			log.error("Order creator is not a provider, cannot create bill for order: {}", order.getUuid());
+		Provider cashier = resolveCashier(order);
+		if (cashier == null) {
+			log.error("Cannot resolve cashier for order: {}", order.getUuid());
 			return Optional.empty();
 		}
 		
-		List<CashPoint> cashPoints = cashPointService.getAllCashPoints(false);
-		if (cashPoints.isEmpty()) {
-			log.error("No cash points configured, cannot create bill for order: {}", order.getUuid());
+		CashPoint cashPoint = resolveCashPoint();
+		if (cashPoint == null) {
+			log.error("Cannot resolve cash point for order: {}", order.getUuid());
 			return Optional.empty();
 		}
 		
 		Bill bill = new Bill();
 		bill.setPatient(patient);
 		bill.setStatus(BillStatus.PENDING);
-		bill.setCashier(providers.get(0));
-		bill.setCashPoint(cashPoints.get(0));
+		bill.setCashier(cashier);
+		bill.setCashPoint(cashPoint);
 		bill.addLineItem(lineItem);
 		
 		Bill savedBill = billService.saveBill(bill);
 		return Optional.of(savedBill);
+	}
+	
+	/**
+	 * Resolve the provider to set as the cashier on the bill. Defaults to the order's orderer.
+	 * Subclasses can override to use a different resolution strategy.
+	 */
+	protected Provider resolveCashier(Order order) {
+		return order.getOrderer();
+	}
+	
+	/**
+	 * Resolve the cash point for the bill. Defaults to the first available cash point. Subclasses can
+	 * override, e.g., to resolve by encounter location.
+	 */
+	protected CashPoint resolveCashPoint() {
+		CashPointService cashPointService = Context.getService(CashPointService.class);
+		List<CashPoint> cashPoints = cashPointService.getAllCashPoints(false);
+		return cashPoints.isEmpty() ? null : cashPoints.get(0);
+	}
+	
+	/**
+	 * Create a bill line item with the common fields populated. Subclasses should set the type-specific
+	 * fields (item or billable service) and the price on the returned line item.
+	 */
+	protected BillLineItem createLineItem(BigDecimal price, int quantity, BillStatus paymentStatus, Order order) {
+		BillLineItem lineItem = new BillLineItem();
+		lineItem.setPrice(price);
+		lineItem.setQuantity(quantity);
+		lineItem.setPaymentStatus(paymentStatus);
+		lineItem.setLineItemOrder(0);
+		lineItem.setOrder(order);
+		return lineItem;
 	}
 	
 	protected boolean checkIfOrderIsExempted(Order order, ExemptionType exemptionType) {
@@ -169,9 +207,8 @@ public abstract class AbstractOrderBillingStrategy implements OrderBillingStrate
 		return false;
 	}
 	
-	private Map<String, Object> buildExemptionVariables(Order order) {
+	protected Map<String, Object> buildExemptionVariables(Order order) {
 		Map<String, Object> variables = new HashMap<>();
-		ProgramWorkflowService workflowService = Context.getProgramWorkflowService();
 		
 		Patient patient = order.getPatient();
 		variables.put("patient", patient);
@@ -186,8 +223,8 @@ public abstract class AbstractOrderBillingStrategy implements OrderBillingStrate
 		}
 		variables.put("order", orderData);
 		
-		List<PatientProgram> programs = workflowService.getPatientPrograms(patient, null, null, null, new Date(), null,
-		    false);
+		List<PatientProgram> programs = Context.getProgramWorkflowService().getPatientPrograms(patient, null, null, null,
+		    new Date(), null, false);
 		List<String> activePrograms = programs.stream().filter(PatientProgram::getActive)
 		        .map(pp -> pp.getProgram().getName()).collect(Collectors.toList());
 		variables.put("activePrograms", activePrograms);
