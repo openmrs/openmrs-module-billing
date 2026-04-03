@@ -94,7 +94,7 @@ public abstract class AbstractOrderBillingStrategy implements OrderBillingStrate
 			log.info("Bill line item already exists for order: {}, skipping duplicate bill creation", order.getUuid());
 			return Optional.of(existingLineItem.getBill());
 		}
-		return handleNewOrder(order).flatMap(lineItem -> saveBill(order.getPatient(), lineItem, order));
+		return handleNewOrder(order).flatMap(lineItem -> createBill(order.getPatient(), lineItem, order));
 	}
 	
 	@Override
@@ -149,7 +149,7 @@ public abstract class AbstractOrderBillingStrategy implements OrderBillingStrate
 		billService.saveBill(existingLineItem.getBill());
 	}
 	
-	protected Optional<Bill> saveBill(Patient patient, BillLineItem lineItem, Order order) {
+	protected Optional<Bill> createBill(Patient patient, BillLineItem lineItem, Order order) {
 		Provider cashier = resolveCashier(order);
 		if (cashier == null) {
 			log.error("Cannot resolve cashier for order: {}", order.getUuid());
