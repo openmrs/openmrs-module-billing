@@ -55,14 +55,7 @@ public abstract class AbstractOrderBillingStrategy implements OrderBillingStrate
 		try {
 			switch (order.getAction()) {
 				case NEW:
-					BillLineItemService itemService = Context.getService(BillLineItemService.class);
-					BillLineItem existingLineItem = itemService.getBillLineItemByOrder(order);
-					if (existingLineItem != null) {
-						log.info("Bill line item already exists for order: {}, skipping duplicate bill creation",
-						    order.getUuid());
-						return Optional.of(existingLineItem.getBill());
-					}
-					return handleNewOrder(order).flatMap(lineItem -> saveBill(order.getPatient(), lineItem, order));
+					return createBillIfAbsent(order);
 				case REVISE:
 					return handleRevisedOrder(order);
 				case DISCONTINUE:
@@ -76,6 +69,16 @@ public abstract class AbstractOrderBillingStrategy implements OrderBillingStrate
 			log.error("Error processing order (action={}): {}", order.getAction(), e.getMessage(), e);
 			return Optional.empty();
 		}
+	}
+	
+	protected Optional<Bill> createBillIfAbsent(Order order) {
+		BillLineItemService itemService = Context.getService(BillLineItemService.class);
+		BillLineItem existingLineItem = itemService.getBillLineItemByOrder(order);
+		if (existingLineItem != null) {
+			log.info("Bill line item already exists for order: {}, skipping duplicate bill creation", order.getUuid());
+			return Optional.of(existingLineItem.getBill());
+		}
+		return handleNewOrder(order).flatMap(lineItem -> saveBill(order.getPatient(), lineItem, order));
 	}
 	
 	@Override
@@ -96,7 +99,7 @@ public abstract class AbstractOrderBillingStrategy implements OrderBillingStrate
 	
 	protected Optional<Bill> handleRevisedOrder(Order order) {
 		voidPreviousLineItem(order, "Order revised");
-		return handleNewOrder(order).flatMap(lineItem -> saveBill(order.getPatient(), lineItem, order));
+		return createBillIfAbsent(order);
 	}
 	
 	protected void handleDiscontinuedOrder(Order order) {
