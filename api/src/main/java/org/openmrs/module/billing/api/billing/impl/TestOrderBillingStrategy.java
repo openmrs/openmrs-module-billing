@@ -17,11 +17,10 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.openmrs.Order;
 import org.openmrs.TestOrder;
-import org.openmrs.api.context.Context;
-import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.billing.api.BillableServiceService;
 import org.openmrs.module.billing.api.ItemPriceService;
 import org.openmrs.module.billing.api.model.BillLineItem;
@@ -31,17 +30,23 @@ import org.openmrs.module.billing.api.model.BillableServiceStatus;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
 import org.openmrs.module.billing.api.model.ExemptionType;
 import org.openmrs.module.billing.api.search.BillableServiceSearch;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Default billing strategy for {@link TestOrder}s. Creates a bill line item based on the billable
  * service linked to the test order's concept.
  */
 @Slf4j
+@Setter(onMethod_ = @Autowired)
 public class TestOrderBillingStrategy extends AbstractOrderBillingStrategy {
 	
+	private BillableServiceService billableServiceService;
+	
+	private ItemPriceService itemPriceService;
+	
 	@Override
-	public boolean supports(Order order) {
-		return HibernateUtil.getRealObjectFromProxy(order) instanceof TestOrder && isSupportedAction(order);
+	protected boolean supportsOrder(Order order) {
+		return order instanceof TestOrder;
 	}
 	
 	@Override
@@ -53,12 +58,11 @@ public class TestOrderBillingStrategy extends AbstractOrderBillingStrategy {
 			return Optional.empty();
 		}
 		
-		BillableServiceService serviceService = Context.getService(BillableServiceService.class);
 		BillableServiceSearch searchTemplate = new BillableServiceSearch();
 		searchTemplate.setConceptUuid(testOrder.getConcept().getUuid());
 		searchTemplate.setServiceStatus(BillableServiceStatus.ENABLED);
 		
-		List<BillableService> searchResult = serviceService.getBillableServices(searchTemplate, null);
+		List<BillableService> searchResult = billableServiceService.getBillableServices(searchTemplate, null);
 		if (searchResult.isEmpty()) {
 			log.debug("No billable service found for concept: {}", testOrder.getConcept().getUuid());
 			return Optional.empty();
@@ -74,8 +78,7 @@ public class TestOrderBillingStrategy extends AbstractOrderBillingStrategy {
 	}
 	
 	private BigDecimal resolvePrice(BillableService billableService) {
-		ItemPriceService priceService = Context.getService(ItemPriceService.class);
-		List<CashierItemPrice> itemPrices = priceService.getServicePrice(billableService);
+		List<CashierItemPrice> itemPrices = itemPriceService.getServicePrice(billableService);
 		if (!itemPrices.isEmpty()) {
 			return itemPrices.get(0).getPrice();
 		}

@@ -17,11 +17,10 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.openmrs.DrugOrder;
 import org.openmrs.Order;
-import org.openmrs.api.context.Context;
-import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.billing.api.ItemPriceService;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
@@ -29,17 +28,23 @@ import org.openmrs.module.billing.api.model.CashierItemPrice;
 import org.openmrs.module.billing.api.model.ExemptionType;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Default billing strategy for {@link DrugOrder}s. Creates a bill line item based on the stock item
  * linked to the ordered drug.
  */
 @Slf4j
+@Setter(onMethod_ = @Autowired)
 public class DrugOrderBillingStrategy extends AbstractOrderBillingStrategy {
 	
+	private StockManagementService stockManagementService;
+	
+	private ItemPriceService itemPriceService;
+	
 	@Override
-	public boolean supports(Order order) {
-		return HibernateUtil.getRealObjectFromProxy(order) instanceof DrugOrder && isSupportedAction(order);
+	protected boolean supportsOrder(Order order) {
+		return order instanceof DrugOrder;
 	}
 	
 	@Override
@@ -51,9 +56,8 @@ public class DrugOrderBillingStrategy extends AbstractOrderBillingStrategy {
 			return Optional.empty();
 		}
 		
-		StockManagementService stockService = Context.getService(StockManagementService.class);
 		Integer drugId = drugOrder.getDrug().getDrugId();
-		List<StockItem> stockItems = stockService.getStockItemByDrug(drugId);
+		List<StockItem> stockItems = stockManagementService.getStockItemByDrug(drugId);
 		
 		if (stockItems.isEmpty()) {
 			log.debug("No stock item found for drug ID: {}", drugId);
@@ -71,8 +75,7 @@ public class DrugOrderBillingStrategy extends AbstractOrderBillingStrategy {
 	}
 	
 	private BigDecimal resolvePrice(StockItem stockItem) {
-		ItemPriceService priceService = Context.getService(ItemPriceService.class);
-		List<CashierItemPrice> itemPrices = priceService.getItemPrice(stockItem);
+		List<CashierItemPrice> itemPrices = itemPriceService.getItemPrice(stockItem);
 		if (!itemPrices.isEmpty()) {
 			return itemPrices.get(0).getPrice();
 		} else if (stockItem.getPurchasePrice() != null) {
@@ -80,5 +83,4 @@ public class DrugOrderBillingStrategy extends AbstractOrderBillingStrategy {
 		}
 		return BigDecimal.ZERO;
 	}
-	
 }
