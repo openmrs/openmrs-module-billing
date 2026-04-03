@@ -40,6 +40,7 @@ import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.model.ExemptionType;
+import org.springframework.core.Ordered;
 
 /**
  * Base class for billing strategies that provides shared logic for bill creation, line item
@@ -75,6 +76,11 @@ public abstract class AbstractOrderBillingStrategy implements OrderBillingStrate
 			log.error("Error processing order (action={}): {}", order.getAction(), e.getMessage(), e);
 			return Optional.empty();
 		}
+	}
+	
+	@Override
+	public int getOrder() {
+		return Ordered.LOWEST_PRECEDENCE;
 	}
 	
 	protected abstract Optional<Bill> handleNewOrder(Order order);

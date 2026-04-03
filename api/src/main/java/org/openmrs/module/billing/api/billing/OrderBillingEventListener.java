@@ -20,6 +20,7 @@ import javax.jms.Message;
 import java.util.List;
 
 import lombok.Setter;
+import org.springframework.core.OrderComparator;
 import lombok.extern.slf4j.Slf4j;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.Order;
@@ -91,6 +92,7 @@ public class OrderBillingEventListener implements BillingEventListener {
 	 */
 	void processOrder(Order order) {
 		List<OrderBillingStrategy> strategies = Context.getRegisteredComponents(OrderBillingStrategy.class);
+		OrderComparator.sort(strategies);
 		
 		for (OrderBillingStrategy strategy : strategies) {
 			if (strategy.supports(order)) {

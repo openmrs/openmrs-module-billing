@@ -15,17 +15,18 @@ package org.openmrs.module.billing.api.billing;
 
 import org.openmrs.Order;
 import org.openmrs.module.billing.api.model.Bill;
+import org.springframework.core.Ordered;
 
 import java.util.Optional;
 
 /**
  * Strategy for generating a bill from an order. Implementations are Spring beans discovered via
- * {@code Context.getRegisteredComponents(OrderBillingStrategy.class)}. The first strategy whose
+ * {@code Context.getRegisteredComponents(OrderBillingStrategy.class)} and sorted by
+ * {@link Ordered#getOrder()} (lowest value = highest priority). The first strategy whose
  * {@link #supports(Order)} returns {@code true} handles the order. To override a default strategy,
- * register a bean with the same name (e.g. "drugOrderBillingStrategy") in your module's Spring
- * context.
+ * register a bean with a lower order value so it is evaluated first.
  */
-public interface OrderBillingStrategy {
+public interface OrderBillingStrategy extends Ordered {
 	
 	/**
 	 * Whether this strategy can handle the given order.
