@@ -1,5 +1,6 @@
 package org.openmrs.module.billing.api.db;
 
+import org.openmrs.Order;
 import org.openmrs.module.billing.api.model.BillLineItem;
 
 import javax.annotation.Nonnull;
@@ -31,5 +32,14 @@ public interface BillLineItemDAO {
 	 */
 	@Nullable
 	BillLineItem getBillLineItemByUuid(@Nonnull String uuid);
+	
+	/**
+	 * Retrieves the active (non-voided) bill line item linked to the given order.
+	 *
+	 * @param order the order to look up
+	 * @return the bill line item for that order, or null if none exists
+	 */
+	@Nullable
+	BillLineItem getBillLineItemByOrder(@Nonnull Order order);
 	
 }

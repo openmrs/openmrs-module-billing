@@ -109,8 +109,8 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 				if (cashier == null) {
 					cashier = getCurrentCashier();
 					if (cashier == null) {
-						throw new RestClientException("The current user ("
-						        + Context.getAuthenticatedUser().getUsername() + ") is not a provider");
+						throw new RestClientException(
+						        "The current user (" + Context.getAuthenticatedUser().getUsername() + ") is not a provider");
 					}
 				}
 				payment.setCashier(cashier);
@@ -152,10 +152,10 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			if (bill.getCashier() == null) {
 				Provider cashier = getCurrentCashier();
 				if (cashier == null) {
-					throw new RestClientException("The current user ("
-					        + Context.getAuthenticatedUser().getUsername() + ") is not a provider");
+					throw new RestClientException(
+					        "The current user (" + Context.getAuthenticatedUser().getUsername() + ") is not a provider");
 				}
-
+				
 				bill.setCashier(cashier);
 			}
 			
