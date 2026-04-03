@@ -21,8 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.openmrs.DrugOrder;
 import org.openmrs.Order;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.billing.api.ItemPriceService;
-import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
@@ -39,15 +39,11 @@ public class DrugOrderBillingStrategy extends AbstractOrderBillingStrategy {
 	
 	@Override
 	public boolean supports(Order order) {
-		if (!(order instanceof DrugOrder)) {
-			return false;
-		}
-		Order.Action action = order.getAction();
-		return action == Order.Action.NEW || action == Order.Action.REVISE || action == Order.Action.DISCONTINUE;
+		return HibernateUtil.getRealObjectFromProxy(order) instanceof DrugOrder && isSupportedAction(order);
 	}
 	
 	@Override
-	protected Optional<Bill> handleNewOrder(Order order) {
+	protected Optional<BillLineItem> handleNewOrder(Order order) {
 		DrugOrder drugOrder = (DrugOrder) order;
 		
 		if (drugOrder.getDrug() == null) {
@@ -69,32 +65,20 @@ public class DrugOrderBillingStrategy extends AbstractOrderBillingStrategy {
 		BillStatus lineItemStatus = isExempted ? BillStatus.EXEMPTED : BillStatus.PENDING;
 		
 		StockItem stockItem = stockItems.get(0);
-		BillLineItem lineItem = createLineItem(stockItem, quantity, lineItemStatus, order);
-		
-		return saveBill(order.getPatient(), lineItem, order);
+		BillLineItem lineItem = createLineItem(resolvePrice(stockItem), quantity, lineItemStatus, order);
+		lineItem.setItem(stockItem);
+		return Optional.of(lineItem);
 	}
 	
-	private BillLineItem createLineItem(StockItem stockItem, int quantity, BillStatus lineItemStatus, Order order) {
+	private BigDecimal resolvePrice(StockItem stockItem) {
 		ItemPriceService priceService = Context.getService(ItemPriceService.class);
-		
-		BillLineItem lineItem = new BillLineItem();
-		lineItem.setItem(stockItem);
-		
 		List<CashierItemPrice> itemPrices = priceService.getItemPrice(stockItem);
 		if (!itemPrices.isEmpty()) {
-			lineItem.setPrice(itemPrices.get(0).getPrice());
+			return itemPrices.get(0).getPrice();
 		} else if (stockItem.getPurchasePrice() != null) {
-			lineItem.setPrice(stockItem.getPurchasePrice());
-		} else {
-			lineItem.setPrice(BigDecimal.ZERO);
+			return stockItem.getPurchasePrice();
 		}
-		
-		lineItem.setQuantity(quantity);
-		lineItem.setPaymentStatus(lineItemStatus);
-		lineItem.setLineItemOrder(0);
-		lineItem.setOrder(order);
-		
-		return lineItem;
+		return BigDecimal.ZERO;
 	}
 	
 }
