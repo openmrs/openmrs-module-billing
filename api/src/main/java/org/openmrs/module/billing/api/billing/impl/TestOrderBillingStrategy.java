@@ -48,6 +48,11 @@ public class TestOrderBillingStrategy extends AbstractOrderBillingStrategy {
 	protected Optional<BillLineItem> handleNewOrder(Order order) {
 		TestOrder testOrder = (TestOrder) order;
 		
+		if (testOrder.getConcept() == null) {
+			log.warn("TestOrder {} has no concept set, cannot generate bill", order.getUuid());
+			return Optional.empty();
+		}
+		
 		BillableServiceService serviceService = Context.getService(BillableServiceService.class);
 		BillableServiceSearch searchTemplate = new BillableServiceSearch();
 		searchTemplate.setConceptUuid(testOrder.getConcept().getUuid());
