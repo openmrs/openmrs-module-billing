@@ -16,7 +16,7 @@ package org.openmrs.module.billing.api.billing;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.event.Event;
 import org.openmrs.event.EventListener;
-import org.openmrs.module.DaemonToken;
+import org.openmrs.module.DaemonTokenAware;
 
 /**
  * Marker interface for event listeners that should be auto-subscribed when the billing module
@@ -27,20 +27,15 @@ import org.openmrs.module.DaemonToken;
  * To add a new listener, implement this interface and register the bean in
  * {@code moduleApplicationContext.xml} — no changes to the activator are needed.
  */
-public interface BillingEventListener extends EventListener {
-	
+public interface BillingEventListener extends EventListener, DaemonTokenAware {
+
 	/**
 	 * The OpenMRS domain class this listener subscribes to (e.g. {@code Order.class}).
 	 */
 	Class<? extends OpenmrsObject> getSubscribedClass();
-	
+
 	/**
 	 * The event action this listener subscribes to (e.g. {@link Event.Action#CREATED}).
 	 */
 	Event.Action getSubscribedAction();
-	
-	/**
-	 * Set the daemon token for executing operations in a daemon thread context.
-	 */
-	void setDaemonToken(DaemonToken daemonToken);
 }

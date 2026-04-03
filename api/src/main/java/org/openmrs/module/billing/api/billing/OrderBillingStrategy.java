@@ -14,7 +14,9 @@
 package org.openmrs.module.billing.api.billing;
 
 import org.openmrs.Order;
+import org.openmrs.Provider;
 import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.module.billing.api.model.CashPoint;
 import org.springframework.core.Ordered;
 
 import java.util.Optional;
@@ -44,4 +46,19 @@ public interface OrderBillingStrategy extends Ordered {
 	 * @return the created bill, or empty if the order should not be billed
 	 */
 	Optional<Bill> generateBill(Order order);
+	
+	/**
+	 * Resolve the provider to set as the cashier on the bill.
+	 *
+	 * @param order the order being billed
+	 * @return the cashier provider, or null if one cannot be determined
+	 */
+	Provider resolveCashier(Order order);
+	
+	/**
+	 * Resolve the cash point for the bill.
+	 *
+	 * @return the cash point, or null if one cannot be determined
+	 */
+	CashPoint resolveCashPoint();
 }

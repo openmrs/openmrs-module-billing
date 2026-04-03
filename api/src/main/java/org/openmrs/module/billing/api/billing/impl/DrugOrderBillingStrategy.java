@@ -21,6 +21,8 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.openmrs.DrugOrder;
 import org.openmrs.Order;
+import org.openmrs.Provider;
+import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.ItemPriceService;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
@@ -36,7 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 @Slf4j
 @Setter(onMethod_ = @Autowired)
-public class DrugOrderBillingStrategy extends AbstractOrderBillingStrategy {
+public class DrugOrderBillingStrategy extends AbstractDefaultOrderBillingStrategy {
 	
 	private StockManagementService stockManagementService;
 	
@@ -48,7 +50,7 @@ public class DrugOrderBillingStrategy extends AbstractOrderBillingStrategy {
 	}
 	
 	@Override
-	protected Optional<BillLineItem> handleNewOrder(Order order) {
+	protected Optional<BillLineItem> createBillLineItem(Order order) {
 		DrugOrder drugOrder = (DrugOrder) order;
 		
 		if (drugOrder.getDrug() == null) {
@@ -82,5 +84,16 @@ public class DrugOrderBillingStrategy extends AbstractOrderBillingStrategy {
 			return stockItem.getPurchasePrice();
 		}
 		return BigDecimal.ZERO;
+	}
+	
+	@Override
+	public Provider resolveCashier(Order order) {
+		return order.getOrderer();
+	}
+	
+	@Override
+	public CashPoint resolveCashPoint() {
+		List<CashPoint> cashPoints = cashPointService.getAllCashPoints(false);
+		return cashPoints.isEmpty() ? null : cashPoints.get(0);
 	}
 }
