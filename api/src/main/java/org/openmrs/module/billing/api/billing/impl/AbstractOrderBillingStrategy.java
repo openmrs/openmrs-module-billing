@@ -21,13 +21,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.openmrs.Order;
 import org.openmrs.Patient;
 import org.openmrs.PatientProgram;
 import org.openmrs.Provider;
 import org.openmrs.api.ProgramWorkflowService;
-import org.openmrs.api.context.Context;
+import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.billing.api.BillExemptionService;
 import org.openmrs.module.billing.api.BillLineItemService;
 import org.openmrs.module.billing.api.BillService;
@@ -48,7 +51,21 @@ import org.springframework.core.Ordered;
  * line items specific to their order type.
  */
 @Slf4j
+@Setter(onMethod_ = @Autowired)
 public abstract class AbstractOrderBillingStrategy implements OrderBillingStrategy {
+	
+	protected BillService billService;
+	
+	protected BillLineItemService billLineItemService;
+	
+	protected CashPointService cashPointService;
+	
+	protected BillExemptionService billExemptionService;
+	
+	@Qualifier("ruleEngine")
+	protected ExemptionRuleEngine exemptionRuleEngine;
+	
+	protected ProgramWorkflowService programWorkflowService;
 	
 	@Override
 	public Optional<Bill> generateBill(Order order) {
@@ -72,8 +89,7 @@ public abstract class AbstractOrderBillingStrategy implements OrderBillingStrate
 	}
 	
 	protected Optional<Bill> createBillIfAbsent(Order order) {
-		BillLineItemService itemService = Context.getService(BillLineItemService.class);
-		BillLineItem existingLineItem = itemService.getBillLineItemByOrder(order);
+		BillLineItem existingLineItem = billLineItemService.getBillLineItemByOrder(order);
 		if (existingLineItem != null) {
 			log.info("Bill line item already exists for order: {}, skipping duplicate bill creation", order.getUuid());
 			return Optional.of(existingLineItem.getBill());
@@ -86,14 +102,20 @@ public abstract class AbstractOrderBillingStrategy implements OrderBillingStrate
 		return Ordered.LOWEST_PRECEDENCE;
 	}
 	
-	/**
-	 * Whether the order's action is one that this base class handles (NEW, REVISE, DISCONTINUE).
-	 * Subclasses can call this from {@link #supports(Order)} to avoid repeating the action check.
-	 */
-	protected boolean isSupportedAction(Order order) {
-		Order.Action action = order.getAction();
-		return action == Order.Action.NEW || action == Order.Action.REVISE || action == Order.Action.DISCONTINUE;
+	@Override
+	public final boolean supports(Order order) {
+		Order realOrder = HibernateUtil.getRealObjectFromProxy(order);
+		Order.Action action = realOrder.getAction();
+		boolean supportedAction = action == Order.Action.NEW || action == Order.Action.REVISE
+		        || action == Order.Action.DISCONTINUE;
+		return supportedAction && supportsOrder(realOrder);
 	}
+	
+	/**
+	 * Whether this strategy handles the given (already deproxied) order. Subclasses only need to check
+	 * the order type here — action filtering and deproxying are handled by the base class.
+	 */
+	protected abstract boolean supportsOrder(Order order);
 	
 	protected abstract Optional<BillLineItem> handleNewOrder(Order order);
 	
@@ -113,8 +135,7 @@ public abstract class AbstractOrderBillingStrategy implements OrderBillingStrate
 			return;
 		}
 		
-		BillLineItemService lineItemService = Context.getService(BillLineItemService.class);
-		BillLineItem existingLineItem = lineItemService.getBillLineItemByOrder(previousOrder);
+		BillLineItem existingLineItem = billLineItemService.getBillLineItemByOrder(previousOrder);
 		if (existingLineItem == null) {
 			log.warn("No bill line item found for previous order: {}", previousOrder.getUuid());
 			return;
@@ -125,13 +146,10 @@ public abstract class AbstractOrderBillingStrategy implements OrderBillingStrate
 		existingLineItem.setDateVoided(new Date());
 		existingLineItem.setVoidedBy(order.getCreator());
 		
-		BillService billService = Context.getService(BillService.class);
 		billService.saveBill(existingLineItem.getBill());
 	}
 	
 	protected Optional<Bill> saveBill(Patient patient, BillLineItem lineItem, Order order) {
-		BillService billService = Context.getService(BillService.class);
-		
 		Provider cashier = resolveCashier(order);
 		if (cashier == null) {
 			log.error("Cannot resolve cashier for order: {}", order.getUuid());
@@ -168,7 +186,6 @@ public abstract class AbstractOrderBillingStrategy implements OrderBillingStrate
 	 * override, e.g., to resolve by encounter location.
 	 */
 	protected CashPoint resolveCashPoint() {
-		CashPointService cashPointService = Context.getService(CashPointService.class);
 		List<CashPoint> cashPoints = cashPointService.getAllCashPoints(false);
 		return cashPoints.isEmpty() ? null : cashPoints.get(0);
 	}
@@ -192,17 +209,16 @@ public abstract class AbstractOrderBillingStrategy implements OrderBillingStrate
 			return false;
 		}
 		
-		BillExemptionService exemptionService = Context.getService(BillExemptionService.class);
-		List<BillExemption> exemptions = exemptionService.getExemptionsByConcept(order.getConcept(), exemptionType, false);
+		List<BillExemption> exemptions = billExemptionService.getExemptionsByConcept(order.getConcept(), exemptionType,
+		    false);
 		if (exemptions == null || exemptions.isEmpty()) {
 			return false;
 		}
 		
-		ExemptionRuleEngine ruleEngine = Context.getRegisteredComponent("ruleEngine", ExemptionRuleEngine.class);
 		Map<String, Object> variables = buildExemptionVariables(order);
 		
 		for (BillExemption exemption : exemptions) {
-			if (ruleEngine.isExemptionApplicable(exemption, variables)) {
+			if (exemptionRuleEngine.isExemptionApplicable(exemption, variables)) {
 				return true;
 			}
 		}
@@ -226,8 +242,8 @@ public abstract class AbstractOrderBillingStrategy implements OrderBillingStrate
 		}
 		variables.put("order", orderData);
 		
-		List<PatientProgram> programs = Context.getProgramWorkflowService().getPatientPrograms(patient, null, null, null,
-		    new Date(), null, false);
+		List<PatientProgram> programs = programWorkflowService.getPatientPrograms(patient, null, null, null, new Date(),
+		    null, false);
 		List<String> activePrograms = programs.stream().filter(PatientProgram::getActive)
 		        .map(pp -> pp.getProgram().getName()).collect(Collectors.toList());
 		variables.put("activePrograms", activePrograms);
