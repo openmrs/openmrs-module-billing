@@ -15,11 +15,8 @@ package org.openmrs.module.billing.api.billing;
 
 import org.openmrs.Order;
 import org.openmrs.Provider;
-import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.CashPoint;
 import org.springframework.core.Ordered;
-
-import java.util.Optional;
 
 /**
  * Strategy for generating a bill from an order. Implementations are Spring beans discovered via
@@ -43,9 +40,9 @@ public interface OrderBillingStrategy extends Ordered {
 	 * (idempotency) before creating a new bill.
 	 *
 	 * @param order a persisted order (guaranteed to exist in the database)
-	 * @return the created bill, or empty if the order should not be billed
+	 * @return the billing result indicating what action was taken
 	 */
-	Optional<Bill> generateBill(Order order);
+	BillingResult generateBill(Order order);
 	
 	/**
 	 * Resolve the provider to set as the cashier on the bill.

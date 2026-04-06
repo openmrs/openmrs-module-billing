@@ -32,6 +32,7 @@ import org.openmrs.module.billing.api.BillExemptionService;
 import org.openmrs.module.billing.api.BillLineItemService;
 import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.CashPointService;
+import org.openmrs.module.billing.api.billing.BillingResult;
 import org.openmrs.module.billing.api.evaluator.ExemptionRuleEngine;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillExemption;
@@ -68,19 +69,20 @@ public abstract class AbstractDefaultOrderBillingStrategy extends AbstractOrderB
 	protected ProgramWorkflowService programWorkflowService;
 	
 	@Override
-	protected Optional<Bill> handleNewOrder(Order order) {
+	protected BillingResult handleNewOrder(Order order) {
 		return createBillIfAbsent(order);
 	}
 	
 	@Override
-	protected Optional<Bill> handleRevisedOrder(Order order) {
+	protected BillingResult handleRevisedOrder(Order order) {
 		voidPreviousLineItem(order, "Order revised");
 		return createBillIfAbsent(order);
 	}
 	
 	@Override
-	protected void handleDiscontinuedOrder(Order order) {
+	protected BillingResult handleDiscontinuedOrder(Order order) {
 		voidPreviousLineItem(order, "Order discontinued");
+		return BillingResult.discontinued();
 	}
 	
 	protected void voidPreviousLineItem(Order order, String reason) {
@@ -107,26 +109,32 @@ public abstract class AbstractDefaultOrderBillingStrategy extends AbstractOrderB
 	 */
 	protected abstract Optional<BillLineItem> createBillLineItem(Order order);
 	
-	protected Optional<Bill> createBillIfAbsent(Order order) {
+	protected BillingResult createBillIfAbsent(Order order) {
 		BillLineItem existingLineItem = billLineItemService.getBillLineItemByOrder(order);
 		if (existingLineItem != null) {
 			log.info("Bill line item already exists for order: {}, skipping duplicate bill creation", order.getUuid());
-			return Optional.of(existingLineItem.getBill());
+			return BillingResult.skipped("Duplicate — bill already exists");
 		}
-		return createBillLineItem(order).flatMap(lineItem -> createBill(order.getPatient(), lineItem, order));
+		
+		Optional<BillLineItem> lineItemOpt = createBillLineItem(order);
+		if (!lineItemOpt.isPresent()) {
+			return BillingResult.skipped("No billable item found for order");
+		}
+		
+		return createBill(order.getPatient(), lineItemOpt.get(), order);
 	}
 	
-	protected Optional<Bill> createBill(Patient patient, BillLineItem lineItem, Order order) {
+	protected BillingResult createBill(Patient patient, BillLineItem lineItem, Order order) {
 		Provider cashier = resolveCashier(order);
 		if (cashier == null) {
 			log.error("Cannot resolve cashier for order: {}", order.getUuid());
-			return Optional.empty();
+			return BillingResult.skipped("Cannot resolve cashier");
 		}
 		
 		CashPoint cashPoint = resolveCashPoint();
 		if (cashPoint == null) {
 			log.error("Cannot resolve cash point for order: {}", order.getUuid());
-			return Optional.empty();
+			return BillingResult.skipped("Cannot resolve cash point");
 		}
 		
 		Bill bill = new Bill();
@@ -137,7 +145,7 @@ public abstract class AbstractDefaultOrderBillingStrategy extends AbstractOrderB
 		bill.addLineItem(lineItem);
 		
 		Bill savedBill = billService.saveBill(bill);
-		return Optional.of(savedBill);
+		return BillingResult.created(savedBill);
 	}
 	
 	// resolveCashier() and resolveCashPoint() are inherited from the interface

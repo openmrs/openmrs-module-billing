@@ -13,14 +13,12 @@
  */
 package org.openmrs.module.billing.api.billing.impl;
 
-import java.util.Optional;
-
 import lombok.extern.slf4j.Slf4j;
 import org.openmrs.Order;
 import org.openmrs.Provider;
 import org.openmrs.api.db.hibernate.HibernateUtil;
+import org.openmrs.module.billing.api.billing.BillingResult;
 import org.openmrs.module.billing.api.billing.OrderBillingStrategy;
-import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.CashPoint;
 import org.springframework.core.Ordered;
 
@@ -34,7 +32,7 @@ import org.springframework.core.Ordered;
 public abstract class AbstractOrderBillingStrategy implements OrderBillingStrategy {
 	
 	@Override
-	public Optional<Bill> generateBill(Order order) {
+	public BillingResult generateBill(Order order) {
 		try {
 			switch (order.getAction()) {
 				case NEW:
@@ -42,15 +40,14 @@ public abstract class AbstractOrderBillingStrategy implements OrderBillingStrate
 				case REVISE:
 					return handleRevisedOrder(order);
 				case DISCONTINUE:
-					handleDiscontinuedOrder(order);
-					return Optional.empty();
+					return handleDiscontinuedOrder(order);
 				default:
-					return Optional.empty();
+					return BillingResult.skipped("Unsupported order action: " + order.getAction());
 			}
 		}
 		catch (Exception e) {
 			log.error("Error processing order (action={}): {}", order.getAction(), e.getMessage(), e);
-			return Optional.empty();
+			return BillingResult.skipped(e.getMessage());
 		}
 	}
 	
@@ -70,18 +67,18 @@ public abstract class AbstractOrderBillingStrategy implements OrderBillingStrate
 	
 	/**
 	 * Whether this strategy handles the given (already deproxied) order. Subclasses only need to check
-	 * the order type here — action filtering and deproxying are handled by the base class.
+	 * the order type here — the base class handles action filtering and deproxying.
 	 */
 	protected abstract boolean supportsOrder(Order order);
 	
-	protected abstract Optional<Bill> handleNewOrder(Order order);
+	protected abstract BillingResult handleNewOrder(Order order);
 	
-	protected Optional<Bill> handleRevisedOrder(Order order) {
+	protected BillingResult handleRevisedOrder(Order order) {
 		return handleNewOrder(order);
 	}
 	
-	protected void handleDiscontinuedOrder(Order order) {
-		// no-op by default
+	protected BillingResult handleDiscontinuedOrder(Order order) {
+		return BillingResult.skipped("No discontinue handler implemented");
 	}
 	
 	@Override
