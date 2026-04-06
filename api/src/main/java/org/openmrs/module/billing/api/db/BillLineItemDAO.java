@@ -42,4 +42,12 @@ public interface BillLineItemDAO {
 	@Nullable
 	BillLineItem getBillLineItemByOrder(@Nonnull Order order);
 	
+	/**
+	 * Saves or updates a bill line item.
+	 *
+	 * @param lineItem the line item to save
+	 * @return the saved line item
+	 */
+	BillLineItem saveBillLineItem(@Nonnull BillLineItem lineItem);
+	
 }

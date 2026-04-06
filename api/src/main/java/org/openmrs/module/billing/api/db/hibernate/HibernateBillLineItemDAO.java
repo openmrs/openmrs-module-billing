@@ -45,4 +45,10 @@ public class HibernateBillLineItemDAO implements BillLineItemDAO {
 		return query.getResultStream().findFirst().orElse(null);
 	}
 	
+	@Override
+	public BillLineItem saveBillLineItem(@Nonnull BillLineItem lineItem) {
+		sessionFactory.getCurrentSession().saveOrUpdate(lineItem);
+		return lineItem;
+	}
+	
 }

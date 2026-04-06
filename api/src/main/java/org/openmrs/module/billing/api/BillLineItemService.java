@@ -48,4 +48,13 @@ public interface BillLineItemService extends OpenmrsService {
 	@Nullable
 	BillLineItem getBillLineItemByOrder(Order order);
 	
+	/**
+	 * Voids a bill line item. The OpenMRS {@code BaseVoidHandler} AOP handles setting the void metadata
+	 * (voided, voidReason, dateVoided, voidedBy) automatically.
+	 *
+	 * @param lineItem the line item to void
+	 * @param reason the void reason
+	 */
+	void voidBillLineItem(BillLineItem lineItem, String reason);
+	
 }

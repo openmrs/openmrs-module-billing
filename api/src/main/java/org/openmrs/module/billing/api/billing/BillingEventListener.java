@@ -28,12 +28,12 @@ import org.openmrs.module.DaemonTokenAware;
  * {@code moduleApplicationContext.xml} — no changes to the activator are needed.
  */
 public interface BillingEventListener extends EventListener, DaemonTokenAware {
-
+	
 	/**
 	 * The OpenMRS domain class this listener subscribes to (e.g. {@code Order.class}).
 	 */
 	Class<? extends OpenmrsObject> getSubscribedClass();
-
+	
 	/**
 	 * The event action this listener subscribes to (e.g. {@link Event.Action#CREATED}).
 	 */

@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Order;
 import org.openmrs.api.impl.BaseOpenmrsService;
@@ -25,6 +26,7 @@ import org.openmrs.module.billing.api.db.BillLineItemDAO;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 public class BillLineItemServiceImpl extends BaseOpenmrsService implements BillLineItemService {
 	
 	@Setter
@@ -55,5 +57,14 @@ public class BillLineItemServiceImpl extends BaseOpenmrsService implements BillL
 			return null;
 		}
 		return billLineItemDAO.getBillLineItemByOrder(order);
+	}
+	
+	@Override
+	@Transactional
+	public void voidBillLineItem(BillLineItem lineItem, String voidReason) {
+		if (StringUtils.isBlank(voidReason)) {
+			throw new IllegalArgumentException("voidReason cannot be null or empty");
+		}
+		billLineItemDAO.saveBillLineItem(lineItem);
 	}
 }

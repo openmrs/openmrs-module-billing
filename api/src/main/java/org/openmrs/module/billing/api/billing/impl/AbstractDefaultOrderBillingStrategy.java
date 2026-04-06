@@ -83,6 +83,22 @@ public abstract class AbstractDefaultOrderBillingStrategy extends AbstractOrderB
 		voidPreviousLineItem(order, "Order discontinued");
 	}
 	
+	protected void voidPreviousLineItem(Order order, String reason) {
+		Order previousOrder = order.getPreviousOrder();
+		if (previousOrder == null) {
+			log.warn("No previous order found for {} order: {}", order.getAction(), order.getUuid());
+			return;
+		}
+		
+		BillLineItem existingLineItem = billLineItemService.getBillLineItemByOrder(previousOrder);
+		if (existingLineItem == null) {
+			log.warn("No bill line item found for previous order: {}", previousOrder.getUuid());
+			return;
+		}
+		
+		billLineItemService.voidBillLineItem(existingLineItem, reason);
+	}
+	
 	/**
 	 * Create the order-type-specific bill line item. Called by the default bill creation pipeline.
 	 *
@@ -98,27 +114,6 @@ public abstract class AbstractDefaultOrderBillingStrategy extends AbstractOrderB
 			return Optional.of(existingLineItem.getBill());
 		}
 		return createBillLineItem(order).flatMap(lineItem -> createBill(order.getPatient(), lineItem, order));
-	}
-	
-	protected void voidPreviousLineItem(Order order, String reason) {
-		Order previousOrder = order.getPreviousOrder();
-		if (previousOrder == null) {
-			log.warn("No previous order found for {} order: {}", order.getAction(), order.getUuid());
-			return;
-		}
-		
-		BillLineItem existingLineItem = billLineItemService.getBillLineItemByOrder(previousOrder);
-		if (existingLineItem == null) {
-			log.warn("No bill line item found for previous order: {}", previousOrder.getUuid());
-			return;
-		}
-		
-		existingLineItem.setVoided(true);
-		existingLineItem.setVoidReason(reason);
-		existingLineItem.setDateVoided(new Date());
-		existingLineItem.setVoidedBy(order.getCreator());
-		
-		billService.saveBill(existingLineItem.getBill());
 	}
 	
 	protected Optional<Bill> createBill(Patient patient, BillLineItem lineItem, Order order) {
