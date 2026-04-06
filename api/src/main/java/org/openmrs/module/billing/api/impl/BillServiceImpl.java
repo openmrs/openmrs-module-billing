@@ -178,7 +178,6 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 	}
 	
 	@Override
-	@Transactional
 	public Bill requestRefund(Bill bill, String refundReason) {
 		if (bill == null) {
 			throw new IllegalArgumentException("The bill must be defined.");
@@ -194,11 +193,10 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		bill.setRefundRequestedBy(Context.getAuthenticatedUser());
 		bill.setDateRefundRequested(new Date());
 		bill.setStatus(BillStatus.REFUND_REQUESTED);
-		return billDAO.saveBill(bill);
+		return Context.getService(BillService.class).saveBill(bill);
 	}
 	
 	@Override
-	@Transactional
 	public Bill approveRefund(Bill bill) {
 		if (bill == null) {
 			throw new IllegalArgumentException("The bill must be defined.");
@@ -210,11 +208,10 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		bill.setRefundApprovedBy(Context.getAuthenticatedUser());
 		bill.setDateRefundApproved(new Date());
 		bill.setStatus(BillStatus.REFUNDED);
-		return billDAO.saveBill(bill);
+		return Context.getService(BillService.class).saveBill(bill);
 	}
 	
 	@Override
-	@Transactional
 	public Bill rejectRefund(Bill bill, String denialReason) {
 		if (bill == null) {
 			throw new IllegalArgumentException("The bill must be defined.");
@@ -230,7 +227,7 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		bill.setRefundRejectedBy(Context.getAuthenticatedUser());
 		bill.setDateRefundRejected(new Date());
 		bill.setStatus(BillStatus.REFUND_DENIED);
-		return billDAO.saveBill(bill);
+		return Context.getService(BillService.class).saveBill(bill);
 	}
 	
 }

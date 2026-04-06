@@ -187,8 +187,7 @@ public class Bill extends BaseOpenmrsData {
 	}
 	
 	public void synchronizeBillStatus() {
-		if (this.status == BillStatus.REFUND_REQUESTED || this.status == BillStatus.REFUNDED
-		        || this.status == BillStatus.REFUND_DENIED) {
+		if (this.status == BillStatus.REFUND_REQUESTED || this.status == BillStatus.REFUNDED) {
 			return;
 		}
 		if (!this.getPayments().isEmpty() && getTotalPayments().compareTo(BigDecimal.ZERO) > 0) {
