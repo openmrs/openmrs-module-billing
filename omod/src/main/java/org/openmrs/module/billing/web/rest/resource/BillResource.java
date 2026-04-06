@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Provider;
+import org.openmrs.Visit;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.base.ProviderUtil;
@@ -71,6 +72,7 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			description.addProperty("dateCreated");
 			description.addProperty("lineItems");
 			description.addProperty("patient", Representation.REF);
+			description.addProperty("visit", Representation.REF);
 			description.addProperty("payments", Representation.FULL);
 			description.addProperty("receiptNumber");
 			description.addProperty("status");
@@ -158,7 +160,14 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 
 				bill.setCashier(cashier);
 			}
-			
+
+			if (bill.getVisit() == null && bill.getPatient() != null) {
+				List<Visit> activeVisits = Context.getVisitService().getActiveVisitsByPatient(bill.getPatient());
+				if (activeVisits != null && !activeVisits.isEmpty()) {
+					bill.setVisit(activeVisits.get(0));
+				}
+			}
+
 			if (bill.getCashPoint() == null) {
 				loadBillCashPoint(bill);
 			}

@@ -1109,4 +1109,18 @@
             referencedTableName="provider" referencedColumnNames="provider_id"
             onDelete="SET NULL" onUpdate="CASCADE"/>
     </changeSet>
+
+    <changeSet id="openmrs.billing-005-20260407-associate-bill-with-visit" author="rjnt4">
+        <comment>Add visit_id to cashier_bill to associate a bill with the patient's active visit at creation time</comment>
+        <addColumn tableName="cashier_bill">
+            <column name="visit_id" type="int">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <addForeignKeyConstraint
+            constraintName="cashier_bill_visit_fk"
+            baseTableName="cashier_bill" baseColumnNames="visit_id"
+            referencedTableName="visit" referencedColumnNames="visit_id"
+            onDelete="SET NULL" onUpdate="CASCADE"/>
+    </changeSet>
 </databaseChangeLog>

@@ -31,11 +31,12 @@ public class BillValidator implements Validator {
 			errors.reject("error.general");
 		} else {
 			Bill bill = (Bill) target;
-			
+
 			if (bill.getVoided() && StringUtils.isBlank(bill.getVoidReason())) {
 				errors.rejectValue("voided", "error.null");
 			}
-			
+
+			validateVisitPatientConsistency(bill, errors);
 			validateNewPaymentsHaveCashier(bill, errors);
 			validateLineItemsNotModified(bill, errors);
 		}
@@ -84,6 +85,17 @@ public class BillValidator implements Validator {
 		}
 	}
 	
+	/**
+	 * Validates that the visit set on a bill belongs to the same patient as the bill.
+	 */
+	private void validateVisitPatientConsistency(Bill bill, Errors errors) {
+		if (bill.getVisit() != null && bill.getPatient() != null) {
+			if (!bill.getVisit().getPatient().equals(bill.getPatient())) {
+				errors.rejectValue("visit", "billing.error.visitPatientMismatch");
+			}
+		}
+	}
+
 	/**
 	 * Validates that any new (unsaved) non-voided payment has a cashier. Existing persisted payments
 	 * (id != null) are exempt to allow legacy data.

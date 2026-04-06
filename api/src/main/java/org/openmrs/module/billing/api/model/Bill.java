@@ -25,6 +25,7 @@ import lombok.Setter;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
+import org.openmrs.Visit;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.util.PrivilegeConstants;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
@@ -44,9 +45,11 @@ public class Bill extends BaseOpenmrsData {
 	private String receiptNumber;
 	
 	private Provider cashier;
-	
+
 	private Patient patient;
-	
+
+	private Visit visit;
+
 	private CashPoint cashPoint;
 	
 	private Bill billAdjusted;

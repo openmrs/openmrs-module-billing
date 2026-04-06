@@ -94,6 +94,7 @@
 		<property name="receiptNumber" type="java.lang.String" column="receipt_number" not-null="false" length="255"/>
 		<many-to-one name="cashier" class="org.openmrs.Provider" not-null="true" column="provider_id"/>
 		<many-to-one name="patient" class="org.openmrs.Patient" not-null="true" column="patient_id"/>
+		<many-to-one name="visit" class="org.openmrs.Visit" not-null="false" column="visit_id"/>
 		<many-to-one name="cashPoint" class="org.openmrs.module.billing.api.model.CashPoint" not-null="true"
 		             column="cash_point_id"/>
 		<many-to-one name="billAdjusted" class="org.openmrs.module.billing.api.model.Bill" column="adjusted_bill_id"/>
