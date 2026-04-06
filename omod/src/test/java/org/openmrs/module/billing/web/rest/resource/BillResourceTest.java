@@ -254,4 +254,26 @@ public class BillResourceTest {
 		assertEquals(caller, bill.getVisit());
 		verify(visitService, never()).getActiveVisitsByPatient(any());
 	}
+
+	@Test
+	public void save_shouldNotAutoAssociateVisitForExistingBill() {
+		VisitService visitService = mock(VisitService.class);
+		contextMock.when(() -> Context.getVisitService()).thenReturn(visitService);
+
+		Patient patient = new Patient();
+		when(billService.saveBill(any())).thenAnswer(inv -> inv.getArgument(0));
+
+		Bill bill = new Bill();
+		bill.setPatient(patient);
+		bill.setId(99);
+		bill.setCashier(new Provider());
+		bill.setCashPoint(new CashPoint());
+		bill.setStatus(BillStatus.PENDING);
+		bill.setPayments(new HashSet<>());
+
+		resource.save(bill);
+
+		verify(visitService, never()).getActiveVisitsByPatient(any());
+		assertNull(bill.getVisit());
+	}
 }

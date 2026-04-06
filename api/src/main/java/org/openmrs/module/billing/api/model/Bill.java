@@ -44,9 +44,11 @@ public class Bill extends BaseOpenmrsData {
 	private String receiptNumber;
 	
 	private Provider cashier;
-	
+
 	private Patient patient;
-	
+
+	private Visit visit;
+
 	private CashPoint cashPoint;
 	
 	private Visit visit;

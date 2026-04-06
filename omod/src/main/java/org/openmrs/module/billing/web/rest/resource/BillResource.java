@@ -76,6 +76,7 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			description.addProperty("dateCreated");
 			description.addProperty("lineItems");
 			description.addProperty("patient", Representation.REF);
+			description.addProperty("visit", Representation.REF);
 			description.addProperty("payments", Representation.FULL);
 			description.addProperty("receiptNumber");
 			description.addProperty("status");
@@ -184,7 +185,14 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			if (bill.getCashier() == null) {
 				assignCurrentCashier(bill);
 			}
-			
+
+			if (bill.getVisit() == null && bill.getPatient() != null) {
+				List<Visit> activeVisits = Context.getVisitService().getActiveVisitsByPatient(bill.getPatient());
+				if (activeVisits != null && !activeVisits.isEmpty()) {
+					bill.setVisit(activeVisits.get(0));
+				}
+			}
+
 			if (bill.getCashPoint() == null) {
 				loadBillCashPoint(bill);
 			}

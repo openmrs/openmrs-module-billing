@@ -114,6 +114,7 @@
 		</set>
 		<many-to-one name="cashier" class="org.openmrs.Provider" not-null="true" column="provider_id"/>
 		<many-to-one name="patient" class="org.openmrs.Patient" not-null="true" column="patient_id"/>
+		<many-to-one name="visit" class="org.openmrs.Visit" not-null="false" column="visit_id"/>
 		<many-to-one name="cashPoint" class="org.openmrs.module.billing.api.model.CashPoint" not-null="true"
 		             column="cash_point_id"/>
 		<many-to-one name="visit" class="org.openmrs.Visit" column="visit_id" index="cashier_bill_visit_id_idx"/>
