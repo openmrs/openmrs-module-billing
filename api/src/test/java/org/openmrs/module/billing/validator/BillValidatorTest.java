@@ -17,9 +17,12 @@ package org.openmrs.module.billing.validator;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.openmrs.Patient;
+import org.openmrs.Visit;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.TestConstants;
 import org.openmrs.module.billing.api.BillService;
@@ -124,21 +127,62 @@ public class BillValidatorTest extends BaseModuleContextSensitiveTest {
 		Bill postedBill = billService.getBill(0);
 		assertNotNull(postedBill);
 		assertEquals(BillStatus.POSTED, postedBill.getStatus());
-		
+
 		PaymentMode paymentMode = paymentModeService.getPaymentMode(0);
-		
+
 		Payment payment = Payment.builder().amount(BigDecimal.valueOf(10.0)).amountTendered(BigDecimal.valueOf(10.0))
 		        .build();
 		payment.setInstanceType(paymentMode);
 		payment.setVoided(true);
 		// cashier intentionally NOT set
-		
+
 		postedBill.addPayment(payment);
-		
+
 		Errors errors = new BindException(postedBill, "bill");
 		billValidator.validate(postedBill, errors);
-		
+
 		assertFalse(errors.hasErrors());
 	}
-	
+
+	@Test
+	public void validate_shouldRejectBillWhereVisitBelongsToDifferentPatient() {
+		// bill_id=2 belongs to patient_id=2 (PENDING, from BillTest.xml)
+		Bill bill = billService.getBill(2);
+		assertNotNull(bill);
+		assertEquals(BillStatus.PENDING, bill.getStatus());
+
+		// patient_id=6 is in the standard OpenMRS test dataset and is different from patient_id=2
+		Patient otherPatient = Context.getPatientService().getPatient(6);
+		assertNotEquals(bill.getPatient().getPatientId(), otherPatient.getPatientId());
+
+		Visit visitForOtherPatient = new Visit();
+		visitForOtherPatient.setPatient(otherPatient);
+		visitForOtherPatient.setStartDatetime(new Date());
+		visitForOtherPatient.setVisitType(Context.getVisitService().getAllVisitTypes().get(0));
+		bill.setVisit(visitForOtherPatient);
+
+		Errors errors = new BindException(bill, "bill");
+		billValidator.validate(bill, errors);
+
+		assertTrue(errors.hasFieldErrors("visit"));
+	}
+
+	@Test
+	public void validate_shouldNotRejectBillWhereVisitBelongsToSamePatient() {
+		// bill_id=2 belongs to patient_id=2 (PENDING, from BillTest.xml)
+		Bill bill = billService.getBill(2);
+		assertNotNull(bill);
+
+		Visit visitForSamePatient = new Visit();
+		visitForSamePatient.setPatient(bill.getPatient());
+		visitForSamePatient.setStartDatetime(new Date());
+		visitForSamePatient.setVisitType(Context.getVisitService().getAllVisitTypes().get(0));
+		bill.setVisit(visitForSamePatient);
+
+		Errors errors = new BindException(bill, "bill");
+		billValidator.validate(bill, errors);
+
+		assertFalse(errors.hasFieldErrors("visit"));
+	}
+
 }
