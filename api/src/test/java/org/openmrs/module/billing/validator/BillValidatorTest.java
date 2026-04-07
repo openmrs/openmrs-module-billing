@@ -184,5 +184,28 @@ public class BillValidatorTest extends BaseModuleContextSensitiveTest {
 		assertTrue(errors.hasGlobalErrors());
 		assertEquals("billing.error.visitDoesNotBelongToPatient", errors.getGlobalError().getCode());
 	}
-	
+
+	@Test
+	public void validate_shouldNotRejectBillWhereVisitBelongsToSamePatient() {
+		Bill bill = billService.getBill(2);
+		assertNotNull(bill);
+
+		VisitService visitService = Context.getVisitService();
+		VisitType visitType = visitService.getAllVisitTypes().isEmpty()
+		        ? visitService.saveVisitType(new VisitType("Test", "Test visit type"))
+		        : visitService.getAllVisitTypes().get(0);
+
+		Visit visitForSamePatient = new Visit();
+		visitForSamePatient.setPatient(bill.getPatient());
+		visitForSamePatient.setStartDatetime(new Date());
+		visitForSamePatient.setVisitType(visitType);
+		visitForSamePatient = visitService.saveVisit(visitForSamePatient);
+		bill.setVisit(visitForSamePatient);
+
+		Errors errors = new BindException(bill, "bill");
+		billValidator.validate(bill, errors);
+
+		assertFalse(errors.hasErrors());
+	}
+
 }
