@@ -265,7 +265,7 @@ public class BillTest {
 	}
 	
 	@Test
-	public void synchronizeBillStatus_shouldNotOverwriteRefundDeniedStatus() {
+	public void synchronizeBillStatus_shouldSynchronizeRefundDeniedBillToPaid() {
 		Bill bill = new Bill();
 		bill.setLineItems(new ArrayList<>());
 		bill.setPayments(new HashSet<>());
@@ -284,7 +284,7 @@ public class BillTest {
 		
 		bill.synchronizeBillStatus();
 		
-		assertEquals(BillStatus.REFUND_DENIED, bill.getStatus());
+		assertEquals(BillStatus.PAID, bill.getStatus());
 	}
 	
 	@Test
