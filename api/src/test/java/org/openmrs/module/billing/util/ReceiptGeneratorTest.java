@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.billing.util;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -104,6 +105,9 @@ public class ReceiptGeneratorTest extends BaseModuleContextSensitiveTest {
 
 		assertNotNull(pdfBytes);
 		assertTrue(pdfBytes.length > 0);
+		String pdfText = extractTextFromPdf(pdfBytes);
+		assertFalse(pdfText.contains("You were served by"),
+		    "PDF should not contain cashier line when cashier is null");
 	}
 
 	private Bill createTestBill() {
