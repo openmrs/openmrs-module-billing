@@ -117,14 +117,14 @@ public class SequentialReceiptNumberGenerator implements IReceiptNumberGenerator
 		
 		switch (model.getGroupingType()) {
 			case CASHIER:
-				result = model.getCashierPrefix() + bill.getCashier().getId();
+				result = model.getCashierPrefix() + (bill.getCashier() != null ? bill.getCashier().getId() : "");
 				break;
 			case CASH_POINT:
 				result = model.getCashPointPrefix() + bill.getCashPoint().getId();
 				break;
 			case CASHIER_AND_CASH_POINT:
-				result = model.getCashierPrefix() + bill.getCashier().getId() + model.getSeparator()
-				        + model.getCashPointPrefix() + bill.getCashPoint().getId();
+				result = model.getCashierPrefix() + (bill.getCashier() != null ? bill.getCashier().getId() : "")
+				        + model.getSeparator() + model.getCashPointPrefix() + bill.getCashPoint().getId();
 				break;
 			default:
 				break;

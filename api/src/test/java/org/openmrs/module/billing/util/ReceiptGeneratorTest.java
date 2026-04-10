@@ -95,6 +95,17 @@ public class ReceiptGeneratorTest extends BaseModuleContextSensitiveTest {
 		assertTrue(pdfText.contains("KES"), "PDF should contain configured currency symbol KES but was: " + pdfText);
 	}
 	
+	@Test
+	public void createBillReceipt_shouldNotThrowExceptionWhenCashierIsNull() throws Exception {
+		Bill bill = createTestBill();
+		bill.setCashier(null);
+
+		byte[] pdfBytes = ReceiptGenerator.createBillReceipt(bill);
+
+		assertNotNull(pdfBytes);
+		assertTrue(pdfBytes.length > 0);
+	}
+
 	private Bill createTestBill() {
 		Patient patient = patientService.getPatient(0);
 		

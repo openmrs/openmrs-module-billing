@@ -316,6 +316,56 @@ public class SequentialReceiptNumberGeneratorTest {
 		generator.generateNumber(null);
 	}
 	
+	/**
+	 * @verifies Handle null cashier when grouping type is CASHIER
+	 * @see SequentialReceiptNumberGenerator#generateNumber(Bill)
+	 */
+	@Test
+	public void generateNumber_shouldHandleNullCashierWithCashierGroupingType() {
+		SequentialReceiptNumberGeneratorModel model = new SequentialReceiptNumberGeneratorModel();
+		model.setGroupingType(SequentialReceiptNumberGenerator.GroupingType.CASHIER);
+		model.setSeparator("");
+		model.setSequencePadding(4);
+		model.setCashierPrefix(SequentialReceiptNumberGeneratorModel.DEFAULT_CASHIER_PREFIX);
+		model.setCashPointPrefix(SequentialReceiptNumberGeneratorModel.DEFAULT_CASH_POINT_PREFIX);
+		model.setSequenceType(SequentialReceiptNumberGenerator.SequenceType.COUNTER);
+		model.setIncludeCheckDigit(false);
+
+		when(service.getOnly()).thenReturn(model);
+		when(service.reserveNextSequence("P")).thenReturn(5);
+		generator.load();
+
+		Bill bill = createBillWithoutCashier(3);
+		String number = generator.generateNumber(bill);
+		Assert.assertNotNull(number);
+		Assert.assertEquals("P0005", number);
+	}
+
+	/**
+	 * @verifies Handle null cashier when grouping type is CASHIER_AND_CASH_POINT
+	 * @see SequentialReceiptNumberGenerator#generateNumber(Bill)
+	 */
+	@Test
+	public void generateNumber_shouldHandleNullCashierWithCashierAndCashPointGroupingType() {
+		SequentialReceiptNumberGeneratorModel model = new SequentialReceiptNumberGeneratorModel();
+		model.setGroupingType(SequentialReceiptNumberGenerator.GroupingType.CASHIER_AND_CASH_POINT);
+		model.setSeparator("");
+		model.setSequencePadding(4);
+		model.setCashierPrefix(SequentialReceiptNumberGeneratorModel.DEFAULT_CASHIER_PREFIX);
+		model.setCashPointPrefix(SequentialReceiptNumberGeneratorModel.DEFAULT_CASH_POINT_PREFIX);
+		model.setSequenceType(SequentialReceiptNumberGenerator.SequenceType.COUNTER);
+		model.setIncludeCheckDigit(false);
+
+		when(service.getOnly()).thenReturn(model);
+		when(service.reserveNextSequence("PCP3")).thenReturn(7);
+		generator.load();
+
+		Bill bill = createBillWithoutCashier(3);
+		String number = generator.generateNumber(bill);
+		Assert.assertNotNull(number);
+		Assert.assertEquals("PCP30007", number);
+	}
+
 	protected Bill createBill(int cashierId, int cashPointId) {
 		Provider provider = new Provider(cashierId);
 		CashPoint cashPoint = new CashPoint();
@@ -323,7 +373,15 @@ public class SequentialReceiptNumberGeneratorTest {
 		Bill bill = new Bill();
 		bill.setCashier(provider);
 		bill.setCashPoint(cashPoint);
-		
+
+		return bill;
+	}
+
+	protected Bill createBillWithoutCashier(int cashPointId) {
+		CashPoint cashPoint = new CashPoint();
+		cashPoint.setId(cashPointId);
+		Bill bill = new Bill();
+		bill.setCashPoint(cashPoint);
 		return bill;
 	}
 }
