@@ -42,6 +42,8 @@ import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.model.ExemptionType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * Default implementation base class that provides shared logic for bill creation, line item
@@ -68,6 +70,8 @@ public abstract class AbstractDefaultOrderBillingStrategy extends AbstractOrderB
 	
 	protected ProgramWorkflowService programWorkflowService;
 	
+	protected PlatformTransactionManager transactionManager;
+	
 	@Override
 	protected BillingResult handleNewOrder(Order order) {
 		return createBillIfAbsent(order);
@@ -75,8 +79,11 @@ public abstract class AbstractDefaultOrderBillingStrategy extends AbstractOrderB
 	
 	@Override
 	protected BillingResult handleRevisedOrder(Order order) {
-		voidPreviousLineItem(order, "Order revised");
-		return createBillIfAbsent(order);
+		TransactionTemplate txTemplate = new TransactionTemplate(transactionManager);
+		return txTemplate.execute(status -> {
+			voidPreviousLineItem(order, "Order revised");
+			return createBillIfAbsent(order);
+		});
 	}
 	
 	@Override
