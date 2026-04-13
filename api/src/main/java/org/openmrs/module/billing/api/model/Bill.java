@@ -59,6 +59,16 @@ public class Bill extends BaseOpenmrsData {
 	
 	private String adjustmentReason;
 	
+	private BillDiscount discount;
+	
+	public BigDecimal getAmountAfterDiscount() {
+		BigDecimal total = getTotal();
+		if (discount != null && !discount.getVoided() && discount.getDiscountAmount() != null) {
+			total = total.subtract(discount.getDiscountAmount());
+		}
+		return total;
+	}
+	
 	public BigDecimal getTotal() {
 		BigDecimal total = BigDecimal.ZERO;
 		

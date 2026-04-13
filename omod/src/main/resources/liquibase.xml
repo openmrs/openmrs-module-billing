@@ -1120,4 +1120,79 @@
             referencedTableName="provider" referencedColumnNames="provider_id"
             onDelete="SET NULL" onUpdate="CASCADE"/>
     </changeSet>
+
+    <changeSet id="openmrs.billing-005-20260407-create-bill-discount-table" author="Wikum Weerakutti">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="bill_discount"/>
+            </not>
+        </preConditions>
+        <comment>Create table for bill discounts with full audit trail</comment>
+
+        <createTable tableName="bill_discount">
+            <column name="bill_discount_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="bill_id" type="int">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="discount_type" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="discount_value" type="decimal(10,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="discount_amount" type="decimal(10,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="justification" type="varchar(1000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="initiator_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="approver_id" type="int"/>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="voided" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="int"/>
+            <column name="date_voided" type="datetime"/>
+            <column name="void_reason" type="varchar(255)"/>
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint constraintName="bill_discount_bill_id_fk"
+                                 baseTableName="bill_discount" baseColumnNames="bill_id"
+                                 referencedTableName="cashier_bill" referencedColumnNames="bill_id"/>
+
+        <addForeignKeyConstraint constraintName="bill_discount_initiator_id_fk"
+                                 baseTableName="bill_discount" baseColumnNames="initiator_id"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+
+        <addForeignKeyConstraint constraintName="bill_discount_approver_id_fk"
+                                 baseTableName="bill_discount" baseColumnNames="approver_id"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+
+        <addForeignKeyConstraint constraintName="bill_discount_creator_fk"
+                                 baseTableName="bill_discount" baseColumnNames="creator"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+
+        <addForeignKeyConstraint constraintName="bill_discount_changed_by_fk"
+                                 baseTableName="bill_discount" baseColumnNames="changed_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+
+        <addForeignKeyConstraint constraintName="bill_discount_voided_by_fk"
+                                 baseTableName="bill_discount" baseColumnNames="voided_by"
+                                 referencedTableName="users" referencedColumnNames="user_id"/>
+    </changeSet>
 </databaseChangeLog>
