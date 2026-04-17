@@ -24,6 +24,7 @@ import org.springframework.core.OrderComparator;
 import lombok.extern.slf4j.Slf4j;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.Order;
+import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.context.Daemon;
 import org.openmrs.event.Event;
@@ -91,12 +92,13 @@ public class OrderBillingEventListener implements BillingEventListener {
 	 * @param order a persisted order
 	 */
 	void processOrder(Order order) {
+		Order realOrder = HibernateUtil.getRealObjectFromProxy(order);
 		List<OrderBillingStrategy> strategies = Context.getRegisteredComponents(OrderBillingStrategy.class);
 		OrderComparator.sort(strategies);
-		
+
 		for (OrderBillingStrategy strategy : strategies) {
-			if (strategy.supports(order)) {
-				BillingResult result = strategy.handleOrder(order);
+			if (strategy.supports(realOrder)) {
+				BillingResult result = strategy.handleOrder(realOrder);
 				switch (result.getAction()) {
 					case CREATED:
 						log.info("Bill {} created for order {} by {}", result.getBill().getUuid(), order.getUuid(),
