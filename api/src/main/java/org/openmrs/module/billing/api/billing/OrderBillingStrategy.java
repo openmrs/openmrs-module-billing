@@ -42,7 +42,7 @@ public interface OrderBillingStrategy extends Ordered {
 	 * @param order a persisted order (guaranteed to exist in the database)
 	 * @return the billing result indicating what action was taken
 	 */
-	BillingResult generateBill(Order order);
+	BillingResult handleOrder(Order order);
 	
 	/**
 	 * Resolve the provider to set as the cashier on the bill.

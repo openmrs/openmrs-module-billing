@@ -32,7 +32,7 @@ import org.springframework.core.Ordered;
 public abstract class AbstractOrderBillingStrategy implements OrderBillingStrategy {
 	
 	@Override
-	public BillingResult generateBill(Order order) {
+	public BillingResult handleOrder(Order order) {
 		try {
 			switch (order.getAction()) {
 				case NEW:

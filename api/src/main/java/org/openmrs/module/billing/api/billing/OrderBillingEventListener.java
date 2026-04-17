@@ -96,7 +96,7 @@ public class OrderBillingEventListener implements BillingEventListener {
 		
 		for (OrderBillingStrategy strategy : strategies) {
 			if (strategy.supports(order)) {
-				BillingResult result = strategy.generateBill(order);
+				BillingResult result = strategy.handleOrder(order);
 				switch (result.getAction()) {
 					case CREATED:
 						log.info("Bill {} created for order {} by {}", result.getBill().getUuid(), order.getUuid(),
