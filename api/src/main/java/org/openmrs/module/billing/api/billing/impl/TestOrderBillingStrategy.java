@@ -69,10 +69,10 @@ public class TestOrderBillingStrategy extends AbstractDefaultOrderBillingStrateg
 			log.debug("No billable service found for concept: {}", testOrder.getConcept().getUuid());
 			return Optional.empty();
 		}
-
+		
 		BillableService billableService = searchResult.get(0);
-		BillStatus lineItemStatus = checkIfOrderIsExempted(order, ExemptionType.SERVICE) ?
-				BillStatus.EXEMPTED : BillStatus.PENDING;
+		BillStatus lineItemStatus = checkIfOrderIsExempted(order, ExemptionType.SERVICE) ? BillStatus.EXEMPTED
+		        : BillStatus.PENDING;
 		
 		BillLineItem lineItem = createLineItem(resolvePrice(billableService), 1, lineItemStatus, order);
 		lineItem.setBillableService(billableService);
