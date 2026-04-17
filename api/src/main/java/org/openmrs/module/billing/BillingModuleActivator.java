@@ -46,6 +46,8 @@ public class BillingModuleActivator extends BaseModuleActivator implements Daemo
 	@Override
 	public void contextRefreshed() {
 		log.info("OpenMRS Billing Module refreshed");
+		
+		subscribeBillingEventListeners();
 	}
 	
 	/**
@@ -54,8 +56,6 @@ public class BillingModuleActivator extends BaseModuleActivator implements Daemo
 	@Override
 	public void started() {
 		log.info("OpenMRS Billing Module started");
-		
-		subscribeBillingEventListeners();
 	}
 	
 	/**
@@ -63,12 +63,15 @@ public class BillingModuleActivator extends BaseModuleActivator implements Daemo
 	 */
 	@Override
 	public void stopped() {
-		unsubscribeBillingEventListeners();
-		
 		Module module = ModuleFactory.getModuleById(CashierWebConstants.OPENHMIS_CASHIER_MODULE_ID);
 		WebModuleUtil.unloadFilters(module);
 		
 		log.info("OpenMRS Billing Module stopped");
+	}
+	
+	@Override
+	public void willRefreshContext() {
+		unsubscribeBillingEventListeners();
 	}
 	
 	private void subscribeBillingEventListeners() {
