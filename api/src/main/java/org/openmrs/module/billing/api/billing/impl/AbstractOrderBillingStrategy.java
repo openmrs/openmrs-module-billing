@@ -13,6 +13,9 @@
  */
 package org.openmrs.module.billing.api.billing.impl;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.openmrs.Order;
 import org.openmrs.Provider;
@@ -21,6 +24,8 @@ import org.openmrs.module.billing.api.billing.BillingResult;
 import org.openmrs.module.billing.api.billing.OrderBillingStrategy;
 import org.openmrs.module.billing.api.model.CashPoint;
 import org.springframework.core.Ordered;
+
+import java.util.Set;
 
 /**
  * Minimal base class for {@link OrderBillingStrategy} implementations. Provides the framework for
@@ -31,12 +36,18 @@ import org.springframework.core.Ordered;
 @Slf4j
 public abstract class AbstractOrderBillingStrategy implements OrderBillingStrategy {
 	
+	@Getter
+	@Setter(AccessLevel.PROTECTED)
+	private Set<Order.Action> supportedActions;
+	
 	@Override
 	public BillingResult handleOrder(Order order) {
 		try {
 			switch (order.getAction()) {
 				case NEW:
 					return handleNewOrder(order);
+				case RENEW:
+					return handleRenewOrder(order);
 				case REVISE:
 					return handleRevisedOrder(order);
 				case DISCONTINUE:
@@ -59,10 +70,7 @@ public abstract class AbstractOrderBillingStrategy implements OrderBillingStrate
 	@Override
 	public final boolean supports(Order order) {
 		Order realOrder = HibernateUtil.getRealObjectFromProxy(order);
-		Order.Action action = realOrder.getAction();
-		boolean supportedAction = action == Order.Action.NEW || action == Order.Action.REVISE
-		        || action == Order.Action.DISCONTINUE;
-		return supportedAction && supportsOrder(realOrder);
+		return supportedActions.contains(realOrder.getAction()) && supportsOrder(realOrder);
 	}
 	
 	/**
@@ -72,6 +80,10 @@ public abstract class AbstractOrderBillingStrategy implements OrderBillingStrate
 	protected abstract boolean supportsOrder(Order order);
 	
 	protected abstract BillingResult handleNewOrder(Order order);
+	
+	protected BillingResult handleRenewOrder(Order order) {
+		return handleNewOrder(order);
+	}
 	
 	protected BillingResult handleRevisedOrder(Order order) {
 		return handleNewOrder(order);

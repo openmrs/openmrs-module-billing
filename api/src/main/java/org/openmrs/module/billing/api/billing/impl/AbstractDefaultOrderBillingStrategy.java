@@ -15,6 +15,7 @@ package org.openmrs.module.billing.api.billing.impl;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,8 +73,17 @@ public abstract class AbstractDefaultOrderBillingStrategy extends AbstractOrderB
 	
 	protected PlatformTransactionManager transactionManager;
 	
+	{
+		setSupportedActions(EnumSet.of(Order.Action.NEW, Order.Action.RENEW, Order.Action.REVISE, Order.Action.DISCONTINUE));
+	}
+	
 	@Override
 	protected BillingResult handleNewOrder(Order order) {
+		return createBillIfAbsent(order);
+	}
+	
+	@Override
+	protected BillingResult handleRenewOrder(Order order) {
 		return createBillIfAbsent(order);
 	}
 	

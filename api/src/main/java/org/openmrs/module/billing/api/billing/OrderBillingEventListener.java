@@ -95,7 +95,7 @@ public class OrderBillingEventListener implements BillingEventListener {
 		Order realOrder = HibernateUtil.getRealObjectFromProxy(order);
 		List<OrderBillingStrategy> strategies = Context.getRegisteredComponents(OrderBillingStrategy.class);
 		OrderComparator.sort(strategies);
-
+		
 		for (OrderBillingStrategy strategy : strategies) {
 			if (strategy.supports(realOrder)) {
 				BillingResult result = strategy.handleOrder(realOrder);
