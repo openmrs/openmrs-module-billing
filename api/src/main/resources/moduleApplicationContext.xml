@@ -260,6 +260,16 @@
 
 	<bean id="billValidator" class="org.openmrs.module.billing.validator.BillValidator"/>
 
+	<!-- Order Billing: Event Listener and Strategies -->
+	<bean id="orderBillingEventListener"
+		  class="org.openmrs.module.billing.api.billing.OrderBillingEventListener"/>
+
+	<bean id="drugOrderBillingStrategy"
+		  class="org.openmrs.module.billing.api.billing.impl.DrugOrderBillingStrategy"/>
+
+	<bean id="testOrderBillingStrategy"
+		  class="org.openmrs.module.billing.api.billing.impl.TestOrderBillingStrategy"/>
+
 	<bean id="ruleEngine"
 		  class="org.openmrs.module.billing.api.evaluator.ExemptionRuleEngine">
 		<constructor-arg>
