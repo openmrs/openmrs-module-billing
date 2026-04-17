@@ -70,8 +70,8 @@ public class TestOrderBillingStrategy extends AbstractDefaultOrderBillingStrateg
 			return Optional.empty();
 		}
 		
-		boolean isExempted = checkIfOrderIsExempted(order, ExemptionType.SERVICE);
-		BillStatus lineItemStatus = isExempted ? BillStatus.EXEMPTED : BillStatus.PENDING;
+		BillStatus lineItemStatus = checkIfOrderIsExempted(order, ExemptionType.SERVICE) ?
+				BillStatus.EXEMPTED : BillStatus.PENDING;
 		
 		BillableService billableService = searchResult.get(0);
 		BillLineItem lineItem = createLineItem(resolvePrice(billableService), 1, lineItemStatus, order);
