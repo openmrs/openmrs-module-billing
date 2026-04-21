@@ -527,20 +527,21 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		assertNotNull(paidBill);
 		assertEquals(BillStatus.PAID, paidBill.getStatus());
 		
-		assertThrows(IllegalArgumentException.class, () -> billService.requestRefund(paidBill, ""));
-		assertThrows(IllegalArgumentException.class, () -> billService.requestRefund(paidBill, null));
+		assertThrows(IllegalArgumentException.class, () -> billService.requestRefund(billService.getBill(1), ""));
+		Context.clearSession();
+		assertThrows(IllegalArgumentException.class, () -> billService.requestRefund(billService.getBill(1), null));
 	}
 	
 	/**
 	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#requestRefund(Bill, String)
 	 */
 	@Test
-	public void requestRefund_shouldThrowIllegalArgumentExceptionIfBillIsNotPaid() {
+	public void requestRefund_shouldThrowValidationExceptionIfBillIsNotPaid() {
 		Bill pendingBill = billService.getBill(2);
 		assertNotNull(pendingBill);
 		assertEquals(BillStatus.PENDING, pendingBill.getStatus());
 		
-		assertThrows(IllegalArgumentException.class, () -> billService.requestRefund(pendingBill, "Equipment failure"));
+		assertThrows(ValidationException.class, () -> billService.requestRefund(pendingBill, "Equipment failure"));
 	}
 	
 	/**
@@ -573,12 +574,12 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#approveRefund(Bill)
 	 */
 	@Test
-	public void approveRefund_shouldThrowIllegalArgumentExceptionIfBillIsNotRefundRequested() {
+	public void approveRefund_shouldThrowValidationExceptionIfBillIsNotRefundRequested() {
 		Bill paidBill = billService.getBill(1);
 		assertNotNull(paidBill);
 		assertEquals(BillStatus.PAID, paidBill.getStatus());
 		
-		assertThrows(IllegalArgumentException.class, () -> billService.approveRefund(paidBill));
+		assertThrows(ValidationException.class, () -> billService.approveRefund(paidBill));
 	}
 	
 	/**
@@ -591,6 +592,8 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		
 		Bill requestedBill = billService.requestRefund(paidBill, "Equipment failure");
 		assertEquals(BillStatus.REFUND_REQUESTED, requestedBill.getStatus());
+		// Flush so the validator's native-SQL read of the persisted status sees REFUND_REQUESTED.
+		Context.flushSession();
 		
 		Bill result = billService.approveRefund(requestedBill);
 		
@@ -614,23 +617,25 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	 */
 	@Test
 	public void rejectRefund_shouldThrowIllegalArgumentExceptionIfDenialReasonIsBlank() {
-		Bill paidBill = billService.getBill(1);
-		Bill requestedBill = billService.requestRefund(paidBill, "Equipment failure");
+		Integer billId = billService.requestRefund(billService.getBill(1), "Equipment failure").getId();
+		Context.flushSession();
+		Context.clearSession();
 		
-		assertThrows(IllegalArgumentException.class, () -> billService.rejectRefund(requestedBill, ""));
-		assertThrows(IllegalArgumentException.class, () -> billService.rejectRefund(requestedBill, null));
+		assertThrows(IllegalArgumentException.class, () -> billService.rejectRefund(billService.getBill(billId), ""));
+		Context.clearSession();
+		assertThrows(IllegalArgumentException.class, () -> billService.rejectRefund(billService.getBill(billId), null));
 	}
 	
 	/**
 	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#rejectRefund(Bill, String)
 	 */
 	@Test
-	public void rejectRefund_shouldThrowIllegalArgumentExceptionIfBillIsNotRefundRequested() {
+	public void rejectRefund_shouldThrowValidationExceptionIfBillIsNotRefundRequested() {
 		Bill paidBill = billService.getBill(1);
 		assertNotNull(paidBill);
 		assertEquals(BillStatus.PAID, paidBill.getStatus());
 		
-		assertThrows(IllegalArgumentException.class, () -> billService.rejectRefund(paidBill, "Not eligible"));
+		assertThrows(ValidationException.class, () -> billService.rejectRefund(paidBill, "Not eligible"));
 	}
 	
 	/**
@@ -643,6 +648,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		
 		Bill requestedBill = billService.requestRefund(paidBill, "Equipment failure");
 		assertEquals(BillStatus.REFUND_REQUESTED, requestedBill.getStatus());
+		Context.flushSession();
 		
 		Bill result = billService.rejectRefund(requestedBill, "Service was already provided");
 		

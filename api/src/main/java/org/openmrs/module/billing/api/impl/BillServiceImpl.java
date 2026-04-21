@@ -178,16 +178,21 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
+	public BillStatus getPersistedBillStatus(Integer billId) {
+		if (billId == null) {
+			return null;
+		}
+		return billDAO.getPersistedBillStatus(billId);
+	}
+	
+	@Override
 	public Bill requestRefund(Bill bill, String refundReason) {
 		if (bill == null) {
 			throw new IllegalArgumentException("The bill must be defined.");
 		}
 		if (StringUtils.isBlank(refundReason)) {
 			throw new IllegalArgumentException("refundReason cannot be null or empty");
-		}
-		if (bill.getStatus() != BillStatus.PAID) {
-			throw new IllegalArgumentException(
-			        "Only PAID bills can have a refund requested. Current status: " + bill.getStatus());
 		}
 		bill.setRefundReason(refundReason);
 		bill.setRefundRequestedBy(Context.getAuthenticatedUser());
@@ -200,10 +205,6 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 	public Bill approveRefund(Bill bill) {
 		if (bill == null) {
 			throw new IllegalArgumentException("The bill must be defined.");
-		}
-		if (bill.getStatus() != BillStatus.REFUND_REQUESTED) {
-			throw new IllegalArgumentException(
-			        "Only bills with REFUND_REQUESTED status can be approved. Current status: " + bill.getStatus());
 		}
 		bill.setRefundApprovedBy(Context.getAuthenticatedUser());
 		bill.setDateRefundApproved(new Date());
@@ -218,10 +219,6 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 		}
 		if (StringUtils.isBlank(denialReason)) {
 			throw new IllegalArgumentException("denialReason cannot be null or empty");
-		}
-		if (bill.getStatus() != BillStatus.REFUND_REQUESTED) {
-			throw new IllegalArgumentException(
-			        "Only bills with REFUND_REQUESTED status can be rejected. Current status: " + bill.getStatus());
 		}
 		bill.setRefundDenialReason(denialReason);
 		bill.setRefundRejectedBy(Context.getAuthenticatedUser());

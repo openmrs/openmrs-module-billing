@@ -1113,8 +1113,8 @@
     <changeSet id="openmrs.billing-005-20260402-refund-support" author="UjjawalPrabhat">
         <comment>Widen status columns and add refund audit fields to cashier_bill</comment>
 
-        <modifyDataType tableName="cashier_bill" columnName="status" newDataType="varchar(50)"/>
-        <modifyDataType tableName="cashier_bill_line_item" columnName="payment_status" newDataType="varchar(50)"/>
+        <sql>ALTER TABLE cashier_bill MODIFY COLUMN status varchar(50)</sql>
+        <sql>ALTER TABLE cashier_bill_line_item MODIFY COLUMN payment_status varchar(50)</sql>
 
         <addColumn tableName="cashier_bill">
             <column name="refund_reason" type="varchar(500)"><constraints nullable="true"/></column>

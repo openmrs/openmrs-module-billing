@@ -4,6 +4,7 @@ import org.openmrs.annotation.Authorized;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.module.billing.api.util.PrivilegeConstants;
 
@@ -143,6 +144,17 @@ public interface BillService extends OpenmrsService {
 	
 	@Authorized(PrivilegeConstants.VIEW_BILLS)
 	boolean isBillEditable(Bill bill);
+	
+	/**
+	 * Reads the bill's status directly from the database, bypassing Hibernate's session cache. Intended
+	 * for status-transition validation where an in-memory entity may have a pending target status and
+	 * the caller needs the untouched persisted value.
+	 *
+	 * @param billId the database ID of the bill
+	 * @return the persisted status, or null if no bill with that ID exists
+	 */
+	@Authorized(PrivilegeConstants.VIEW_BILLS)
+	BillStatus getPersistedBillStatus(Integer billId);
 	
 	/**
 	 * Requests a refund for a paid bill.
