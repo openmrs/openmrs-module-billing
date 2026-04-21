@@ -30,7 +30,7 @@ public class BillDiscount extends BaseOpenmrsData {
 	private Integer billDiscountId;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "bill_id", nullable = false, unique = true)
+	@JoinColumn(name = "bill_id", nullable = false)
 	private Bill bill;
 	
 	@Enumerated(EnumType.STRING)

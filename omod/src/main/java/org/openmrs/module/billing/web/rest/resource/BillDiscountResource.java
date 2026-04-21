@@ -38,11 +38,9 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 	@Override
 	public BillDiscount save(BillDiscount delegate) {
 		if (delegate.getId() == null) {
-			// Auto-set initiator to current user
 			if (delegate.getInitiator() == null) {
 				delegate.setInitiator(Context.getAuthenticatedUser());
 			}
-			// Compute discount amount from value and type
 			computeDiscountAmount(delegate);
 		}
 		return Context.getService(BillDiscountService.class).saveBillDiscount(delegate);

@@ -1134,7 +1134,7 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="bill_id" type="int">
-                <constraints nullable="false" unique="true"/>
+                <constraints nullable="false"/>
             </column>
             <column name="discount_type" type="varchar(20)">
                 <constraints nullable="false"/>

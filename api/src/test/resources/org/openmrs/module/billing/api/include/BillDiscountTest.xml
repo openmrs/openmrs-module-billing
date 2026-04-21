@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+	<!-- Supplements BillTest.xml. Reuses bills 0 (POSTED, total 913.06), 1 (PAID, total 300), 2 (PENDING, total 125.50). -->
+
+	<!-- Discount feature enabled by default for these tests -->
+	<global_property property="billing.discountEnabled" property_value="true"
+	                 uuid="d0000000-0000-0000-0000-000000000gp0"
+	                 description="Enable the bill discount feature"/>
+
+	<!-- Additional POSTED bill without a discount for happy-path apply tests -->
+	<cashier_bill bill_id="100" receipt_number="discount-test-posted" provider_id="0" patient_id="0"
+	              cash_point_id="0" status="POSTED"
+	              creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	              uuid="d0000000-0000-0000-0000-000000000100" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="100" bill_id="100" item_id="0" price="200.00" price_name="default"
+	                        quantity="1" line_item_order="0" payment_status="POSTED"
+	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                        uuid="d0000000-0000-0000-0000-000000000110"/>
+
+	<!-- CANCELLED bill - should reject discount -->
+	<cashier_bill bill_id="101" receipt_number="discount-test-cancelled" provider_id="0" patient_id="0"
+	              cash_point_id="0" status="CANCELLED"
+	              creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	              uuid="d0000000-0000-0000-0000-000000000101" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="101" bill_id="101" item_id="0" price="100.00" price_name="default"
+	                        quantity="1" line_item_order="0" payment_status="PENDING"
+	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                        uuid="d0000000-0000-0000-0000-000000000111"/>
+
+	<!-- Existing active discount on bill 0 (POSTED) for dup/lookup tests -->
+	<bill_discount bill_discount_id="1" bill_id="0" discount_type="PERCENTAGE" discount_value="10.00"
+	               discount_amount="91.31" justification="Loyal patient"
+	               initiator_id="1" creator="1" date_created="2012-01-02 00:00:00.0" voided="false"
+	               uuid="d1000000-0000-0000-0000-000000000001"/>
+
+	<!-- Voided discount on bill 2 (PENDING) - allows testing void-and-reapply -->
+	<bill_discount bill_discount_id="2" bill_id="2" discount_type="FIXED_AMOUNT" discount_value="10.00"
+	               discount_amount="10.00" justification="Will be voided"
+	               initiator_id="1" creator="1" date_created="2012-01-02 00:00:00.0"
+	               voided="true" voided_by="1" date_voided="2012-01-03 00:00:00.0" void_reason="Test void"
+	               uuid="d1000000-0000-0000-0000-000000000002"/>
+</dataset>
