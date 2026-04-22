@@ -1,6 +1,8 @@
 package org.openmrs.module.billing.validator;
 
 import java.math.BigDecimal;
+import java.util.EnumSet;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 
@@ -17,6 +19,9 @@ import org.springframework.validation.Validator;
 
 @Handler(supports = { BillDiscount.class }, order = 50)
 public class BillDiscountValidator implements Validator {
+	
+	private static final Set<BillStatus> DISCOUNT_ELIGIBLE_STATUSES = EnumSet.of(BillStatus.PENDING, BillStatus.POSTED,
+	    BillStatus.ADJUSTED);
 	
 	@Override
 	public boolean supports(@Nonnull Class<?> clazz) {
@@ -44,9 +49,7 @@ public class BillDiscountValidator implements Validator {
 			return;
 		}
 		
-		// Bill must be PENDING or POSTED (not PAID, REFUNDED, CANCELLED, ADJUSTED, EXEMPTED)
-		BillStatus status = bill.getStatus();
-		if (status != BillStatus.PENDING && status != BillStatus.POSTED) {
+		if (!DISCOUNT_ELIGIBLE_STATUSES.contains(bill.getStatus())) {
 			errors.rejectValue("bill", "billing.error.discount.billNotEligible");
 		}
 		
