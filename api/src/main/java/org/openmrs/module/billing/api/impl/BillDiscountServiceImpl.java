@@ -12,12 +12,6 @@ public class BillDiscountServiceImpl implements BillDiscountService {
 	private final BillDiscountDAO billDiscountDAO;
 	
 	@Override
-	@Transactional
-	public BillDiscount saveBillDiscount(BillDiscount billDiscount) {
-		return billDiscountDAO.saveBillDiscount(billDiscount);
-	}
-	
-	@Override
 	@Transactional(readOnly = true)
 	public BillDiscount getBillDiscountById(Integer id) {
 		return billDiscountDAO.getBillDiscountById(id);
@@ -33,5 +27,11 @@ public class BillDiscountServiceImpl implements BillDiscountService {
 	@Transactional(readOnly = true)
 	public BillDiscount getBillDiscountByBillId(Integer billId) {
 		return billDiscountDAO.getBillDiscountByBillId(billId);
+	}
+
+	@Override
+	@Transactional
+	public BillDiscount saveBillDiscount(BillDiscount billDiscount) {
+		return billDiscountDAO.saveBillDiscount(billDiscount);
 	}
 }

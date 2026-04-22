@@ -6,9 +6,6 @@ import org.openmrs.module.billing.api.util.PrivilegeConstants;
 
 public interface BillDiscountService {
 	
-	@Authorized(PrivilegeConstants.MANAGE_BILL_DISCOUNTS)
-	BillDiscount saveBillDiscount(BillDiscount billDiscount);
-	
 	@Authorized(PrivilegeConstants.VIEW_BILL_DISCOUNTS)
 	BillDiscount getBillDiscountById(Integer id);
 	
@@ -17,4 +14,7 @@ public interface BillDiscountService {
 	
 	@Authorized(PrivilegeConstants.VIEW_BILL_DISCOUNTS)
 	BillDiscount getBillDiscountByBillId(Integer billId);
+
+	@Authorized(PrivilegeConstants.MANAGE_BILL_DISCOUNTS)
+	BillDiscount saveBillDiscount(BillDiscount billDiscount);
 }
