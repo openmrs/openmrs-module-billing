@@ -14,7 +14,7 @@ public interface BillDiscountService {
 	
 	@Authorized(PrivilegeConstants.VIEW_BILL_DISCOUNTS)
 	BillDiscount getBillDiscountByBillId(Integer billId);
-
+	
 	@Authorized(PrivilegeConstants.MANAGE_BILL_DISCOUNTS)
 	BillDiscount saveBillDiscount(BillDiscount billDiscount);
 }

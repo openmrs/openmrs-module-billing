@@ -59,12 +59,29 @@ public class Bill extends BaseOpenmrsData {
 	
 	private String adjustmentReason;
 	
-	private BillDiscount discount;
+	private Set<BillDiscount> discounts;
+	
+	/**
+	 * @return the single non-voided discount currently applied to this bill, or {@code null} if none.
+	 *         Voided history remains available via {@link #getDiscounts()}.
+	 */
+	public BillDiscount getActiveDiscount() {
+		if (discounts == null) {
+			return null;
+		}
+		for (BillDiscount d : discounts) {
+			if (d != null && !d.getVoided()) {
+				return d;
+			}
+		}
+		return null;
+	}
 	
 	public BigDecimal getAmountAfterDiscount() {
 		BigDecimal total = getTotal();
-		if (discount != null && !discount.getVoided() && discount.getDiscountAmount() != null) {
-			total = total.subtract(discount.getDiscountAmount());
+		BillDiscount active = getActiveDiscount();
+		if (active != null && active.getDiscountAmount() != null) {
+			total = total.subtract(active.getDiscountAmount());
 		}
 		return total;
 	}

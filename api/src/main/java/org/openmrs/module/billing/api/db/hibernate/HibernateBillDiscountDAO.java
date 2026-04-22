@@ -15,7 +15,6 @@ public class HibernateBillDiscountDAO implements BillDiscountDAO {
 	
 	private final SessionFactory sessionFactory;
 	
-
 	@Override
 	public BillDiscount getBillDiscountById(Integer id) {
 		return sessionFactory.getCurrentSession().get(BillDiscount.class, id);
@@ -42,7 +41,7 @@ public class HibernateBillDiscountDAO implements BillDiscountDAO {
 		query.select(root).where(cb.equal(root.get("bill").get("id"), billId), cb.isFalse(root.get("voided")));
 		return session.createQuery(query).uniqueResult();
 	}
-
+	
 	@Override
 	public BillDiscount saveBillDiscount(BillDiscount billDiscount) {
 		sessionFactory.getCurrentSession().saveOrUpdate(billDiscount);

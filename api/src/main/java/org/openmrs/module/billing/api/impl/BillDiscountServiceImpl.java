@@ -28,7 +28,7 @@ public class BillDiscountServiceImpl implements BillDiscountService {
 	public BillDiscount getBillDiscountByBillId(Integer billId) {
 		return billDiscountDAO.getBillDiscountByBillId(billId);
 	}
-
+	
 	@Override
 	@Transactional
 	public BillDiscount saveBillDiscount(BillDiscount billDiscount) {
