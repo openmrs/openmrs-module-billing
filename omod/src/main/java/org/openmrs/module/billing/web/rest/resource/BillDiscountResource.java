@@ -3,9 +3,11 @@ package org.openmrs.module.billing.web.rest.resource;
 import org.openmrs.User;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillDiscountService;
+import org.openmrs.module.billing.api.BillLineItemService;
 import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillDiscount;
+import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.DiscountType;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
 import org.openmrs.module.webservices.rest.web.RequestContext;
@@ -78,6 +80,7 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 		} else if (rep instanceof DefaultRepresentation) {
 			description.addProperty("uuid");
 			description.addProperty("bill", Representation.REF);
+			description.addProperty("lineItem", Representation.REF);
 			description.addProperty("discountType");
 			description.addProperty("discountValue");
 			description.addProperty("discountAmount");
@@ -89,6 +92,7 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 		} else if (rep instanceof FullRepresentation) {
 			description.addProperty("uuid");
 			description.addProperty("bill", Representation.DEFAULT);
+			description.addProperty("lineItem", Representation.DEFAULT);
 			description.addProperty("discountType");
 			description.addProperty("discountValue");
 			description.addProperty("discountAmount");
@@ -107,6 +111,7 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 	public DelegatingResourceDescription getCreatableProperties() {
 		DelegatingResourceDescription description = new DelegatingResourceDescription();
 		description.addProperty("bill");
+		description.addProperty("lineItem");
 		description.addProperty("discountType");
 		description.addProperty("discountValue");
 		description.addProperty("justification");
@@ -136,6 +141,14 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 		}
 	}
 	
+	@PropertySetter("lineItem")
+	public void setLineItem(BillDiscount instance, String lineItemUuid) {
+		if (lineItemUuid != null) {
+			BillLineItem lineItem = Context.getService(BillLineItemService.class).getBillLineItemByUuid(lineItemUuid);
+			instance.setLineItem(lineItem);
+		}
+	}
+	
 	@PropertySetter("approver")
 	public void setApprover(BillDiscount instance, String approverUuid) {
 		if (approverUuid != null) {
@@ -149,12 +162,11 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 			return;
 		}
 		
-		BigDecimal billTotal = discount.getBill().getTotal();
+		BigDecimal base = discount.getLineItem() != null ? discount.getLineItem().getTotal() : discount.getBill().getTotal();
 		BigDecimal amount;
 		
 		if (discount.getDiscountType() == DiscountType.PERCENTAGE) {
-			amount = billTotal.multiply(discount.getDiscountValue()).divide(BigDecimal.valueOf(100), 2,
-			    RoundingMode.HALF_UP);
+			amount = base.multiply(discount.getDiscountValue()).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
 		} else {
 			amount = discount.getDiscountValue();
 		}

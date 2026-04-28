@@ -13,6 +13,7 @@ import org.openmrs.module.billing.ModuleSettings;
 import org.openmrs.module.billing.api.BillDiscountService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillDiscount;
+import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
@@ -53,12 +54,30 @@ public class BillDiscountValidator implements Validator {
 			errors.rejectValue("bill", "billing.error.discount.billNotEligible");
 		}
 		
-		// Cannot apply multiple discounts to the same bill
+		BillLineItem lineItem = discount.getLineItem();
+		
+		// If scoped to a line item, it must belong to the same bill and not be voided
+		if (lineItem != null) {
+			if (lineItem.getBill() == null || !lineItem.getBill().getId().equals(bill.getId())) {
+				errors.rejectValue("lineItem", "billing.error.discount.lineItemNotOnBill");
+			} else if (lineItem.getVoided()) {
+				errors.rejectValue("lineItem", "billing.error.discount.lineItemVoided");
+			}
+		}
+		
+		// Uniqueness depends on scope: at most one active discount per scope
 		if (discount.getId() == null) {
 			BillDiscountService discountService = Context.getService(BillDiscountService.class);
-			BillDiscount existing = discountService.getBillDiscountByBillId(bill.getId());
-			if (existing != null) {
-				errors.rejectValue("bill", "billing.error.discount.alreadyExists");
+			if (lineItem == null) {
+				BillDiscount existing = discountService.getBillDiscountByBillId(bill.getId());
+				if (existing != null) {
+					errors.rejectValue("bill", "billing.error.discount.alreadyExists");
+				}
+			} else if (lineItem.getId() != null) {
+				BillDiscount existing = discountService.getActiveLineItemDiscount(lineItem.getId());
+				if (existing != null) {
+					errors.rejectValue("lineItem", "billing.error.discount.alreadyExistsForLineItem");
+				}
 			}
 		}
 		
@@ -72,10 +91,13 @@ public class BillDiscountValidator implements Validator {
 			errors.rejectValue("discountValue", "billing.error.discount.valueRequired");
 		}
 		
-		// Discount amount must not exceed bill total
-		if (discount.getDiscountAmount() != null && bill.getTotal() != null
-		        && discount.getDiscountAmount().compareTo(bill.getTotal()) > 0) {
-			errors.rejectValue("discountAmount", "billing.error.discount.exceedsBillTotal");
+		// Discount amount must not exceed the scoped target's total (line item or bill)
+		if (discount.getDiscountAmount() != null) {
+			BigDecimal cap = lineItem != null ? lineItem.getTotal() : bill.getTotal();
+			if (cap != null && discount.getDiscountAmount().compareTo(cap) > 0) {
+				errors.rejectValue("discountAmount", lineItem != null ? "billing.error.discount.exceedsLineItemTotal"
+				        : "billing.error.discount.exceedsBillTotal");
+			}
 		}
 		
 		// Justification is mandatory

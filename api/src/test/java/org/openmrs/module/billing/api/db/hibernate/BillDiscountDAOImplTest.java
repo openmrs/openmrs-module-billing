@@ -97,6 +97,29 @@ public class BillDiscountDAOImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
+	public void getBillDiscountByBillId_shouldIgnoreLineScopedDiscount() {
+		// Bill 100 only has a line-item-scoped discount; the bill-level lookup must skip it.
+		assertNull(dao.getBillDiscountByBillId(100));
+	}
+	
+	@Test
+	public void getActiveLineItemDiscount_shouldReturnDiscountForLineItem() {
+		BillDiscount discount = dao.getActiveLineItemDiscount(100);
+		
+		assertNotNull(discount);
+		assertEquals(3, discount.getBillDiscountId());
+		assertNotNull(discount.getLineItem());
+		assertEquals(100, discount.getLineItem().getId());
+		assertFalse(discount.getVoided());
+	}
+	
+	@Test
+	public void getActiveLineItemDiscount_shouldReturnNullWhenNone() {
+		// Line item 102 exists but has no discount.
+		assertNull(dao.getActiveLineItemDiscount(102));
+	}
+	
+	@Test
 	public void saveBillDiscount_shouldPersistNewDiscount() {
 		Bill bill = Context.getService(BillService.class).getBillByUuid("6028814B39B565A20139B95D74360004");
 		assertNotNull(bill);

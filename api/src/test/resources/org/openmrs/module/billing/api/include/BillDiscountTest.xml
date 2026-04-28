@@ -7,7 +7,8 @@
 	                 uuid="d0000000-0000-0000-0000-000000000gp0"
 	                 description="Enable the bill discount feature"/>
 
-	<!-- Additional POSTED bill without a discount for happy-path apply tests -->
+	<!-- Additional POSTED bill without a bill-level discount for happy-path apply tests.
+	     Has two line items: 100 (total 200, has a line-scoped discount) and 102 (total 80, free). -->
 	<cashier_bill bill_id="100" receipt_number="discount-test-posted" provider_id="0" patient_id="0"
 	              cash_point_id="0" status="POSTED"
 	              creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
@@ -16,6 +17,10 @@
 	                        quantity="1" line_item_order="0" payment_status="POSTED"
 	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
 	                        uuid="d0000000-0000-0000-0000-000000000110"/>
+	<cashier_bill_line_item bill_line_item_id="102" bill_id="100" item_id="0" price="80.00" price_name="default"
+	                        quantity="1" line_item_order="1" payment_status="POSTED"
+	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                        uuid="d0000000-0000-0000-0000-000000000112"/>
 
 	<!-- CANCELLED bill - should reject discount -->
 	<cashier_bill bill_id="101" receipt_number="discount-test-cancelled" provider_id="0" patient_id="0"
@@ -27,13 +32,20 @@
 	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
 	                        uuid="d0000000-0000-0000-0000-000000000111"/>
 
-	<!-- Existing active discount on bill 0 (POSTED) for dup/lookup tests -->
+	<!-- Active line-item-scoped discount on line item 100 of bill 100. Listed first so DbUnit
+	     column sensing picks up the bill_line_item_id column. -->
+	<bill_discount bill_discount_id="3" bill_id="100" bill_line_item_id="100" discount_type="FIXED_AMOUNT"
+	               discount_value="20.00" discount_amount="20.00" justification="Item-specific waiver"
+	               initiator_id="1" creator="1" date_created="2012-01-02 00:00:00.0" voided="false"
+	               uuid="d1000000-0000-0000-0000-000000000003"/>
+
+	<!-- Existing active bill-level discount on bill 0 (POSTED) for dup/lookup tests -->
 	<bill_discount bill_discount_id="1" bill_id="0" discount_type="PERCENTAGE" discount_value="10.00"
 	               discount_amount="91.31" justification="Loyal patient"
 	               initiator_id="1" creator="1" date_created="2012-01-02 00:00:00.0" voided="false"
 	               uuid="d1000000-0000-0000-0000-000000000001"/>
 
-	<!-- Voided discount on bill 2 (PENDING) - allows testing void-and-reapply -->
+	<!-- Voided bill-level discount on bill 2 (PENDING) - allows testing void-and-reapply -->
 	<bill_discount bill_discount_id="2" bill_id="2" discount_type="FIXED_AMOUNT" discount_value="10.00"
 	               discount_amount="10.00" justification="Will be voided"
 	               initiator_id="1" creator="1" date_created="2012-01-02 00:00:00.0"

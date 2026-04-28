@@ -10,5 +10,7 @@ public interface BillDiscountDAO {
 	
 	BillDiscount getBillDiscountByBillId(Integer billId);
 	
+	BillDiscount getActiveLineItemDiscount(Integer lineItemId);
+	
 	BillDiscount saveBillDiscount(BillDiscount billDiscount);
 }

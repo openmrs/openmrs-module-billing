@@ -62,15 +62,16 @@ public class Bill extends BaseOpenmrsData {
 	private Set<BillDiscount> discounts;
 	
 	/**
-	 * @return the single non-voided discount currently applied to this bill, or {@code null} if none.
-	 *         Voided history remains available via {@link #getDiscounts()}.
+	 * @return the active bill-level discount (one whose {@code lineItem} is {@code null}), or
+	 *         {@code null} if none. Line-item scoped discounts are not returned here — see
+	 *         {@link #getDiscounts()} to iterate them.
 	 */
 	public BillDiscount getActiveDiscount() {
 		if (discounts == null) {
 			return null;
 		}
 		for (BillDiscount d : discounts) {
-			if (d != null && !d.getVoided()) {
+			if (d != null && !d.getVoided() && d.getLineItem() == null) {
 				return d;
 			}
 		}
@@ -79,9 +80,12 @@ public class Bill extends BaseOpenmrsData {
 	
 	public BigDecimal getAmountAfterDiscount() {
 		BigDecimal total = getTotal();
-		BillDiscount active = getActiveDiscount();
-		if (active != null && active.getDiscountAmount() != null) {
-			total = total.subtract(active.getDiscountAmount());
+		if (discounts != null) {
+			for (BillDiscount d : discounts) {
+				if (d != null && !d.getVoided() && d.getDiscountAmount() != null) {
+					total = total.subtract(d.getDiscountAmount());
+				}
+			}
 		}
 		return total;
 	}

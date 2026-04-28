@@ -33,6 +33,10 @@ public class BillDiscount extends BaseOpenmrsData {
 	@JoinColumn(name = "bill_id", nullable = false)
 	private Bill bill;
 	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "bill_line_item_id")
+	private BillLineItem lineItem;
+	
 	@Enumerated(EnumType.STRING)
 	@Column(name = "discount_type", nullable = false)
 	private DiscountType discountType;

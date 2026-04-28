@@ -30,6 +30,12 @@ public class BillDiscountServiceImpl implements BillDiscountService {
 	}
 	
 	@Override
+	@Transactional(readOnly = true)
+	public BillDiscount getActiveLineItemDiscount(Integer lineItemId) {
+		return billDiscountDAO.getActiveLineItemDiscount(lineItemId);
+	}
+	
+	@Override
 	@Transactional
 	public BillDiscount saveBillDiscount(BillDiscount billDiscount) {
 		return billDiscountDAO.saveBillDiscount(billDiscount);

@@ -1136,6 +1136,7 @@
             <column name="bill_id" type="int">
                 <constraints nullable="false"/>
             </column>
+            <column name="bill_line_item_id" type="int"/>
             <column name="discount_type" type="varchar(20)">
                 <constraints nullable="false"/>
             </column>
@@ -1174,6 +1175,10 @@
         <addForeignKeyConstraint constraintName="bill_discount_bill_id_fk"
                                  baseTableName="bill_discount" baseColumnNames="bill_id"
                                  referencedTableName="cashier_bill" referencedColumnNames="bill_id"/>
+
+        <addForeignKeyConstraint constraintName="bill_discount_bill_line_item_id_fk"
+                                 baseTableName="bill_discount" baseColumnNames="bill_line_item_id"
+                                 referencedTableName="cashier_bill_line_item" referencedColumnNames="bill_line_item_id"/>
 
         <addForeignKeyConstraint constraintName="bill_discount_initiator_id_fk"
                                  baseTableName="bill_discount" baseColumnNames="initiator_id"

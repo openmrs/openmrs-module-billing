@@ -38,7 +38,19 @@ public class HibernateBillDiscountDAO implements BillDiscountDAO {
 		CriteriaQuery<BillDiscount> query = cb.createQuery(BillDiscount.class);
 		Root<BillDiscount> root = query.from(BillDiscount.class);
 		
-		query.select(root).where(cb.equal(root.get("bill").get("id"), billId), cb.isFalse(root.get("voided")));
+		query.select(root).where(cb.equal(root.get("bill").get("id"), billId), cb.isNull(root.get("lineItem")),
+		    cb.isFalse(root.get("voided")));
+		return session.createQuery(query).uniqueResult();
+	}
+	
+	@Override
+	public BillDiscount getActiveLineItemDiscount(Integer lineItemId) {
+		Session session = sessionFactory.getCurrentSession();
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<BillDiscount> query = cb.createQuery(BillDiscount.class);
+		Root<BillDiscount> root = query.from(BillDiscount.class);
+		
+		query.select(root).where(cb.equal(root.get("lineItem").get("id"), lineItemId), cb.isFalse(root.get("voided")));
 		return session.createQuery(query).uniqueResult();
 	}
 	
