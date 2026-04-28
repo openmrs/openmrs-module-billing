@@ -1,3 +1,14 @@
+<!--
+
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+
+-->
 <dataset>
 	<concept concept_id="1067" retired="false" datatype_id="3" class_id="20" is_set="false" creator="1" date_created="2004-08-12 00:00:00.0" version="" uuid="1067AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"/>
 	<global_property property="stockmanagement.unknownConceptId" property_value="1067" description="Stock items maximum import size" uuid="0ac8c82c-487c-11ed-9e32-00155d44ac61"/>
