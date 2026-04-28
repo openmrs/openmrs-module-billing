@@ -228,6 +228,68 @@ public class BillTest {
 	}
 	
 	@Test
+	public void synchronizeBillStatus_shouldFlipToPaidWhenPaymentEqualsAmountAfterDiscount() {
+		// Gross total 100, discount 30 → discounted total 70. Payment of 70 must mark the bill PAID
+		// even though the gross total is still 100. This is the behavior synchronizeBillStatus()
+		// must respect after the discount-aware fix.
+		Bill bill = new Bill();
+		bill.setLineItems(new ArrayList<>());
+		bill.setPayments(new HashSet<>());
+		bill.setDiscounts(new HashSet<>());
+
+		BillLineItem lineItem = new BillLineItem();
+		lineItem.setPrice(BigDecimal.valueOf(100));
+		lineItem.setQuantity(1);
+		lineItem.setVoided(false);
+		bill.getLineItems().add(lineItem);
+
+		BillDiscount discount = new BillDiscount();
+		discount.setDiscountAmount(BigDecimal.valueOf(30));
+		discount.setVoided(false);
+		bill.getDiscounts().add(discount);
+
+		Payment payment = new Payment();
+		payment.setAmountTendered(BigDecimal.valueOf(70));
+		payment.setVoided(false);
+		bill.getPayments().add(payment);
+
+		bill.synchronizeBillStatus();
+
+		assertEquals(BillStatus.PAID, bill.getStatus());
+		assertEquals(BillStatus.PAID, lineItem.getPaymentStatus());
+	}
+
+	@Test
+	public void synchronizeBillStatus_shouldStayPostedWhenPaymentBelowAmountAfterDiscount() {
+		// Gross total 100, discount 30 → discounted total 70. Payment of 60 is below the discounted
+		// total, so the bill must remain POSTED (partial payment).
+		Bill bill = new Bill();
+		bill.setLineItems(new ArrayList<>());
+		bill.setPayments(new HashSet<>());
+		bill.setDiscounts(new HashSet<>());
+
+		BillLineItem lineItem = new BillLineItem();
+		lineItem.setPrice(BigDecimal.valueOf(100));
+		lineItem.setQuantity(1);
+		lineItem.setVoided(false);
+		bill.getLineItems().add(lineItem);
+
+		BillDiscount discount = new BillDiscount();
+		discount.setDiscountAmount(BigDecimal.valueOf(30));
+		discount.setVoided(false);
+		bill.getDiscounts().add(discount);
+
+		Payment payment = new Payment();
+		payment.setAmountTendered(BigDecimal.valueOf(60));
+		payment.setVoided(false);
+		bill.getPayments().add(payment);
+
+		bill.synchronizeBillStatus();
+
+		assertEquals(BillStatus.POSTED, bill.getStatus());
+	}
+
+	@Test
 	public void setLineItems_shouldAllowSettingLineItemsOnNewBill() {
 		Bill bill = new Bill();
 		bill.setStatus(BillStatus.PENDING);
