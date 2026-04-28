@@ -62,9 +62,12 @@ public class Bill extends BaseOpenmrsData {
 	private Set<BillDiscount> discounts;
 	
 	/**
-	 * @return the active bill-level discount (one whose {@code lineItem} is {@code null}), or
-	 *         {@code null} if none. Line-item scoped discounts are not returned here — see
-	 *         {@link #getDiscounts()} to iterate them.
+	 * Returns the active bill-level discount on this bill — that is, the (at most one) non-voided
+	 * discount whose {@code lineItem} is {@code null}. Line-item scoped discounts are intentionally
+	 * not returned; iterate {@link #getDiscounts()} when you need every active discount regardless
+	 * of scope.
+	 *
+	 * @return the active bill-level discount, or {@code null} if none exists
 	 */
 	public BillDiscount getActiveDiscount() {
 		if (discounts == null) {
@@ -78,6 +81,14 @@ public class Bill extends BaseOpenmrsData {
 		return null;
 	}
 	
+	/**
+	 * Returns the bill total net of every non-voided discount (bill-level and line-item scoped).
+	 * The validator forbids bill-level and line-scoped discounts from coexisting on the same bill,
+	 * so this sum is unambiguous: either a single bill-level amount is subtracted, or the sum of
+	 * per-line discounts.
+	 *
+	 * @return {@code getTotal()} minus the sum of active discount amounts
+	 */
 	public BigDecimal getAmountAfterDiscount() {
 		BigDecimal total = getTotal();
 		if (discounts != null) {
@@ -197,7 +208,7 @@ public class Bill extends BaseOpenmrsData {
 	
 	public void synchronizeBillStatus() {
 		if (!this.getPayments().isEmpty() && getTotalPayments().compareTo(BigDecimal.ZERO) > 0) {
-			boolean billFullySettled = getTotalPayments().compareTo(getTotal()) >= 0;
+			boolean billFullySettled = getTotalPayments().compareTo(getAmountAfterDiscount()) >= 0;
 			if (billFullySettled) {
 				this.setStatus(BillStatus.PAID);
 				// Update all non-voided bill line items to PAID status

@@ -104,7 +104,7 @@
 
 		<property name="receiptNumber" type="java.lang.String" column="receipt_number" not-null="false" length="255"/>
 
-		<set name="discounts" inverse="true" lazy="false">
+		<set name="discounts" inverse="true" lazy="true">
 			<key column="bill_id"/>
 			<one-to-many class="org.openmrs.module.billing.api.model.BillDiscount"/>
 		</set>

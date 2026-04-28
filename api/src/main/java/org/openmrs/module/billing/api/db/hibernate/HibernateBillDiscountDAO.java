@@ -1,5 +1,7 @@
 package org.openmrs.module.billing.api.db.hibernate;
 
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -54,6 +56,18 @@ public class HibernateBillDiscountDAO implements BillDiscountDAO {
 		return session.createQuery(query).uniqueResult();
 	}
 	
+	@Override
+	public List<BillDiscount> getDiscountsByBillId(Integer billId) {
+		Session session = sessionFactory.getCurrentSession();
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<BillDiscount> query = cb.createQuery(BillDiscount.class);
+		Root<BillDiscount> root = query.from(BillDiscount.class);
+
+		query.select(root).where(cb.equal(root.get("bill").get("id"), billId))
+		        .orderBy(cb.desc(root.get("dateCreated")));
+		return session.createQuery(query).getResultList();
+	}
+
 	@Override
 	public BillDiscount saveBillDiscount(BillDiscount billDiscount) {
 		sessionFactory.getCurrentSession().saveOrUpdate(billDiscount);

@@ -15,6 +15,7 @@ import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillDiscount;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
+import org.openmrs.module.billing.api.model.DiscountType;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
@@ -65,18 +66,26 @@ public class BillDiscountValidator implements Validator {
 			}
 		}
 		
-		// Uniqueness depends on scope: at most one active discount per scope
+		// Scope rules:
+		//   - at most one active discount per scope (one bill-level OR one per line item),
+		//   - bill-level and line-scoped discounts cannot coexist on the same bill (avoids
+		//     ambiguous totals when bill-level percentages would be computed off the gross
+		//     total while line discounts also subtract).
 		if (discount.getId() == null) {
 			BillDiscountService discountService = Context.getService(BillDiscountService.class);
 			if (lineItem == null) {
 				BillDiscount existing = discountService.getBillDiscountByBillId(bill.getId());
 				if (existing != null) {
 					errors.rejectValue("bill", "billing.error.discount.alreadyExists");
+				} else if (hasActiveLineScopedDiscount(bill)) {
+					errors.rejectValue("bill", "billing.error.discount.scopeConflict");
 				}
 			} else if (lineItem.getId() != null) {
 				BillDiscount existing = discountService.getActiveLineItemDiscount(lineItem.getId());
 				if (existing != null) {
 					errors.rejectValue("lineItem", "billing.error.discount.alreadyExistsForLineItem");
+				} else if (discountService.getBillDiscountByBillId(bill.getId()) != null) {
+					errors.rejectValue("bill", "billing.error.discount.scopeConflict");
 				}
 			}
 		}
@@ -86,16 +95,19 @@ public class BillDiscountValidator implements Validator {
 			errors.rejectValue("discountType", "billing.error.discount.typeRequired");
 		}
 		
-		// Discount value must be positive
-		if (discount.getDiscountValue() == null || discount.getDiscountValue().compareTo(BigDecimal.ZERO) <= 0) {
+		// Discount value must be positive and within range for its type. The amount is derived
+		// from value at the service layer, so bounding value here is what keeps amount in range.
+		BigDecimal value = discount.getDiscountValue();
+		if (value == null || value.compareTo(BigDecimal.ZERO) <= 0) {
 			errors.rejectValue("discountValue", "billing.error.discount.valueRequired");
-		}
-		
-		// Discount amount must not exceed the scoped target's total (line item or bill)
-		if (discount.getDiscountAmount() != null) {
+		} else if (discount.getDiscountType() == DiscountType.PERCENTAGE) {
+			if (value.compareTo(BigDecimal.valueOf(100)) > 0) {
+				errors.rejectValue("discountValue", "billing.error.discount.percentageOutOfRange");
+			}
+		} else if (discount.getDiscountType() == DiscountType.FIXED_AMOUNT) {
 			BigDecimal cap = lineItem != null ? lineItem.getTotal() : bill.getTotal();
-			if (cap != null && discount.getDiscountAmount().compareTo(cap) > 0) {
-				errors.rejectValue("discountAmount", lineItem != null ? "billing.error.discount.exceedsLineItemTotal"
+			if (cap != null && value.compareTo(cap) > 0) {
+				errors.rejectValue("discountValue", lineItem != null ? "billing.error.discount.exceedsLineItemTotal"
 				        : "billing.error.discount.exceedsBillTotal");
 			}
 		}
@@ -109,5 +121,17 @@ public class BillDiscountValidator implements Validator {
 		if (discount.getInitiator() == null) {
 			errors.rejectValue("initiator", "billing.error.discount.initiatorRequired");
 		}
+	}
+
+	private boolean hasActiveLineScopedDiscount(Bill bill) {
+		if (bill.getDiscounts() == null) {
+			return false;
+		}
+		for (BillDiscount d : bill.getDiscounts()) {
+			if (d != null && !d.getVoided() && d.getLineItem() != null) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

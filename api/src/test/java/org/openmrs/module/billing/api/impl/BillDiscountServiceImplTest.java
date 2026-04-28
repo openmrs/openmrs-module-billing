@@ -29,8 +29,10 @@ import org.openmrs.module.billing.api.model.DiscountType;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -38,20 +40,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BillDiscountServiceImplTest extends BaseModuleContextSensitiveTest {
 	
-	private static final String POSTED_BILL_UUID = "d0000000-0000-0000-0000-000000000100";
-	
+	// Clean POSTED bill (200) — no existing discounts. Used for bill-level happy-path and rejection tests.
+	private static final String POSTED_BILL_UUID = "d0000000-0000-0000-0000-000000000200";
+
+	// POSTED bill (100) with a pre-existing line-scoped discount on line item 100. Used for line-scope tests.
+	private static final String LINE_SCOPED_BILL_UUID = "d0000000-0000-0000-0000-000000000100";
+
 	private static final String CANCELLED_BILL_UUID = "d0000000-0000-0000-0000-000000000101";
-	
+
 	private static final String PAID_BILL_UUID = "5028814B39B565A20139B95D74360004";
-	
+
 	private static final String PENDING_BILL_UUID = "6028814B39B565A20139B95D74360004";
-	
+
 	private static final String BILL_WITH_ACTIVE_DISCOUNT_UUID = "4028814B39B565A20139B95D74360004";
-	
+
 	private static final String LINE_ITEM_WITH_DISCOUNT_UUID = "d0000000-0000-0000-0000-000000000110";
-	
+
 	private static final String FREE_LINE_ITEM_UUID = "d0000000-0000-0000-0000-000000000112";
-	
+
 	private static final String OTHER_BILL_LINE_ITEM_UUID = "4028814B39B565A20139B95FB3440005";
 	
 	private BillDiscountService service;
@@ -140,7 +146,7 @@ public class BillDiscountServiceImplTest extends BaseModuleContextSensitiveTest 
 	
 	@Test
 	public void saveBillDiscount_shouldRejectWhenAmountExceedsBillTotal() {
-		// POSTED_BILL_UUID total = 280.00 (line items 100 + 102). Try to discount 300.00.
+		// Clean POSTED bill 200 total = 200.00. Try to discount 300.00.
 		BillDiscount discount = buildDiscount(POSTED_BILL_UUID, DiscountType.FIXED_AMOUNT, new BigDecimal("300.00"),
 		    new BigDecimal("300.00"), "Exceeds total");
 		
@@ -178,8 +184,8 @@ public class BillDiscountServiceImplTest extends BaseModuleContextSensitiveTest 
 	@Test
 	public void saveBillDiscount_shouldPersistLineScopedDiscount() {
 		// Line item 102 on bill 100 has no existing discount; happy path.
-		BillDiscount discount = buildLineScopedDiscount(POSTED_BILL_UUID, FREE_LINE_ITEM_UUID, DiscountType.FIXED_AMOUNT,
-		    new BigDecimal("10.00"), new BigDecimal("10.00"), "Item-specific waiver");
+		BillDiscount discount = buildLineScopedDiscount(LINE_SCOPED_BILL_UUID, FREE_LINE_ITEM_UUID,
+		    DiscountType.FIXED_AMOUNT, new BigDecimal("10.00"), new BigDecimal("10.00"), "Item-specific waiver");
 		
 		BillDiscount saved = service.saveBillDiscount(discount);
 		
@@ -192,27 +198,33 @@ public class BillDiscountServiceImplTest extends BaseModuleContextSensitiveTest 
 	@Test
 	public void saveBillDiscount_shouldRejectSecondLineScopedDiscountOnSameLineItem() {
 		// Line item 100 already has an active line-scoped discount in the dataset.
-		BillDiscount discount = buildLineScopedDiscount(POSTED_BILL_UUID, LINE_ITEM_WITH_DISCOUNT_UUID,
+		BillDiscount discount = buildLineScopedDiscount(LINE_SCOPED_BILL_UUID, LINE_ITEM_WITH_DISCOUNT_UUID,
 		    DiscountType.FIXED_AMOUNT, new BigDecimal("5.00"), new BigDecimal("5.00"), "Duplicate line discount");
 		
 		assertThrows(Exception.class, () -> service.saveBillDiscount(discount));
 	}
 	
 	@Test
-	public void saveBillDiscount_shouldAllowBillLevelDiscountAlongsideLineScoped() {
-		// Bill 100 has a line-scoped discount but no bill-level discount; bill-level apply must succeed.
-		BillDiscount discount = buildDiscount(POSTED_BILL_UUID, DiscountType.FIXED_AMOUNT, new BigDecimal("15.00"),
-		    new BigDecimal("15.00"), "Bill-level on top of line discount");
-		
-		BillDiscount saved = service.saveBillDiscount(discount);
-		
-		assertNotNull(saved);
-		assertNull(saved.getLineItem());
+	public void saveBillDiscount_shouldRejectBillLevelDiscountWhenLineScopedExists() {
+		// Bill 100 has an active line-scoped discount; bill-level and line-scoped must not coexist.
+		BillDiscount discount = buildDiscount(LINE_SCOPED_BILL_UUID, DiscountType.FIXED_AMOUNT, new BigDecimal("15.00"),
+		    new BigDecimal("15.00"), "Should be rejected");
+
+		assertThrows(Exception.class, () -> service.saveBillDiscount(discount));
+	}
+
+	@Test
+	public void saveBillDiscount_shouldRejectLineScopedDiscountWhenBillLevelExists() {
+		// Bill 0 already has an active bill-level discount; cannot add a line-scoped one on the same bill.
+		BillDiscount discount = buildLineScopedDiscount(BILL_WITH_ACTIVE_DISCOUNT_UUID, OTHER_BILL_LINE_ITEM_UUID,
+		    DiscountType.FIXED_AMOUNT, new BigDecimal("5.00"), new BigDecimal("5.00"), "Should be rejected");
+
+		assertThrows(Exception.class, () -> service.saveBillDiscount(discount));
 	}
 	
 	@Test
 	public void saveBillDiscount_shouldRejectLineItemFromDifferentBill() {
-		// Set bill = bill 100 but lineItem belongs to bill 0.
+		// Set bill = clean POSTED bill 200 but lineItem belongs to bill 0.
 		BillDiscount discount = buildLineScopedDiscount(POSTED_BILL_UUID, OTHER_BILL_LINE_ITEM_UUID,
 		    DiscountType.FIXED_AMOUNT, new BigDecimal("5.00"), new BigDecimal("5.00"), "Wrong bill");
 		
@@ -222,12 +234,24 @@ public class BillDiscountServiceImplTest extends BaseModuleContextSensitiveTest 
 	@Test
 	public void saveBillDiscount_shouldRejectWhenAmountExceedsLineItemTotal() {
 		// Line item 102 total = 80.00; try 100.00.
-		BillDiscount discount = buildLineScopedDiscount(POSTED_BILL_UUID, FREE_LINE_ITEM_UUID, DiscountType.FIXED_AMOUNT,
-		    new BigDecimal("100.00"), new BigDecimal("100.00"), "Exceeds line total");
+		BillDiscount discount = buildLineScopedDiscount(LINE_SCOPED_BILL_UUID, FREE_LINE_ITEM_UUID,
+		    DiscountType.FIXED_AMOUNT, new BigDecimal("100.00"), new BigDecimal("100.00"), "Exceeds line total");
 		
 		assertThrows(Exception.class, () -> service.saveBillDiscount(discount));
 	}
 	
+	@Test
+	public void getDiscountsByBillId_shouldReturnFullAuditHistory() {
+		Bill bill = billService.getBillByUuid(BILL_WITH_ACTIVE_DISCOUNT_UUID);
+		assertNotNull(bill);
+
+		List<BillDiscount> history = service.getDiscountsByBillId(bill.getId());
+
+		assertNotNull(history);
+		assertEquals(1, history.size());
+		assertFalse(history.get(0).getVoided());
+	}
+
 	@Test
 	public void getActiveLineItemDiscount_shouldReturnDiscountForLineItem() {
 		BillLineItem lineItem = lineItemService.getBillLineItemByUuid(LINE_ITEM_WITH_DISCOUNT_UUID);

@@ -22,9 +22,6 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DataDelegatingCrudR
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-
 /**
  * REST resource representing a {@link BillDiscount}.
  */
@@ -39,11 +36,8 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 	
 	@Override
 	public BillDiscount save(BillDiscount delegate) {
-		if (delegate.getId() == null) {
-			if (delegate.getInitiator() == null) {
-				delegate.setInitiator(Context.getAuthenticatedUser());
-			}
-			computeDiscountAmount(delegate);
+		if (delegate.getId() == null && delegate.getInitiator() == null) {
+			delegate.setInitiator(Context.getAuthenticatedUser());
 		}
 		return Context.getService(BillDiscountService.class).saveBillDiscount(delegate);
 	}
@@ -157,20 +151,4 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 		}
 	}
 	
-	private void computeDiscountAmount(BillDiscount discount) {
-		if (discount.getBill() == null || discount.getDiscountType() == null || discount.getDiscountValue() == null) {
-			return;
-		}
-		
-		BigDecimal base = discount.getLineItem() != null ? discount.getLineItem().getTotal() : discount.getBill().getTotal();
-		BigDecimal amount;
-		
-		if (discount.getDiscountType() == DiscountType.PERCENTAGE) {
-			amount = base.multiply(discount.getDiscountValue()).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-		} else {
-			amount = discount.getDiscountValue();
-		}
-		
-		discount.setDiscountAmount(amount);
-	}
 }
