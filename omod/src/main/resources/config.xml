@@ -51,17 +51,6 @@
 	</globalProperty>
 
 	<globalProperty>
-		<property>${project.parent.artifactId}.defaultShiftReportId</property>
-		<description>ID of the Jasper Cashier Shift report.</description>
-	</globalProperty>
-
-	<globalProperty>
-		<property>${project.parent.artifactId}.timesheetRequired</property>
-		<description>Whether or not to require an active timesheet when creating a new bill. True or false.
-		</description>
-	</globalProperty>
-
-	<globalProperty>
 		<property>${project.parent.artifactId}.roundingMode</property>
 		<description>How to do rounding to bill totals (FLOOR, MID, CEILING)</description>
 	</globalProperty>
@@ -125,20 +114,6 @@
 		<property>${project.parent.artifactId}.reports.departmentRevenue</property>
 		<description>
 			The ID of the Department Revenue report.
-		</description>
-	</globalProperty>
-
-	<globalProperty>
-		<property>${project.parent.artifactId}.reports.shiftSummary</property>
-		<description>
-			The ID of the Shift Summary report.
-		</description>
-	</globalProperty>
-
-	<globalProperty>
-		<property>${project.parent.artifactId}.reports.dailyShiftSummary</property>
-		<description>
-			The ID of the Daily Shift Summary report.
 		</description>
 	</globalProperty>
 
@@ -228,22 +203,6 @@
 		<description>Able to purge cashier module metadata</description>
 	</privilege>
 
-	<!--  Timesheets  -->
-	<privilege>
-		<name>View Cashier Timesheets</name>
-		<description>Able to view timesheets</description>
-	</privilege>
-
-	<privilege>
-		<name>Manage Cashier Timesheets</name>
-		<description>Able to add/edit/delete timesheets</description>
-	</privilege>
-
-	<privilege>
-		<name>Purge Cashier Timesheets</name>
-		<description>Able to purge timesheets</description>
-	</privilege>
-
 	<!-- App privileges for OpenMRS 2.x -->
 	<privilege>
 		<name>App: View Cashier App</name>
@@ -263,11 +222,6 @@
 	<privilege>
 		<name>Task: Adjust Cashier Bills</name>
 		<description>Able to adjust cashier bills</description>
-	</privilege>
-
-	<privilege>
-		<name>Task: Cashier Timesheets</name>
-		<description>Able to access timesheets page</description>
 	</privilege>
 
 	<privilege>
@@ -324,3 +278,4 @@
 	</filter-mapping>
 
 </module>
+

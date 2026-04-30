@@ -23,10 +23,6 @@ public class ModuleSettings {
 	
 	public static final String RECEIPT_REPORT_ID_PROPERTY = "billing.defaultReceiptReportId";
 	
-	public static final String CASHIER_SHIFT_REPORT_ID_PROPERTY = "billing.defaultShiftReportId";
-	
-	public static final String TIMESHEET_REQUIRED_PROPERTY = "billing.timesheetRequired";
-	
 	public static final String ROUNDING_MODE_PROPERTY = "billing.roundingMode";
 	
 	public static final String ROUND_TO_NEAREST_PROPERTY = "billing.roundToNearest";
@@ -50,10 +46,6 @@ public class ModuleSettings {
 	public static final String DEPARTMENT_COLLECTIONS_REPORT_ID_PROPERTY = "billing.reports.departmentCollections";
 	
 	public static final String DEPARTMENT_REVENUE_REPORT_ID_PROPERTY = "billing.reports.departmentRevenue";
-	
-	public static final String SHIFT_SUMMARY_REPORT_ID_PROPERTY = "billing.reports.shiftSummary";
-	
-	public static final String DAILY_SHIFT_SUMMARY_REPORT_ID_PROPERTY = "billing.reports.dailyShiftSummary";
 	
 	public static final String PAYMENTS_BY_PAYMENT_MODE_REPORT_ID_PROPERTY = "billing.reports.paymentsByPaymentMode";
 	
@@ -105,14 +97,6 @@ public class ModuleSettings {
 			}
 		});
 		
-		getIntProperty(CASHIER_SHIFT_REPORT_ID_PROPERTY, new Action1<Integer>() {
-			
-			@Override
-			public void apply(Integer parameter) {
-				cashierSettings.setDefaultShiftReportId(parameter);
-			}
-		});
-		
 		getIntProperty(RECEIPT_REPORT_ID_PROPERTY, new Action1<Integer>() {
 			
 			@Override
@@ -125,14 +109,6 @@ public class ModuleSettings {
 		if (!StringUtils.isEmpty(property)) {
 			cashierSettings.setCashierRoundingMode(property);
 		}
-		
-		getBoolProperty(TIMESHEET_REQUIRED_PROPERTY, new Action1<Boolean>() {
-			
-			@Override
-			public void apply(Boolean parameter) {
-				cashierSettings.setCashierTimesheetRequired(parameter);
-			}
-		});
 		
 		getIntProperty(PATIENT_DASHBOARD_2_BILL_COUNT, DEFAULT_PATIENT_DASHBOARD_2_BILL_COUNT, new Action1<Integer>() {
 			
@@ -158,22 +134,6 @@ public class ModuleSettings {
 			}
 		});
 		
-		getIntProperty(SHIFT_SUMMARY_REPORT_ID_PROPERTY, new Action1<Integer>() {
-			
-			@Override
-			public void apply(Integer parameter) {
-				cashierSettings.setShiftSummaryReportId(parameter);
-			}
-		});
-		
-		getIntProperty(DAILY_SHIFT_SUMMARY_REPORT_ID_PROPERTY, new Action1<Integer>() {
-			
-			@Override
-			public void apply(Integer parameter) {
-				cashierSettings.setDailyShiftSummaryReportId(parameter);
-			}
-		});
-		
 		getIntProperty(PAYMENTS_BY_PAYMENT_MODE_REPORT_ID_PROPERTY, new Action1<Integer>() {
 			
 			@Override
@@ -193,16 +153,12 @@ public class ModuleSettings {
 		setBoolProperty(ADJUSTMENT_REASON_FIELD, cashierSettings.getAdjustmentReasonField());
 		setBoolProperty(ALLOW_BILL_ADJUSTMENT, cashierSettings.getAllowBillAdjustment());
 		setBoolProperty(AUTOFILL_PAYMENT_AMOUNT, cashierSettings.getAutoFillPaymentAmount());
-		setIntProperty(CASHIER_SHIFT_REPORT_ID_PROPERTY, cashierSettings.getDefaultShiftReportId());
 		setIntProperty(ROUND_TO_NEAREST_PROPERTY, cashierSettings.getCashierRoundingToNearest());
 		setIntProperty(RECEIPT_REPORT_ID_PROPERTY, cashierSettings.getDefaultReceiptReportId());
 		setStringProperty(ROUNDING_MODE_PROPERTY, cashierSettings.getCashierRoundingMode());
-		setBoolProperty(TIMESHEET_REQUIRED_PROPERTY, cashierSettings.getCashierTimesheetRequired());
 		setIntProperty(PATIENT_DASHBOARD_2_BILL_COUNT, cashierSettings.getPatientDashboard2BillCount());
 		setIntProperty(DEPARTMENT_COLLECTIONS_REPORT_ID_PROPERTY, cashierSettings.getDepartmentCollectionsReportId());
 		setIntProperty(DEPARTMENT_REVENUE_REPORT_ID_PROPERTY, cashierSettings.getDepartmentRevenueReportId());
-		setIntProperty(SHIFT_SUMMARY_REPORT_ID_PROPERTY, cashierSettings.getShiftSummaryReportId());
-		setIntProperty(DAILY_SHIFT_SUMMARY_REPORT_ID_PROPERTY, cashierSettings.getDailyShiftSummaryReportId());
 		setIntProperty(PAYMENTS_BY_PAYMENT_MODE_REPORT_ID_PROPERTY, cashierSettings.getPaymentsByPaymentModeReportId());
 	}
 	
