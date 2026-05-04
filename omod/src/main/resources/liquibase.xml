@@ -1120,4 +1120,12 @@
             referencedTableName="provider" referencedColumnNames="provider_id"
             onDelete="SET NULL" onUpdate="CASCADE"/>
     </changeSet>
+
+    <changeSet id="openmrs.billing-005-20260410-make-bill-cashier-optional" author="Raj prakash">
+        <comment>Make cashier (provider_id) optional on cashier_bill — cashier belongs to payments, not bills</comment>
+        <dropNotNullConstraint
+            tableName="cashier_bill"
+            columnName="provider_id"
+            columnDataType="int"/>
+    </changeSet>
 </databaseChangeLog>

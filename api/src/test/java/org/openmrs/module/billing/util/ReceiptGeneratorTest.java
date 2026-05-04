@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.billing.util;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -95,6 +96,20 @@ public class ReceiptGeneratorTest extends BaseModuleContextSensitiveTest {
 		assertTrue(pdfText.contains("KES"), "PDF should contain configured currency symbol KES but was: " + pdfText);
 	}
 	
+	@Test
+	public void createBillReceipt_shouldNotThrowExceptionWhenCashierIsNull() throws Exception {
+		Bill bill = createTestBill();
+		bill.setCashier(null);
+
+		byte[] pdfBytes = ReceiptGenerator.createBillReceipt(bill);
+
+		assertNotNull(pdfBytes);
+		assertTrue(pdfBytes.length > 0);
+		String pdfText = extractTextFromPdf(pdfBytes);
+		assertFalse(pdfText.contains("You were served by"),
+		    "PDF should not contain cashier line when cashier is null");
+	}
+
 	private Bill createTestBill() {
 		Patient patient = patientService.getPatient(0);
 		

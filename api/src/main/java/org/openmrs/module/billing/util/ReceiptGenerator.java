@@ -272,8 +272,10 @@ public class ReceiptGenerator {
 			doc.add(divider);
 			doc.add(amountDueSection);
 			doc.add(divider);
-			doc.add(new Paragraph("You were served by " + bill.getCashier().getName()).setFont(footerSectionFont)
-			        .setFontSize(8).setTextAlignment(TextAlignment.CENTER));
+			if (bill.getCashier() != null) {
+				doc.add(new Paragraph("You were served by " + bill.getCashier().getName()).setFont(footerSectionFont)
+				        .setFontSize(8).setTextAlignment(TextAlignment.CENTER));
+			}
 		}
 		catch (Exception e) {
 			LOG.error("Exception caught while writing PDF to stream", e);

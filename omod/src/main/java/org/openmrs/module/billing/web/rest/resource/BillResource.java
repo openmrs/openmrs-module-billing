@@ -145,16 +145,6 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 		//TODO: Test all the ways that this could fail
 		
 		if (bill.getId() == null) {
-			if (bill.getCashier() == null) {
-				Provider cashier = getCurrentCashier();
-				if (cashier == null) {
-					throw new RestClientException(
-					        "The current user (" + Context.getAuthenticatedUser().getUsername() + ") is not a provider");
-				}
-				
-				bill.setCashier(cashier);
-			}
-			
 			if (bill.getCashPoint() == null) {
 				loadBillCashPoint(bill);
 			}
@@ -216,9 +206,18 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 	}
 	
 	private void loadBillCashPoint(Bill bill) {
-		ITimesheetService service = Context.getService(ITimesheetService.class);
-		Timesheet timesheet = service.getCurrentTimesheet(bill.getCashier());
-		if (timesheet == null) {
+		if (bill.getCashier() != null) {
+			ITimesheetService service = Context.getService(ITimesheetService.class);
+			Timesheet timesheet = service.getCurrentTimesheet(bill.getCashier());
+			if (timesheet != null) {
+				CashPoint cashPoint = timesheet.getCashPoint();
+				if (cashPoint == null) {
+					throw new RestClientException("No cash points defined for the current timesheet!");
+				}
+				bill.setCashPoint(cashPoint);
+				return;
+			}
+			// timesheet is null — check if a timesheet is required
 			AdministrationService adminService = Context.getAdministrationService();
 			boolean timesheetRequired;
 			try {
@@ -228,21 +227,16 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			catch (Exception e) {
 				timesheetRequired = false;
 			}
-			
 			if (timesheetRequired) {
 				throw new RestClientException("A current timesheet does not exist for cashier " + bill.getCashier());
-			} else if (bill.getBillAdjusted() != null) {
-				// If this is an adjusting bill, copy cash point from billAdjusted
-				bill.setCashPoint(bill.getBillAdjusted().getCashPoint());
-			} else {
-				throw new RestClientException("Cash point cannot be null!");
 			}
+		}
+		// No cashier, or no timesheet and not required — copy from adjusted bill or fail
+		if (bill.getBillAdjusted() != null) {
+			// If this is an adjusting bill, copy cash point from billAdjusted
+			bill.setCashPoint(bill.getBillAdjusted().getCashPoint());
 		} else {
-			CashPoint cashPoint = timesheet.getCashPoint();
-			if (cashPoint == null) {
-				throw new RestClientException("No cash points defined for the current timesheet!");
-			}
-			bill.setCashPoint(cashPoint);
+			throw new RestClientException("Cash point cannot be null!");
 		}
 	}
 	
