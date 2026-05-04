@@ -21,6 +21,7 @@ import org.openmrs.api.db.hibernate.HibernatePatientDAO;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.db.BillDAO;
 import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.search.BillSearch;
 
 import javax.annotation.Nonnull;
@@ -140,6 +141,20 @@ public class HibernateBillDAO implements BillDAO {
 	@Override
 	public void purgeBill(@Nonnull Bill bill) {
 		sessionFactory.getCurrentSession().remove(bill);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public BillStatus getPersistedBillStatus(@Nonnull Integer billId) {
+		List<?> results = sessionFactory.getCurrentSession()
+		        .createNativeQuery("SELECT status FROM cashier_bill WHERE bill_id = :billId").setParameter("billId", billId)
+		        .getResultList();
+		if (results.isEmpty() || results.get(0) == null) {
+			return null;
+		}
+		return BillStatus.valueOf(results.get(0).toString());
 	}
 	
 	private List<Predicate> buildBillSearchPredicate(CriteriaBuilder cb, Root<Bill> root, BillSearch billSearch) {

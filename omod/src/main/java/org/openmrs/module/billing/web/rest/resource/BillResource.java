@@ -71,6 +71,14 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			description.addProperty("receiptNumber");
 			description.addProperty("status");
 			description.addProperty("adjustmentReason");
+			description.addProperty("refundReason");
+			description.addProperty("refundRequestedBy", Representation.REF);
+			description.addProperty("dateRefundRequested");
+			description.addProperty("refundApprovedBy", Representation.REF);
+			description.addProperty("dateRefundApproved");
+			description.addProperty("refundDenialReason");
+			description.addProperty("refundRejectedBy", Representation.REF);
+			description.addProperty("dateRefundRejected");
 			description.addProperty("uuid");
 			return description;
 		}
@@ -127,6 +135,11 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			instance.setStatus(status);
 		} else if (instance.getStatus() == BillStatus.PENDING && status == BillStatus.POSTED) {
 			instance.setStatus(status);
+		} else if (instance.getStatus() == BillStatus.PAID && status == BillStatus.REFUND_REQUESTED) {
+			instance.setStatus(status);
+		} else if (instance.getStatus() == BillStatus.REFUND_REQUESTED
+		        && (status == BillStatus.REFUNDED || status == BillStatus.REFUND_DENIED)) {
+			instance.setStatus(status);
 		}
 		if (status == BillStatus.POSTED) {
 			RoundingUtil.handleRoundingLineItem(instance);
@@ -143,6 +156,18 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 	@Override
 	public Bill save(Bill bill) {
 		//TODO: Test all the ways that this could fail
+		
+		BillService service = Context.getService(BillService.class);
+		
+		if (bill.getStatus() == BillStatus.REFUND_REQUESTED) {
+			return service.requestRefund(bill, bill.getRefundReason());
+		}
+		if (bill.getStatus() == BillStatus.REFUNDED) {
+			return service.approveRefund(bill);
+		}
+		if (bill.getStatus() == BillStatus.REFUND_DENIED) {
+			return service.rejectRefund(bill, bill.getRefundDenialReason());
+		}
 		
 		if (bill.getId() == null) {
 			if (bill.getCashier() == null) {
@@ -167,7 +192,7 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			}
 		}
 		
-		return Context.getService(BillService.class).saveBill(bill);
+		return service.saveBill(bill);
 	}
 	
 	@Override

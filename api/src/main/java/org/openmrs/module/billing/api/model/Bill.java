@@ -12,6 +12,7 @@ package org.openmrs.module.billing.api.model;
 import java.math.BigDecimal;
 import java.security.AccessControlException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,6 +22,7 @@ import lombok.Setter;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
+import org.openmrs.User;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.util.PrivilegeConstants;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
@@ -58,6 +60,22 @@ public class Bill extends BaseOpenmrsData {
 	private Boolean receiptPrinted = false;
 	
 	private String adjustmentReason;
+	
+	private String refundReason;
+	
+	private User refundRequestedBy;
+	
+	private Date dateRefundRequested;
+	
+	private User refundApprovedBy;
+	
+	private Date dateRefundApproved;
+	
+	private String refundDenialReason;
+	
+	private User refundRejectedBy;
+	
+	private Date dateRefundRejected;
 	
 	public BigDecimal getTotal() {
 		BigDecimal total = BigDecimal.ZERO;
@@ -165,6 +183,9 @@ public class Bill extends BaseOpenmrsData {
 	}
 	
 	public void synchronizeBillStatus() {
+		if (this.status == BillStatus.REFUND_REQUESTED || this.status == BillStatus.REFUNDED) {
+			return;
+		}
 		if (!this.getPayments().isEmpty() && getTotalPayments().compareTo(BigDecimal.ZERO) > 0) {
 			boolean billFullySettled = getTotalPayments().compareTo(getTotal()) >= 0;
 			if (billFullySettled) {

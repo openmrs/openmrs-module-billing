@@ -20,8 +20,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.openmrs.annotation.Handler;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillLineItemService;
+import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
+import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.model.Payment;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
@@ -47,6 +49,7 @@ public class BillValidator implements Validator {
 			
 			validateNewPaymentsHaveCashier(bill, errors);
 			validateLineItemsNotModified(bill, errors);
+			validateRefundFields(bill, errors);
 		}
 	}
 	
@@ -90,6 +93,40 @@ public class BillValidator implements Validator {
 			if (hasNewLineItems) {
 				errors.reject("billing.error.lineItemsCannotBeAddedToNonPendingBill");
 			}
+		}
+	}
+	
+	/**
+	 * Validates refund-related fields and that the persisted status is a valid predecessor for the
+	 * requested refund-workflow target. Reads the persisted status via
+	 * {@link BillService#getPersistedBillStatus(Integer)} (bypasses the Hibernate session cache)
+	 * because {@code BillResource.setBillStatus} and the refund service methods mutate the in-memory
+	 * status to the target before validation runs — so the managed entity's status is not usable as the
+	 * source of truth here.
+	 */
+	private void validateRefundFields(Bill bill, Errors errors) {
+		if (bill.getId() == null || bill.getStatus() == null) {
+			return;
+		}
+		
+		BillStatus requiredSource;
+		if (bill.getStatus() == BillStatus.REFUND_REQUESTED) {
+			requiredSource = BillStatus.PAID;
+		} else if (bill.getStatus() == BillStatus.REFUNDED || bill.getStatus() == BillStatus.REFUND_DENIED) {
+			requiredSource = BillStatus.REFUND_REQUESTED;
+		} else {
+			return;
+		}
+		BillStatus persisted = Context.getService(BillService.class).getPersistedBillStatus(bill.getId());
+		if (persisted != requiredSource) {
+			errors.reject("billing.error.invalidBillStatusTransition");
+		}
+		
+		if (bill.getStatus() == BillStatus.REFUND_REQUESTED && StringUtils.isBlank(bill.getRefundReason())) {
+			errors.reject("billing.error.refundReasonRequired");
+		}
+		if (bill.getStatus() == BillStatus.REFUND_DENIED && StringUtils.isBlank(bill.getRefundDenialReason())) {
+			errors.reject("billing.error.denialReasonRequired");
 		}
 	}
 	

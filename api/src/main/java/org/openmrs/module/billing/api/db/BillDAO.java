@@ -11,6 +11,7 @@ package org.openmrs.module.billing.api.db;
 
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.search.BillSearch;
 
 import javax.annotation.Nonnull;
@@ -107,5 +108,16 @@ public interface BillDAO {
 	 * @param bill the bill to permanently delete (must not be null)
 	 */
 	void purgeBill(@Nonnull Bill bill);
+	
+	/**
+	 * Reads the bill's status directly from the database, bypassing Hibernate's session cache. This
+	 * returns the persisted (pre-mutation) value even when the managed entity in the current session
+	 * has been modified, so callers can compare the DB truth against in-memory changes (e.g., for
+	 * status-transition validation).
+	 *
+	 * @param billId the database ID of the bill (must not be null)
+	 * @return the persisted status, or null if no bill with that ID exists
+	 */
+	BillStatus getPersistedBillStatus(@Nonnull Integer billId);
 	
 }

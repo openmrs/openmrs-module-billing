@@ -17,12 +17,14 @@ import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.db.BillDAO;
 import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.module.billing.util.ReceiptGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -169,6 +171,56 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 			return existingBill == null || existingBill.editable();
 		}
 		return true;
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public BillStatus getPersistedBillStatus(Integer billId) {
+		if (billId == null) {
+			return null;
+		}
+		return billDAO.getPersistedBillStatus(billId);
+	}
+	
+	@Override
+	public Bill requestRefund(Bill bill, String refundReason) {
+		if (bill == null) {
+			throw new IllegalArgumentException("The bill must be defined.");
+		}
+		if (StringUtils.isBlank(refundReason)) {
+			throw new IllegalArgumentException("refundReason cannot be null or empty");
+		}
+		bill.setRefundReason(refundReason);
+		bill.setRefundRequestedBy(Context.getAuthenticatedUser());
+		bill.setDateRefundRequested(new Date());
+		bill.setStatus(BillStatus.REFUND_REQUESTED);
+		return Context.getService(BillService.class).saveBill(bill);
+	}
+	
+	@Override
+	public Bill approveRefund(Bill bill) {
+		if (bill == null) {
+			throw new IllegalArgumentException("The bill must be defined.");
+		}
+		bill.setRefundApprovedBy(Context.getAuthenticatedUser());
+		bill.setDateRefundApproved(new Date());
+		bill.setStatus(BillStatus.REFUNDED);
+		return Context.getService(BillService.class).saveBill(bill);
+	}
+	
+	@Override
+	public Bill rejectRefund(Bill bill, String denialReason) {
+		if (bill == null) {
+			throw new IllegalArgumentException("The bill must be defined.");
+		}
+		if (StringUtils.isBlank(denialReason)) {
+			throw new IllegalArgumentException("denialReason cannot be null or empty");
+		}
+		bill.setRefundDenialReason(denialReason);
+		bill.setRefundRejectedBy(Context.getAuthenticatedUser());
+		bill.setDateRefundRejected(new Date());
+		bill.setStatus(BillStatus.REFUND_DENIED);
+		return Context.getService(BillService.class).saveBill(bill);
 	}
 	
 }

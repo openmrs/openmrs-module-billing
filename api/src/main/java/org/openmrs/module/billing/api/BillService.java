@@ -13,6 +13,7 @@ import org.openmrs.annotation.Authorized;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.module.billing.api.util.PrivilegeConstants;
 
@@ -152,5 +153,65 @@ public interface BillService extends OpenmrsService {
 	
 	@Authorized(PrivilegeConstants.VIEW_BILLS)
 	boolean isBillEditable(Bill bill);
+	
+	/**
+	 * Reads the bill's status directly from the database, bypassing Hibernate's session cache. Intended
+	 * for status-transition validation where an in-memory entity may have a pending target status and
+	 * the caller needs the untouched persisted value.
+	 *
+	 * @param billId the database ID of the bill
+	 * @return the persisted status, or null if no bill with that ID exists
+	 */
+	@Authorized(PrivilegeConstants.VIEW_BILLS)
+	BillStatus getPersistedBillStatus(Integer billId);
+	
+	/**
+	 * Requests a refund for a paid bill.
+	 * <p>
+	 * The bill must have status {@code PAID}. On success, the bill's status transitions to
+	 * {@code REFUND_REQUESTED} and the refund request metadata (reason, requestedBy, date) is recorded.
+	 * </p>
+	 *
+	 * @param bill the bill to request a refund for
+	 * @param refundReason the reason for requesting the refund (required, cannot be blank)
+	 * @return the updated bill with status {@code REFUND_REQUESTED}
+	 * @throws org.openmrs.api.APIAuthenticationException if the user lacks MANAGE_BILLS privilege
+	 * @throws IllegalArgumentException if the bill is null, not in PAID status, or refundReason is
+	 *             blank
+	 */
+	@Authorized(PrivilegeConstants.MANAGE_BILLS)
+	Bill requestRefund(Bill bill, String refundReason);
+	
+	/**
+	 * Approves a pending refund request.
+	 * <p>
+	 * The bill must have status {@code REFUND_REQUESTED}. On success, the bill's status transitions to
+	 * {@code REFUNDED} and the approval metadata (approvedBy, date) is recorded.
+	 * </p>
+	 *
+	 * @param bill the bill whose refund request is being approved
+	 * @return the updated bill with status {@code REFUNDED}
+	 * @throws org.openmrs.api.APIAuthenticationException if the user lacks REFUND_MONEY privilege
+	 * @throws IllegalArgumentException if the bill is null or not in REFUND_REQUESTED status
+	 */
+	@Authorized(PrivilegeConstants.REFUND_MONEY)
+	Bill approveRefund(Bill bill);
+	
+	/**
+	 * Rejects a pending refund request.
+	 * <p>
+	 * The bill must have status {@code REFUND_REQUESTED}. On success, the bill's status transitions to
+	 * {@code REFUND_DENIED} and the rejection metadata (reason, rejectedBy, date) is recorded.
+	 * </p>
+	 *
+	 * @param bill the bill whose refund request is being rejected
+	 * @param denialReason the reason for denying the refund (required, cannot be blank)
+	 * @return the updated bill with status {@code REFUND_DENIED}
+	 * @throws org.openmrs.api.APIAuthenticationException if the user lacks REFUND_MONEY privilege
+	 * @throws IllegalArgumentException if the bill is null, not in REFUND_REQUESTED status, or
+	 *             denialReason is blank
+	 */
+	@Authorized(PrivilegeConstants.REFUND_MONEY)
+	Bill rejectRefund(Bill bill, String denialReason);
 	
 }

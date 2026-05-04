@@ -136,4 +136,108 @@ public class BillValidatorTest extends BaseModuleContextSensitiveTest {
 		assertFalse(errors.hasErrors());
 	}
 	
+	@Test
+	public void validate_shouldRejectRefundRequestedBillWithNoRefundReason() {
+		Bill paidBill = billService.getBill(1);
+		assertNotNull(paidBill);
+		paidBill.setStatus(BillStatus.REFUND_REQUESTED);
+		// refundReason intentionally NOT set
+		
+		Errors errors = new BindException(paidBill, "bill");
+		billValidator.validate(paidBill, errors);
+		
+		assertTrue(errors.hasErrors());
+	}
+	
+	@Test
+	public void validate_shouldNotRejectRefundRequestedBillWithRefundReason() {
+		Bill paidBill = billService.getBill(1);
+		assertNotNull(paidBill);
+		paidBill.setStatus(BillStatus.REFUND_REQUESTED);
+		paidBill.setRefundReason("Equipment failure");
+		
+		Errors errors = new BindException(paidBill, "bill");
+		billValidator.validate(paidBill, errors);
+		
+		assertFalse(errors.hasErrors());
+	}
+	
+	@Test
+	public void validate_shouldRejectRefundDeniedBillWithNoDenialReason() {
+		Bill paidBill = billService.getBill(1);
+		assertNotNull(paidBill);
+		paidBill.setStatus(BillStatus.REFUND_DENIED);
+		// denialReason intentionally NOT set
+		
+		Errors errors = new BindException(paidBill, "bill");
+		billValidator.validate(paidBill, errors);
+		
+		assertTrue(errors.hasErrors());
+	}
+	
+	@Test
+	public void validate_shouldNotRejectRefundDeniedBillWithDenialReason() {
+		// REFUND_DENIED requires the persisted status to be REFUND_REQUESTED, so transition the bill
+		// through requestRefund first.
+		Bill paidBill = billService.getBill(1);
+		assertNotNull(paidBill);
+		billService.requestRefund(paidBill, "Equipment failure");
+		Context.flushSession();
+		Bill requestedBill = billService.getBill(1);
+		requestedBill.setStatus(BillStatus.REFUND_DENIED);
+		requestedBill.setRefundDenialReason("Service was already provided");
+		
+		Errors errors = new BindException(requestedBill, "bill");
+		billValidator.validate(requestedBill, errors);
+		
+		assertFalse(errors.hasErrors());
+	}
+	
+	@Test
+	public void validate_shouldRejectRefundRequestedTransitionFromNonPaidBill() {
+		Bill pendingBill = billService.getBill(2);
+		assertNotNull(pendingBill);
+		assertEquals(BillStatus.PENDING, pendingBill.getStatus());
+		pendingBill.setStatus(BillStatus.REFUND_REQUESTED);
+		pendingBill.setRefundReason("Attempt from PENDING");
+		
+		Errors errors = new BindException(pendingBill, "bill");
+		billValidator.validate(pendingBill, errors);
+		
+		assertTrue(errors.hasErrors());
+	}
+	
+	@Test
+	public void validate_shouldRejectSecondRefundRequestOnAlreadyRefundRequestedBill() {
+		// Core audit-field-clobber guard: a second request on an already-REFUND_REQUESTED bill must
+		// be rejected so audit fields (refundRequestedBy / dateRefundRequested) aren't overwritten.
+		Bill paidBill = billService.getBill(1);
+		assertNotNull(paidBill);
+		billService.requestRefund(paidBill, "First reason");
+		// Flush so the DB reflects REFUND_REQUESTED — simulates a second HTTP request arriving after
+		// the prior transaction committed.
+		Context.flushSession();
+		Bill requestedBill = billService.getBill(1);
+		assertEquals(BillStatus.REFUND_REQUESTED, requestedBill.getStatus());
+		// Caller is trying to re-submit a refund request; in-memory status is still REFUND_REQUESTED.
+		requestedBill.setRefundReason("Second reason");
+		
+		Errors errors = new BindException(requestedBill, "bill");
+		billValidator.validate(requestedBill, errors);
+		
+		assertTrue(errors.hasErrors());
+	}
+	
+	@Test
+	public void validate_shouldRejectApproveRefundOnNonRequestedBill() {
+		Bill paidBill = billService.getBill(1);
+		assertNotNull(paidBill);
+		paidBill.setStatus(BillStatus.REFUNDED);
+		
+		Errors errors = new BindException(paidBill, "bill");
+		billValidator.validate(paidBill, errors);
+		
+		assertTrue(errors.hasErrors());
+	}
+	
 }
