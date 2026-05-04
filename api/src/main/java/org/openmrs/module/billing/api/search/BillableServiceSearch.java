@@ -33,6 +33,8 @@ public class BillableServiceSearch {
 	
 	private String name;
 	
+	private String shortName;
+	
 	private Boolean includeRetired = false;
 	
 }

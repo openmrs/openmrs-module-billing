@@ -270,6 +270,7 @@
 	</bean>
 
 	<bean id="billValidator" class="org.openmrs.module.billing.validator.BillValidator"/>
+	<bean id="billableServiceValidator" class="org.openmrs.module.billing.validator.BillableServiceValidator"/>
 
 	<!-- Order Billing: Event Listener and Strategies -->
 	<bean id="orderBillingEventListener"

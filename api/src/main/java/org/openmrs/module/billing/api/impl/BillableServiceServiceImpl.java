@@ -23,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.List;
 
+import org.openmrs.validator.ValidateUtil;
+
 public class BillableServiceServiceImpl extends BaseOpenmrsService implements BillableServiceService {
 	
 	@Setter(onMethod_ = { @Autowired })
@@ -73,6 +75,7 @@ public class BillableServiceServiceImpl extends BaseOpenmrsService implements Bi
 		if (billableService == null) {
 			throw new NullPointerException("The billableService must be defined.");
 		}
+		ValidateUtil.validate(billableService);
 		return billableServiceDAO.saveBillableService(billableService);
 	}
 	
