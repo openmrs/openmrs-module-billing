@@ -35,9 +35,8 @@ public class CashierOptionsServiceGpImpl implements ICashierOptionsService {
 	 * @return The {@link CashierOptions}
 	 * @should throw APIException if rounding is set but rounding item is not
 	 * @should throw APIException if rounding is set but rounding item cannot be found
-	 * @should not throw exception if numeric options are null
-	 * @should default to false if timesheet required is not specified
-	 * @should load cashier options from the database
+	 * @should not throw exception if numeric options are null * @should load cashier options from the
+	 *         database
 	 */
 	public CashierOptions getOptions() {
 		CashierOptions options = new CashierOptions();
@@ -47,7 +46,6 @@ public class CashierOptionsServiceGpImpl implements ICashierOptionsService {
 		if (StringUtils.isEmpty(options.getRoundingItemUuid())) {
 			setRoundingOptionsForEmptyUuid(options);
 		}
-		setTimesheetOptions(options);
 		
 		return options;
 	}
@@ -112,20 +110,5 @@ public class CashierOptionsServiceGpImpl implements ICashierOptionsService {
 	private void setRoundingOptionsForEmptyUuid(CashierOptions options) {
 		options.setRoundingMode(CashierOptions.RoundingMode.MID);
 		options.setRoundToNearest(0);
-	}
-	
-	private void setTimesheetOptions(CashierOptions options) {
-		String timesheetRequiredProperty = Context.getAdministrationService()
-		        .getGlobalProperty(ModuleSettings.TIMESHEET_REQUIRED_PROPERTY);
-		if (StringUtils.isNotBlank(timesheetRequiredProperty)) {
-			try {
-				options.setTimesheetRequired(Boolean.parseBoolean(timesheetRequiredProperty));
-			}
-			catch (Exception ex) {
-				options.setTimesheetRequired(false);
-			}
-		} else {
-			options.setTimesheetRequired(false);
-		}
 	}
 }

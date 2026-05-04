@@ -18,19 +18,15 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Provider;
-import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.base.ProviderUtil;
-import org.openmrs.module.billing.ModuleSettings;
 import org.openmrs.module.billing.api.BillService;
-import org.openmrs.module.billing.api.ITimesheetService;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.model.Payment;
-import org.openmrs.module.billing.api.model.Timesheet;
 import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.module.billing.api.util.RoundingUtil;
 import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
@@ -216,33 +212,10 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 	}
 	
 	private void loadBillCashPoint(Bill bill) {
-		ITimesheetService service = Context.getService(ITimesheetService.class);
-		Timesheet timesheet = service.getCurrentTimesheet(bill.getCashier());
-		if (timesheet == null) {
-			AdministrationService adminService = Context.getAdministrationService();
-			boolean timesheetRequired;
-			try {
-				timesheetRequired = Boolean
-				        .parseBoolean(adminService.getGlobalProperty(ModuleSettings.TIMESHEET_REQUIRED_PROPERTY));
-			}
-			catch (Exception e) {
-				timesheetRequired = false;
-			}
-			
-			if (timesheetRequired) {
-				throw new RestClientException("A current timesheet does not exist for cashier " + bill.getCashier());
-			} else if (bill.getBillAdjusted() != null) {
-				// If this is an adjusting bill, copy cash point from billAdjusted
-				bill.setCashPoint(bill.getBillAdjusted().getCashPoint());
-			} else {
-				throw new RestClientException("Cash point cannot be null!");
-			}
+		if (bill.getBillAdjusted() != null) {
+			bill.setCashPoint(bill.getBillAdjusted().getCashPoint());
 		} else {
-			CashPoint cashPoint = timesheet.getCashPoint();
-			if (cashPoint == null) {
-				throw new RestClientException("No cash points defined for the current timesheet!");
-			}
-			bill.setCashPoint(cashPoint);
+			throw new RestClientException("Cash point cannot be null!");
 		}
 	}
 	

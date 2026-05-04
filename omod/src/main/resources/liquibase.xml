@@ -1120,4 +1120,13 @@
             referencedTableName="provider" referencedColumnNames="provider_id"
             onDelete="SET NULL" onUpdate="CASCADE"/>
     </changeSet>
+
+    <changeSet id="billing-remove-cashier-timesheet-table-20260429" author="yourname">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="cashier_timesheet"/>
+        </preConditions>
+        <comment>Remove cashier_timesheet table - timesheet feature removed</comment>
+        <dropTable tableName="cashier_timesheet"/>
+    </changeSet>
 </databaseChangeLog>
+

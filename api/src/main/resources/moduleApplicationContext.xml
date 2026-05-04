@@ -59,14 +59,6 @@
 	<bean parent="serviceContext">
 		<property name="moduleService">
 			<list merge="true">
-				<value>org.openmrs.module.billing.api.ITimesheetService</value>
-				<ref bean="cashierTimesheetService"/>
-			</list>
-		</property>
-	</bean>
-	<bean parent="serviceContext">
-		<property name="moduleService">
-			<list merge="true">
 				<value>org.openmrs.module.billing.api.ISequentialReceiptNumberGeneratorService</value>
 				<ref bean="seqReceiptNumberGeneratorService"/>
 			</list>
@@ -156,12 +148,6 @@
 		<property name="preInterceptors" ref="serviceInterceptors"/>
 		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
 	</bean>
-	<bean id="cashierTimesheetService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager" ref="transactionManager"/>
-		<property name="target">
-			<bean class="org.openmrs.module.billing.api.impl.TimesheetServiceImpl">
-				<property name="repository" ref="genericRepositoryDao"/>
-			</bean>
 		</property>
 		<property name="preInterceptors" ref="serviceInterceptors"/>
 		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
@@ -292,3 +278,4 @@
 	</bean>
 
 </beans>
+
