@@ -74,7 +74,6 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			description.addProperty("discounts", Representation.DEFAULT);
 			description.addProperty("activeDiscount", Representation.DEFAULT);
 			description.addProperty("total");
-			description.addProperty("totalAmount", "total");
 			description.addProperty("amountAfterDiscount");
 			description.addProperty("uuid");
 			return description;

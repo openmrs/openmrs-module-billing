@@ -75,25 +75,31 @@ public class BillDiscountValidator implements Validator {
 			}
 		}
 		
-		// Scope rules:
+		// Scope rules apply on every save (create AND update). The service is the public
+		// contract — restricting these checks to creates would let a Java caller load an
+		// existing row, flip lineItem on or off, and persist a state the validator never saw.
+		// Self-exclusion (existing.id != incoming.id) keeps a row's own re-save from
+		// false-positive matching against itself.
 		//   - at most one active discount per scope (one bill-level OR one per line item),
 		//   - bill-level and line-scoped discounts cannot coexist on the same bill (avoids
 		//     ambiguous totals when bill-level percentages would be computed off the gross
 		//     total while line discounts also subtract).
-		if (discount.getId() == null) {
-			BillDiscountService discountService = Context.getService(BillDiscountService.class);
-			if (lineItem == null) {
-				BillDiscount existing = discountService.getBillDiscountByBillId(bill.getId());
-				if (existing != null) {
-					errors.rejectValue("bill", "billing.error.discount.alreadyExists");
-				} else if (hasActiveLineScopedDiscount(bill)) {
-					errors.rejectValue("bill", "billing.error.discount.scopeConflict");
-				}
-			} else if (lineItem.getId() != null) {
-				BillDiscount existing = discountService.getActiveLineItemDiscount(lineItem.getId());
-				if (existing != null) {
-					errors.rejectValue("lineItem", "billing.error.discount.alreadyExistsForLineItem");
-				} else if (discountService.getBillDiscountByBillId(bill.getId()) != null) {
+		Integer selfId = discount.getId();
+		BillDiscountService discountService = Context.getService(BillDiscountService.class);
+		if (lineItem == null) {
+			BillDiscount existing = discountService.getBillDiscountByBillId(bill.getId());
+			if (existing != null && !existing.getId().equals(selfId)) {
+				errors.rejectValue("bill", "billing.error.discount.alreadyExists");
+			} else if (hasActiveLineScopedDiscount(bill, selfId)) {
+				errors.rejectValue("bill", "billing.error.discount.scopeConflict");
+			}
+		} else if (lineItem.getId() != null) {
+			BillDiscount existing = discountService.getActiveLineItemDiscount(lineItem.getId());
+			if (existing != null && !existing.getId().equals(selfId)) {
+				errors.rejectValue("lineItem", "billing.error.discount.alreadyExistsForLineItem");
+			} else {
+				BillDiscount existingBillLevel = discountService.getBillDiscountByBillId(bill.getId());
+				if (existingBillLevel != null && !existingBillLevel.getId().equals(selfId)) {
 					errors.rejectValue("bill", "billing.error.discount.scopeConflict");
 				}
 			}
@@ -132,12 +138,13 @@ public class BillDiscountValidator implements Validator {
 		}
 	}
 
-	private boolean hasActiveLineScopedDiscount(Bill bill) {
+	private boolean hasActiveLineScopedDiscount(Bill bill, Integer excludeId) {
 		if (bill.getDiscounts() == null) {
 			return false;
 		}
 		for (BillDiscount d : bill.getDiscounts()) {
-			if (d != null && !d.getVoided() && d.getLineItem() != null) {
+			if (d != null && !d.getVoided() && d.getLineItem() != null
+			        && (excludeId == null || !excludeId.equals(d.getId()))) {
 				return true;
 			}
 		}

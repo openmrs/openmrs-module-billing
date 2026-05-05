@@ -236,6 +236,59 @@ public class BillDiscountServiceImplTest extends BaseModuleContextSensitiveTest 
 	}
 	
 	@Test
+	public void saveBillDiscount_shouldRejectScopeFlipFromBillLevelToLineScopedWhenLineAlreadyHasOne() {
+		// Regression: validator must run on update too. Take bill 100's existing line-scoped
+		// discount on line item 100, flip it to bill-level, save → must reject because no
+		// existing bill-level row remains, BUT another line-scoped (itself, pre-flip) was the
+		// only line discount; this should pass actually. Construct the harder case: load bill 0's
+		// bill-level discount, point it at bill 100's line item, save → must reject because
+		// line item 100 already has its own active line-scoped discount.
+		BillDiscount existing = service.getBillDiscountByUuid("d1000000-0000-0000-0000-000000000001");
+		assertNotNull(existing);
+
+		BillLineItem lineWithDiscount = lineItemService.getBillLineItemByUuid(LINE_ITEM_WITH_DISCOUNT_UUID);
+		assertNotNull(lineWithDiscount);
+
+		// Move from bill-level on bill 0 to line-scoped on bill 100's already-discounted line.
+		existing.setBill(lineWithDiscount.getBill());
+		existing.setLineItem(lineWithDiscount);
+
+		assertThrows(Exception.class, () -> service.saveBillDiscount(existing));
+	}
+
+	@Test
+	public void saveBillDiscount_shouldRejectScopeFlipFromLineScopedToBillLevelWhenBillLevelExists() {
+		// Take bill 100's line-scoped discount and null out lineItem to make it bill-level.
+		// But bill 100 currently has no bill-level discount. To trigger conflict, point at bill 0
+		// which already has an active bill-level discount.
+		BillDiscount existing = service.getBillDiscountByUuid("d1000000-0000-0000-0000-000000000003");
+		assertNotNull(existing);
+
+		Bill billWithBillLevel = billService.getBillByUuid(BILL_WITH_ACTIVE_DISCOUNT_UUID);
+		assertNotNull(billWithBillLevel);
+
+		existing.setBill(billWithBillLevel);
+		existing.setLineItem(null);
+
+		assertThrows(Exception.class, () -> service.saveBillDiscount(existing));
+	}
+
+	@Test
+	public void saveBillDiscount_shouldAllowReSavingExistingDiscountWithoutFalsePositiveDuplicate() {
+		// Self-exclusion regression: re-saving the same row (no scope change) must not
+		// trip the alreadyExists check by matching against itself.
+		BillDiscount existing = service.getBillDiscountByUuid("d1000000-0000-0000-0000-000000000001");
+		assertNotNull(existing);
+
+		existing.setJustification("Updated justification");
+
+		BillDiscount saved = service.saveBillDiscount(existing);
+
+		assertNotNull(saved);
+		assertEquals("Updated justification", saved.getJustification());
+	}
+
+	@Test
 	public void getDiscountsByBillId_shouldReturnFullAuditHistory() {
 		Bill bill = billService.getBillByUuid(BILL_WITH_ACTIVE_DISCOUNT_UUID);
 		assertNotNull(bill);
