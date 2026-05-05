@@ -82,7 +82,7 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 	@Override
 	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
 		DelegatingResourceDescription description = new DelegatingResourceDescription();
-
+		
 		if (rep instanceof RefRepresentation) {
 			description.addProperty("uuid");
 			description.addProperty("discountType");
@@ -117,15 +117,15 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 			description.addProperty("voided");
 			description.addProperty("auditInfo");
 		}
-
+		
 		return description;
 	}
-
+	
 	@PropertyGetter("billUuid")
 	public String getBillUuid(BillDiscount instance) {
 		return instance.getBill() == null ? null : instance.getBill().getUuid();
 	}
-
+	
 	@PropertyGetter("lineItemUuid")
 	public String getLineItemUuid(BillDiscount instance) {
 		return instance.getLineItem() == null ? null : instance.getLineItem().getUuid();
@@ -150,14 +150,14 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 		description.addProperty("status");
 		return description;
 	}
-
+	
 	@PropertySetter("discountType")
 	public void setDiscountType(BillDiscount instance, String discountType) {
 		if (discountType != null) {
 			instance.setDiscountType(DiscountType.valueOf(discountType));
 		}
 	}
-
+	
 	@PropertySetter("status")
 	public void setStatus(BillDiscount instance, String status) {
 		if (status != null) {
@@ -188,14 +188,14 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 			instance.setApprover(approver);
 		}
 	}
-
+	
 	// JSON numeric literals arrive as Integer/Double; the default REST converter has no
 	// path from those to BigDecimal, so writes fail before reaching the validator.
 	@PropertySetter("discountValue")
 	public void setDiscountValue(BillDiscount instance, Object value) {
 		instance.setDiscountValue(toBigDecimal(value));
 	}
-
+	
 	private BigDecimal toBigDecimal(Object value) {
 		if (value == null) {
 			return null;
@@ -205,7 +205,7 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 		}
 		return new BigDecimal(value.toString());
 	}
-
+	
 	@Override
 	protected AlreadyPaged<BillDiscount> doSearch(RequestContext context) {
 		String billUuid = context.getRequest().getParameter("bill");

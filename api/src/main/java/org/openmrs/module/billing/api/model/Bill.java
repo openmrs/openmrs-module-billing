@@ -64,9 +64,9 @@ public class Bill extends BaseOpenmrsData {
 	
 	/**
 	 * Returns the active bill-level discount on this bill — that is, the (at most one) non-voided
-	 * discount whose {@code lineItem} is {@code null}. Line-item scoped discounts are intentionally
-	 * not returned; iterate {@link #getDiscounts()} when you need every active discount regardless
-	 * of scope.
+	 * discount whose {@code lineItem} is {@code null}. Line-item scoped discounts are intentionally not
+	 * returned; iterate {@link #getDiscounts()} when you need every active discount regardless of
+	 * scope.
 	 *
 	 * @return the active bill-level discount, or {@code null} if none exists
 	 */
@@ -81,12 +81,11 @@ public class Bill extends BaseOpenmrsData {
 		}
 		return null;
 	}
-
+	
 	/**
-	 * Returns every non-voided discount on this bill (bill-level and line-item scoped).
-	 * Voided rows are excluded — for the full audit history, query
-	 * {@code BillDiscountService.getDiscountsByBillId} (or the equivalent REST search at
-	 * {@code /billDiscount?bill=<uuid>}).
+	 * Returns every non-voided discount on this bill (bill-level and line-item scoped). Voided rows are
+	 * excluded — for the full audit history, query {@code BillDiscountService.getDiscountsByBillId} (or
+	 * the equivalent REST search at {@code /billDiscount?bill=<uuid>}).
 	 */
 	public List<BillDiscount> getActiveDiscounts() {
 		if (discounts == null) {
@@ -102,8 +101,8 @@ public class Bill extends BaseOpenmrsData {
 	}
 	
 	/**
-	 * Bill total net of every approved, non-voided discount. Pending and rejected discounts
-	 * are visible on the bill but do not affect the total or the status flip.
+	 * Bill total net of every approved, non-voided discount. Pending and rejected discounts are visible
+	 * on the bill but do not affect the total or the status flip.
 	 */
 	public BigDecimal getAmountAfterDiscount() {
 		BigDecimal total = getTotal();

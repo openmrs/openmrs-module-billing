@@ -23,7 +23,7 @@ import org.openmrs.module.billing.api.util.PrivilegeConstants;
  * derivation rules.
  */
 public interface BillDiscountService {
-
+	
 	/**
 	 * Looks up a discount by its primary key.
 	 *
@@ -32,7 +32,7 @@ public interface BillDiscountService {
 	 */
 	@Authorized(PrivilegeConstants.VIEW_BILL_DISCOUNTS)
 	BillDiscount getBillDiscountById(Integer id);
-
+	
 	/**
 	 * Looks up a discount by UUID.
 	 *
@@ -41,7 +41,7 @@ public interface BillDiscountService {
 	 */
 	@Authorized(PrivilegeConstants.VIEW_BILL_DISCOUNTS)
 	BillDiscount getBillDiscountByUuid(String uuid);
-
+	
 	/**
 	 * Returns the active bill-level discount for a bill (i.e. {@code lineItem == null} and
 	 * {@code voided == false}). Line-item scoped discounts are excluded — use
@@ -52,7 +52,7 @@ public interface BillDiscountService {
 	 */
 	@Authorized(PrivilegeConstants.VIEW_BILL_DISCOUNTS)
 	BillDiscount getBillDiscountByBillId(Integer billId);
-
+	
 	/**
 	 * Returns the active discount targeting a specific line item.
 	 *
@@ -61,23 +61,23 @@ public interface BillDiscountService {
 	 */
 	@Authorized(PrivilegeConstants.VIEW_BILL_DISCOUNTS)
 	BillDiscount getActiveLineItemDiscount(Integer lineItemId);
-
+	
 	/**
-	 * Returns the full discount history for a bill — active and voided rows alike — ordered
-	 * newest first. Intended for audit-trail surfaces; for the currently effective discount(s)
-	 * use {@link #getBillDiscountByBillId(Integer)} or {@link #getActiveLineItemDiscount(Integer)}.
+	 * Returns the full discount history for a bill — active and voided rows alike — ordered newest
+	 * first. Intended for audit-trail surfaces; for the currently effective discount(s) use
+	 * {@link #getBillDiscountByBillId(Integer)} or {@link #getActiveLineItemDiscount(Integer)}.
 	 *
 	 * @param billId the bill's primary key
 	 * @return the audit history (possibly empty), never {@code null}
 	 */
 	@Authorized(PrivilegeConstants.VIEW_BILL_DISCOUNTS)
 	List<BillDiscount> getDiscountsByBillId(Integer billId);
-
+	
 	/**
 	 * Persists a new or existing discount. The {@code discountAmount} field is authoritatively
 	 * (re)derived from {@code discountValue} and the scope total before persist — caller-supplied
-	 * amounts are not trusted. The validator enforces scope-exclusivity (a bill cannot carry both
-	 * a bill-level and any line-scoped discount at once) and per-scope uniqueness.
+	 * amounts are not trusted. The validator enforces scope-exclusivity (a bill cannot carry both a
+	 * bill-level and any line-scoped discount at once) and per-scope uniqueness.
 	 *
 	 * @param billDiscount the discount to save
 	 * @return the persisted (managed) instance

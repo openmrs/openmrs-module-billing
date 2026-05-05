@@ -86,7 +86,7 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 	public DelegatingResourceDescription getCreatableProperties() {
 		return getRepresentationDescription(new DefaultRepresentation());
 	}
-
+	
 	// Override the default getter so the rep ships only non-voided discounts. The raw
 	// Hibernate-mapped set on Bill includes voided rows for audit purposes; consumers that
 	// want the full audit history should call GET /billDiscount?bill=<uuid>.

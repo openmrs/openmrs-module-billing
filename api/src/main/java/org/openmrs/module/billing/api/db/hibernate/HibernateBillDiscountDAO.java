@@ -71,12 +71,11 @@ public class HibernateBillDiscountDAO implements BillDiscountDAO {
 		CriteriaBuilder cb = session.getCriteriaBuilder();
 		CriteriaQuery<BillDiscount> query = cb.createQuery(BillDiscount.class);
 		Root<BillDiscount> root = query.from(BillDiscount.class);
-
-		query.select(root).where(cb.equal(root.get("bill").get("id"), billId))
-		        .orderBy(cb.desc(root.get("dateCreated")));
+		
+		query.select(root).where(cb.equal(root.get("bill").get("id"), billId)).orderBy(cb.desc(root.get("dateCreated")));
 		return session.createQuery(query).getResultList();
 	}
-
+	
 	@Override
 	public BillDiscount saveBillDiscount(BillDiscount billDiscount) {
 		sessionFactory.getCurrentSession().saveOrUpdate(billDiscount);

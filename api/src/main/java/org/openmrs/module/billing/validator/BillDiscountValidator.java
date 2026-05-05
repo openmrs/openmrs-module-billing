@@ -48,13 +48,13 @@ public class BillDiscountValidator implements Validator {
 			return;
 		}
 		BillDiscount discount = (BillDiscount) target;
-
+		
 		// Voiding an existing row bypasses business-rule gates so PAID bills and toggled-off
 		// feature flags can't block refund corrections.
 		if (discount.getId() != null && Boolean.TRUE.equals(discount.getVoided())) {
 			return;
 		}
-
+		
 		String enabled = Context.getAdministrationService().getGlobalProperty(ModuleSettings.DISCOUNT_ENABLED);
 		if (!Boolean.parseBoolean(enabled)) {
 			errors.reject("billing.error.discount.featureDisabled");
@@ -138,12 +138,12 @@ public class BillDiscountValidator implements Validator {
 		if (StringUtils.isBlank(discount.getJustification())) {
 			errors.rejectValue("justification", "billing.error.discount.justificationRequired");
 		}
-
+		
 		// Initiator is required
 		if (discount.getInitiator() == null) {
 			errors.rejectValue("initiator", "billing.error.discount.initiatorRequired");
 		}
-
+		
 		// Status is required; APPROVED/REJECTED require an approver who isn't the initiator,
 		// AND the current user must hold the APPROVE_BILL_DISCOUNTS privilege.
 		DiscountStatus status = discount.getStatus();
@@ -158,7 +158,7 @@ public class BillDiscountValidator implements Validator {
 			}
 		}
 	}
-
+	
 	private boolean hasActiveLineScopedDiscount(Bill bill, Integer excludeId) {
 		if (bill.getDiscounts() == null) {
 			return false;

@@ -40,9 +40,9 @@ public class PrivilegeConstants {
 	public static final String REPRINT_RECEIPT = "Reprint Receipt";
 	
 	public static final String MANAGE_BILL_DISCOUNTS = "Manage Bill Discounts";
-
+	
 	public static final String APPROVE_BILL_DISCOUNTS = "Approve Bill Discounts";
-
+	
 	public static final String VIEW_BILL_DISCOUNTS = "View Bill Discounts";
 	
 	public static final String MANAGE_METADATA = "Manage Cashier Metadata";

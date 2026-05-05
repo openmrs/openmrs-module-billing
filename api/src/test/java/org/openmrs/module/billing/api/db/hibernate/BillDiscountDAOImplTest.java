@@ -115,12 +115,12 @@ public class BillDiscountDAOImplTest extends BaseModuleContextSensitiveTest {
 		// Line item 102 exists but has no discount.
 		assertNull(dao.getActiveLineItemDiscount(102));
 	}
-
+	
 	@Test
 	public void getDiscountsByBillId_shouldReturnVoidedHistory() {
 		// Bill 2 holds only a voided discount in the dataset; the audit query must surface it.
 		List<BillDiscount> history = dao.getDiscountsByBillId(2);
-
+		
 		assertNotNull(history);
 		assertEquals(1, history.size());
 		assertTrue(history.get(0).getVoided());
