@@ -26,6 +26,7 @@ import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.ITimesheetService;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.module.billing.api.model.BillDiscount;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.model.CashPoint;
@@ -38,6 +39,7 @@ import org.openmrs.module.billing.web.base.resource.PagingUtil;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
+import org.openmrs.module.webservices.rest.web.annotation.PropertyGetter;
 import org.openmrs.module.webservices.rest.web.annotation.PropertySetter;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
@@ -72,7 +74,6 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			description.addProperty("status");
 			description.addProperty("adjustmentReason");
 			description.addProperty("discounts", Representation.DEFAULT);
-			description.addProperty("activeDiscount", Representation.DEFAULT);
 			description.addProperty("total");
 			description.addProperty("amountAfterDiscount");
 			description.addProperty("uuid");
@@ -84,6 +85,14 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 	@Override
 	public DelegatingResourceDescription getCreatableProperties() {
 		return getRepresentationDescription(new DefaultRepresentation());
+	}
+
+	// Override the default getter so the rep ships only non-voided discounts. The raw
+	// Hibernate-mapped set on Bill includes voided rows for audit purposes; consumers that
+	// want the full audit history should call GET /billDiscount?bill=<uuid>.
+	@PropertyGetter("discounts")
+	public List<BillDiscount> getActiveDiscounts(Bill bill) {
+		return bill.getActiveDiscounts();
 	}
 	
 	@PropertySetter("lineItems")

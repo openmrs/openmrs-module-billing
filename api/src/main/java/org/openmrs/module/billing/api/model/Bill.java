@@ -12,6 +12,7 @@ package org.openmrs.module.billing.api.model;
 import java.math.BigDecimal;
 import java.security.AccessControlException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -79,6 +80,25 @@ public class Bill extends BaseOpenmrsData {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Returns every non-voided discount on this bill (bill-level and line-item scoped).
+	 * Voided rows are excluded — for the full audit history, query
+	 * {@code BillDiscountService.getDiscountsByBillId} (or the equivalent REST search at
+	 * {@code /billDiscount?bill=<uuid>}).
+	 */
+	public List<BillDiscount> getActiveDiscounts() {
+		if (discounts == null) {
+			return Collections.emptyList();
+		}
+		List<BillDiscount> active = new ArrayList<>();
+		for (BillDiscount d : discounts) {
+			if (d != null && !d.getVoided()) {
+				active.add(d);
+			}
+		}
+		return active;
 	}
 	
 	/**
