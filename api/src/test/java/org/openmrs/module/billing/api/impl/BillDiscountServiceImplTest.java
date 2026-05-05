@@ -262,17 +262,16 @@ public class BillDiscountServiceImplTest extends BaseModuleContextSensitiveTest 
 	        String justification) {
 		Bill bill = billService.getBillByUuid(billUuid);
 		assertNotNull(bill, "Test dataset missing bill: " + billUuid);
-		
+
 		BillDiscount discount = new BillDiscount();
 		discount.setBill(bill);
 		discount.setDiscountType(type);
 		discount.setDiscountValue(value);
-		discount.setDiscountAmount(amount);
 		discount.setJustification(justification);
 		discount.setInitiator(Context.getAuthenticatedUser());
 		return discount;
 	}
-	
+
 	private BillDiscount buildLineScopedDiscount(String billUuid, String lineItemUuid, DiscountType type, BigDecimal value,
 	        BigDecimal amount, String justification) {
 		BillDiscount discount = buildDiscount(billUuid, type, value, amount, justification);

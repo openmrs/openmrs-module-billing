@@ -135,7 +135,6 @@ public class BillDiscountDAOImplTest extends BaseModuleContextSensitiveTest {
 		discount.setBill(bill);
 		discount.setDiscountType(DiscountType.FIXED_AMOUNT);
 		discount.setDiscountValue(new BigDecimal("25.00"));
-		discount.setDiscountAmount(new BigDecimal("25.00"));
 		discount.setJustification("Financial hardship");
 		discount.setInitiator(Context.getAuthenticatedUser());
 		discount.setCreator(Context.getAuthenticatedUser());

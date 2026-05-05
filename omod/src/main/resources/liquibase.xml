@@ -1143,9 +1143,6 @@
             <column name="discount_value" type="decimal(10,2)">
                 <constraints nullable="false"/>
             </column>
-            <column name="discount_amount" type="decimal(10,2)">
-                <constraints nullable="false"/>
-            </column>
             <column name="justification" type="varchar(1000)">
                 <constraints nullable="false"/>
             </column>

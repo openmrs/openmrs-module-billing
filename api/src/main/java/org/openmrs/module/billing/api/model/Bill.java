@@ -93,7 +93,7 @@ public class Bill extends BaseOpenmrsData {
 		BigDecimal total = getTotal();
 		if (discounts != null) {
 			for (BillDiscount d : discounts) {
-				if (d != null && !d.getVoided() && d.getDiscountAmount() != null) {
+				if (d != null && !d.getVoided()) {
 					total = total.subtract(d.getDiscountAmount());
 				}
 			}

@@ -244,7 +244,8 @@ public class BillTest {
 		bill.getLineItems().add(lineItem);
 
 		BillDiscount discount = new BillDiscount();
-		discount.setDiscountAmount(BigDecimal.valueOf(30));
+		discount.setDiscountType(DiscountType.FIXED_AMOUNT);
+		discount.setDiscountValue(BigDecimal.valueOf(30));
 		discount.setVoided(false);
 		bill.getDiscounts().add(discount);
 
@@ -275,7 +276,8 @@ public class BillTest {
 		bill.getLineItems().add(lineItem);
 
 		BillDiscount discount = new BillDiscount();
-		discount.setDiscountAmount(BigDecimal.valueOf(30));
+		discount.setDiscountType(DiscountType.FIXED_AMOUNT);
+		discount.setDiscountValue(BigDecimal.valueOf(30));
 		discount.setVoided(false);
 		bill.getDiscounts().add(discount);
 
@@ -287,6 +289,39 @@ public class BillTest {
 		bill.synchronizeBillStatus();
 
 		assertEquals(BillStatus.POSTED, bill.getStatus());
+	}
+
+	@Test
+	public void getAmountAfterDiscount_shouldRecomputePercentageDiscountWhenLineItemsChange() {
+		// Regression: PERCENTAGE discounts must track the current bill total, not the snapshot
+		// taken when the discount was first applied. A 10% discount on a $100 bill is $10 off
+		// initially; once a $50 line item is added, the same row must reflect $15 off.
+		Bill bill = new Bill();
+		bill.setLineItems(new ArrayList<>());
+		bill.setDiscounts(new HashSet<>());
+
+		BillLineItem first = new BillLineItem();
+		first.setPrice(BigDecimal.valueOf(100));
+		first.setQuantity(1);
+		first.setVoided(false);
+		bill.getLineItems().add(first);
+
+		BillDiscount discount = new BillDiscount();
+		discount.setBill(bill);
+		discount.setDiscountType(DiscountType.PERCENTAGE);
+		discount.setDiscountValue(BigDecimal.valueOf(10));
+		discount.setVoided(false);
+		bill.getDiscounts().add(discount);
+
+		assertEquals(0, BigDecimal.valueOf(90).compareTo(bill.getAmountAfterDiscount()));
+
+		BillLineItem added = new BillLineItem();
+		added.setPrice(BigDecimal.valueOf(50));
+		added.setQuantity(1);
+		added.setVoided(false);
+		bill.getLineItems().add(added);
+
+		assertEquals(0, new BigDecimal("135.00").compareTo(bill.getAmountAfterDiscount()));
 	}
 
 	@Test
