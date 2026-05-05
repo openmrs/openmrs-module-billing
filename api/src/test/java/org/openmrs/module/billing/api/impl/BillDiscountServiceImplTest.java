@@ -181,13 +181,29 @@ public class BillDiscountServiceImplTest extends BaseModuleContextSensitiveTest 
 		// Line item 102 on bill 100 has no existing discount; happy path.
 		BillDiscount discount = buildLineScopedDiscount(LINE_SCOPED_BILL_UUID, FREE_LINE_ITEM_UUID,
 		    DiscountType.FIXED_AMOUNT, new BigDecimal("10.00"), new BigDecimal("10.00"), "Item-specific waiver");
-		
+
 		BillDiscount saved = service.saveBillDiscount(discount);
-		
+
 		assertNotNull(saved);
 		assertNotNull(saved.getBillDiscountId());
 		assertNotNull(saved.getLineItem());
 		assertEquals(FREE_LINE_ITEM_UUID, saved.getLineItem().getUuid());
+	}
+
+	@Test
+	public void saveBillDiscount_shouldComputePercentageAmountAgainstLineItemTotal() {
+		// PERCENTAGE × line-scoped path: ensures getDiscountAmount() multiplies the line item
+		// total (not the bill total) by the percentage. Line item 102 total = 80.00, 25% off
+		// must yield 20.00.
+		BillDiscount discount = buildLineScopedDiscount(LINE_SCOPED_BILL_UUID, FREE_LINE_ITEM_UUID,
+		    DiscountType.PERCENTAGE, new BigDecimal("25"), null, "Quarter off this line");
+
+		BillDiscount saved = service.saveBillDiscount(discount);
+
+		assertNotNull(saved);
+		assertNotNull(saved.getLineItem());
+		assertEquals(0, new BigDecimal("20.00").compareTo(saved.getDiscountAmount()),
+		    "PERCENTAGE on line item should compute against the line item's total, not the bill's");
 	}
 	
 	@Test
