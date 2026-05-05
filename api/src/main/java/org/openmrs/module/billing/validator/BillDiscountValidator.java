@@ -46,8 +46,13 @@ public class BillDiscountValidator implements Validator {
 			return;
 		}
 		BillDiscount discount = (BillDiscount) target;
-		
-		// Discount feature must be enabled at the facility level
+
+		// Voiding an existing row bypasses business-rule gates so PAID bills and toggled-off
+		// feature flags can't block refund corrections.
+		if (discount.getId() != null && Boolean.TRUE.equals(discount.getVoided())) {
+			return;
+		}
+
 		String enabled = Context.getAdministrationService().getGlobalProperty(ModuleSettings.DISCOUNT_ENABLED);
 		if (!Boolean.parseBoolean(enabled)) {
 			errors.reject("billing.error.discount.featureDisabled");

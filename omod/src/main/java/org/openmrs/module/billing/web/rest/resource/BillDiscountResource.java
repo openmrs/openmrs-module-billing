@@ -10,7 +10,6 @@
 package org.openmrs.module.billing.web.rest.resource;
 
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -36,6 +35,7 @@ import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.impl.AlreadyPaged;
 import org.openmrs.module.webservices.rest.web.resource.impl.DataDelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
+import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
 /**
@@ -198,11 +198,11 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 	protected AlreadyPaged<BillDiscount> doSearch(RequestContext context) {
 		String billUuid = context.getRequest().getParameter("bill");
 		if (StringUtils.isBlank(billUuid)) {
-			return new AlreadyPaged<>(context, Collections.emptyList(), false);
+			throw new InvalidSearchException("'bill' query parameter is required");
 		}
 		Bill bill = Context.getService(BillService.class).getBillByUuid(billUuid);
 		if (bill == null) {
-			return new AlreadyPaged<>(context, Collections.emptyList(), false);
+			throw new InvalidSearchException("No bill found with uuid: " + billUuid);
 		}
 		List<BillDiscount> results = Context.getService(BillDiscountService.class).getDiscountsByBillId(bill.getId());
 		return new AlreadyPaged<>(context, results, false);
