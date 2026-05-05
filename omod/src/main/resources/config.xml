@@ -225,6 +225,11 @@
 	</privilege>
 
 	<privilege>
+		<name>Approve Bill Discounts</name>
+		<description>Able to approve or reject pending bill discounts</description>
+	</privilege>
+
+	<privilege>
 		<name>View Bill Discounts</name>
 		<description>Able to view bill discounts</description>
 	</privilege>

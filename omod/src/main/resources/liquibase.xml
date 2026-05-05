@@ -1143,6 +1143,9 @@
             <column name="discount_value" type="decimal(10,2)">
                 <constraints nullable="false"/>
             </column>
+            <column name="discount_status" type="varchar(20)" defaultValue="PENDING">
+                <constraints nullable="false"/>
+            </column>
             <column name="justification" type="varchar(1000)">
                 <constraints nullable="false"/>
             </column>

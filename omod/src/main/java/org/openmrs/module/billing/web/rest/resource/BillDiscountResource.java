@@ -21,6 +21,7 @@ import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillDiscount;
 import org.openmrs.module.billing.api.model.BillLineItem;
+import org.openmrs.module.billing.api.model.DiscountStatus;
 import org.openmrs.module.billing.api.model.DiscountType;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
 import org.openmrs.module.webservices.rest.web.RequestContext;
@@ -86,6 +87,7 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 			description.addProperty("uuid");
 			description.addProperty("discountType");
 			description.addProperty("discountAmount");
+			description.addProperty("status");
 			description.addProperty("voided");
 		} else if (rep instanceof DefaultRepresentation) {
 			description.addProperty("uuid");
@@ -98,6 +100,7 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 			description.addProperty("initiator", Representation.REF);
 			description.addProperty("approver", Representation.REF);
 			description.addProperty("dateCreated");
+			description.addProperty("status");
 			description.addProperty("voided");
 		} else if (rep instanceof FullRepresentation) {
 			description.addProperty("uuid");
@@ -110,6 +113,7 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 			description.addProperty("initiator", Representation.DEFAULT);
 			description.addProperty("approver", Representation.DEFAULT);
 			description.addProperty("dateCreated");
+			description.addProperty("status");
 			description.addProperty("voided");
 			description.addProperty("auditInfo");
 		}
@@ -143,13 +147,21 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 	public DelegatingResourceDescription getUpdatableProperties() {
 		DelegatingResourceDescription description = new DelegatingResourceDescription();
 		description.addProperty("approver");
+		description.addProperty("status");
 		return description;
 	}
-	
+
 	@PropertySetter("discountType")
 	public void setDiscountType(BillDiscount instance, String discountType) {
 		if (discountType != null) {
 			instance.setDiscountType(DiscountType.valueOf(discountType));
+		}
+	}
+
+	@PropertySetter("status")
+	public void setStatus(BillDiscount instance, String status) {
+		if (status != null) {
+			instance.setStatus(DiscountStatus.valueOf(status));
 		}
 	}
 	

@@ -102,18 +102,14 @@ public class Bill extends BaseOpenmrsData {
 	}
 	
 	/**
-	 * Returns the bill total net of every non-voided discount (bill-level and line-item scoped).
-	 * The validator forbids bill-level and line-scoped discounts from coexisting on the same bill,
-	 * so this sum is unambiguous: either a single bill-level amount is subtracted, or the sum of
-	 * per-line discounts.
-	 *
-	 * @return {@code getTotal()} minus the sum of active discount amounts
+	 * Bill total net of every approved, non-voided discount. Pending and rejected discounts
+	 * are visible on the bill but do not affect the total or the status flip.
 	 */
 	public BigDecimal getAmountAfterDiscount() {
 		BigDecimal total = getTotal();
 		if (discounts != null) {
 			for (BillDiscount d : discounts) {
-				if (d != null && !d.getVoided()) {
+				if (d != null && !d.getVoided() && d.getStatus() == DiscountStatus.APPROVED) {
 					total = total.subtract(d.getDiscountAmount());
 				}
 			}

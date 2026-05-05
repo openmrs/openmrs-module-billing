@@ -50,7 +50,11 @@ public class BillDiscount extends BaseOpenmrsData {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "discount_type", nullable = false)
 	private DiscountType discountType;
-	
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "discount_status", nullable = false, length = 20)
+	private DiscountStatus status = DiscountStatus.PENDING;
+
 	@Column(name = "discount_value", nullable = false)
 	private BigDecimal discountValue;
 

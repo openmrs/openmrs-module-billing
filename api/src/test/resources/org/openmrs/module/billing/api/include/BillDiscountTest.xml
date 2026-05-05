@@ -54,22 +54,22 @@
 	                        uuid="d0000000-0000-0000-0000-000000000210"/>
 
 	<!-- Active line-item-scoped discount on line item 100 of bill 100. Listed first so DbUnit
-	     column sensing picks up the bill_line_item_id column. -->
+	     column sensing picks up the bill_line_item_id and discount_status columns. -->
 	<bill_discount bill_discount_id="3" bill_id="100" bill_line_item_id="100" discount_type="FIXED_AMOUNT"
-	               discount_value="20.00" justification="Item-specific waiver"
-	               initiator_id="1" creator="1" date_created="2012-01-02 00:00:00.0" voided="false"
+	               discount_value="20.00" discount_status="APPROVED" justification="Item-specific waiver"
+	               initiator_id="1" approver_id="5506" creator="1" date_created="2012-01-02 00:00:00.0" voided="false"
 	               uuid="d1000000-0000-0000-0000-000000000003"/>
 
 	<!-- Existing active bill-level discount on bill 0 (POSTED) for dup/lookup tests -->
 	<bill_discount bill_discount_id="1" bill_id="0" discount_type="PERCENTAGE" discount_value="10.00"
-	               justification="Loyal patient"
-	               initiator_id="1" creator="1" date_created="2012-01-02 00:00:00.0" voided="false"
+	               discount_status="APPROVED" justification="Loyal patient"
+	               initiator_id="1" approver_id="5506" creator="1" date_created="2012-01-02 00:00:00.0" voided="false"
 	               uuid="d1000000-0000-0000-0000-000000000001"/>
 
 	<!-- Voided bill-level discount on bill 2 (PENDING) - allows testing void-and-reapply -->
 	<bill_discount bill_discount_id="2" bill_id="2" discount_type="FIXED_AMOUNT" discount_value="10.00"
-	               justification="Will be voided"
-	               initiator_id="1" creator="1" date_created="2012-01-02 00:00:00.0"
+	               discount_status="APPROVED" justification="Will be voided"
+	               initiator_id="1" approver_id="5506" creator="1" date_created="2012-01-02 00:00:00.0"
 	               voided="true" voided_by="1" date_voided="2012-01-03 00:00:00.0" void_reason="Test void"
 	               uuid="d1000000-0000-0000-0000-000000000002"/>
 </dataset>

@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import org.junit.Test;
+import org.openmrs.module.billing.api.model.DiscountStatus;
 
 /**
  * Test for verifying Bill model methods, particularly getTotalPayments()
@@ -246,6 +247,7 @@ public class BillTest {
 		BillDiscount discount = new BillDiscount();
 		discount.setDiscountType(DiscountType.FIXED_AMOUNT);
 		discount.setDiscountValue(BigDecimal.valueOf(30));
+		discount.setStatus(DiscountStatus.APPROVED);
 		discount.setVoided(false);
 		bill.getDiscounts().add(discount);
 
@@ -278,6 +280,7 @@ public class BillTest {
 		BillDiscount discount = new BillDiscount();
 		discount.setDiscountType(DiscountType.FIXED_AMOUNT);
 		discount.setDiscountValue(BigDecimal.valueOf(30));
+		discount.setStatus(DiscountStatus.APPROVED);
 		discount.setVoided(false);
 		bill.getDiscounts().add(discount);
 
@@ -310,6 +313,7 @@ public class BillTest {
 		discount.setBill(bill);
 		discount.setDiscountType(DiscountType.PERCENTAGE);
 		discount.setDiscountValue(BigDecimal.valueOf(10));
+		discount.setStatus(DiscountStatus.APPROVED);
 		discount.setVoided(false);
 		bill.getDiscounts().add(discount);
 
@@ -322,6 +326,51 @@ public class BillTest {
 		bill.getLineItems().add(added);
 
 		assertEquals(0, new BigDecimal("135.00").compareTo(bill.getAmountAfterDiscount()));
+	}
+
+	@Test
+	public void getAmountAfterDiscount_shouldNotApplyPendingDiscount() {
+		// Pending discounts must not affect the bill total — they're awaiting approval.
+		Bill bill = new Bill();
+		bill.setLineItems(new ArrayList<>());
+		bill.setDiscounts(new HashSet<>());
+
+		BillLineItem lineItem = new BillLineItem();
+		lineItem.setPrice(BigDecimal.valueOf(100));
+		lineItem.setQuantity(1);
+		lineItem.setVoided(false);
+		bill.getLineItems().add(lineItem);
+
+		BillDiscount discount = new BillDiscount();
+		discount.setDiscountType(DiscountType.FIXED_AMOUNT);
+		discount.setDiscountValue(BigDecimal.valueOf(30));
+		discount.setStatus(DiscountStatus.PENDING);
+		discount.setVoided(false);
+		bill.getDiscounts().add(discount);
+
+		assertEquals(0, BigDecimal.valueOf(100).compareTo(bill.getAmountAfterDiscount()));
+	}
+
+	@Test
+	public void getAmountAfterDiscount_shouldNotApplyRejectedDiscount() {
+		Bill bill = new Bill();
+		bill.setLineItems(new ArrayList<>());
+		bill.setDiscounts(new HashSet<>());
+
+		BillLineItem lineItem = new BillLineItem();
+		lineItem.setPrice(BigDecimal.valueOf(100));
+		lineItem.setQuantity(1);
+		lineItem.setVoided(false);
+		bill.getLineItems().add(lineItem);
+
+		BillDiscount discount = new BillDiscount();
+		discount.setDiscountType(DiscountType.FIXED_AMOUNT);
+		discount.setDiscountValue(BigDecimal.valueOf(30));
+		discount.setStatus(DiscountStatus.REJECTED);
+		discount.setVoided(false);
+		bill.getDiscounts().add(discount);
+
+		assertEquals(0, BigDecimal.valueOf(100).compareTo(bill.getAmountAfterDiscount()));
 	}
 
 	@Test

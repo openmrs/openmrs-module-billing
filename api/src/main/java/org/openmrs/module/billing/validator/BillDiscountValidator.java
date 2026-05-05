@@ -24,7 +24,9 @@ import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillDiscount;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
+import org.openmrs.module.billing.api.model.DiscountStatus;
 import org.openmrs.module.billing.api.model.DiscountType;
+import org.openmrs.module.billing.api.util.PrivilegeConstants;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
@@ -136,10 +138,24 @@ public class BillDiscountValidator implements Validator {
 		if (StringUtils.isBlank(discount.getJustification())) {
 			errors.rejectValue("justification", "billing.error.discount.justificationRequired");
 		}
-		
+
 		// Initiator is required
 		if (discount.getInitiator() == null) {
 			errors.rejectValue("initiator", "billing.error.discount.initiatorRequired");
+		}
+
+		// Status is required; APPROVED/REJECTED require an approver who isn't the initiator,
+		// AND the current user must hold the APPROVE_BILL_DISCOUNTS privilege.
+		DiscountStatus status = discount.getStatus();
+		if (status == null) {
+			errors.rejectValue("status", "billing.error.discount.statusRequired");
+		} else if (status == DiscountStatus.APPROVED || status == DiscountStatus.REJECTED) {
+			if (!Context.hasPrivilege(PrivilegeConstants.APPROVE_BILL_DISCOUNTS)) {
+				errors.rejectValue("status", "billing.error.discount.approvePrivilegeRequired");
+			}
+			if (discount.getApprover() == null) {
+				errors.rejectValue("approver", "billing.error.discount.approverRequired");
+			}
 		}
 	}
 

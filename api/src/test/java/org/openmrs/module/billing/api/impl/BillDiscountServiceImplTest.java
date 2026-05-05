@@ -20,6 +20,7 @@ import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillDiscount;
 import org.openmrs.module.billing.api.model.BillLineItem;
+import org.openmrs.module.billing.api.model.DiscountStatus;
 import org.openmrs.module.billing.api.model.DiscountType;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 
@@ -290,6 +291,34 @@ public class BillDiscountServiceImplTest extends BaseModuleContextSensitiveTest 
 	}
 
 	@Test
+	public void saveBillDiscount_shouldRejectApprovedStatusWithoutApprover() {
+		BillDiscount discount = buildDiscount(POSTED_BILL_UUID, DiscountType.FIXED_AMOUNT, new BigDecimal("10.00"),
+		    new BigDecimal("10.00"), "Missing approver");
+		discount.setStatus(DiscountStatus.APPROVED);
+
+		assertThrows(Exception.class, () -> service.saveBillDiscount(discount));
+	}
+
+	@Test
+	public void saveBillDiscount_shouldAllowApprovingPendingDiscount() {
+		BillDiscount existing = service.getBillDiscountByUuid("d1000000-0000-0000-0000-000000000001");
+		assertNotNull(existing);
+		// Reset to PENDING so we can re-approve it under a non-self approver.
+		existing.setStatus(DiscountStatus.PENDING);
+		existing.setApprover(null);
+		service.saveBillDiscount(existing);
+
+		BillDiscount loaded = service.getBillDiscountByUuid("d1000000-0000-0000-0000-000000000001");
+		loaded.setStatus(DiscountStatus.APPROVED);
+		loaded.setApprover(Context.getUserService().getUser(5506));
+
+		BillDiscount approved = service.saveBillDiscount(loaded);
+
+		assertNotNull(approved.getApprover());
+		assertEquals(DiscountStatus.APPROVED, approved.getStatus());
+	}
+
+	@Test
 	public void saveBillDiscount_shouldAllowReSavingExistingDiscountWithoutFalsePositiveDuplicate() {
 		// Self-exclusion regression: re-saving the same row (no scope change) must not
 		// trip the alreadyExists check by matching against itself.
@@ -338,6 +367,7 @@ public class BillDiscountServiceImplTest extends BaseModuleContextSensitiveTest 
 		discount.setDiscountValue(value);
 		discount.setJustification(justification);
 		discount.setInitiator(Context.getAuthenticatedUser());
+		discount.setStatus(DiscountStatus.PENDING);
 		return discount;
 	}
 
