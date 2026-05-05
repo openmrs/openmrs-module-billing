@@ -1,5 +1,19 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
 package org.openmrs.module.billing.web.rest.resource;
 
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.User;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillDiscountService;
@@ -12,12 +26,14 @@ import org.openmrs.module.billing.api.model.DiscountType;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
+import org.openmrs.module.webservices.rest.web.annotation.PropertyGetter;
 import org.openmrs.module.webservices.rest.web.annotation.PropertySetter;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
+import org.openmrs.module.webservices.rest.web.resource.impl.AlreadyPaged;
 import org.openmrs.module.webservices.rest.web.resource.impl.DataDelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
@@ -65,7 +81,7 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 	@Override
 	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
 		DelegatingResourceDescription description = new DelegatingResourceDescription();
-		
+
 		if (rep instanceof RefRepresentation) {
 			description.addProperty("uuid");
 			description.addProperty("discountType");
@@ -73,8 +89,8 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 			description.addProperty("voided");
 		} else if (rep instanceof DefaultRepresentation) {
 			description.addProperty("uuid");
-			description.addProperty("bill", Representation.REF);
-			description.addProperty("lineItem", Representation.REF);
+			description.addProperty("billUuid");
+			description.addProperty("lineItemUuid");
 			description.addProperty("discountType");
 			description.addProperty("discountValue");
 			description.addProperty("discountAmount");
@@ -85,8 +101,8 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 			description.addProperty("voided");
 		} else if (rep instanceof FullRepresentation) {
 			description.addProperty("uuid");
-			description.addProperty("bill", Representation.DEFAULT);
-			description.addProperty("lineItem", Representation.DEFAULT);
+			description.addProperty("billUuid");
+			description.addProperty("lineItemUuid");
 			description.addProperty("discountType");
 			description.addProperty("discountValue");
 			description.addProperty("discountAmount");
@@ -97,8 +113,18 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 			description.addProperty("voided");
 			description.addProperty("auditInfo");
 		}
-		
+
 		return description;
+	}
+
+	@PropertyGetter("billUuid")
+	public String getBillUuid(BillDiscount instance) {
+		return instance.getBill() == null ? null : instance.getBill().getUuid();
+	}
+
+	@PropertyGetter("lineItemUuid")
+	public String getLineItemUuid(BillDiscount instance) {
+		return instance.getLineItem() == null ? null : instance.getLineItem().getUuid();
 	}
 	
 	@Override
@@ -150,5 +176,35 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 			instance.setApprover(approver);
 		}
 	}
-	
+
+	// JSON numeric literals arrive as Integer/Double; the default REST converter has no
+	// path from those to BigDecimal, so writes fail before reaching the validator.
+	@PropertySetter("discountValue")
+	public void setDiscountValue(BillDiscount instance, Object value) {
+		instance.setDiscountValue(toBigDecimal(value));
+	}
+
+	private BigDecimal toBigDecimal(Object value) {
+		if (value == null) {
+			return null;
+		}
+		if (value instanceof BigDecimal) {
+			return (BigDecimal) value;
+		}
+		return new BigDecimal(value.toString());
+	}
+
+	@Override
+	protected AlreadyPaged<BillDiscount> doSearch(RequestContext context) {
+		String billUuid = context.getRequest().getParameter("bill");
+		if (StringUtils.isBlank(billUuid)) {
+			return new AlreadyPaged<>(context, Collections.emptyList(), false);
+		}
+		Bill bill = Context.getService(BillService.class).getBillByUuid(billUuid);
+		if (bill == null) {
+			return new AlreadyPaged<>(context, Collections.emptyList(), false);
+		}
+		List<BillDiscount> results = Context.getService(BillDiscountService.class).getDiscountsByBillId(bill.getId());
+		return new AlreadyPaged<>(context, results, false);
+	}
 }
