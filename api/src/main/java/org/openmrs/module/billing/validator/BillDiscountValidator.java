@@ -151,16 +151,19 @@ public class BillDiscountValidator implements Validator {
 			errors.rejectValue("initiator", "billing.error.discount.initiatorRequired");
 		}
 		
-		// Status is required; APPROVED/REJECTED require an approver who isn't the initiator,
-		// AND the current user must hold the APPROVE_BILL_DISCOUNTS privilege.
+		// Status: any change to status requires APPROVE_BILL_DISCOUNTS so a manage-only user
+		// cannot reverse an approval by setting status back to PENDING. APPROVED/REJECTED also
+		// require a non-null approver.
 		DiscountStatus status = discount.getStatus();
 		if (status == null) {
 			errors.rejectValue("status", "billing.error.discount.statusRequired");
-		} else if (status == DiscountStatus.APPROVED || status == DiscountStatus.REJECTED) {
-			if (!Context.hasPrivilege(PrivilegeConstants.APPROVE_BILL_DISCOUNTS)) {
+		} else {
+			DiscountStatus previous = discount.getId() == null ? DiscountStatus.PENDING
+			        : discountService.getStatusById(discount.getId());
+			if (previous != status && !Context.hasPrivilege(PrivilegeConstants.APPROVE_BILL_DISCOUNTS)) {
 				errors.rejectValue("status", "billing.error.discount.approvePrivilegeRequired");
 			}
-			if (discount.getApprover() == null) {
+			if ((status == DiscountStatus.APPROVED || status == DiscountStatus.REJECTED) && discount.getApprover() == null) {
 				errors.rejectValue("approver", "billing.error.discount.approverRequired");
 			}
 		}

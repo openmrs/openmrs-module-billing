@@ -12,6 +12,7 @@ package org.openmrs.module.billing.api.db;
 import java.util.List;
 
 import org.openmrs.module.billing.api.model.BillDiscount;
+import org.openmrs.module.billing.api.model.DiscountStatus;
 
 /**
  * Data-access contract for {@link BillDiscount}. Read methods filter by scope and voided state
@@ -39,6 +40,15 @@ public interface BillDiscountDAO {
 	 * @return every discount on the bill (active and voided), newest first; never {@code null}
 	 */
 	List<BillDiscount> getDiscountsByBillId(Integer billId);
+	
+	/**
+	 * Returns the persisted status of a discount via a scalar query — without loading the entity into
+	 * the Hibernate session — so the validator can compare incoming vs persisted status during a save
+	 * without risking {@code NonUniqueObjectException}.
+	 *
+	 * @return the persisted status, or {@code null} if no row matches
+	 */
+	DiscountStatus getStatusById(Integer id);
 	
 	/**
 	 * Inserts or updates the given discount via {@code saveOrUpdate}.

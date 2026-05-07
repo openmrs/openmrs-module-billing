@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.openmrs.module.billing.api.BillDiscountService;
 import org.openmrs.module.billing.api.db.BillDiscountDAO;
 import org.openmrs.module.billing.api.model.BillDiscount;
+import org.openmrs.module.billing.api.model.DiscountStatus;
 import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
@@ -56,5 +57,11 @@ public class BillDiscountServiceImpl implements BillDiscountService {
 	@Transactional
 	public BillDiscount saveBillDiscount(BillDiscount billDiscount) {
 		return billDiscountDAO.saveBillDiscount(billDiscount);
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public DiscountStatus getStatusById(Integer id) {
+		return billDiscountDAO.getStatusById(id);
 	}
 }

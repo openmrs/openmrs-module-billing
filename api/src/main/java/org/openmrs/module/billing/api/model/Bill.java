@@ -85,6 +85,20 @@ public class Bill extends BaseOpenmrsData {
 	 * on the bill but do not affect the total or the status flip.
 	 */
 	public BigDecimal getAmountAfterDiscount() {
+		return effectiveTotal().max(BigDecimal.ZERO);
+	}
+	
+	/**
+	 * @return {@code true} when the sum of approved discount amounts exceeds {@link #getTotal()} —
+	 *         typically because a line item was voided after a FIXED_AMOUNT discount was approved.
+	 *         Callers (notably {@link #synchronizeBillStatus()}) should refuse to auto-flip PAID in
+	 *         this state so the drift surfaces for manual reconciliation.
+	 */
+	public boolean hasDiscountDrift() {
+		return effectiveTotal().compareTo(BigDecimal.ZERO) < 0;
+	}
+	
+	private BigDecimal effectiveTotal() {
 		BigDecimal total = getTotal();
 		if (discounts != null) {
 			for (BillDiscount d : discounts) {
@@ -93,7 +107,7 @@ public class Bill extends BaseOpenmrsData {
 				}
 			}
 		}
-		return total.max(BigDecimal.ZERO);
+		return total;
 	}
 	
 	public BigDecimal getTotal() {
@@ -203,6 +217,13 @@ public class Bill extends BaseOpenmrsData {
 	
 	public void synchronizeBillStatus() {
 		if (!this.getPayments().isEmpty() && getTotalPayments().compareTo(BigDecimal.ZERO) > 0) {
+			// Approved discount exceeds the current bill total — likely a line item was voided
+			// after approval. Stay POSTED so a human can void/reapply rather than letting any
+			// non-zero payment silently flip the bill to PAID.
+			if (hasDiscountDrift()) {
+				this.setStatus(BillStatus.POSTED);
+				return;
+			}
 			boolean billFullySettled = getTotalPayments().compareTo(getAmountAfterDiscount()) >= 0;
 			if (billFullySettled) {
 				this.setStatus(BillStatus.PAID);

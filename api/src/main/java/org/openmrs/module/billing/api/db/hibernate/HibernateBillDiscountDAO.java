@@ -16,6 +16,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.openmrs.module.billing.api.db.BillDiscountDAO;
 import org.openmrs.module.billing.api.model.BillDiscount;
+import org.openmrs.module.billing.api.model.DiscountStatus;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -74,6 +75,17 @@ public class HibernateBillDiscountDAO implements BillDiscountDAO {
 		
 		query.select(root).where(cb.equal(root.get("bill").get("id"), billId)).orderBy(cb.desc(root.get("dateCreated")));
 		return session.createQuery(query).getResultList();
+	}
+	
+	@Override
+	public DiscountStatus getStatusById(Integer id) {
+		Session session = sessionFactory.getCurrentSession();
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<DiscountStatus> query = cb.createQuery(DiscountStatus.class);
+		Root<BillDiscount> root = query.from(BillDiscount.class);
+		
+		query.select(root.<DiscountStatus> get("status")).where(cb.equal(root.get("billDiscountId"), id));
+		return session.createQuery(query).uniqueResult();
 	}
 	
 	@Override

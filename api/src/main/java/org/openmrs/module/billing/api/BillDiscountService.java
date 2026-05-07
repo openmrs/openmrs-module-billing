@@ -13,6 +13,7 @@ import java.util.List;
 
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.billing.api.model.BillDiscount;
+import org.openmrs.module.billing.api.model.DiscountStatus;
 import org.openmrs.module.billing.api.util.PrivilegeConstants;
 
 /**
@@ -84,4 +85,12 @@ public interface BillDiscountService {
 	 */
 	@Authorized(PrivilegeConstants.MANAGE_BILL_DISCOUNTS)
 	BillDiscount saveBillDiscount(BillDiscount billDiscount);
+	
+	/**
+	 * Returns the persisted status of a discount via a scalar query — the entity is not loaded into the
+	 * Hibernate session, so the validator can compare incoming vs persisted status during a save
+	 * without risking {@code NonUniqueObjectException} on the subsequent {@code saveOrUpdate}.
+	 */
+	@Authorized(PrivilegeConstants.VIEW_BILL_DISCOUNTS)
+	DiscountStatus getStatusById(Integer id);
 }
