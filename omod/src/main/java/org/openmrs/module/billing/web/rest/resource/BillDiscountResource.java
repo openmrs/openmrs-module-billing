@@ -176,7 +176,7 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 			instance.setBill(bill);
 		}
 	}
-
+	
 	@PropertySetter("lineItem")
 	public void setLineItem(BillDiscount instance, String lineItemUuid) {
 		if (lineItemUuid != null) {
@@ -187,7 +187,7 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 			instance.setLineItem(lineItem);
 		}
 	}
-
+	
 	@PropertySetter("approver")
 	public void setApprover(BillDiscount instance, String approverUuid) {
 		if (approverUuid != null) {

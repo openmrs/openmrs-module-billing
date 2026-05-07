@@ -61,7 +61,7 @@ public class Bill extends BaseOpenmrsData {
 	private String adjustmentReason;
 	
 	private Set<BillDiscount> discounts;
-
+	
 	/**
 	 * Returns every non-voided discount on this bill (bill-level and line-item scoped). Voided rows are
 	 * excluded — for the full audit history, query {@code BillDiscountService.getDiscountsByBillId} (or
