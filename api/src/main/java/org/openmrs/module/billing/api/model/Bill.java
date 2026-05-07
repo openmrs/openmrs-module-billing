@@ -12,12 +12,14 @@ package org.openmrs.module.billing.api.model;
 import java.math.BigDecimal;
 import java.security.AccessControlException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
@@ -31,6 +33,7 @@ import org.openmrs.module.stockmanagement.api.model.StockItem;
  */
 @Getter
 @Setter
+@Slf4j
 public class Bill extends BaseOpenmrsData {
 	
 	private static final long serialVersionUID = 0L;
@@ -58,6 +61,56 @@ public class Bill extends BaseOpenmrsData {
 	private Boolean receiptPrinted = false;
 	
 	private String adjustmentReason;
+	
+	private Set<BillDiscount> discounts;
+	
+	/**
+	 * Returns every non-voided discount on this bill (bill-level and line-item scoped). Voided rows are
+	 * excluded — for the full audit history, query {@code BillDiscountService.getDiscountsByBillId} (or
+	 * the equivalent REST search at {@code /billDiscount?bill=<uuid>}).
+	 */
+	public List<BillDiscount> getActiveDiscounts() {
+		if (discounts == null) {
+			return Collections.emptyList();
+		}
+		List<BillDiscount> active = new ArrayList<>();
+		for (BillDiscount d : discounts) {
+			if (d != null && !d.getVoided()) {
+				active.add(d);
+			}
+		}
+		return active;
+	}
+	
+	/**
+	 * Bill total net of every approved, non-voided discount. Pending and rejected discounts are visible
+	 * on the bill but do not affect the total or the status flip.
+	 */
+	public BigDecimal getAmountAfterDiscount() {
+		return effectiveTotal().max(BigDecimal.ZERO);
+	}
+	
+	/**
+	 * @return {@code true} when the sum of approved discount amounts exceeds {@link #getTotal()} —
+	 *         typically because a line item was voided after a FIXED_AMOUNT discount was approved.
+	 *         Callers (notably {@link #synchronizeBillStatus()}) should refuse to auto-flip PAID in
+	 *         this state so the drift surfaces for manual reconciliation.
+	 */
+	public boolean hasDiscountDrift() {
+		return effectiveTotal().compareTo(BigDecimal.ZERO) < 0;
+	}
+	
+	private BigDecimal effectiveTotal() {
+		BigDecimal total = getTotal();
+		if (discounts != null) {
+			for (BillDiscount d : discounts) {
+				if (d != null && !d.getVoided() && d.getStatus() == DiscountStatus.APPROVED) {
+					total = total.subtract(d.getDiscountAmount());
+				}
+			}
+		}
+		return total;
+	}
 	
 	public BigDecimal getTotal() {
 		BigDecimal total = BigDecimal.ZERO;
@@ -149,6 +202,17 @@ public class Bill extends BaseOpenmrsData {
 		}
 	}
 	
+	public void addDiscount(BillDiscount discount) {
+		if (discount == null) {
+			throw new NullPointerException("The discount to add must be defined.");
+		}
+		if (this.discounts == null) {
+			this.discounts = new HashSet<>();
+		}
+		this.discounts.add(discount);
+		discount.setBill(this);
+	}
+	
 	public void addPayment(Payment payment) {
 		if (payment == null) {
 			throw new NullPointerException("The payment to add must be defined.");
@@ -166,7 +230,16 @@ public class Bill extends BaseOpenmrsData {
 	
 	public void synchronizeBillStatus() {
 		if (!this.getPayments().isEmpty() && getTotalPayments().compareTo(BigDecimal.ZERO) > 0) {
-			boolean billFullySettled = getTotalPayments().compareTo(getTotal()) >= 0;
+			// Approved discount exceeds the current bill total — likely a line item was voided
+			// after approval. Stay POSTED so a human can void/reapply rather than letting any
+			// non-zero payment silently flip the bill to PAID.
+			if (hasDiscountDrift()) {
+				log.warn("Bill {} has discount drift (total={}, effectiveTotal={}); staying POSTED for manual review",
+				    getUuid(), getTotal(), effectiveTotal());
+				this.setStatus(BillStatus.POSTED);
+				return;
+			}
+			boolean billFullySettled = getTotalPayments().compareTo(getAmountAfterDiscount()) >= 0;
 			if (billFullySettled) {
 				this.setStatus(BillStatus.PAID);
 				// Update all non-voided bill line items to PAID status

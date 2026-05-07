@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+
+-->
+<dataset>
+	<!-- Supplements BillTest.xml. Reuses bills 0 (POSTED, total 913.06), 1 (PAID, total 300), 2 (PENDING, total 125.50). -->
+
+	<!-- Discount feature enabled by default for these tests -->
+	<global_property property="billing.discountEnabled" property_value="true"
+	                 uuid="d0000000-0000-0000-0000-000000000gp0"
+	                 description="Enable the bill discount feature"/>
+
+	<!-- Additional POSTED bill without a bill-level discount for happy-path apply tests.
+	     Has two line items: 100 (total 200, has a line-scoped discount) and 102 (total 80, free). -->
+	<cashier_bill bill_id="100" receipt_number="discount-test-posted" provider_id="0" patient_id="0"
+	              cash_point_id="0" status="POSTED"
+	              creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	              uuid="d0000000-0000-0000-0000-000000000100" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="100" bill_id="100" item_id="0" price="200.00" price_name="default"
+	                        quantity="1" line_item_order="0" payment_status="POSTED"
+	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                        uuid="d0000000-0000-0000-0000-000000000110"/>
+	<cashier_bill_line_item bill_line_item_id="102" bill_id="100" item_id="0" price="80.00" price_name="default"
+	                        quantity="1" line_item_order="1" payment_status="POSTED"
+	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                        uuid="d0000000-0000-0000-0000-000000000112"/>
+
+	<!-- CANCELLED bill - should reject discount -->
+	<cashier_bill bill_id="101" receipt_number="discount-test-cancelled" provider_id="0" patient_id="0"
+	              cash_point_id="0" status="CANCELLED"
+	              creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	              uuid="d0000000-0000-0000-0000-000000000101" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="101" bill_id="101" item_id="0" price="100.00" price_name="default"
+	                        quantity="1" line_item_order="0" payment_status="PENDING"
+	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                        uuid="d0000000-0000-0000-0000-000000000111"/>
+
+	<!-- Clean POSTED bill with no discounts (total = 200). Used for bill-level happy-path tests. -->
+	<cashier_bill bill_id="200" receipt_number="discount-test-clean" provider_id="0" patient_id="0"
+	              cash_point_id="0" status="POSTED"
+	              creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	              uuid="d0000000-0000-0000-0000-000000000200" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="200" bill_id="200" item_id="0" price="200.00" price_name="default"
+	                        quantity="1" line_item_order="0" payment_status="POSTED"
+	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                        uuid="d0000000-0000-0000-0000-000000000210"/>
+
+	<!-- Active line-item-scoped discount on line item 100 of bill 100. Listed first so DbUnit
+	     column sensing picks up the bill_line_item_id and discount_status columns. -->
+	<bill_discount bill_discount_id="3" bill_id="100" bill_line_item_id="100" discount_type="FIXED_AMOUNT"
+	               discount_value="20.00" discount_status="APPROVED" justification="Item-specific waiver"
+	               initiator_id="1" approver_id="5506" creator="1" date_created="2012-01-02 00:00:00.0" voided="false"
+	               uuid="d1000000-0000-0000-0000-000000000003"/>
+
+	<!-- Existing active bill-level discount on bill 0 (POSTED) for dup/lookup tests -->
+	<bill_discount bill_discount_id="1" bill_id="0" discount_type="PERCENTAGE" discount_value="10.00"
+	               discount_status="APPROVED" justification="Loyal patient"
+	               initiator_id="1" approver_id="5506" creator="1" date_created="2012-01-02 00:00:00.0" voided="false"
+	               uuid="d1000000-0000-0000-0000-000000000001"/>
+
+	<!-- Voided bill-level discount on bill 2 (PENDING) - allows testing void-and-reapply -->
+	<bill_discount bill_discount_id="2" bill_id="2" discount_type="FIXED_AMOUNT" discount_value="10.00"
+	               discount_status="APPROVED" justification="Will be voided"
+	               initiator_id="1" approver_id="5506" creator="1" date_created="2012-01-02 00:00:00.0"
+	               voided="true" voided_by="1" date_voided="2012-01-03 00:00:00.0" void_reason="Test void"
+	               uuid="d1000000-0000-0000-0000-000000000002"/>
+</dataset>

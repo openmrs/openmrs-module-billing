@@ -99,6 +99,12 @@
 	</globalProperty>
 
 	<globalProperty>
+		<property>${project.parent.artifactId}.discountEnabled</property>
+		<description>true/false whether or not the discount feature is enabled at the facility level.</description>
+		<defaultValue>false</defaultValue>
+	</globalProperty>
+
+	<globalProperty>
 		<property>${project.parent.artifactId}.autofillPaymentAmount</property>
 		<description>
 			True/false weather or not the payment amount should be automatically filled with the remaining balance.
@@ -210,6 +216,22 @@
 	<privilege>
 		<name>Purge Cashier Bills</name>
 		<description>Able to purge bills</description>
+	</privilege>
+
+	<!--  Discounts  -->
+	<privilege>
+		<name>Manage Bill Discounts</name>
+		<description>Able to apply and manage discounts on bills</description>
+	</privilege>
+
+	<privilege>
+		<name>Approve Bill Discounts</name>
+		<description>Able to approve or reject pending bill discounts</description>
+	</privilege>
+
+	<privilege>
+		<name>View Bill Discounts</name>
+		<description>Able to view bill discounts</description>
 	</privilege>
 
 	<!--  Metadata  -->
