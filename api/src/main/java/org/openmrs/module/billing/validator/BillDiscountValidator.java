@@ -50,8 +50,15 @@ public class BillDiscountValidator implements Validator {
 		BillDiscount discount = (BillDiscount) target;
 		
 		// Voiding an existing row bypasses business-rule gates so PAID bills and toggled-off
-		// feature flags can't block refund corrections.
+		// feature flags can't block refund corrections. Reversing a finalized state
+		// (APPROVED/REJECTED) still requires APPROVE_BILL_DISCOUNTS so a manage-only user
+		// can't undo an approval by voiding.
 		if (discount.getId() != null && Boolean.TRUE.equals(discount.getVoided())) {
+			DiscountStatus current = discount.getStatus();
+			if ((current == DiscountStatus.APPROVED || current == DiscountStatus.REJECTED)
+			        && !Context.hasPrivilege(PrivilegeConstants.APPROVE_BILL_DISCOUNTS)) {
+				errors.reject("billing.error.discount.approvePrivilegeRequired");
+			}
 			return;
 		}
 		

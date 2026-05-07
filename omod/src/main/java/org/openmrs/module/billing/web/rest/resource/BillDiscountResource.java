@@ -37,6 +37,7 @@ import org.openmrs.module.webservices.rest.web.resource.impl.AlreadyPaged;
 import org.openmrs.module.webservices.rest.web.resource.impl.DataDelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
+import org.openmrs.module.webservices.rest.web.response.ObjectNotFoundException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
 /**
@@ -169,22 +170,31 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 	public void setBill(BillDiscount instance, String billUuid) {
 		if (billUuid != null) {
 			Bill bill = Context.getService(BillService.class).getBillByUuid(billUuid);
+			if (bill == null) {
+				throw new ObjectNotFoundException();
+			}
 			instance.setBill(bill);
 		}
 	}
-	
+
 	@PropertySetter("lineItem")
 	public void setLineItem(BillDiscount instance, String lineItemUuid) {
 		if (lineItemUuid != null) {
 			BillLineItem lineItem = Context.getService(BillLineItemService.class).getBillLineItemByUuid(lineItemUuid);
+			if (lineItem == null) {
+				throw new ObjectNotFoundException();
+			}
 			instance.setLineItem(lineItem);
 		}
 	}
-	
+
 	@PropertySetter("approver")
 	public void setApprover(BillDiscount instance, String approverUuid) {
 		if (approverUuid != null) {
 			User approver = Context.getUserService().getUserByUuid(approverUuid);
+			if (approver == null) {
+				throw new ObjectNotFoundException();
+			}
 			instance.setApprover(approver);
 		}
 	}
