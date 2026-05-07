@@ -80,14 +80,8 @@ public class BillDiscount extends BaseOpenmrsData {
 	}
 	
 	/**
-	 * Returns the live discount amount evaluated against the current scope total. For
-	 * {@code PERCENTAGE} discounts the figure is derived from {@link #discountValue} and the current
-	 * line item or bill total, so it tracks line items being added, voided or repriced after the
-	 * discount was first applied. For {@code FIXED_AMOUNT} the value itself is the discount amount.
-	 * <p>
-	 * This is intentionally a derived value — there is no persisted snapshot column. All consumers
-	 * (totals, synchronizeBillStatus, receipts, REST representations) should call this method rather
-	 * than caching the result.
+	 * Live discount amount derived from {@link #discountValue} against the current scope total. Always
+	 * call this; never cache the result.
 	 */
 	public BigDecimal getDiscountAmount() {
 		if (discountValue == null || discountType == null) {

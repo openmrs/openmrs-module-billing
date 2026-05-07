@@ -84,7 +84,22 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 	
 	@Override
 	public DelegatingResourceDescription getCreatableProperties() {
-		return getRepresentationDescription(new DefaultRepresentation());
+		// Discounts are deliberately excluded — they go through BillDiscountResource so the
+		// BillDiscountValidator (privileges, scope rules, status transitions) actually runs.
+		// Computed fields (total, amountAfterDiscount, dateCreated) are server-derived.
+		DelegatingResourceDescription description = new DelegatingResourceDescription();
+		description.addProperty("adjustedBy");
+		description.addProperty("billAdjusted");
+		description.addProperty("cashPoint");
+		description.addProperty("cashier");
+		description.addProperty("lineItems");
+		description.addProperty("patient");
+		description.addProperty("payments");
+		description.addProperty("receiptNumber");
+		description.addProperty("status");
+		description.addProperty("adjustmentReason");
+		description.addProperty("uuid");
+		return description;
 	}
 	
 	// Override the default getter so the rep ships only non-voided discounts. The raw

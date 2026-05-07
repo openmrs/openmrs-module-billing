@@ -80,7 +80,6 @@ public class BillDiscountValidator implements Validator {
 		
 		BillLineItem lineItem = discount.getLineItem();
 		
-		// If scoped to a line item, it must belong to the same bill and not be voided
 		if (lineItem != null) {
 			if (lineItem.getBill() == null || !lineItem.getBill().getId().equals(bill.getId())) {
 				errors.rejectValue("lineItem", "billing.error.discount.lineItemNotOnBill");
@@ -119,13 +118,10 @@ public class BillDiscountValidator implements Validator {
 			}
 		}
 		
-		// Discount type is required
 		if (discount.getDiscountType() == null) {
 			errors.rejectValue("discountType", "billing.error.discount.typeRequired");
 		}
 		
-		// Discount value must be positive and within range for its type. The amount is derived
-		// from value at the service layer, so bounding value here is what keeps amount in range.
 		BigDecimal value = discount.getDiscountValue();
 		if (value == null || value.compareTo(BigDecimal.ZERO) <= 0) {
 			errors.rejectValue("discountValue", "billing.error.discount.valueRequired");
@@ -141,12 +137,10 @@ public class BillDiscountValidator implements Validator {
 			}
 		}
 		
-		// Justification is mandatory
 		if (StringUtils.isBlank(discount.getJustification())) {
 			errors.rejectValue("justification", "billing.error.discount.justificationRequired");
 		}
 		
-		// Initiator is required
 		if (discount.getInitiator() == null) {
 			errors.rejectValue("initiator", "billing.error.discount.initiatorRequired");
 		}
@@ -158,8 +152,17 @@ public class BillDiscountValidator implements Validator {
 		if (status == null) {
 			errors.rejectValue("status", "billing.error.discount.statusRequired");
 		} else {
-			DiscountStatus previous = discount.getId() == null ? DiscountStatus.PENDING
-			        : discountService.getStatusById(discount.getId());
+			DiscountStatus previous;
+			if (discount.getId() == null) {
+				previous = DiscountStatus.PENDING;
+			} else {
+				previous = discountService.getStatusById(discount.getId());
+				if (previous == null) {
+					// Row vanished between load and save (concurrent purge or bad id).
+					errors.rejectValue("status", "billing.error.discount.notFound");
+					return;
+				}
+			}
 			if (previous != status && !Context.hasPrivilege(PrivilegeConstants.APPROVE_BILL_DISCOUNTS)) {
 				errors.rejectValue("status", "billing.error.discount.approvePrivilegeRequired");
 			}

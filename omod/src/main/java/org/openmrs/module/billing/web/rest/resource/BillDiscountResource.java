@@ -36,6 +36,7 @@ import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.impl.AlreadyPaged;
 import org.openmrs.module.webservices.rest.web.resource.impl.DataDelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
+import org.openmrs.module.webservices.rest.web.response.ConversionException;
 import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
 import org.openmrs.module.webservices.rest.web.response.ObjectNotFoundException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
@@ -213,7 +214,12 @@ public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscoun
 		if (value instanceof BigDecimal) {
 			return (BigDecimal) value;
 		}
-		return new BigDecimal(value.toString());
+		try {
+			return new BigDecimal(value.toString());
+		}
+		catch (NumberFormatException e) {
+			throw new ConversionException("Cannot convert '" + value + "' to BigDecimal", e);
+		}
 	}
 	
 	@Override

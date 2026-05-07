@@ -19,6 +19,7 @@ import java.util.Set;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
@@ -32,6 +33,7 @@ import org.openmrs.module.stockmanagement.api.model.StockItem;
  */
 @Getter
 @Setter
+@Slf4j
 public class Bill extends BaseOpenmrsData {
 	
 	private static final long serialVersionUID = 0L;
@@ -200,6 +202,17 @@ public class Bill extends BaseOpenmrsData {
 		}
 	}
 	
+	public void addDiscount(BillDiscount discount) {
+		if (discount == null) {
+			throw new NullPointerException("The discount to add must be defined.");
+		}
+		if (this.discounts == null) {
+			this.discounts = new HashSet<>();
+		}
+		this.discounts.add(discount);
+		discount.setBill(this);
+	}
+	
 	public void addPayment(Payment payment) {
 		if (payment == null) {
 			throw new NullPointerException("The payment to add must be defined.");
@@ -221,6 +234,8 @@ public class Bill extends BaseOpenmrsData {
 			// after approval. Stay POSTED so a human can void/reapply rather than letting any
 			// non-zero payment silently flip the bill to PAID.
 			if (hasDiscountDrift()) {
+				log.warn("Bill {} has discount drift (total={}, effectiveTotal={}); staying POSTED for manual review",
+				    getUuid(), getTotal(), effectiveTotal());
 				this.setStatus(BillStatus.POSTED);
 				return;
 			}
