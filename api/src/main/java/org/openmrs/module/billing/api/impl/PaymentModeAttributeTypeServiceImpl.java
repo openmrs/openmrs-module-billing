@@ -9,23 +9,63 @@
  */
 package org.openmrs.module.billing.api.impl;
 
-import org.openmrs.module.billing.api.IPaymentModeAttributeTypeService;
-import org.openmrs.module.billing.api.base.entity.impl.BaseMetadataDataServiceImpl;
-import org.openmrs.module.billing.api.base.entity.security.IMetadataAuthorizationPrivileges;
+import java.util.List;
+
+import lombok.Setter;
+import org.openmrs.api.impl.BaseOpenmrsService;
+import org.openmrs.module.billing.api.PaymentModeAttributeTypeService;
+import org.openmrs.module.billing.api.db.PaymentModeAttributeTypeDAO;
 import org.openmrs.module.billing.api.model.PaymentModeAttributeType;
-import org.openmrs.module.billing.api.security.BasicMetadataAuthorizationPrivileges;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Data service implementation class for {@link PaymentModeAttributeType}s.
  */
-public class PaymentModeAttributeTypeServiceImpl extends BaseMetadataDataServiceImpl<PaymentModeAttributeType> implements IPaymentModeAttributeTypeService {
-	
-	@Override
-	protected IMetadataAuthorizationPrivileges getPrivileges() {
-		return new BasicMetadataAuthorizationPrivileges();
-	}
-	
-	@Override
-	protected void validate(PaymentModeAttributeType entity) {
-	}
+@Transactional
+public class PaymentModeAttributeTypeServiceImpl extends BaseOpenmrsService
+        implements PaymentModeAttributeTypeService {
+
+    @Setter(onMethod_ = { @Autowired })
+    private PaymentModeAttributeTypeDAO paymentModeAttributeTypeDAO;
+
+    @Override
+    @Transactional(readOnly = true)
+    public PaymentModeAttributeType getPaymentModeAttributeType(Integer id) {
+        if (id == null) {
+            return null;
+        }
+        return paymentModeAttributeTypeDAO.getPaymentModeAttributeType(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PaymentModeAttributeType getPaymentModeAttributeTypeByUuid(String uuid) {
+        if (uuid == null || uuid.isEmpty()) {
+            return null;
+        }
+        return paymentModeAttributeTypeDAO.getPaymentModeAttributeTypeByUuid(uuid);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PaymentModeAttributeType> getAllPaymentModeAttributeTypes(boolean includeRetired) {
+        return paymentModeAttributeTypeDAO.getAllPaymentModeAttributeTypes(includeRetired);
+    }
+
+    @Override
+    public PaymentModeAttributeType savePaymentModeAttributeType(PaymentModeAttributeType attributeType) {
+        if (attributeType == null) {
+            throw new IllegalArgumentException("PaymentModeAttributeType cannot be null");
+        }
+        return paymentModeAttributeTypeDAO.savePaymentModeAttributeType(attributeType);
+    }
+
+    @Override
+    public void purgePaymentModeAttributeType(PaymentModeAttributeType attributeType) {
+        if (attributeType == null) {
+            throw new IllegalArgumentException("PaymentModeAttributeType cannot be null");
+        }
+        paymentModeAttributeTypeDAO.purgePaymentModeAttributeType(attributeType);
+    }
 }

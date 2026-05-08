@@ -43,7 +43,7 @@
 	<bean parent="serviceContext">
 		<property name="moduleService">
 			<list merge="true">
-				<value>org.openmrs.module.billing.api.IPaymentModeAttributeTypeService</value>
+				<value>org.openmrs.module.billing.api.PaymentModeAttributeTypeService</value>
 				<ref bean="cashierPaymentModeAttributeTypeService"/>
 			</list>
 		</property>
@@ -148,7 +148,7 @@
 		<property name="transactionManager" ref="transactionManager"/>
 		<property name="target">
 			<bean class="org.openmrs.module.billing.api.impl.PaymentModeAttributeTypeServiceImpl">
-				<property name="repository" ref="genericRepositoryDao"/>
+				<property name="paymentModeAttributeTypeDAO" ref="paymentModeAttributeTypeDAO"/>
 			</bean>
 		</property>
 		<property name="preInterceptors" ref="serviceInterceptors"/>
@@ -280,6 +280,10 @@
 	</bean>
 	<bean id="paymentModeDAO"
 		  class="org.openmrs.module.billing.api.db.hibernate.HibernatePaymentModeDAOImpl">
+		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	<bean id="paymentModeAttributeTypeDAO"
+		  class="org.openmrs.module.billing.api.db.hibernate.HibernatePaymentModeAttributeTypeDAOImpl">
 		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
 	</bean>
 	<bean id="cashPointDAO"
