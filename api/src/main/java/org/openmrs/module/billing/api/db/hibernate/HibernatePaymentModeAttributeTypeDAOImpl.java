@@ -20,38 +20,36 @@ import java.util.List;
 
 @RequiredArgsConstructor
 public class HibernatePaymentModeAttributeTypeDAOImpl implements PaymentModeAttributeTypeDAO {
-
-    private final SessionFactory sessionFactory;
-
-    @Override
-    public PaymentModeAttributeType getPaymentModeAttributeType(@Nonnull Integer id) {
-        return sessionFactory.getCurrentSession().get(PaymentModeAttributeType.class, id);
-    }
-
-    @Override
-    public PaymentModeAttributeType getPaymentModeAttributeTypeByUuid(@Nonnull String uuid) {
-        TypedQuery<PaymentModeAttributeType> query = sessionFactory.getCurrentSession()
-                .createQuery("select p from PaymentModeAttributeType p where p.uuid = :uuid",
-                        PaymentModeAttributeType.class);
-        query.setParameter("uuid", uuid);
-        return query.getResultStream().findFirst().orElse(null);
-    }
-
-    @Override
-    public List<PaymentModeAttributeType> getAllPaymentModeAttributeTypes(boolean includeRetired) {
-        String hql = "from PaymentModeAttributeType" + (includeRetired ? "" : " where retired = false");
-        return sessionFactory.getCurrentSession()
-                .createQuery(hql, PaymentModeAttributeType.class).getResultList();
-    }
-
-    @Override
-    public PaymentModeAttributeType savePaymentModeAttributeType(@Nonnull PaymentModeAttributeType attributeType) {
-        sessionFactory.getCurrentSession().saveOrUpdate(attributeType);
-        return attributeType;
-    }
-
-    @Override
-    public void purgePaymentModeAttributeType(@Nonnull PaymentModeAttributeType attributeType) {
-        sessionFactory.getCurrentSession().delete(attributeType);
-    }
+	
+	private final SessionFactory sessionFactory;
+	
+	@Override
+	public PaymentModeAttributeType getPaymentModeAttributeType(@Nonnull Integer id) {
+		return sessionFactory.getCurrentSession().get(PaymentModeAttributeType.class, id);
+	}
+	
+	@Override
+	public PaymentModeAttributeType getPaymentModeAttributeTypeByUuid(@Nonnull String uuid) {
+		TypedQuery<PaymentModeAttributeType> query = sessionFactory.getCurrentSession().createQuery(
+		    "select p from PaymentModeAttributeType p where p.uuid = :uuid", PaymentModeAttributeType.class);
+		query.setParameter("uuid", uuid);
+		return query.getResultStream().findFirst().orElse(null);
+	}
+	
+	@Override
+	public List<PaymentModeAttributeType> getAllPaymentModeAttributeTypes(boolean includeRetired) {
+		String hql = "from PaymentModeAttributeType" + (includeRetired ? "" : " where retired = false");
+		return sessionFactory.getCurrentSession().createQuery(hql, PaymentModeAttributeType.class).getResultList();
+	}
+	
+	@Override
+	public PaymentModeAttributeType savePaymentModeAttributeType(@Nonnull PaymentModeAttributeType attributeType) {
+		sessionFactory.getCurrentSession().saveOrUpdate(attributeType);
+		return attributeType;
+	}
+	
+	@Override
+	public void purgePaymentModeAttributeType(@Nonnull PaymentModeAttributeType attributeType) {
+		sessionFactory.getCurrentSession().delete(attributeType);
+	}
 }

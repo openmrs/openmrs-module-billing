@@ -23,49 +23,48 @@ import org.springframework.transaction.annotation.Transactional;
  * Data service implementation class for {@link PaymentModeAttributeType}s.
  */
 @Transactional
-public class PaymentModeAttributeTypeServiceImpl extends BaseOpenmrsService
-        implements PaymentModeAttributeTypeService {
-
-    @Setter(onMethod_ = { @Autowired })
-    private PaymentModeAttributeTypeDAO paymentModeAttributeTypeDAO;
-
-    @Override
-    @Transactional(readOnly = true)
-    public PaymentModeAttributeType getPaymentModeAttributeType(Integer id) {
-        if (id == null) {
-            return null;
-        }
-        return paymentModeAttributeTypeDAO.getPaymentModeAttributeType(id);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public PaymentModeAttributeType getPaymentModeAttributeTypeByUuid(String uuid) {
-        if (uuid == null || uuid.isEmpty()) {
-            return null;
-        }
-        return paymentModeAttributeTypeDAO.getPaymentModeAttributeTypeByUuid(uuid);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<PaymentModeAttributeType> getAllPaymentModeAttributeTypes(boolean includeRetired) {
-        return paymentModeAttributeTypeDAO.getAllPaymentModeAttributeTypes(includeRetired);
-    }
-
-    @Override
-    public PaymentModeAttributeType savePaymentModeAttributeType(PaymentModeAttributeType attributeType) {
-        if (attributeType == null) {
-            throw new IllegalArgumentException("PaymentModeAttributeType cannot be null");
-        }
-        return paymentModeAttributeTypeDAO.savePaymentModeAttributeType(attributeType);
-    }
-
-    @Override
-    public void purgePaymentModeAttributeType(PaymentModeAttributeType attributeType) {
-        if (attributeType == null) {
-            throw new IllegalArgumentException("PaymentModeAttributeType cannot be null");
-        }
-        paymentModeAttributeTypeDAO.purgePaymentModeAttributeType(attributeType);
-    }
+public class PaymentModeAttributeTypeServiceImpl extends BaseOpenmrsService implements PaymentModeAttributeTypeService {
+	
+	@Setter(onMethod_ = { @Autowired })
+	private PaymentModeAttributeTypeDAO paymentModeAttributeTypeDAO;
+	
+	@Override
+	@Transactional(readOnly = true)
+	public PaymentModeAttributeType getPaymentModeAttributeType(Integer id) {
+		if (id == null) {
+			return null;
+		}
+		return paymentModeAttributeTypeDAO.getPaymentModeAttributeType(id);
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public PaymentModeAttributeType getPaymentModeAttributeTypeByUuid(String uuid) {
+		if (uuid == null || uuid.isEmpty()) {
+			return null;
+		}
+		return paymentModeAttributeTypeDAO.getPaymentModeAttributeTypeByUuid(uuid);
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public List<PaymentModeAttributeType> getAllPaymentModeAttributeTypes(boolean includeRetired) {
+		return paymentModeAttributeTypeDAO.getAllPaymentModeAttributeTypes(includeRetired);
+	}
+	
+	@Override
+	public PaymentModeAttributeType savePaymentModeAttributeType(PaymentModeAttributeType attributeType) {
+		if (attributeType == null) {
+			throw new IllegalArgumentException("PaymentModeAttributeType cannot be null");
+		}
+		return paymentModeAttributeTypeDAO.savePaymentModeAttributeType(attributeType);
+	}
+	
+	@Override
+	public void purgePaymentModeAttributeType(PaymentModeAttributeType attributeType) {
+		if (attributeType == null) {
+			throw new IllegalArgumentException("PaymentModeAttributeType cannot be null");
+		}
+		paymentModeAttributeTypeDAO.purgePaymentModeAttributeType(attributeType);
+	}
 }

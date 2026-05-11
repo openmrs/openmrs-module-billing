@@ -15,14 +15,14 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 public interface PaymentModeAttributeTypeDAO {
-
-    PaymentModeAttributeType getPaymentModeAttributeType(@Nonnull Integer id);
-
-    PaymentModeAttributeType getPaymentModeAttributeTypeByUuid(@Nonnull String uuid);
-
-    List<PaymentModeAttributeType> getAllPaymentModeAttributeTypes(boolean includeRetired);
-
-    PaymentModeAttributeType savePaymentModeAttributeType(@Nonnull PaymentModeAttributeType attributeType);
-
-    void purgePaymentModeAttributeType(@Nonnull PaymentModeAttributeType attributeType);
+	
+	PaymentModeAttributeType getPaymentModeAttributeType(@Nonnull Integer id);
+	
+	PaymentModeAttributeType getPaymentModeAttributeTypeByUuid(@Nonnull String uuid);
+	
+	List<PaymentModeAttributeType> getAllPaymentModeAttributeTypes(boolean includeRetired);
+	
+	PaymentModeAttributeType savePaymentModeAttributeType(@Nonnull PaymentModeAttributeType attributeType);
+	
+	void purgePaymentModeAttributeType(@Nonnull PaymentModeAttributeType attributeType);
 }
