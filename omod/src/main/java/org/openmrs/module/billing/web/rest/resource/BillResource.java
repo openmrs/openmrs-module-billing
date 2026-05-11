@@ -30,6 +30,7 @@ import org.openmrs.module.billing.api.model.BillDiscount;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.model.CashPoint;
+import org.openmrs.module.billing.api.model.DiscountStatus;
 import org.openmrs.module.billing.api.model.Payment;
 import org.openmrs.module.billing.api.model.Timesheet;
 import org.openmrs.module.billing.api.search.BillSearch;
@@ -48,6 +49,7 @@ import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.impl.AlreadyPaged;
 import org.openmrs.module.webservices.rest.web.resource.impl.DataDelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
+import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.springframework.web.client.RestClientException;
 
@@ -298,7 +300,21 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 		if (StringUtils.isNotBlank(cashPointUuid)) {
 			billSearch.setCashPointUuid(cashPointUuid);
 		}
-		
+
+		String discountStatus = context.getRequest().getParameter("discountStatus");
+		if (StringUtils.isNotBlank(discountStatus)) {
+			List<DiscountStatus> discountStatuses = Arrays.stream(discountStatus.split(",")).map(String::trim).filter(StringUtils::isNotBlank)
+			        .map(s -> {
+				        try {
+					        return DiscountStatus.valueOf(s.toUpperCase());
+				        } catch (IllegalArgumentException e) {
+					        throw new InvalidSearchException("Invalid discountStatus '" + s + "'. Allowed values: "
+					                + Arrays.toString(DiscountStatus.values()));
+				        }
+			        }).collect(Collectors.toList());
+			billSearch.setDiscountStatuses(discountStatuses);
+		}
+
 		String includeAll = context.getRequest().getParameter("includeAll");
 		if (StringUtils.isNotBlank(includeAll)) {
 			billSearch.setIncludeVoidedLineItems(Boolean.parseBoolean(includeAll));
