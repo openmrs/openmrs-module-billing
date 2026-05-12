@@ -21,6 +21,7 @@ import org.openmrs.api.db.hibernate.HibernatePatientDAO;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.db.BillDAO;
 import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.module.billing.api.model.BillDiscount;
 import org.openmrs.module.billing.api.search.BillSearch;
 
 import javax.annotation.Nonnull;
@@ -32,7 +33,6 @@ import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 import java.util.ArrayList;
 import java.util.List;
-import org.openmrs.module.billing.api.model.BillDiscount;
 
 import static org.openmrs.module.billing.api.db.hibernate.PagingUtil.applyPaging;
 

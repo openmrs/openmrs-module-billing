@@ -9,10 +9,10 @@
  */
 package org.openmrs.module.billing.web.rest.resource;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -25,9 +25,9 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillService;
@@ -51,7 +51,7 @@ public class BillResourceTest {
 	/** Captures the BillSearch passed to billService.getBills() in the current test. */
 	private final List<BillSearch> capturedSearches = new ArrayList<>();
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		resource = new BillResource();
 		billService = mock(BillService.class);
@@ -68,7 +68,7 @@ public class BillResourceTest {
 		contextMock.when(() -> Context.getService(BillService.class)).thenReturn(billService);
 	}
 	
-	@After
+	@AfterEach
 	public void tearDown() {
 		if (contextMock != null) {
 			contextMock.close();
