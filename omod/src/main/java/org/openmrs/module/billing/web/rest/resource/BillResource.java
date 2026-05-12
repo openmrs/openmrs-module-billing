@@ -300,21 +300,22 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 		if (StringUtils.isNotBlank(cashPointUuid)) {
 			billSearch.setCashPointUuid(cashPointUuid);
 		}
-
+		
 		String discountStatus = context.getRequest().getParameter("discountStatus");
 		if (StringUtils.isNotBlank(discountStatus)) {
-			List<DiscountStatus> discountStatuses = Arrays.stream(discountStatus.split(",")).map(String::trim).filter(StringUtils::isNotBlank)
-			        .map(s -> {
+			List<DiscountStatus> discountStatuses = Arrays.stream(discountStatus.split(",")).map(String::trim)
+			        .filter(StringUtils::isNotBlank).map(s -> {
 				        try {
 					        return DiscountStatus.valueOf(s.toUpperCase());
-				        } catch (IllegalArgumentException e) {
+				        }
+				        catch (IllegalArgumentException e) {
 					        throw new InvalidSearchException("Invalid discountStatus '" + s + "'. Allowed values: "
 					                + Arrays.toString(DiscountStatus.values()));
 				        }
 			        }).collect(Collectors.toList());
 			billSearch.setDiscountStatuses(discountStatuses);
 		}
-
+		
 		String includeAll = context.getRequest().getParameter("includeAll");
 		if (StringUtils.isNotBlank(includeAll)) {
 			billSearch.setIncludeVoidedLineItems(Boolean.parseBoolean(includeAll));

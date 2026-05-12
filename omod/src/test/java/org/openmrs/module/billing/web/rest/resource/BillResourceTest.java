@@ -41,40 +41,40 @@ import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
  * Tests for {@link BillResource}
  */
 public class BillResourceTest {
-
+	
 	private BillResource resource;
-
+	
 	private BillService billService;
-
+	
 	private MockedStatic<Context> contextMock;
-
+	
 	/** Captures the BillSearch passed to billService.getBills() in the current test. */
 	private final List<BillSearch> capturedSearches = new ArrayList<>();
-
+	
 	@Before
 	public void setUp() {
 		resource = new BillResource();
 		billService = mock(BillService.class);
 		capturedSearches.clear();
-
+		
 		doAnswer(invocation -> {
 			capturedSearches.add(invocation.getArgument(0));
 			PagingInfo pagingInfo = invocation.getArgument(1);
 			pagingInfo.setTotalRecordCount(0L);
 			return Collections.emptyList();
 		}).when(billService).getBills(any(), any());
-
+		
 		contextMock = mockStatic(Context.class);
 		contextMock.when(() -> Context.getService(BillService.class)).thenReturn(billService);
 	}
-
+	
 	@After
 	public void tearDown() {
 		if (contextMock != null) {
 			contextMock.close();
 		}
 	}
-
+	
 	/**
 	 * Builds a mocked {@link RequestContext} with the given discountStatus request parameter value
 	 * (null means the parameter is absent).
@@ -82,50 +82,49 @@ public class BillResourceTest {
 	private RequestContext buildContext(String discountStatusParam) {
 		HttpServletRequest req = mock(HttpServletRequest.class);
 		org.mockito.Mockito.when(req.getParameter("discountStatus")).thenReturn(discountStatusParam);
-
+		
 		RequestContext context = mock(RequestContext.class);
 		org.mockito.Mockito.when(context.getRequest()).thenReturn(req);
 		org.mockito.Mockito.when(context.getStartIndex()).thenReturn(0);
 		org.mockito.Mockito.when(context.getLimit()).thenReturn(10);
-
+		
 		return context;
 	}
-
+	
 	@Test
 	public void doSearch_shouldParseSingleDiscountStatusParam() {
 		RequestContext context = buildContext("PENDING");
-
+		
 		resource.doSearch(context);
-
-		assertEquals(Collections.singletonList(DiscountStatus.PENDING),
-		    capturedSearches.get(0).getDiscountStatuses());
+		
+		assertEquals(Collections.singletonList(DiscountStatus.PENDING), capturedSearches.get(0).getDiscountStatuses());
 	}
-
+	
 	@Test
 	public void doSearch_shouldParseCommaSeparatedDiscountStatuses() {
 		RequestContext context = buildContext("approved, rejected");
-
+		
 		resource.doSearch(context);
-
+		
 		assertEquals(Arrays.asList(DiscountStatus.APPROVED, DiscountStatus.REJECTED),
 		    capturedSearches.get(0).getDiscountStatuses());
 	}
-
+	
 	@Test
 	public void doSearch_shouldRejectInvalidDiscountStatus() {
 		RequestContext context = buildContext("MAYBE");
-
+		
 		InvalidSearchException ex = assertThrows(InvalidSearchException.class, () -> resource.doSearch(context));
 		assertTrue(ex.getMessage().contains("MAYBE"));
 		assertTrue(ex.getMessage().contains("PENDING"));
 	}
-
+	
 	@Test
 	public void doSearch_shouldNotSetDiscountStatusesWhenParamMissing() {
 		RequestContext context = buildContext(null);
-
+		
 		resource.doSearch(context);
-
+		
 		assertNull(capturedSearches.get(0).getDiscountStatuses());
 	}
 }
