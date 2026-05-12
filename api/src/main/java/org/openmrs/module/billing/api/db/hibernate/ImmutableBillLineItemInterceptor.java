@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
 public class ImmutableBillLineItemInterceptor extends ImmutableEntityInterceptor {
 	
 	private static final String[] MUTABLE_PROPERTY_NAMES = new String[] { "voided", "dateVoided", "voidedBy", "voidReason",
-	        "paymentStatus", "changedBy", "dateChanged" };
+	        "status", "changedBy", "dateChanged" };
 	
 	@Override
 	protected Class<?> getSupportedType() {

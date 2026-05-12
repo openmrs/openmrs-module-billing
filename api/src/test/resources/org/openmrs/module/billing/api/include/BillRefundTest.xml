@@ -21,7 +21,7 @@
 	              creator="1" date_created="2012-04-01 00:00:00.0" voided="false"
 	              uuid="r0000000-0000-0000-0000-000000000300" receipt_printed="0"/>
 	<cashier_bill_line_item bill_line_item_id="300" bill_id="300" item_id="0" price="100.00" price_name="default"
-	                        quantity="1" line_item_order="0" payment_status="PAID"
+	                        quantity="1" line_item_order="0" status="PAID"
 	                        creator="1" date_created="2012-04-01 00:00:00.0" voided="false"
 	                        uuid="r0000000-0000-0000-0000-000000000310"/>
 
@@ -31,11 +31,11 @@
 	              creator="1" date_created="2012-04-01 00:00:00.0" voided="false"
 	              uuid="r0000000-0000-0000-0000-000000000301" receipt_printed="0"/>
 	<cashier_bill_line_item bill_line_item_id="301" bill_id="301" item_id="0" price="60.00" price_name="default"
-	                        quantity="1" line_item_order="0" payment_status="PAID"
+	                        quantity="1" line_item_order="0" status="PAID"
 	                        creator="1" date_created="2012-04-01 00:00:00.0" voided="false"
 	                        uuid="r0000000-0000-0000-0000-000000000311"/>
 	<cashier_bill_line_item bill_line_item_id="302" bill_id="301" item_id="0" price="40.00" price_name="default"
-	                        quantity="1" line_item_order="1" payment_status="PAID"
+	                        quantity="1" line_item_order="1" status="PAID"
 	                        creator="1" date_created="2012-04-01 00:00:00.0" voided="false"
 	                        uuid="r0000000-0000-0000-0000-000000000312"/>
 
@@ -45,7 +45,7 @@
 	              creator="1" date_created="2012-04-01 00:00:00.0" voided="false"
 	              uuid="r0000000-0000-0000-0000-000000000302" receipt_printed="0"/>
 	<cashier_bill_line_item bill_line_item_id="320" bill_id="302" item_id="0" price="50.00" price_name="default"
-	                        quantity="1" line_item_order="0" payment_status="PAID"
+	                        quantity="1" line_item_order="0" status="PAID"
 	                        creator="1" date_created="2012-04-01 00:00:00.0" voided="false"
 	                        uuid="r0000000-0000-0000-0000-000000000320"/>
 
@@ -55,11 +55,11 @@
 	              creator="1" date_created="2012-04-01 00:00:00.0" voided="false"
 	              uuid="r0000000-0000-0000-0000-000000000303" receipt_printed="0"/>
 	<cashier_bill_line_item bill_line_item_id="330" bill_id="303" item_id="0" price="70.00" price_name="default"
-	                        quantity="1" line_item_order="0" payment_status="PAID"
+	                        quantity="1" line_item_order="0" status="PAID"
 	                        creator="1" date_created="2012-04-01 00:00:00.0" voided="false"
 	                        uuid="r0000000-0000-0000-0000-000000000330"/>
 	<cashier_bill_line_item bill_line_item_id="331" bill_id="303" item_id="0" price="30.00" price_name="default"
-	                        quantity="1" line_item_order="1" payment_status="PAID"
+	                        quantity="1" line_item_order="1" status="PAID"
 	                        creator="1" date_created="2012-04-01 00:00:00.0" voided="false"
 	                        uuid="r0000000-0000-0000-0000-000000000331"/>
 
@@ -80,7 +80,7 @@
 	              creator="1" date_created="2012-04-01 00:00:00.0" voided="false"
 	              uuid="r0000000-0000-0000-0000-000000000304" receipt_printed="0"/>
 	<cashier_bill_line_item bill_line_item_id="340" bill_id="304" item_id="0" price="40.00" price_name="default"
-	                        quantity="1" line_item_order="0" payment_status="PAID"
+	                        quantity="1" line_item_order="0" status="PAID"
 	                        creator="1" date_created="2012-04-01 00:00:00.0" voided="false"
 	                        uuid="r0000000-0000-0000-0000-000000000340"/>
 	<bill_refund bill_refund_id="2" bill_id="304" refund_amount="40.00" reason="Mistakenly raised"

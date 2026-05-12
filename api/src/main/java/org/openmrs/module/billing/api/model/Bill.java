@@ -249,11 +249,11 @@ public class Bill extends BaseOpenmrsData {
 			boolean billFullySettled = getTotalPayments().compareTo(getAmountAfterDiscount()) >= 0;
 			if (billFullySettled) {
 				this.setStatus(BillStatus.PAID);
-				// Update all non-voided bill line items to PAID status
+				// Update all non-voided and non-refunded status bill line items to PAID status
 				if (this.lineItems != null) {
 					for (BillLineItem lineItem : this.lineItems) {
-						if (lineItem != null && !lineItem.getVoided()) {
-							lineItem.setPaymentStatus(BillStatus.PAID);
+						if (lineItem != null && !lineItem.getVoided() && !isRefundStatus(lineItem.getStatus())) {
+							lineItem.setStatus(BillLineItemStatus.PAID);
 						}
 					}
 				}
@@ -305,6 +305,11 @@ public class Bill extends BaseOpenmrsData {
 		for (BillLineItem lineItem : this.getLineItems()) {
 			lineItem.setLineItemOrder(orderCounter++);
 		}
+	}
+	
+	private boolean isRefundStatus(BillLineItemStatus lineItemStatus) {
+		return lineItemStatus == BillLineItemStatus.REFUND_REQUESTED || lineItemStatus == BillLineItemStatus.REFUNDED
+		        || lineItemStatus == BillLineItemStatus.PARTIALLY_REFUNDED;
 	}
 	
 }

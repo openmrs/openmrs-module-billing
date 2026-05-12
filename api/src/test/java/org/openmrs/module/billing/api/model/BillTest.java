@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import org.junit.Test;
-import org.openmrs.module.billing.api.model.DiscountStatus;
 
 /**
  * Test for verifying Bill model methods, particularly getTotalPayments()
@@ -131,7 +130,7 @@ public class BillTest {
 		bill.synchronizeBillStatus();
 		
 		assertEquals(BillStatus.PAID, bill.getStatus());
-		assertEquals(BillStatus.PAID, lineItem.getPaymentStatus());
+		assertEquals(BillLineItemStatus.PAID, lineItem.getStatus());
 	}
 	
 	@Test
@@ -187,7 +186,7 @@ public class BillTest {
 		bill.synchronizeBillStatus();
 		assertEquals(BillStatus.PAID, bill.getStatus());
 		// Only non-voided line items should be set to PAID
-		assertEquals(BillStatus.PAID, lineItem1.getPaymentStatus());
+		assertEquals(BillLineItemStatus.PAID, lineItem1.getStatus());
 	}
 	
 	@Test
@@ -222,10 +221,10 @@ public class BillTest {
 		bill.synchronizeBillStatus();
 		
 		assertEquals(BillStatus.PAID, bill.getStatus());
-		assertEquals(BillStatus.PAID, lineItem1.getPaymentStatus());
-		assertEquals(BillStatus.PAID, lineItem2.getPaymentStatus());
+		assertEquals(BillLineItemStatus.PAID, lineItem1.getStatus());
+		assertEquals(BillLineItemStatus.PAID, lineItem2.getStatus());
 		// Voided line items should not be updated
-		assertNull(voidedLineItem.getPaymentStatus());
+		assertNull(voidedLineItem.getStatus());
 	}
 	
 	@Test
@@ -259,7 +258,7 @@ public class BillTest {
 		bill.synchronizeBillStatus();
 		
 		assertEquals(BillStatus.PAID, bill.getStatus());
-		assertEquals(BillStatus.PAID, lineItem.getPaymentStatus());
+		assertEquals(BillLineItemStatus.PAID, lineItem.getStatus());
 	}
 	
 	@Test

@@ -1201,107 +1201,127 @@
                                  referencedTableName="users" referencedColumnNames="user_id"/>
     </changeSet>
 
-    <changeSet id="openmrs.billing-006-20260508-create-bill-refund-table" author="Wikum Weerakutti">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="bill_refund"/>
-            </not>
-        </preConditions>
-        <comment>Create table for bill refunds with full audit trail</comment>
+	<changeSet id="openmrs.billing-006-20260508-create-bill-refund-table" author="Wikum Weerakutti">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="bill_refund"/>
+			</not>
+		</preConditions>
+		<comment>Create table for bill refunds with full audit trail</comment>
 
-        <createTable tableName="bill_refund">
-            <column name="bill_refund_id" type="int" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="bill_id" type="int">
-                <constraints nullable="false"/>
-            </column>
-            <column name="bill_line_item_id" type="int"/>
-            <column name="refund_amount" type="decimal(10,2)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="reason" type="varchar(1000)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="refund_status" type="varchar(20)" defaultValue="REQUESTED">
-                <constraints nullable="false"/>
-            </column>
-            <column name="initiator_id" type="int">
-                <constraints nullable="false"/>
-            </column>
-            <column name="approver_id" type="int"/>
-            <column name="completer_id" type="int"/>
-            <column name="date_approved" type="datetime"/>
-            <column name="date_completed" type="datetime"/>
-            <column name="creator" type="int">
-                <constraints nullable="false"/>
-            </column>
-            <column name="date_created" type="datetime">
-                <constraints nullable="false"/>
-            </column>
-            <column name="changed_by" type="int"/>
-            <column name="date_changed" type="datetime"/>
-            <column name="voided" type="boolean" defaultValueBoolean="false">
-                <constraints nullable="false"/>
-            </column>
-            <column name="voided_by" type="int"/>
-            <column name="date_voided" type="datetime"/>
-            <column name="void_reason" type="varchar(255)"/>
-            <column name="uuid" type="char(38)">
-                <constraints nullable="false" unique="true"/>
-            </column>
-        </createTable>
+		<createTable tableName="bill_refund">
+			<column name="bill_refund_id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+			<column name="bill_id" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="bill_line_item_id" type="int"/>
+			<column name="refund_amount" type="decimal(10,2)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="reason" type="varchar(1000)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="refund_status" type="varchar(20)" defaultValue="REQUESTED">
+				<constraints nullable="false"/>
+			</column>
+			<column name="initiator_id" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="approver_id" type="int"/>
+			<column name="completer_id" type="int"/>
+			<column name="date_approved" type="datetime"/>
+			<column name="date_completed" type="datetime"/>
+			<column name="creator" type="int">
+				<constraints nullable="false"/>
+			</column>
+			<column name="date_created" type="datetime">
+				<constraints nullable="false"/>
+			</column>
+			<column name="changed_by" type="int"/>
+			<column name="date_changed" type="datetime"/>
+			<column name="voided" type="boolean" defaultValueBoolean="false">
+				<constraints nullable="false"/>
+			</column>
+			<column name="voided_by" type="int"/>
+			<column name="date_voided" type="datetime"/>
+			<column name="void_reason" type="varchar(255)"/>
+			<column name="uuid" type="char(38)">
+				<constraints nullable="false" unique="true"/>
+			</column>
+		</createTable>
 
-        <addForeignKeyConstraint constraintName="bill_refund_bill_id_fk"
-                                 baseTableName="bill_refund" baseColumnNames="bill_id"
-                                 referencedTableName="cashier_bill" referencedColumnNames="bill_id"/>
+		<addForeignKeyConstraint constraintName="bill_refund_bill_id_fk"
+		                         baseTableName="bill_refund" baseColumnNames="bill_id"
+		                         referencedTableName="cashier_bill" referencedColumnNames="bill_id"/>
 
-        <addForeignKeyConstraint constraintName="bill_refund_bill_line_item_id_fk"
-                                 baseTableName="bill_refund" baseColumnNames="bill_line_item_id"
-                                 referencedTableName="cashier_bill_line_item" referencedColumnNames="bill_line_item_id"/>
+		<addForeignKeyConstraint constraintName="bill_refund_bill_line_item_id_fk"
+		                         baseTableName="bill_refund" baseColumnNames="bill_line_item_id"
+		                         referencedTableName="cashier_bill_line_item" referencedColumnNames="bill_line_item_id"/>
 
-        <addForeignKeyConstraint constraintName="bill_refund_initiator_id_fk"
-                                 baseTableName="bill_refund" baseColumnNames="initiator_id"
-                                 referencedTableName="users" referencedColumnNames="user_id"/>
+		<addForeignKeyConstraint constraintName="bill_refund_initiator_id_fk"
+		                         baseTableName="bill_refund" baseColumnNames="initiator_id"
+		                         referencedTableName="users" referencedColumnNames="user_id"/>
 
-        <addForeignKeyConstraint constraintName="bill_refund_approver_id_fk"
-                                 baseTableName="bill_refund" baseColumnNames="approver_id"
-                                 referencedTableName="users" referencedColumnNames="user_id"/>
+		<addForeignKeyConstraint constraintName="bill_refund_approver_id_fk"
+		                         baseTableName="bill_refund" baseColumnNames="approver_id"
+		                         referencedTableName="users" referencedColumnNames="user_id"/>
 
-        <addForeignKeyConstraint constraintName="bill_refund_completer_id_fk"
-                                 baseTableName="bill_refund" baseColumnNames="completer_id"
-                                 referencedTableName="users" referencedColumnNames="user_id"/>
+		<addForeignKeyConstraint constraintName="bill_refund_completer_id_fk"
+		                         baseTableName="bill_refund" baseColumnNames="completer_id"
+		                         referencedTableName="users" referencedColumnNames="user_id"/>
 
-        <addForeignKeyConstraint constraintName="bill_refund_creator_fk"
-                                 baseTableName="bill_refund" baseColumnNames="creator"
-                                 referencedTableName="users" referencedColumnNames="user_id"/>
+		<addForeignKeyConstraint constraintName="bill_refund_creator_fk"
+		                         baseTableName="bill_refund" baseColumnNames="creator"
+		                         referencedTableName="users" referencedColumnNames="user_id"/>
 
-        <addForeignKeyConstraint constraintName="bill_refund_changed_by_fk"
-                                 baseTableName="bill_refund" baseColumnNames="changed_by"
-                                 referencedTableName="users" referencedColumnNames="user_id"/>
+		<addForeignKeyConstraint constraintName="bill_refund_changed_by_fk"
+		                         baseTableName="bill_refund" baseColumnNames="changed_by"
+		                         referencedTableName="users" referencedColumnNames="user_id"/>
 
-        <addForeignKeyConstraint constraintName="bill_refund_voided_by_fk"
-                                 baseTableName="bill_refund" baseColumnNames="voided_by"
-                                 referencedTableName="users" referencedColumnNames="user_id"/>
+		<addForeignKeyConstraint constraintName="bill_refund_voided_by_fk"
+		                         baseTableName="bill_refund" baseColumnNames="voided_by"
+		                         referencedTableName="users" referencedColumnNames="user_id"/>
 
-        <createIndex tableName="bill_refund" indexName="idx_bill_refund_bill_id">
-            <column name="bill_id"/>
-        </createIndex>
+		<createIndex tableName="bill_refund" indexName="idx_bill_refund_bill_id">
+			<column name="bill_id"/>
+		</createIndex>
 
-        <createIndex tableName="bill_refund" indexName="idx_bill_refund_line_item_id">
-            <column name="bill_line_item_id"/>
-        </createIndex>
-    </changeSet>
+		<createIndex tableName="bill_refund" indexName="idx_bill_refund_line_item_id">
+			<column name="bill_line_item_id"/>
+		</createIndex>
+	</changeSet>
 
-    <changeSet id="openmrs.billing-007-20260508-widen-cashier-bill-status" author="Wikum Weerakutti">
-        <preConditions onFail="MARK_RAN">
-            <columnExists tableName="cashier_bill" columnName="status"/>
-        </preConditions>
-        <comment>Widen cashier_bill.status to fit refund-derived enum values (PARTIALLY_REFUNDED is 18 chars)</comment>
-        <modifyColumn tableName="cashier_bill">
-            <column name="status" type="varchar(20)">
-                <constraints nullable="false"/>
-            </column>
-        </modifyColumn>
-    </changeSet>
+	<changeSet id="openmrs.billing-007-20260508-widen-cashier-bill-status" author="Wikum Weerakutti">
+		<preConditions onFail="MARK_RAN">
+			<columnExists tableName="cashier_bill" columnName="status"/>
+		</preConditions>
+		<comment>Widen cashier_bill.status to fit refund-derived enum values (PARTIALLY_REFUNDED is 18 chars)</comment>
+		<modifyColumn tableName="cashier_bill">
+			<column name="status" type="varchar(20)">
+				<constraints nullable="false"/>
+			</column>
+		</modifyColumn>
+	</changeSet>
+
+	<changeSet id="openmrs.billing-005-20260512-fix-posted-line-item-status" author="Wikum Weerakutti">
+		<preConditions onFail="MARK_RAN">
+			<sqlCheck expectedResult="0" >
+				SELECT 1 FROM cashier_bill_line_item WHERE payment_status = 'POSTED' LIMIT 1
+			</sqlCheck>
+		</preConditions>
+		<comment>POSTED is no longer a valid BillLineItemStatus; migrate any legacy rows to PENDING.</comment>
+		<update tableName="cashier_bill_line_item">
+			<column name="payment_status" value="PENDING"/>
+			<where>payment_status = 'POSTED'</where>
+		</update>
+	</changeSet>
+
+	<changeSet id="openmrs.billing-005-20260512-rename-payment-status" author="Wikum Weerakutti">
+		<preConditions onFail="MARK_RAN">
+			<columnExists tableName="cashier_bill_line_item" columnName="status"/>
+		</preConditions>
+		<renameColumn tableName="cashier_bill_line_item" oldColumnName="payment_status" newColumnName="status" columnDataType="varchar(20)" />
+	</changeSet>
 </databaseChangeLog>

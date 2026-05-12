@@ -12,6 +12,8 @@ package org.openmrs.module.billing.api.impl;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import org.openmrs.api.context.Context;
@@ -19,6 +21,8 @@ import org.openmrs.module.billing.api.BillRefundService;
 import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.db.BillRefundDAO;
 import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.module.billing.api.model.BillLineItem;
+import org.openmrs.module.billing.api.model.BillLineItemStatus;
 import org.openmrs.module.billing.api.model.BillRefund;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.model.RefundStatus;
@@ -72,6 +76,9 @@ public class BillRefundServiceImpl implements BillRefundService {
 		BillRefund saved = billRefundDAO.saveBillRefund(billRefund);
 		stampTransitionTimestamps(saved);
 		reconcileBillStatus(saved.getBill() == null ? null : saved.getBill().getId());
+		if (saved.getLineItem() != null) {
+			reconcileBillLineItemStatus(saved.getBill().getBillId(), saved.getLineItem().getId());
+		}
 		return saved;
 	}
 	
@@ -96,8 +103,8 @@ public class BillRefundServiceImpl implements BillRefundService {
 		if (billId == null) {
 			return;
 		}
-		Context.addProxyPrivilege(PrivilegeConstants.MANAGE_BILLS);
 		try {
+			Context.addProxyPrivilege(PrivilegeConstants.MANAGE_BILLS);
 			Bill freshBill = Context.getService(BillService.class).getBill(billId);
 			if (freshBill == null) {
 				return;
@@ -107,6 +114,36 @@ public class BillRefundServiceImpl implements BillRefundService {
 				return;
 			}
 			freshBill.setStatus(target);
+			Context.getService(BillService.class).saveBill(freshBill);
+		}
+		finally {
+			Context.removeProxyPrivilege(PrivilegeConstants.MANAGE_BILLS);
+		}
+	}
+	
+	private void reconcileBillLineItemStatus(Integer billId, Integer billLineItemId) {
+		if (billLineItemId == null || billId == null) {
+			return;
+		}
+		try {
+			Context.addProxyPrivilege(PrivilegeConstants.MANAGE_BILLS);
+			Bill freshBill = Context.getService(BillService.class).getBill(billId);
+			if (freshBill == null) {
+				return;
+			}
+			
+			BillLineItem lineItem = freshBill.getLineItems().stream().filter(li -> li.getId().equals(billLineItemId))
+			        .findFirst().orElse(null);
+			
+			if (lineItem == null) {
+				return;
+			}
+			
+			BillLineItemStatus target = deriveBillLineItemStatusFromRefunds(billId, lineItem);
+			if (lineItem.getStatus() == target) {
+				return;
+			}
+			lineItem.setStatus(target);
 			Context.getService(BillService.class).saveBill(freshBill);
 		}
 		finally {
@@ -124,7 +161,7 @@ public class BillRefundServiceImpl implements BillRefundService {
 		
 		BigDecimal totalRefunded = history.stream()
 		        .filter(r -> r.getStatus() == RefundStatus.APPROVED || r.getStatus() == RefundStatus.COMPLETED)
-		        .map(BillRefund::getRefundAmount).filter(a -> a != null).reduce(BigDecimal.ZERO, BigDecimal::add);
+		        .map(BillRefund::getRefundAmount).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add);
 		
 		if (totalRefunded.compareTo(BigDecimal.ZERO) == 0) {
 			return BillStatus.PAID;
@@ -135,4 +172,29 @@ public class BillRefundServiceImpl implements BillRefundService {
 		}
 		return BillStatus.PARTIALLY_REFUNDED;
 	}
+	
+	private BillLineItemStatus deriveBillLineItemStatusFromRefunds(Integer billId, BillLineItem lineItem) {
+		List<BillRefund> history = billRefundDAO.getRefundsByBillId(billId).stream()
+		        .filter(r -> !Boolean.TRUE.equals(r.getVoided()))
+		        .filter(r -> r.getLineItem() != null && lineItem.getId().equals(r.getLineItem().getId()))
+		        .collect(Collectors.toList());
+		
+		if (history.stream().anyMatch(r -> r.getStatus() == RefundStatus.REQUESTED)) {
+			return BillLineItemStatus.REFUND_REQUESTED;
+		}
+		
+		BigDecimal totalRefunded = history.stream()
+		        .filter(r -> r.getStatus() == RefundStatus.APPROVED || r.getStatus() == RefundStatus.COMPLETED)
+		        .map(BillRefund::getRefundAmount).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add);
+		
+		if (totalRefunded.compareTo(BigDecimal.ZERO) == 0) {
+			return BillLineItemStatus.PAID;
+		}
+		BigDecimal lineTotal = lineItem.getTotal();
+		if (lineTotal != null && totalRefunded.compareTo(lineTotal) >= 0) {
+			return BillLineItemStatus.REFUNDED;
+		}
+		return BillLineItemStatus.PARTIALLY_REFUNDED;
+	}
+	
 }
