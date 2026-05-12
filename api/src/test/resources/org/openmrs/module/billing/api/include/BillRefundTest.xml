@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+
+-->
+<dataset>
+	<global_property property="billing.refundEnabled" property_value="true"
+	                 uuid="r0000000-0000-0000-0000-000000000gp0"
+	                 description="Enable the bill refund feature"/>
+
+	<!-- Clean PAID bill (total 100) -->
+	<cashier_bill bill_id="300" receipt_number="refund-test-paid-clean" provider_id="0" patient_id="0"
+	              cash_point_id="0" status="PAID"
+	              creator="1" date_created="2012-04-01 00:00:00.0" voided="false"
+	              uuid="r0000000-0000-0000-0000-000000000300" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="300" bill_id="300" item_id="0" price="100.00" price_name="default"
+	                        quantity="1" line_item_order="0" payment_status="PAID"
+	                        creator="1" date_created="2012-04-01 00:00:00.0" voided="false"
+	                        uuid="r0000000-0000-0000-0000-000000000310"/>
+
+	<!-- PAID bill with two line items -->
+	<cashier_bill bill_id="301" receipt_number="refund-test-paid-multiline" provider_id="0" patient_id="0"
+	              cash_point_id="0" status="PAID"
+	              creator="1" date_created="2012-04-01 00:00:00.0" voided="false"
+	              uuid="r0000000-0000-0000-0000-000000000301" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="301" bill_id="301" item_id="0" price="60.00" price_name="default"
+	                        quantity="1" line_item_order="0" payment_status="PAID"
+	                        creator="1" date_created="2012-04-01 00:00:00.0" voided="false"
+	                        uuid="r0000000-0000-0000-0000-000000000311"/>
+	<cashier_bill_line_item bill_line_item_id="302" bill_id="301" item_id="0" price="40.00" price_name="default"
+	                        quantity="1" line_item_order="1" payment_status="PAID"
+	                        creator="1" date_created="2012-04-01 00:00:00.0" voided="false"
+	                        uuid="r0000000-0000-0000-0000-000000000312"/>
+
+	<!-- Bill with an active bill-level refund (REQUESTED) -->
+	<cashier_bill bill_id="302" receipt_number="refund-test-active-bill-refund" provider_id="0" patient_id="0"
+	              cash_point_id="0" status="REFUND_REQUESTED"
+	              creator="1" date_created="2012-04-01 00:00:00.0" voided="false"
+	              uuid="r0000000-0000-0000-0000-000000000302" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="320" bill_id="302" item_id="0" price="50.00" price_name="default"
+	                        quantity="1" line_item_order="0" payment_status="PAID"
+	                        creator="1" date_created="2012-04-01 00:00:00.0" voided="false"
+	                        uuid="r0000000-0000-0000-0000-000000000320"/>
+
+	<!-- Bill with an active line-scoped refund on line 330 -->
+	<cashier_bill bill_id="303" receipt_number="refund-test-active-line-refund" provider_id="0" patient_id="0"
+	              cash_point_id="0" status="REFUND_REQUESTED"
+	              creator="1" date_created="2012-04-01 00:00:00.0" voided="false"
+	              uuid="r0000000-0000-0000-0000-000000000303" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="330" bill_id="303" item_id="0" price="70.00" price_name="default"
+	                        quantity="1" line_item_order="0" payment_status="PAID"
+	                        creator="1" date_created="2012-04-01 00:00:00.0" voided="false"
+	                        uuid="r0000000-0000-0000-0000-000000000330"/>
+	<cashier_bill_line_item bill_line_item_id="331" bill_id="303" item_id="0" price="30.00" price_name="default"
+	                        quantity="1" line_item_order="1" payment_status="PAID"
+	                        creator="1" date_created="2012-04-01 00:00:00.0" voided="false"
+	                        uuid="r0000000-0000-0000-0000-000000000331"/>
+
+	<!-- Listed first so DbUnit column-sensing picks up bill_line_item_id and refund_status. -->
+	<bill_refund bill_refund_id="3" bill_id="303" bill_line_item_id="330" refund_amount="70.00"
+	             reason="Lab equipment failure" refund_status="REQUESTED"
+	             initiator_id="1" creator="1" date_created="2012-04-02 00:00:00.0" voided="false"
+	             uuid="r1000000-0000-0000-0000-000000000003"/>
+
+	<bill_refund bill_refund_id="1" bill_id="302" refund_amount="50.00" reason="Service not delivered"
+	             refund_status="REQUESTED"
+	             initiator_id="1" creator="1" date_created="2012-04-02 00:00:00.0" voided="false"
+	             uuid="r1000000-0000-0000-0000-000000000001"/>
+
+	<!-- Bill with a voided refund (back to PAID) -->
+	<cashier_bill bill_id="304" receipt_number="refund-test-voided-history" provider_id="0" patient_id="0"
+	              cash_point_id="0" status="PAID"
+	              creator="1" date_created="2012-04-01 00:00:00.0" voided="false"
+	              uuid="r0000000-0000-0000-0000-000000000304" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="340" bill_id="304" item_id="0" price="40.00" price_name="default"
+	                        quantity="1" line_item_order="0" payment_status="PAID"
+	                        creator="1" date_created="2012-04-01 00:00:00.0" voided="false"
+	                        uuid="r0000000-0000-0000-0000-000000000340"/>
+	<bill_refund bill_refund_id="2" bill_id="304" refund_amount="40.00" reason="Mistakenly raised"
+	             refund_status="REQUESTED"
+	             initiator_id="1" creator="1" date_created="2012-04-02 00:00:00.0"
+	             voided="true" voided_by="1" date_voided="2012-04-03 00:00:00.0" void_reason="Test void"
+	             uuid="r1000000-0000-0000-0000-000000000002"/>
+</dataset>

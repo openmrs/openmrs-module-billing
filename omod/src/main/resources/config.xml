@@ -105,6 +105,12 @@
 	</globalProperty>
 
 	<globalProperty>
+		<property>${project.parent.artifactId}.refundEnabled</property>
+		<description>true/false whether or not the refund feature is enabled at the facility level.</description>
+		<defaultValue>false</defaultValue>
+	</globalProperty>
+
+	<globalProperty>
 		<property>${project.parent.artifactId}.autofillPaymentAmount</property>
 		<description>
 			True/false weather or not the payment amount should be automatically filled with the remaining balance.
@@ -232,6 +238,27 @@
 	<privilege>
 		<name>View Bill Discounts</name>
 		<description>Able to view bill discounts</description>
+	</privilege>
+
+	<!--  Refunds  -->
+	<privilege>
+		<name>Request Bill Refunds</name>
+		<description>Able to raise a refund request against a paid bill</description>
+	</privilege>
+
+	<privilege>
+		<name>Approve Bill Refunds</name>
+		<description>Able to approve or reject pending bill refund requests</description>
+	</privilege>
+
+	<privilege>
+		<name>Complete Bill Refunds</name>
+		<description>Able to record completion of an approved refund (cash or electronic disbursement)</description>
+	</privilege>
+
+	<privilege>
+		<name>View Bill Refunds</name>
+		<description>Able to view bill refunds</description>
 	</privilege>
 
 	<!--  Metadata  -->
