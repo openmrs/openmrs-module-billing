@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -292,7 +293,7 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 		String status = context.getRequest().getParameter("status");
 		if (StringUtils.isNotBlank(status)) {
 			List<BillStatus> statuses = Arrays.stream(status.split(",")).map(String::trim).filter(StringUtils::isNotBlank)
-			        .map(s -> BillStatus.valueOf(s.toUpperCase())).collect(Collectors.toList());
+			        .map(s -> BillStatus.valueOf(s.toUpperCase(Locale.ROOT))).collect(Collectors.toList());
 			billSearch.setStatuses(statuses);
 		}
 		
@@ -306,7 +307,7 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			List<DiscountStatus> discountStatuses = Arrays.stream(discountStatus.split(",")).map(String::trim)
 			        .filter(StringUtils::isNotBlank).map(s -> {
 				        try {
-					        return DiscountStatus.valueOf(s.toUpperCase());
+					        return DiscountStatus.valueOf(s.toUpperCase(Locale.ROOT));
 				        }
 				        catch (IllegalArgumentException e) {
 					        throw new InvalidSearchException("Invalid discountStatus '" + s + "'. Allowed values: "
