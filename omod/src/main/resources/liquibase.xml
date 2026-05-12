@@ -1129,7 +1129,7 @@
         </preConditions>
         <comment>Create table for bill discounts with full audit trail</comment>
 
-		<createTable tableName="bill_discount">
+        <createTable tableName="bill_discount">
             <column name="bill_discount_id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>

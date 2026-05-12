@@ -21,8 +21,9 @@ import org.openmrs.module.billing.api.util.PrivilegeConstants;
  * bill's status across the refund lifecycle.
  * <p>
  * Throughout this interface, a refund is considered <b>"active"</b> when {@code voided=false} AND
- * its {@link RefundStatus} is one of {@code REQUESTED}, {@code APPROVED}, or {@code COMPLETED}.
- * {@code REJECTED} refunds are not active.
+ * its {@link RefundStatus} is {@code REQUESTED} or {@code APPROVED}. {@code COMPLETED} and
+ * {@code REJECTED} refunds are not active — completing or rejecting frees the scope so further
+ * refunds can target any remaining unrefunded amount.
  */
 public interface BillRefundService {
 	
