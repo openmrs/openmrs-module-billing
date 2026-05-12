@@ -64,6 +64,8 @@ public class Bill extends BaseOpenmrsData {
 	
 	private Set<BillDiscount> discounts;
 	
+	private Set<BillRefund> refunds;
+	
 	/**
 	 * Returns every non-voided discount on this bill (bill-level and line-item scoped). Voided rows are
 	 * excluded — for the full audit history, query {@code BillDiscountService.getDiscountsByBillId} (or
@@ -229,6 +231,11 @@ public class Bill extends BaseOpenmrsData {
 	}
 	
 	public void synchronizeBillStatus() {
+		BillStatus current = getStatus();
+		if (current == BillStatus.REFUND_REQUESTED || current == BillStatus.REFUNDED
+		        || current == BillStatus.PARTIALLY_REFUNDED) {
+			return;
+		}
 		if (!this.getPayments().isEmpty() && getTotalPayments().compareTo(BigDecimal.ZERO) > 0) {
 			// Approved discount exceeds the current bill total — likely a line item was voided
 			// after approval. Stay POSTED so a human can void/reapply rather than letting any
