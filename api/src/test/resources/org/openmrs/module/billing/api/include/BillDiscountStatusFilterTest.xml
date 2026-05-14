@@ -21,7 +21,7 @@
 	              creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
 	              uuid="b1000000-0000-0000-0000-000000000001" receipt_printed="0"/>
 	<cashier_bill_line_item bill_line_item_id="1010" bill_id="1001" item_id="0" price="100.00" price_name="default"
-	                        quantity="1" line_item_order="0" payment_status="PENDING"
+	                        quantity="1" line_item_order="0" status="PENDING"
 	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
 	                        uuid="e1000000-0000-0000-0000-000000001010"/>
 
@@ -31,7 +31,7 @@
 	              creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
 	              uuid="b2000000-0000-0000-0000-000000000002" receipt_printed="0"/>
 	<cashier_bill_line_item bill_line_item_id="1020" bill_id="1002" item_id="0" price="100.00" price_name="default"
-	                        quantity="1" line_item_order="0" payment_status="PENDING"
+	                        quantity="1" line_item_order="0" status="PENDING"
 	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
 	                        uuid="e1000000-0000-0000-0000-000000001020"/>
 
@@ -41,7 +41,7 @@
 	              creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
 	              uuid="b3000000-0000-0000-0000-000000000003" receipt_printed="0"/>
 	<cashier_bill_line_item bill_line_item_id="1030" bill_id="1003" item_id="0" price="100.00" price_name="default"
-	                        quantity="1" line_item_order="0" payment_status="PENDING"
+	                        quantity="1" line_item_order="0" status="PENDING"
 	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
 	                        uuid="e1000000-0000-0000-0000-000000001030"/>
 
@@ -51,11 +51,11 @@
 	              creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
 	              uuid="b4000000-0000-0000-0000-000000000004" receipt_printed="0"/>
 	<cashier_bill_line_item bill_line_item_id="1040" bill_id="1004" item_id="0" price="100.00" price_name="default"
-	                        quantity="1" line_item_order="0" payment_status="PENDING"
+	                        quantity="1" line_item_order="0" status="PENDING"
 	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
 	                        uuid="e1000000-0000-0000-0000-000000001040"/>
 	<cashier_bill_line_item bill_line_item_id="1041" bill_id="1004" item_id="0" price="50.00" price_name="default"
-	                        quantity="1" line_item_order="1" payment_status="PENDING"
+	                        quantity="1" line_item_order="1" status="PENDING"
 	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
 	                        uuid="e1000000-0000-0000-0000-000000001041"/>
 
@@ -65,7 +65,7 @@
 	              creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
 	              uuid="b5000000-0000-0000-0000-000000000005" receipt_printed="0"/>
 	<cashier_bill_line_item bill_line_item_id="1050" bill_id="1005" item_id="0" price="100.00" price_name="default"
-	                        quantity="1" line_item_order="0" payment_status="PENDING"
+	                        quantity="1" line_item_order="0" status="PENDING"
 	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
 	                        uuid="e1000000-0000-0000-0000-000000001050"/>
 
