@@ -136,7 +136,7 @@ public class BillRefundServiceImpl implements BillRefundService {
 		Integer billId = refund.getBill() == null ? null : refund.getBill().getId();
 		Integer billLineItemId = refund.getLineItem() == null ? null : refund.getLineItem().getId();
 		if (billId == null || billLineItemId == null) {
-			log.warn("Cannot reconcile line item status: refund {} has billId={} lineItemId={}", refund.getUuid(), billId,
+			log.error("Cannot reconcile line item status: refund {} has billId={} lineItemId={}", refund.getUuid(), billId,
 			    billLineItemId);
 			return;
 		}
