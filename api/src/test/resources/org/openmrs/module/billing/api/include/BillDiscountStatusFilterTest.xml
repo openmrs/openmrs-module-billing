@@ -1,0 +1,117 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+
+-->
+<dataset>
+	<!-- Five bills (1001–1005) used exclusively to test getBills discount-status filtering.
+	     Uses bill_id range 1001–1005 to avoid colliding with BillTest.xml (0–2) and
+	     BillDiscountTest.xml (100–200). -->
+
+	<!-- bill 1001 — one PENDING bill-level discount (non-voided) -->
+	<cashier_bill bill_id="1001" receipt_number="filter-test-1001" provider_id="0" patient_id="0"
+	              cash_point_id="0" status="PENDING"
+	              creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	              uuid="b1000000-0000-0000-0000-000000000001" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="1010" bill_id="1001" item_id="0" price="100.00" price_name="default"
+	                        quantity="1" line_item_order="0" payment_status="PENDING"
+	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                        uuid="e1000000-0000-0000-0000-000000001010"/>
+
+	<!-- bill 1002 — one APPROVED bill-level discount (non-voided) -->
+	<cashier_bill bill_id="1002" receipt_number="filter-test-1002" provider_id="0" patient_id="0"
+	              cash_point_id="0" status="PENDING"
+	              creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	              uuid="b2000000-0000-0000-0000-000000000002" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="1020" bill_id="1002" item_id="0" price="100.00" price_name="default"
+	                        quantity="1" line_item_order="0" payment_status="PENDING"
+	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                        uuid="e1000000-0000-0000-0000-000000001020"/>
+
+	<!-- bill 1003 — one REJECTED line-item discount (non-voided) -->
+	<cashier_bill bill_id="1003" receipt_number="filter-test-1003" provider_id="0" patient_id="0"
+	              cash_point_id="0" status="PENDING"
+	              creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	              uuid="b3000000-0000-0000-0000-000000000003" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="1030" bill_id="1003" item_id="0" price="100.00" price_name="default"
+	                        quantity="1" line_item_order="0" payment_status="PENDING"
+	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                        uuid="e1000000-0000-0000-0000-000000001030"/>
+
+	<!-- bill 1004 — one PENDING + one APPROVED line-item discounts (both non-voided) -->
+	<cashier_bill bill_id="1004" receipt_number="filter-test-1004" provider_id="0" patient_id="0"
+	              cash_point_id="0" status="PENDING"
+	              creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	              uuid="b4000000-0000-0000-0000-000000000004" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="1040" bill_id="1004" item_id="0" price="100.00" price_name="default"
+	                        quantity="1" line_item_order="0" payment_status="PENDING"
+	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                        uuid="e1000000-0000-0000-0000-000000001040"/>
+	<cashier_bill_line_item bill_line_item_id="1041" bill_id="1004" item_id="0" price="50.00" price_name="default"
+	                        quantity="1" line_item_order="1" payment_status="PENDING"
+	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                        uuid="e1000000-0000-0000-0000-000000001041"/>
+
+	<!-- bill 1005 — one PENDING discount that is voided -->
+	<cashier_bill bill_id="1005" receipt_number="filter-test-1005" provider_id="0" patient_id="0"
+	              cash_point_id="0" status="PENDING"
+	              creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	              uuid="b5000000-0000-0000-0000-000000000005" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="1050" bill_id="1005" item_id="0" price="100.00" price_name="default"
+	                        quantity="1" line_item_order="0" payment_status="PENDING"
+	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                        uuid="e1000000-0000-0000-0000-000000001050"/>
+
+	<!-- bill_discount rows. Listed with a line-item-scoped row FIRST so DbUnit column-sensing
+	     picks up the bill_line_item_id column for all subsequent rows. -->
+
+	<!-- bill 1003: REJECTED line-item discount (listed first to prime column sensing) -->
+	<bill_discount bill_discount_id="1003" bill_id="1003" bill_line_item_id="1030"
+	               discount_type="FIXED_AMOUNT" discount_value="10.00" discount_status="REJECTED"
+	               justification="Rejected request" initiator_id="1" approver_id="5506"
+	               creator="1" date_created="2012-01-02 00:00:00.0" voided="false"
+	               uuid="d1000000-0000-0000-0000-000000001003"/>
+
+	<!-- bill 1001: PENDING bill-level discount -->
+	<bill_discount bill_discount_id="1001" bill_id="1001"
+	               discount_type="PERCENTAGE" discount_value="10.00" discount_status="PENDING"
+	               justification="Awaiting approval" initiator_id="1"
+	               creator="1" date_created="2012-01-02 00:00:00.0" voided="false"
+	               uuid="d1000000-0000-0000-0000-000000001001"/>
+
+	<!-- bill 1002: APPROVED bill-level discount -->
+	<bill_discount bill_discount_id="1002" bill_id="1002"
+	               discount_type="PERCENTAGE" discount_value="10.00" discount_status="APPROVED"
+	               justification="Approved waiver" initiator_id="1" approver_id="5506"
+	               creator="1" date_created="2012-01-02 00:00:00.0" voided="false"
+	               uuid="d1000000-0000-0000-0000-000000001002"/>
+
+	<!-- bill 1004: PENDING line-item discount -->
+	<bill_discount bill_discount_id="1004" bill_id="1004" bill_line_item_id="1040"
+	               discount_type="FIXED_AMOUNT" discount_value="5.00" discount_status="PENDING"
+	               justification="Pending line item discount" initiator_id="1"
+	               creator="1" date_created="2012-01-02 00:00:00.0" voided="false"
+	               uuid="d1000000-0000-0000-0000-000000001004"/>
+
+	<!-- bill 1004: APPROVED line-item discount -->
+	<bill_discount bill_discount_id="1005" bill_id="1004" bill_line_item_id="1041"
+	               discount_type="FIXED_AMOUNT" discount_value="5.00" discount_status="APPROVED"
+	               justification="Approved line item discount" initiator_id="1" approver_id="5506"
+	               creator="1" date_created="2012-01-02 00:00:00.0" voided="false"
+	               uuid="d1000000-0000-0000-0000-000000001005"/>
+
+	<!-- bill 1005: PENDING discount — voided -->
+	<bill_discount bill_discount_id="1006" bill_id="1005" bill_line_item_id="1050"
+	               discount_type="FIXED_AMOUNT" discount_value="10.00" discount_status="PENDING"
+	               justification="Will be voided" initiator_id="1"
+	               creator="1" date_created="2012-01-02 00:00:00.0"
+	               voided="true" voided_by="1" date_voided="2012-01-03 00:00:00.0" void_reason="Test void"
+	               uuid="d1000000-0000-0000-0000-000000001006"/>
+</dataset>
