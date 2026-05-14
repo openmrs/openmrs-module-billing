@@ -584,6 +584,45 @@ public class BillRefundServiceImplTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
+	public void saveBillRefund_shouldFlipLineItemToRefundedWhenCumulativeApprovedRefundsReachLineTotal() {
+		// Proves the derivation sums across multiple line-scoped refunds rather than only inspecting the latest.
+		BillRefund first = buildLineScopedRefund(MULTILINE_PAID_BILL_UUID, MULTILINE_PAID_LINE_ITEM_UUID,
+		    new BigDecimal("25.00"), "First partial");
+		BillRefund firstSaved = service.saveBillRefund(first);
+		firstSaved.setStatus(RefundStatus.APPROVED);
+		firstSaved.setApprover(Context.getUserService().getUser(5506));
+		service.saveBillRefund(firstSaved);
+		BillRefund firstApproved = service.getBillRefundByUuid(firstSaved.getUuid());
+		firstApproved.setStatus(RefundStatus.COMPLETED);
+		firstApproved.setCompleter(Context.getUserService().getUser(5506));
+		service.saveBillRefund(firstApproved);
+		
+		BillRefund second = buildLineScopedRefund(MULTILINE_PAID_BILL_UUID, MULTILINE_PAID_LINE_ITEM_UUID,
+		    new BigDecimal("35.00"), "Second partial bringing total to line price");
+		BillRefund secondSaved = service.saveBillRefund(second);
+		secondSaved.setStatus(RefundStatus.APPROVED);
+		secondSaved.setApprover(Context.getUserService().getUser(5506));
+		service.saveBillRefund(secondSaved);
+		
+		BillLineItem lineItem = lineItemService.getBillLineItemByUuid(MULTILINE_PAID_LINE_ITEM_UUID);
+		assertEquals(BillLineItemStatus.REFUNDED, lineItem.getStatus());
+	}
+	
+	@Test
+	public void saveBillRefund_shouldRevertLineItemToPaidWhenLineScopedRefundIsRejected() {
+		BillRefund refund = buildLineScopedRefund(MULTILINE_PAID_BILL_UUID, MULTILINE_PAID_LINE_ITEM_UUID,
+		    new BigDecimal("30.00"), "Line refund to be rejected");
+		BillRefund saved = service.saveBillRefund(refund);
+		
+		saved.setStatus(RefundStatus.REJECTED);
+		saved.setApprover(Context.getUserService().getUser(5506));
+		service.saveBillRefund(saved);
+		
+		BillLineItem lineItem = lineItemService.getBillLineItemByUuid(MULTILINE_PAID_LINE_ITEM_UUID);
+		assertEquals(BillLineItemStatus.PAID, lineItem.getStatus());
+	}
+	
+	@Test
 	public void saveBillRefund_billScopedRefundShouldNotChangeLineItemStatus() {
 		BillRefund refund = buildRefund(CLEAN_PAID_BILL_UUID, new BigDecimal("40.00"), "Partial bill-level refund");
 		BillRefund saved = service.saveBillRefund(refund);

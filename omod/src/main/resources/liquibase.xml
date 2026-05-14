@@ -1306,6 +1306,9 @@
 	</changeSet>
 
 	<changeSet id="openmrs.billing-008-20260512-fix-posted-line-item-status" author="Wikum Weerakutti">
+		<preConditions onFail="MARK_RAN">
+			<columnExists tableName="cashier_bill_line_item" columnName="payment_status"/>
+		</preConditions>
 		<comment>POSTED is no longer a valid BillLineItemStatus; migrate any legacy rows to PENDING.</comment>
 		<update tableName="cashier_bill_line_item">
 			<column name="payment_status" value="PENDING"/>
@@ -1318,5 +1321,17 @@
 			<columnExists tableName="cashier_bill_line_item" columnName="payment_status"/>
 		</preConditions>
 		<renameColumn tableName="cashier_bill_line_item" oldColumnName="payment_status" newColumnName="status" columnDataType="varchar(20)" />
+	</changeSet>
+
+	<changeSet id="openmrs.billing-010-20260512-enforce-line-item-status-not-null" author="Wikum Weerakutti">
+		<preConditions onFail="MARK_RAN">
+			<columnExists tableName="cashier_bill_line_item" columnName="status"/>
+		</preConditions>
+		<comment>Backfill any unexpected NULL status rows as PENDING, then re-apply NOT NULL on the renamed column for cross-DB portability.</comment>
+		<update tableName="cashier_bill_line_item">
+			<column name="status" value="PENDING"/>
+			<where>status IS NULL</where>
+		</update>
+		<addNotNullConstraint tableName="cashier_bill_line_item" columnName="status" columnDataType="varchar(20)"/>
 	</changeSet>
 </databaseChangeLog>

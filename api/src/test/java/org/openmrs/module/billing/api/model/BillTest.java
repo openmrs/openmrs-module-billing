@@ -228,6 +228,56 @@ public class BillTest {
 	}
 	
 	@Test
+	public void synchronizeBillStatus_shouldNotClobberRefundStateLineItemsWhenBillIsFullyPaid() {
+		// Line items that already reflect a refund state must not be flipped back to PAID
+		// when the bill is settled. This guards against a partial-payment + refund interleave
+		// silently dropping line-level refund history.
+		Bill bill = new Bill();
+		bill.setLineItems(new ArrayList<>());
+		bill.setPayments(new HashSet<>());
+		
+		BillLineItem paidLine = new BillLineItem();
+		paidLine.setPrice(BigDecimal.valueOf(40));
+		paidLine.setQuantity(1);
+		paidLine.setVoided(false);
+		bill.getLineItems().add(paidLine);
+		
+		BillLineItem refundRequestedLine = new BillLineItem();
+		refundRequestedLine.setPrice(BigDecimal.valueOf(20));
+		refundRequestedLine.setQuantity(1);
+		refundRequestedLine.setVoided(false);
+		refundRequestedLine.setStatus(BillLineItemStatus.REFUND_REQUESTED);
+		bill.getLineItems().add(refundRequestedLine);
+		
+		BillLineItem partiallyRefundedLine = new BillLineItem();
+		partiallyRefundedLine.setPrice(BigDecimal.valueOf(25));
+		partiallyRefundedLine.setQuantity(1);
+		partiallyRefundedLine.setVoided(false);
+		partiallyRefundedLine.setStatus(BillLineItemStatus.PARTIALLY_REFUNDED);
+		bill.getLineItems().add(partiallyRefundedLine);
+		
+		BillLineItem refundedLine = new BillLineItem();
+		refundedLine.setPrice(BigDecimal.valueOf(15));
+		refundedLine.setQuantity(1);
+		refundedLine.setVoided(false);
+		refundedLine.setStatus(BillLineItemStatus.REFUNDED);
+		bill.getLineItems().add(refundedLine);
+		
+		Payment payment = new Payment();
+		payment.setAmountTendered(BigDecimal.valueOf(100));
+		payment.setVoided(false);
+		bill.getPayments().add(payment);
+		
+		bill.synchronizeBillStatus();
+		
+		assertEquals(BillStatus.PAID, bill.getStatus());
+		assertEquals(BillLineItemStatus.PAID, paidLine.getStatus());
+		assertEquals(BillLineItemStatus.REFUND_REQUESTED, refundRequestedLine.getStatus());
+		assertEquals(BillLineItemStatus.PARTIALLY_REFUNDED, partiallyRefundedLine.getStatus());
+		assertEquals(BillLineItemStatus.REFUNDED, refundedLine.getStatus());
+	}
+	
+	@Test
 	public void synchronizeBillStatus_shouldFlipToPaidWhenPaymentEqualsAmountAfterDiscount() {
 		// Gross total 100, discount 30 → discounted total 70. Payment of 70 must mark the bill PAID
 		// even though the gross total is still 100. This is the behavior synchronizeBillStatus()

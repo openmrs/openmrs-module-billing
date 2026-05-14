@@ -11,6 +11,7 @@ package org.openmrs.module.billing.api.model;
 
 import java.math.BigDecimal;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.openmrs.BaseChangeableOpenmrsData;
@@ -27,6 +28,7 @@ public class BillLineItem extends BaseChangeableOpenmrsData {
 	
 	private static final long serialVersionUID = 0L;
 	
+	@Setter(AccessLevel.NONE)
 	private Integer billLineItemId;
 	
 	private Bill bill;

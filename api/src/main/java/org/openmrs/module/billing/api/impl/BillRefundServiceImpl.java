@@ -16,6 +16,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillRefundService;
 import org.openmrs.module.billing.api.BillService;
@@ -29,6 +30,7 @@ import org.openmrs.module.billing.api.model.RefundStatus;
 import org.openmrs.module.billing.api.util.PrivilegeConstants;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @RequiredArgsConstructor
 public class BillRefundServiceImpl implements BillRefundService {
 	
@@ -76,9 +78,12 @@ public class BillRefundServiceImpl implements BillRefundService {
 		BillRefund saved = billRefundDAO.saveBillRefund(billRefund);
 		stampTransitionTimestamps(saved);
 		Integer billId = saved.getBill() == null ? null : saved.getBill().getId();
+		if (billId == null) {
+			log.error("Saved refund {} has no associated bill; skipping status reconcile", saved.getUuid());
+		}
 		reconcileBillStatus(billId);
 		if (saved.getLineItem() != null) {
-			reconcileBillLineItemStatus(billId, saved.getLineItem().getId());
+			reconcileBillLineItemStatus(saved);
 		}
 		return saved;
 	}
@@ -108,6 +113,7 @@ public class BillRefundServiceImpl implements BillRefundService {
 			Context.addProxyPrivilege(PrivilegeConstants.MANAGE_BILLS);
 			Bill freshBill = Context.getService(BillService.class).getBill(billId);
 			if (freshBill == null) {
+				log.error("Refund-driven reconcile could not load bill {}; bill status will not be updated", billId);
 				return;
 			}
 			BillStatus target = deriveBillStatusFromRefunds(billId, freshBill);
@@ -117,19 +123,29 @@ public class BillRefundServiceImpl implements BillRefundService {
 			freshBill.setStatus(target);
 			Context.getService(BillService.class).saveBill(freshBill);
 		}
+		catch (RuntimeException e) {
+			log.error("Failed to reconcile bill status for bill {}", billId, e);
+			throw e;
+		}
 		finally {
 			Context.removeProxyPrivilege(PrivilegeConstants.MANAGE_BILLS);
 		}
 	}
 	
-	private void reconcileBillLineItemStatus(Integer billId, Integer billLineItemId) {
-		if (billLineItemId == null || billId == null) {
+	private void reconcileBillLineItemStatus(BillRefund refund) {
+		Integer billId = refund.getBill() == null ? null : refund.getBill().getId();
+		Integer billLineItemId = refund.getLineItem() == null ? null : refund.getLineItem().getId();
+		if (billId == null || billLineItemId == null) {
+			log.warn("Cannot reconcile line item status: refund {} has billId={} lineItemId={}", refund.getUuid(), billId,
+			    billLineItemId);
 			return;
 		}
 		try {
 			Context.addProxyPrivilege(PrivilegeConstants.MANAGE_BILLS);
 			Bill freshBill = Context.getService(BillService.class).getBill(billId);
 			if (freshBill == null) {
+				log.error("Refund {} references bill {} which could not be loaded; skipping line-item status reconcile",
+				    refund.getUuid(), billId);
 				return;
 			}
 			
@@ -137,6 +153,8 @@ public class BillRefundServiceImpl implements BillRefundService {
 			        .findFirst().orElse(null);
 			
 			if (lineItem == null) {
+				log.error("Refund {} references line item {} that is not on bill {}; skipping line-item status reconcile",
+				    refund.getUuid(), billLineItemId, billId);
 				return;
 			}
 			
@@ -146,6 +164,11 @@ public class BillRefundServiceImpl implements BillRefundService {
 			}
 			lineItem.setStatus(target);
 			Context.getService(BillService.class).saveBill(freshBill);
+		}
+		catch (RuntimeException e) {
+			log.error("Failed to reconcile line item {} on bill {} for refund {}", billLineItemId, billId, refund.getUuid(),
+			    e);
+			throw e;
 		}
 		finally {
 			Context.removeProxyPrivilege(PrivilegeConstants.MANAGE_BILLS);
