@@ -75,9 +75,10 @@ public class BillRefundServiceImpl implements BillRefundService {
 	public BillRefund saveBillRefund(BillRefund billRefund) {
 		BillRefund saved = billRefundDAO.saveBillRefund(billRefund);
 		stampTransitionTimestamps(saved);
-		reconcileBillStatus(saved.getBill() == null ? null : saved.getBill().getId());
+		Integer billId = saved.getBill() == null ? null : saved.getBill().getId();
+		reconcileBillStatus(billId);
 		if (saved.getLineItem() != null) {
-			reconcileBillLineItemStatus(saved.getBill().getBillId(), saved.getLineItem().getId());
+			reconcileBillLineItemStatus(billId, saved.getLineItem().getId());
 		}
 		return saved;
 	}

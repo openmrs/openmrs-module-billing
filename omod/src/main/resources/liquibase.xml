@@ -1305,12 +1305,7 @@
 		</modifyColumn>
 	</changeSet>
 
-	<changeSet id="openmrs.billing-005-20260512-fix-posted-line-item-status" author="Wikum Weerakutti">
-		<preConditions onFail="MARK_RAN">
-			<sqlCheck expectedResult="0" >
-				SELECT 1 FROM cashier_bill_line_item WHERE payment_status = 'POSTED' LIMIT 1
-			</sqlCheck>
-		</preConditions>
+	<changeSet id="openmrs.billing-008-20260512-fix-posted-line-item-status" author="Wikum Weerakutti">
 		<comment>POSTED is no longer a valid BillLineItemStatus; migrate any legacy rows to PENDING.</comment>
 		<update tableName="cashier_bill_line_item">
 			<column name="payment_status" value="PENDING"/>
@@ -1318,9 +1313,9 @@
 		</update>
 	</changeSet>
 
-	<changeSet id="openmrs.billing-005-20260512-rename-payment-status" author="Wikum Weerakutti">
+	<changeSet id="openmrs.billing-009-20260512-rename-payment-status" author="Wikum Weerakutti">
 		<preConditions onFail="MARK_RAN">
-			<columnExists tableName="cashier_bill_line_item" columnName="status"/>
+			<columnExists tableName="cashier_bill_line_item" columnName="payment_status"/>
 		</preConditions>
 		<renameColumn tableName="cashier_bill_line_item" oldColumnName="payment_status" newColumnName="status" columnDataType="varchar(20)" />
 	</changeSet>
