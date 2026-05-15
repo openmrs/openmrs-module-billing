@@ -101,13 +101,13 @@
 	<globalProperty>
 		<property>${project.parent.artifactId}.discountEnabled</property>
 		<description>true/false whether or not the discount feature is enabled at the facility level.</description>
-		<defaultValue>false</defaultValue>
+		<defaultValue>true</defaultValue>
 	</globalProperty>
 
 	<globalProperty>
 		<property>${project.parent.artifactId}.refundEnabled</property>
 		<description>true/false whether or not the refund feature is enabled at the facility level.</description>
-		<defaultValue>false</defaultValue>
+		<defaultValue>true</defaultValue>
 	</globalProperty>
 
 	<globalProperty>
