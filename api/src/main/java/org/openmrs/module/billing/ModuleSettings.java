@@ -61,6 +61,8 @@ public class ModuleSettings {
 	
 	public static final String PAYMENTS_BY_PAYMENT_MODE_REPORT_ID_PROPERTY = "billing.reports.paymentsByPaymentMode";
 	
+	public static final String PATIENT_PAYMENT_STATUS_RESOLVER = "billing.patientPaymentStatusResolver";
+	
 	private static final AdministrationService administrationService;
 	
 	static {

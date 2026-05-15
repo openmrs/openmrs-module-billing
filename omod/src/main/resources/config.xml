@@ -173,6 +173,16 @@
 		</description>
 	</globalProperty>
 
+	<globalProperty>
+		<property>${project.parent.artifactId}.patientPaymentStatusResolver</property>
+		<description>
+			Fully qualified class name of a class implementing
+			org.openmrs.module.billing.api.PatientPaymentStatusResolver. The class must
+			have a public no-arg constructor. Leave blank to use the default resolver,
+			which derives PAID/UNPAID from existing Bill records.
+		</description>
+	</globalProperty>
+
 
 	<!-- Extensions -->
 	<!--	<extension>-->
