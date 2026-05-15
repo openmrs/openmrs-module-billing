@@ -337,4 +337,14 @@
 		</constructor-arg>
 	</bean>
 
+	<bean id="defaultPatientPaymentStatusResolver"
+	      class="org.openmrs.module.billing.api.impl.DefaultPatientPaymentStatusResolver">
+		<constructor-arg ref="billService"/>
+	</bean>
+
+	<bean id="patientPaymentStatusResolverFactory"
+	      class="org.openmrs.module.billing.api.PatientPaymentStatusResolverFactory">
+		<constructor-arg ref="defaultPatientPaymentStatusResolver"/>
+	</bean>
+
 </beans>
