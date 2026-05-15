@@ -36,6 +36,7 @@ import org.openmrs.module.billing.api.BillLineItemService;
 import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
+import org.openmrs.module.billing.api.model.BillLineItemStatus;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 
@@ -94,7 +95,7 @@ public class OrderBillingEventListenerTest extends BaseModuleContextSensitiveTes
 		assertFalse(bill.getLineItems().isEmpty());
 		BillLineItem lineItem = bill.getLineItems().get(0);
 		assertNotNull(lineItem.getBillableService());
-		assertEquals(BillStatus.PENDING, lineItem.getPaymentStatus());
+		assertEquals(BillLineItemStatus.PENDING, lineItem.getStatus());
 		assertEquals(1, lineItem.getQuantity());
 		assertEquals(new BigDecimal("75.00"), lineItem.getPrice());
 		assertEquals(savedOrder.getId(), lineItem.getOrder().getId());
@@ -305,7 +306,7 @@ public class OrderBillingEventListenerTest extends BaseModuleContextSensitiveTes
 		
 		BillLineItem lineItem = bill.getLineItems().get(0);
 		assertNotNull(lineItem.getItem(), "Line item should reference a stock item");
-		assertEquals(BillStatus.PENDING, lineItem.getPaymentStatus());
+		assertEquals(BillLineItemStatus.PENDING, lineItem.getStatus());
 		assertEquals(5, lineItem.getQuantity());
 		assertEquals(new BigDecimal("150.00"), lineItem.getPrice());
 		assertEquals(savedOrder.getId(), lineItem.getOrder().getId());

@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.openmrs.Order;
 import org.openmrs.Provider;
 import org.openmrs.TestOrder;
+import org.openmrs.module.billing.api.model.BillLineItemStatus;
 import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.BillableServiceService;
 import org.openmrs.module.billing.api.ItemPriceService;
@@ -67,8 +68,9 @@ public class TestOrderBillingStrategy extends AbstractDefaultOrderBillingStrateg
 		}
 		
 		BillableService billableService = searchResult.get(0);
-		BillStatus lineItemStatus = checkIfOrderIsExempted(order, ExemptionType.SERVICE) ? BillStatus.EXEMPTED
-		        : BillStatus.PENDING;
+		BillLineItemStatus lineItemStatus = checkIfOrderIsExempted(order, ExemptionType.SERVICE)
+		        ? BillLineItemStatus.EXEMPTED
+		        : BillLineItemStatus.PENDING;
 		
 		BillLineItem lineItem = createLineItem(resolvePrice(billableService), 1, lineItemStatus, order);
 		lineItem.setBillableService(billableService);

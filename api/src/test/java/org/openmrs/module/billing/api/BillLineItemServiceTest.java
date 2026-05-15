@@ -34,6 +34,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.TestConstants;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
+import org.openmrs.module.billing.api.model.BillLineItemStatus;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
@@ -139,7 +140,7 @@ public class BillLineItemServiceTest extends BaseModuleContextSensitiveTest {
 		BillLineItem lineItem = new BillLineItem();
 		lineItem.setPrice(new BigDecimal("100.00"));
 		lineItem.setQuantity(1);
-		lineItem.setPaymentStatus(BillStatus.PENDING);
+		lineItem.setStatus(BillLineItemStatus.PENDING);
 		lineItem.setLineItemOrder(0);
 		
 		Bill bill = new Bill();
@@ -158,7 +159,7 @@ public class BillLineItemServiceTest extends BaseModuleContextSensitiveTest {
 		BillLineItem lineItem = new BillLineItem();
 		lineItem.setPrice(new BigDecimal("75.00"));
 		lineItem.setQuantity(1);
-		lineItem.setPaymentStatus(BillStatus.PENDING);
+		lineItem.setStatus(BillLineItemStatus.PENDING);
 		lineItem.setLineItemOrder(0);
 		lineItem.setOrder(order);
 		

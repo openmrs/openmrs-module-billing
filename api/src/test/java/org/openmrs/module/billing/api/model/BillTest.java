@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import org.junit.Test;
-import org.openmrs.module.billing.api.model.DiscountStatus;
 
 /**
  * Test for verifying Bill model methods, particularly getTotalPayments()
@@ -131,7 +130,7 @@ public class BillTest {
 		bill.synchronizeBillStatus();
 		
 		assertEquals(BillStatus.PAID, bill.getStatus());
-		assertEquals(BillStatus.PAID, lineItem.getPaymentStatus());
+		assertEquals(BillLineItemStatus.PAID, lineItem.getStatus());
 	}
 	
 	@Test
@@ -187,7 +186,7 @@ public class BillTest {
 		bill.synchronizeBillStatus();
 		assertEquals(BillStatus.PAID, bill.getStatus());
 		// Only non-voided line items should be set to PAID
-		assertEquals(BillStatus.PAID, lineItem1.getPaymentStatus());
+		assertEquals(BillLineItemStatus.PAID, lineItem1.getStatus());
 	}
 	
 	@Test
@@ -222,10 +221,60 @@ public class BillTest {
 		bill.synchronizeBillStatus();
 		
 		assertEquals(BillStatus.PAID, bill.getStatus());
-		assertEquals(BillStatus.PAID, lineItem1.getPaymentStatus());
-		assertEquals(BillStatus.PAID, lineItem2.getPaymentStatus());
+		assertEquals(BillLineItemStatus.PAID, lineItem1.getStatus());
+		assertEquals(BillLineItemStatus.PAID, lineItem2.getStatus());
 		// Voided line items should not be updated
-		assertNull(voidedLineItem.getPaymentStatus());
+		assertNull(voidedLineItem.getStatus());
+	}
+	
+	@Test
+	public void synchronizeBillStatus_shouldNotClobberRefundStateLineItemsWhenBillIsFullyPaid() {
+		// Line items that already reflect a refund state must not be flipped back to PAID
+		// when the bill is settled. This guards against a partial-payment + refund interleave
+		// silently dropping line-level refund history.
+		Bill bill = new Bill();
+		bill.setLineItems(new ArrayList<>());
+		bill.setPayments(new HashSet<>());
+		
+		BillLineItem paidLine = new BillLineItem();
+		paidLine.setPrice(BigDecimal.valueOf(40));
+		paidLine.setQuantity(1);
+		paidLine.setVoided(false);
+		bill.getLineItems().add(paidLine);
+		
+		BillLineItem refundRequestedLine = new BillLineItem();
+		refundRequestedLine.setPrice(BigDecimal.valueOf(20));
+		refundRequestedLine.setQuantity(1);
+		refundRequestedLine.setVoided(false);
+		refundRequestedLine.setStatus(BillLineItemStatus.REFUND_REQUESTED);
+		bill.getLineItems().add(refundRequestedLine);
+		
+		BillLineItem partiallyRefundedLine = new BillLineItem();
+		partiallyRefundedLine.setPrice(BigDecimal.valueOf(25));
+		partiallyRefundedLine.setQuantity(1);
+		partiallyRefundedLine.setVoided(false);
+		partiallyRefundedLine.setStatus(BillLineItemStatus.PARTIALLY_REFUNDED);
+		bill.getLineItems().add(partiallyRefundedLine);
+		
+		BillLineItem refundedLine = new BillLineItem();
+		refundedLine.setPrice(BigDecimal.valueOf(15));
+		refundedLine.setQuantity(1);
+		refundedLine.setVoided(false);
+		refundedLine.setStatus(BillLineItemStatus.REFUNDED);
+		bill.getLineItems().add(refundedLine);
+		
+		Payment payment = new Payment();
+		payment.setAmountTendered(BigDecimal.valueOf(100));
+		payment.setVoided(false);
+		bill.getPayments().add(payment);
+		
+		bill.synchronizeBillStatus();
+		
+		assertEquals(BillStatus.PAID, bill.getStatus());
+		assertEquals(BillLineItemStatus.PAID, paidLine.getStatus());
+		assertEquals(BillLineItemStatus.REFUND_REQUESTED, refundRequestedLine.getStatus());
+		assertEquals(BillLineItemStatus.PARTIALLY_REFUNDED, partiallyRefundedLine.getStatus());
+		assertEquals(BillLineItemStatus.REFUNDED, refundedLine.getStatus());
 	}
 	
 	@Test
@@ -259,7 +308,7 @@ public class BillTest {
 		bill.synchronizeBillStatus();
 		
 		assertEquals(BillStatus.PAID, bill.getStatus());
-		assertEquals(BillStatus.PAID, lineItem.getPaymentStatus());
+		assertEquals(BillLineItemStatus.PAID, lineItem.getStatus());
 	}
 	
 	@Test

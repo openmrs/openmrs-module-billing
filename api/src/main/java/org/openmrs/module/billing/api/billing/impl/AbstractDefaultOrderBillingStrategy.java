@@ -34,6 +34,7 @@ import org.openmrs.module.billing.api.evaluator.ExemptionRuleEngine;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillExemption;
 import org.openmrs.module.billing.api.model.BillLineItem;
+import org.openmrs.module.billing.api.model.BillLineItemStatus;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.model.ExemptionType;
@@ -168,11 +169,11 @@ public abstract class AbstractDefaultOrderBillingStrategy extends AbstractOrderB
 	 * Create a bill line item with the common fields populated. Subclasses should set the type-specific
 	 * fields (item or billable service) on the returned line item.
 	 */
-	protected BillLineItem createLineItem(BigDecimal price, int quantity, BillStatus paymentStatus, Order order) {
+	protected BillLineItem createLineItem(BigDecimal price, int quantity, BillLineItemStatus paymentStatus, Order order) {
 		BillLineItem lineItem = new BillLineItem();
 		lineItem.setPrice(price);
 		lineItem.setQuantity(quantity);
-		lineItem.setPaymentStatus(paymentStatus);
+		lineItem.setStatus(paymentStatus);
 		lineItem.setLineItemOrder(0);
 		lineItem.setOrder(order);
 		return lineItem;

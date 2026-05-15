@@ -182,9 +182,9 @@
 		<property name="priceName" type="java.lang.String" column="price_name" length="255"/>
 		<property name="quantity" type="int" column="quantity" not-null="true"/>
 		<property name="lineItemOrder" type="int" column="line_item_order"/>
-		<property name="paymentStatus" column="payment_status" not-null="true">
+		<property name="status" column="status" not-null="true">
 			<type name="org.hibernate.type.EnumType">
-				<param name="enumClass">org.openmrs.module.billing.api.model.BillStatus</param>
+				<param name="enumClass">org.openmrs.module.billing.api.model.BillLineItemStatus</param>
 				<param name="type">12</param>
 			</type>
 		</property>

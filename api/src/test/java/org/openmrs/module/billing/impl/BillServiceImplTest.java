@@ -28,6 +28,7 @@ import org.openmrs.module.billing.api.PaymentModeService;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
+import org.openmrs.module.billing.api.model.BillLineItemStatus;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.model.Payment;
 import org.openmrs.module.billing.api.model.PaymentMode;
@@ -143,7 +144,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		StockItem stockItem = existingItem.getItem();
 		
 		BillLineItem lineItem = newBill.addLineItem(stockItem, BigDecimal.valueOf(150), "New price", 2);
-		lineItem.setPaymentStatus(BillStatus.PENDING);
+		lineItem.setStatus(BillLineItemStatus.PENDING);
 		lineItem.setUuid(UUID.randomUUID().toString());
 		
 		Bill savedBill = billService.saveBill(newBill);
@@ -222,7 +223,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		BillLineItem newLineItem = new BillLineItem();
 		newLineItem.setPrice(BigDecimal.valueOf(25.50));
 		newLineItem.setQuantity(2);
-		newLineItem.setPaymentStatus(BillStatus.PENDING);
+		newLineItem.setStatus(BillLineItemStatus.PENDING);
 		newLineItem.setLineItemOrder(pendingBill.getLineItems().size());
 		pendingBill.addLineItem(newLineItem);
 		
@@ -246,7 +247,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		BillLineItem newLineItem = new BillLineItem();
 		newLineItem.setPrice(BigDecimal.valueOf(25.50));
 		newLineItem.setQuantity(2);
-		newLineItem.setPaymentStatus(BillStatus.PENDING);
+		newLineItem.setStatus(BillLineItemStatus.PENDING);
 		paidBill.addLineItem(newLineItem);
 		
 		// Should throw exception when saving (BillValidator catches line item
@@ -495,7 +496,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		Bill templateBill = billService.getBill(0);
 		BillLineItem existingItem = templateBill.getLineItems().get(0);
 		BillLineItem lineItem = newBill.addLineItem(existingItem.getItem(), BigDecimal.valueOf(100), "Test price", 1);
-		lineItem.setPaymentStatus(BillStatus.PENDING);
+		lineItem.setStatus(BillLineItemStatus.PENDING);
 		lineItem.setUuid(UUID.randomUUID().toString());
 		
 		Bill savedBill = billService.saveBill(newBill);
