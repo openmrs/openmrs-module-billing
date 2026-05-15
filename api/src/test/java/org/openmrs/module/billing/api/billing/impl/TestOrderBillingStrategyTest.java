@@ -154,7 +154,7 @@ public class TestOrderBillingStrategyTest {
 	
 	@Test
 	public void createBill_shouldInheritVisitFromOrderEncounter() {
-		Patient patient = mock(Patient.class);
+		Patient patient = new Patient();
 		Order order = mock(Order.class);
 		Encounter encounter = mock(Encounter.class);
 		Visit visit = mock(Visit.class);
@@ -177,7 +177,7 @@ public class TestOrderBillingStrategyTest {
 	
 	@Test
 	public void createBill_shouldLeaveVisitNullWhenEncounterHasNoVisit() {
-		Patient patient = mock(Patient.class);
+		Patient patient = new Patient();
 		Order order = mock(Order.class);
 		Encounter encounter = mock(Encounter.class);
 		Provider cashier = mock(Provider.class);
