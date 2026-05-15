@@ -155,6 +155,9 @@ public abstract class AbstractDefaultOrderBillingStrategy extends AbstractOrderB
 		bill.setStatus(BillStatus.PENDING);
 		bill.setCashier(cashier);
 		bill.setCashPoint(cashPoint);
+		if (order.getEncounter() != null) {
+			bill.setVisit(order.getEncounter().getVisit());
+		}
 		bill.addLineItem(lineItem);
 		
 		Bill savedBill = billService.saveBill(bill);

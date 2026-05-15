@@ -17,8 +17,10 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Provider;
+import org.openmrs.Visit;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.base.ProviderUtil;
@@ -57,6 +59,7 @@ import org.springframework.web.client.RestClientException;
 /**
  * REST resource representing a {@link Bill}.
  */
+@Slf4j
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
         + "/bill", supportedClass = Bill.class, supportedOpenmrsVersions = { "2.0 - 2.*" })
 public class BillResource extends DataDelegatingCrudResource<Bill> {
@@ -68,6 +71,7 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			description.addProperty("adjustedBy", Representation.REF);
 			description.addProperty("billAdjusted", Representation.REF);
 			description.addProperty("cashPoint", Representation.REF);
+			description.addProperty("visit", Representation.REF);
 			description.addProperty("cashier", Representation.REF);
 			description.addProperty("dateCreated");
 			description.addProperty("lineItems");
@@ -94,6 +98,7 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 		description.addProperty("adjustedBy");
 		description.addProperty("billAdjusted");
 		description.addProperty("cashPoint");
+		description.addProperty("visit");
 		description.addProperty("cashier");
 		description.addProperty("lineItems");
 		description.addProperty("patient");
@@ -188,6 +193,16 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			
 			if (bill.getCashPoint() == null) {
 				loadBillCashPoint(bill);
+			}
+			
+			if (bill.getVisit() == null && bill.getPatient() != null) {
+				List<Visit> active = Context.getVisitService().getActiveVisitsByPatient(bill.getPatient());
+				if (active != null && active.size() == 1) {
+					bill.setVisit(active.get(0));
+				} else if (active != null && active.size() > 1) {
+					log.info("Bill for patient {} has {} active visits; leaving visit unset", bill.getPatient().getUuid(),
+					    active.size());
+				}
 			}
 			
 			// Now that all attributes have been set (i.e., payments and bill status) we can check to see if the bill
@@ -300,6 +315,11 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 		String cashPointUuid = context.getRequest().getParameter("cashPointUuid");
 		if (StringUtils.isNotBlank(cashPointUuid)) {
 			billSearch.setCashPointUuid(cashPointUuid);
+		}
+		
+		String visitUuid = context.getRequest().getParameter("visitUuid");
+		if (StringUtils.isNotBlank(visitUuid)) {
+			billSearch.setVisitUuid(visitUuid);
 		}
 		
 		String discountStatus = context.getRequest().getParameter("discountStatus");
