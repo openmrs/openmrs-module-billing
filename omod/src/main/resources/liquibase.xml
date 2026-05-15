@@ -1304,4 +1304,26 @@
             </column>
         </modifyColumn>
     </changeSet>
+
+    <changeSet id="openmrs.billing-008-20260515-add-visit-to-bill" author="Nethmi Rodrigo">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="cashier_bill" columnName="visit_id" />
+            </not>
+        </preConditions>
+        <comment>Add nullable visit_id column and FK to cashier_bill</comment>
+        <addColumn tableName="cashier_bill">
+            <column name="visit_id" type="int">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+        <addForeignKeyConstraint
+            constraintName="cashier_bill_visit_fk"
+            baseTableName="cashier_bill"
+            baseColumnNames="visit_id"
+            referencedTableName="visit"
+            referencedColumnNames="visit_id"
+            onDelete="SET NULL"
+            onUpdate="CASCADE" />
+    </changeSet>
 </databaseChangeLog>
