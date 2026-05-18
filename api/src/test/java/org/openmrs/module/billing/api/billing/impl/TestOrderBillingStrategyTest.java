@@ -161,7 +161,7 @@ public class TestOrderBillingStrategyTest {
 		Order order = new TestOrder();
 		order.setEncounter(encounter);
 		order.setOrderer(cashier);
-		CashPoint cashPoint = mock(CashPoint.class);
+		CashPoint cashPoint = new CashPoint();
 		BillLineItem lineItem = mock(BillLineItem.class);
 		
 		when(cashPointService.getAllCashPoints(false)).thenReturn(Collections.singletonList(cashPoint));
@@ -182,7 +182,7 @@ public class TestOrderBillingStrategyTest {
 		Order order = new TestOrder();
 		order.setEncounter(encounter);
 		order.setOrderer(cashier);
-		CashPoint cashPoint = mock(CashPoint.class);
+		CashPoint cashPoint = new CashPoint();
 		BillLineItem lineItem = mock(BillLineItem.class);
 		
 		when(cashPointService.getAllCashPoints(false)).thenReturn(Collections.singletonList(cashPoint));
