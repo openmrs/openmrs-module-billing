@@ -25,6 +25,8 @@ import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.TestConstants;
 import org.openmrs.module.billing.api.CashPointService;
+import org.openmrs.module.billing.api.BillDiscountService;
+import org.openmrs.module.billing.api.BillRefundService;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.db.BillDAO;
 import org.openmrs.module.billing.api.model.Bill;
@@ -43,12 +45,18 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 	
 	private CashPointService cashPointService;
 	
+	private BillDiscountService billDiscountService;
+	
+	private BillRefundService billRefundService;
+	
 	@BeforeEach
 	public void setup() {
 		billDAO = Context.getRegisteredComponent("billDAO", BillDAO.class);
 		patientService = Context.getPatientService();
 		providerService = Context.getProviderService();
 		cashPointService = Context.getService(CashPointService.class);
+		billDiscountService = Context.getService(BillDiscountService.class);
+		billRefundService = Context.getService(BillRefundService.class);
 		
 		executeDataSet(TestConstants.CORE_DATASET2);
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "StockOperationType.xml");
@@ -239,6 +247,28 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 		
 		Bill deletedBill = billDAO.getBill(billId);
 		assertNull(deletedBill);
+	}
+	
+	@Test
+	public void purgeBill_shouldDeleteDiscountsAndRefunds() {
+		executeDataSet(TestConstants.BASE_DATASET_DIR + "BillPurgeCascadeTest.xml");
+		
+		Bill bill = billDAO.getBill(900);
+		assertNotNull(bill);
+		assertNotNull(billDiscountService.getBillDiscountByUuid("90000000-0000-0000-0000-000000000d00"));
+		assertNotNull(billDiscountService.getBillDiscountByUuid("90000000-0000-0000-0000-000000000d01"));
+		assertNotNull(billRefundService.getBillRefundByUuid("90000000-0000-0000-0000-000000000r00"));
+		assertNotNull(billRefundService.getBillRefundByUuid("90000000-0000-0000-0000-000000000r01"));
+		
+		billDAO.purgeBill(bill);
+		Context.flushSession();
+		Context.clearSession();
+		
+		assertNull(billDAO.getBill(900));
+		assertNull(billDiscountService.getBillDiscountByUuid("90000000-0000-0000-0000-000000000d00"));
+		assertNull(billDiscountService.getBillDiscountByUuid("90000000-0000-0000-0000-000000000d01"));
+		assertNull(billRefundService.getBillRefundByUuid("90000000-0000-0000-0000-000000000r00"));
+		assertNull(billRefundService.getBillRefundByUuid("90000000-0000-0000-0000-000000000r01"));
 	}
 	
 	@Test

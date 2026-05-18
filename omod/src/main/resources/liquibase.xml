@@ -1335,7 +1335,53 @@
 		<addNotNullConstraint tableName="cashier_bill_line_item" columnName="status" columnDataType="varchar(20)"/>
 	</changeSet>
 
-    <changeSet id="openmrs.billing-011-20260515-add-visit-to-bill" author="Nethmi Rodrigo">
+    <changeSet id="openmrs.billing-012-20260519-index-bill-visit" author="Nethmi Rodrigo">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="cashier_bill" indexName="cashier_bill_visit_id_idx" />
+            </not>
+        </preConditions>
+        <comment>Add index for cashier_bill.visit_id</comment>
+        <createIndex indexName="cashier_bill_visit_id_idx" tableName="cashier_bill">
+            <column name="visit_id" />
+        </createIndex>
+    </changeSet>
+
+	<changeSet id="openmrs.billing-011-20260518-cascade-bill-discounts-refunds" author="Nethmi Rodrigo">
+		<preConditions onFail="MARK_RAN">
+			<and>
+				<tableExists tableName="bill_discount"/>
+				<tableExists tableName="bill_refund"/>
+				<tableExists tableName="cashier_bill"/>
+				<tableExists tableName="cashier_bill_line_item"/>
+			</and>
+		</preConditions>
+		<comment>Allow purging a bill to remove its associated discount and refund audit rows.</comment>
+
+		<dropForeignKeyConstraint baseTableName="bill_discount" constraintName="bill_discount_bill_id_fk"/>
+		<dropForeignKeyConstraint baseTableName="bill_discount" constraintName="bill_discount_bill_line_item_id_fk"/>
+		<dropForeignKeyConstraint baseTableName="bill_refund" constraintName="bill_refund_bill_id_fk"/>
+		<dropForeignKeyConstraint baseTableName="bill_refund" constraintName="bill_refund_bill_line_item_id_fk"/>
+
+		<addForeignKeyConstraint constraintName="bill_discount_bill_id_fk"
+		                         baseTableName="bill_discount" baseColumnNames="bill_id"
+		                         referencedTableName="cashier_bill" referencedColumnNames="bill_id"
+		                         onDelete="CASCADE"/>
+		<addForeignKeyConstraint constraintName="bill_discount_bill_line_item_id_fk"
+		                         baseTableName="bill_discount" baseColumnNames="bill_line_item_id"
+		                         referencedTableName="cashier_bill_line_item" referencedColumnNames="bill_line_item_id"
+		                         onDelete="CASCADE"/>
+		<addForeignKeyConstraint constraintName="bill_refund_bill_id_fk"
+		                         baseTableName="bill_refund" baseColumnNames="bill_id"
+		                         referencedTableName="cashier_bill" referencedColumnNames="bill_id"
+		                         onDelete="CASCADE"/>
+		<addForeignKeyConstraint constraintName="bill_refund_bill_line_item_id_fk"
+		                         baseTableName="bill_refund" baseColumnNames="bill_line_item_id"
+		                         referencedTableName="cashier_bill_line_item" referencedColumnNames="bill_line_item_id"
+		                         onDelete="CASCADE"/>
+	</changeSet>
+
+	<changeSet id="openmrs.billing-012-20260515-add-visit-to-bill" author="Nethmi Rodrigo">
         <preConditions onFail="MARK_RAN">
             <not>
                 <columnExists tableName="cashier_bill" columnName="visit_id" />
@@ -1355,17 +1401,5 @@
             referencedColumnNames="visit_id"
             onDelete="SET NULL"
             onUpdate="CASCADE" />
-    </changeSet>
-
-    <changeSet id="openmrs.billing-012-20260519-index-bill-visit" author="Nethmi Rodrigo">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <indexExists tableName="cashier_bill" indexName="cashier_bill_visit_id_idx" />
-            </not>
-        </preConditions>
-        <comment>Add index for cashier_bill.visit_id</comment>
-        <createIndex indexName="cashier_bill_visit_id_idx" tableName="cashier_bill">
-            <column name="visit_id" />
-        </createIndex>
     </changeSet>
 </databaseChangeLog>

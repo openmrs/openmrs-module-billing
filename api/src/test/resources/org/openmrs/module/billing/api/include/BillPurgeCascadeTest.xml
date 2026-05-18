@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+
+-->
+<dataset>
+	<cashier_bill bill_id="900" receipt_number="purge-cascade-bill" provider_id="0" patient_id="0"
+	              cash_point_id="0" status="REFUND_REQUESTED"
+	              creator="1" date_created="2012-05-18 00:00:00.0" voided="false"
+	              uuid="90000000-0000-0000-0000-000000000900" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="900" bill_id="900" item_id="0" price="100.00" price_name="default"
+	                        quantity="1" line_item_order="0" status="PAID"
+	                        creator="1" date_created="2012-05-18 00:00:00.0" voided="false"
+	                        uuid="90000000-0000-0000-0000-000000000910"/>
+
+	<bill_discount bill_discount_id="900" bill_id="900" discount_type="FIXED_AMOUNT"
+	               discount_value="10.00" discount_status="APPROVED" justification="Purge cascade bill discount"
+	               initiator_id="1" approver_id="5506" creator="1" date_created="2012-05-18 00:00:00.0"
+	               voided="false" uuid="90000000-0000-0000-0000-000000000d00"/>
+	<bill_discount bill_discount_id="901" bill_id="900" bill_line_item_id="900" discount_type="FIXED_AMOUNT"
+	               discount_value="5.00" discount_status="APPROVED" justification="Purge cascade line discount"
+	               initiator_id="1" approver_id="5506" creator="1" date_created="2012-05-18 00:00:00.0"
+	               voided="false" uuid="90000000-0000-0000-0000-000000000d01"/>
+
+	<bill_refund bill_refund_id="900" bill_id="900" refund_amount="20.00"
+	             reason="Purge cascade bill refund" refund_status="REQUESTED"
+	             initiator_id="1" creator="1" date_created="2012-05-18 00:00:00.0" voided="false"
+	             uuid="90000000-0000-0000-0000-000000000r00"/>
+	<bill_refund bill_refund_id="901" bill_id="900" bill_line_item_id="900" refund_amount="15.00"
+	             reason="Purge cascade line refund" refund_status="REQUESTED"
+	             initiator_id="1" creator="1" date_created="2012-05-18 00:00:00.0" voided="false"
+	             uuid="90000000-0000-0000-0000-000000000r01"/>
+</dataset>
