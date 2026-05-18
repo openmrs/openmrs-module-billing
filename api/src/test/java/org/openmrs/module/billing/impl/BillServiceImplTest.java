@@ -460,7 +460,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		billA.setStatus(BillStatus.PENDING);
 		billA.setVisit(visitA);
 		BillLineItem lineItemA = billA.addLineItem(stockItem, BigDecimal.valueOf(100), "Test price", 1);
-		lineItemA.setPaymentStatus(BillStatus.PENDING);
+		lineItemA.setStatus(BillLineItemStatus.PENDING);
 		lineItemA.setUuid(UUID.randomUUID().toString());
 		billService.saveBill(billA);
 		
@@ -472,7 +472,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		billB.setStatus(BillStatus.PENDING);
 		billB.setVisit(visitB);
 		BillLineItem lineItemB = billB.addLineItem(stockItem, BigDecimal.valueOf(100), "Test price", 1);
-		lineItemB.setPaymentStatus(BillStatus.PENDING);
+		lineItemB.setStatus(BillLineItemStatus.PENDING);
 		lineItemB.setUuid(UUID.randomUUID().toString());
 		billService.saveBill(billB);
 		
@@ -619,7 +619,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		newBill.setVisit(savedVisit);
 		
 		BillLineItem lineItem = newBill.addLineItem(stockItem, BigDecimal.valueOf(100), "Test price", 1);
-		lineItem.setPaymentStatus(BillStatus.PENDING);
+		lineItem.setStatus(BillLineItemStatus.PENDING);
 		lineItem.setUuid(UUID.randomUUID().toString());
 		
 		Bill saved = billService.saveBill(newBill);

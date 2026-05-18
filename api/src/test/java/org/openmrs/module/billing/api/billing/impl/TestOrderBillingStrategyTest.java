@@ -15,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -155,16 +154,16 @@ public class TestOrderBillingStrategyTest {
 	@Test
 	public void createBill_shouldInheritVisitFromOrderEncounter() {
 		Patient patient = new Patient();
-		Order order = mock(Order.class);
-		Encounter encounter = mock(Encounter.class);
-		Visit visit = mock(Visit.class);
-		Provider cashier = mock(Provider.class);
+		Visit visit = new Visit();
+		Encounter encounter = new Encounter();
+		encounter.setVisit(visit);
+		Provider cashier = new Provider();
+		Order order = new TestOrder();
+		order.setEncounter(encounter);
+		order.setOrderer(cashier);
 		CashPoint cashPoint = mock(CashPoint.class);
 		BillLineItem lineItem = mock(BillLineItem.class);
 		
-		when(order.getEncounter()).thenReturn(encounter);
-		when(encounter.getVisit()).thenReturn(visit);
-		when(order.getOrderer()).thenReturn(cashier);
 		when(cashPointService.getAllCashPoints(false)).thenReturn(Collections.singletonList(cashPoint));
 		when(billService.saveBill(any(Bill.class))).thenAnswer(inv -> inv.getArgument(0));
 		
@@ -178,15 +177,14 @@ public class TestOrderBillingStrategyTest {
 	@Test
 	public void createBill_shouldLeaveVisitNullWhenEncounterHasNoVisit() {
 		Patient patient = new Patient();
-		Order order = mock(Order.class);
-		Encounter encounter = mock(Encounter.class);
-		Provider cashier = mock(Provider.class);
+		Encounter encounter = new Encounter();
+		Provider cashier = new Provider();
+		Order order = new TestOrder();
+		order.setEncounter(encounter);
+		order.setOrderer(cashier);
 		CashPoint cashPoint = mock(CashPoint.class);
 		BillLineItem lineItem = mock(BillLineItem.class);
 		
-		lenient().when(order.getEncounter()).thenReturn(encounter);
-		lenient().when(encounter.getVisit()).thenReturn(null);
-		when(order.getOrderer()).thenReturn(cashier);
 		when(cashPointService.getAllCashPoints(false)).thenReturn(Collections.singletonList(cashPoint));
 		when(billService.saveBill(any(Bill.class))).thenAnswer(inv -> inv.getArgument(0));
 		
