@@ -11,6 +11,7 @@ package org.openmrs.module.billing.api.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.openmrs.Patient;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.PatientPaymentStatusResolver;
 import org.openmrs.module.billing.api.model.Bill;
@@ -23,6 +24,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DefaultPatientPaymentStatusResolver implements PatientPaymentStatusResolver {
 	
+	static final String MSG_OUTSTANDING = "billing.patientPaymentStatus.outstanding";
+	
+	static final String MSG_NO_OUTSTANDING = "billing.patientPaymentStatus.noOutstanding";
+	
 	private final BillService billService;
 	
 	@Override
@@ -31,8 +36,8 @@ public class DefaultPatientPaymentStatusResolver implements PatientPaymentStatus
 		boolean hasOutstanding = bills.stream().filter(b -> !Boolean.TRUE.equals(b.getVoided()))
 		        .anyMatch(b -> b.getStatus() == BillStatus.PENDING || b.getStatus() == BillStatus.POSTED);
 		
+		String reason = Context.getMessageSourceService().getMessage(hasOutstanding ? MSG_OUTSTANDING : MSG_NO_OUTSTANDING);
 		return PatientPaymentStatusResult.builder()
-		        .status(hasOutstanding ? PatientPaymentStatus.UNPAID : PatientPaymentStatus.PAID)
-		        .reason(hasOutstanding ? "Outstanding bill(s) present" : "No outstanding bills").build();
+		        .status(hasOutstanding ? PatientPaymentStatus.UNPAID : PatientPaymentStatus.PAID).reason(reason).build();
 	}
 }

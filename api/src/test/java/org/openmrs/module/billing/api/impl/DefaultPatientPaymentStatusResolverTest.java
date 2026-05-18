@@ -12,18 +12,25 @@ package org.openmrs.module.billing.api.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Patient;
+import org.openmrs.api.context.Context;
+import org.openmrs.messagesource.MessageSourceService;
 import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillStatus;
@@ -42,11 +49,28 @@ public class DefaultPatientPaymentStatusResolverTest {
 	
 	private Patient patient;
 	
+	private MockedStatic<Context> contextMock;
+	
 	@BeforeEach
 	public void setUp() {
+		MessageSourceService messageSourceService = mock(MessageSourceService.class);
+		lenient().when(messageSourceService.getMessage(DefaultPatientPaymentStatusResolver.MSG_OUTSTANDING))
+		        .thenReturn("Outstanding bill(s) present");
+		lenient().when(messageSourceService.getMessage(DefaultPatientPaymentStatusResolver.MSG_NO_OUTSTANDING))
+		        .thenReturn("No outstanding bills");
+		contextMock = mockStatic(Context.class);
+		contextMock.when(Context::getMessageSourceService).thenReturn(messageSourceService);
+		
 		resolver = new DefaultPatientPaymentStatusResolver(billService);
 		patient = new Patient();
 		patient.setUuid(PATIENT_UUID);
+	}
+	
+	@AfterEach
+	public void tearDown() {
+		if (contextMock != null) {
+			contextMock.close();
+		}
 	}
 	
 	@Test

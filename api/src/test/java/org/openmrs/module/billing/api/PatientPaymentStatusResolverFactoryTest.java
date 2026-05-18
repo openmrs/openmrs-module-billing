@@ -9,14 +9,15 @@
  */
 package org.openmrs.module.billing.api;
 
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,13 +28,12 @@ import org.openmrs.api.APIException;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.ModuleSettings;
+import org.openmrs.module.billing.api.impl.DefaultPatientPaymentStatusResolver;
 import org.openmrs.module.billing.api.model.PatientPaymentStatusResult;
 
 public class PatientPaymentStatusResolverFactoryTest {
 	
 	private AdministrationService administrationService;
-	
-	private PatientPaymentStatusResolver defaultResolver;
 	
 	private PatientPaymentStatusResolverFactory factory;
 	
@@ -42,10 +42,9 @@ public class PatientPaymentStatusResolverFactoryTest {
 	@BeforeEach
 	public void setUp() {
 		administrationService = mock(AdministrationService.class);
-		defaultResolver = mock(PatientPaymentStatusResolver.class);
 		contextMock = mockStatic(Context.class);
 		contextMock.when(Context::getAdministrationService).thenReturn(administrationService);
-		factory = new PatientPaymentStatusResolverFactory(defaultResolver);
+		factory = new PatientPaymentStatusResolverFactory();
 	}
 	
 	@AfterEach
@@ -56,83 +55,67 @@ public class PatientPaymentStatusResolverFactoryTest {
 	}
 	
 	@Test
-	public void getResolver_shouldReturnDefaultWhenGpIsBlank() {
+	public void getResolver_shouldReturnRegisteredDefaultWhenGpIsBlank() {
+		DefaultPatientPaymentStatusResolver registeredDefault = new DefaultPatientPaymentStatusResolver(null);
 		when(administrationService.getGlobalProperty(ModuleSettings.PATIENT_PAYMENT_STATUS_RESOLVER)).thenReturn("");
-		assertSame(defaultResolver, factory.getResolver());
+		contextMock.when(() -> Context.getRegisteredComponents(PatientPaymentStatusResolver.class))
+		        .thenReturn(Collections.singletonList(registeredDefault));
+		
+		assertSame(registeredDefault, factory.getResolver());
 	}
 	
 	@Test
-	public void getResolver_shouldReturnDefaultWhenGpIsNull() {
+	public void getResolver_shouldReturnRegisteredDefaultWhenGpIsNull() {
+		DefaultPatientPaymentStatusResolver registeredDefault = new DefaultPatientPaymentStatusResolver(null);
 		when(administrationService.getGlobalProperty(ModuleSettings.PATIENT_PAYMENT_STATUS_RESOLVER)).thenReturn(null);
-		assertSame(defaultResolver, factory.getResolver());
+		contextMock.when(() -> Context.getRegisteredComponents(PatientPaymentStatusResolver.class))
+		        .thenReturn(Collections.singletonList(registeredDefault));
+		
+		assertSame(registeredDefault, factory.getResolver());
 	}
 	
 	@Test
-	public void getResolver_shouldInstantiateAndReturnConfiguredResolver() {
+	public void getResolver_shouldReturnRegisteredResolverWhenGpMatchesClassName() {
+		StubResolverA registered = new StubResolverA();
 		when(administrationService.getGlobalProperty(ModuleSettings.PATIENT_PAYMENT_STATUS_RESOLVER))
 		        .thenReturn(StubResolverA.class.getName());
+		contextMock.when(() -> Context.getRegisteredComponents(PatientPaymentStatusResolver.class))
+		        .thenReturn(Collections.singletonList(registered));
 		
-		PatientPaymentStatusResolver result = factory.getResolver();
-		
-		assertNotSame(defaultResolver, result);
-		assertInstanceOf(StubResolverA.class, result);
+		assertSame(registered, factory.getResolver());
 	}
 	
 	@Test
-	public void getResolver_shouldReturnSameInstanceOnSubsequentCalls() {
+	public void getResolver_shouldPickMatchingResolverFromMultipleRegistered() {
+		StubResolverA a = new StubResolverA();
+		StubResolverB b = new StubResolverB();
 		when(administrationService.getGlobalProperty(ModuleSettings.PATIENT_PAYMENT_STATUS_RESOLVER))
-		        .thenReturn(StubResolverA.class.getName());
+		        .thenReturn(StubResolverB.class.getName());
+		contextMock.when(() -> Context.getRegisteredComponents(PatientPaymentStatusResolver.class))
+		        .thenReturn(Arrays.asList(a, b));
 		
-		assertSame(factory.getResolver(), factory.getResolver());
+		assertSame(b, factory.getResolver());
 	}
 	
 	@Test
-	public void getResolver_shouldReinstantiateWhenGpValueChanges() {
-		when(administrationService.getGlobalProperty(ModuleSettings.PATIENT_PAYMENT_STATUS_RESOLVER))
-		        .thenReturn(StubResolverA.class.getName(), StubResolverB.class.getName());
-		
-		PatientPaymentStatusResolver first = factory.getResolver();
-		PatientPaymentStatusResolver second = factory.getResolver();
-		
-		assertInstanceOf(StubResolverA.class, first);
-		assertInstanceOf(StubResolverB.class, second);
-		assertNotSame(first, second);
-	}
-	
-	@Test
-	public void getResolver_shouldRevertToDefaultWhenGpIsClearedAfterBeingSet() {
-		when(administrationService.getGlobalProperty(ModuleSettings.PATIENT_PAYMENT_STATUS_RESOLVER))
-		        .thenReturn(StubResolverA.class.getName(), "");
-		
-		assertInstanceOf(StubResolverA.class, factory.getResolver());
-		assertSame(defaultResolver, factory.getResolver());
-	}
-	
-	@Test
-	public void getResolver_shouldThrowApiExceptionWhenClassNotFound() {
+	public void getResolver_shouldThrowApiExceptionWhenNoRegisteredResolverMatches() {
 		when(administrationService.getGlobalProperty(ModuleSettings.PATIENT_PAYMENT_STATUS_RESOLVER))
 		        .thenReturn("does.not.exist.Resolver");
+		contextMock.when(() -> Context.getRegisteredComponents(PatientPaymentStatusResolver.class))
+		        .thenReturn(Collections.singletonList(new StubResolverA()));
 		
 		APIException ex = assertThrows(APIException.class, () -> factory.getResolver());
 		assertTrue(ex.getMessage().contains("does.not.exist.Resolver"));
 	}
 	
 	@Test
-	public void getResolver_shouldThrowApiExceptionWhenClassDoesNotImplementInterface() {
-		when(administrationService.getGlobalProperty(ModuleSettings.PATIENT_PAYMENT_STATUS_RESOLVER))
-		        .thenReturn(String.class.getName());
+	public void getResolver_shouldThrowApiExceptionWhenDefaultNotRegistered() {
+		when(administrationService.getGlobalProperty(ModuleSettings.PATIENT_PAYMENT_STATUS_RESOLVER)).thenReturn("");
+		contextMock.when(() -> Context.getRegisteredComponents(PatientPaymentStatusResolver.class))
+		        .thenReturn(Collections.emptyList());
 		
 		APIException ex = assertThrows(APIException.class, () -> factory.getResolver());
-		assertTrue(ex.getMessage().contains("does not implement"));
-	}
-	
-	@Test
-	public void getResolver_shouldThrowApiExceptionWhenClassHasNoNoArgConstructor() {
-		when(administrationService.getGlobalProperty(ModuleSettings.PATIENT_PAYMENT_STATUS_RESOLVER))
-		        .thenReturn(NoNoArgCtorResolver.class.getName());
-		
-		APIException ex = assertThrows(APIException.class, () -> factory.getResolver());
-		assertTrue(ex.getMessage().contains(NoNoArgCtorResolver.class.getName()));
+		assertTrue(ex.getMessage().contains(DefaultPatientPaymentStatusResolver.class.getName()));
 	}
 	
 	public static class StubResolverA implements PatientPaymentStatusResolver {
@@ -144,17 +127,6 @@ public class PatientPaymentStatusResolverFactoryTest {
 	}
 	
 	public static class StubResolverB implements PatientPaymentStatusResolver {
-		
-		@Override
-		public PatientPaymentStatusResult resolve(Patient patient) {
-			return null;
-		}
-	}
-	
-	public static class NoNoArgCtorResolver implements PatientPaymentStatusResolver {
-		
-		public NoNoArgCtorResolver(String requiresArg) {
-		}
 		
 		@Override
 		public PatientPaymentStatusResult resolve(Patient patient) {

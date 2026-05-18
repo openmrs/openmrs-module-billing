@@ -9,50 +9,22 @@
  */
 package org.openmrs.module.billing.api;
 
-import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.ModuleSettings;
-import org.openmrs.util.OpenmrsClassLoader;
+import org.openmrs.module.billing.api.impl.DefaultPatientPaymentStatusResolver;
 
-import java.lang.reflect.InvocationTargetException;
-
-@RequiredArgsConstructor
 public class PatientPaymentStatusResolverFactory {
 	
-	private final PatientPaymentStatusResolver defaultPatientPaymentStatusResolver;
-	
-	private volatile String cachedResolverClassName;
-	
-	private volatile PatientPaymentStatusResolver cachedResolver;
-	
 	public PatientPaymentStatusResolver getResolver() {
-		String resolverClassName = Context.getAdministrationService()
+		String configured = Context.getAdministrationService()
 		        .getGlobalProperty(ModuleSettings.PATIENT_PAYMENT_STATUS_RESOLVER);
-		if (StringUtils.isBlank(resolverClassName)) {
-			return defaultPatientPaymentStatusResolver;
-		}
-		synchronized (this) {
-			if (!StringUtils.equals(resolverClassName, cachedResolverClassName)) {
-				cachedResolver = instantiate(resolverClassName);
-				cachedResolverClassName = resolverClassName;
-			}
-			return cachedResolver;
-		}
-	}
-	
-	private PatientPaymentStatusResolver instantiate(String resolverClassName) {
-		try {
-			Class<?> cls = OpenmrsClassLoader.getInstance().loadClass(resolverClassName);
-			if (!PatientPaymentStatusResolver.class.isAssignableFrom(cls)) {
-				throw new APIException("Class '" + resolverClassName + "' does not implement PatientPaymentStatusResolver");
-			}
-			return (PatientPaymentStatusResolver) cls.getDeclaredConstructor().newInstance();
-		}
-		catch (ClassNotFoundException | IllegalAccessException | InvocationTargetException | InstantiationException
-		        | NoSuchMethodException e) {
-			throw new APIException("Failed to load patient payment status resolver '" + resolverClassName + "'", e);
-		}
+		String target = StringUtils.isBlank(configured) ? DefaultPatientPaymentStatusResolver.class.getName() : configured;
+		
+		return Context.getRegisteredComponents(PatientPaymentStatusResolver.class).stream()
+		        .filter(resolver -> target.equals(resolver.getClass().getName())).findFirst()
+		        .orElseThrow(() -> new APIException("No registered PatientPaymentStatusResolver bean matches class '"
+		                + target + "'. Ensure the resolver is a Spring component scanned by an OpenMRS module."));
 	}
 }
