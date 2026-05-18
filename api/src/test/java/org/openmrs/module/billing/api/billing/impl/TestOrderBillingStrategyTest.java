@@ -15,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -162,7 +161,7 @@ public class TestOrderBillingStrategyTest {
 		order.setEncounter(encounter);
 		order.setOrderer(cashier);
 		CashPoint cashPoint = new CashPoint();
-		BillLineItem lineItem = mock(BillLineItem.class);
+		BillLineItem lineItem = new BillLineItem();
 		
 		when(cashPointService.getAllCashPoints(false)).thenReturn(Collections.singletonList(cashPoint));
 		when(billService.saveBill(any(Bill.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -183,7 +182,7 @@ public class TestOrderBillingStrategyTest {
 		order.setEncounter(encounter);
 		order.setOrderer(cashier);
 		CashPoint cashPoint = new CashPoint();
-		BillLineItem lineItem = mock(BillLineItem.class);
+		BillLineItem lineItem = new BillLineItem();
 		
 		when(cashPointService.getAllCashPoints(false)).thenReturn(Collections.singletonList(cashPoint));
 		when(billService.saveBill(any(Bill.class))).thenAnswer(inv -> inv.getArgument(0));
