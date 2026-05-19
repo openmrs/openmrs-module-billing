@@ -337,23 +337,33 @@
 		</constructor-arg>
 	</bean>
 
-	<!-- Querystore SPI: serializers, providers, and indexing advice. The advice classes extend
-	     org.openmrs.module.querystore.bridge.AbstractIndexingAdvice; the providers implement
-	     org.openmrs.module.querystore.spi.ResourceTypeProvider. All require querystore-api on the
-	     classpath at module load (require_module is declared in omod/config.xml). -->
+	<!-- Querystore SPI: serializers and providers. The provider classes implement
+	     org.openmrs.module.querystore.spi.ResourceTypeProvider; serializers extend
+	     org.openmrs.module.querystore.serialization.AbstractRecordSerializer.
+
+	     lazy-init: these classes' supertypes live in the optional querystore-api jar. Eager
+	     instantiation would force-load those supertypes when other modules' tests (e.g., the
+	     billing-fhir module) load this Spring context without querystore on the test classpath —
+	     `provided` scope does not propagate to dependent modules' test classpaths. With lazy-init,
+	     the classes stay unloaded until querystore's `getBeansOfType(ResourceTypeProvider.class)`
+	     scan asks for them, by which time querystore-api is guaranteed to be on the classpath. -->
 	<bean id="billing.querystore.serializer.bill"
-	      class="org.openmrs.module.billing.api.querystore.BillRecordSerializer"/>
+	      class="org.openmrs.module.billing.api.querystore.BillRecordSerializer"
+	      lazy-init="true"/>
 
 	<bean id="billing.querystore.serializer.bill_refund"
-	      class="org.openmrs.module.billing.api.querystore.BillRefundRecordSerializer"/>
+	      class="org.openmrs.module.billing.api.querystore.BillRefundRecordSerializer"
+	      lazy-init="true"/>
 
 	<bean id="billing.querystore.provider.bill"
-	      class="org.openmrs.module.billing.api.querystore.BillResourceTypeProvider">
+	      class="org.openmrs.module.billing.api.querystore.BillResourceTypeProvider"
+	      lazy-init="true">
 		<constructor-arg ref="billing.querystore.serializer.bill"/>
 	</bean>
 
 	<bean id="billing.querystore.provider.bill_refund"
-	      class="org.openmrs.module.billing.api.querystore.BillRefundResourceTypeProvider">
+	      class="org.openmrs.module.billing.api.querystore.BillRefundResourceTypeProvider"
+	      lazy-init="true">
 		<constructor-arg ref="billing.querystore.serializer.bill_refund"/>
 	</bean>
 
