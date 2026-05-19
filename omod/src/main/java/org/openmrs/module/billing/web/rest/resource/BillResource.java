@@ -182,13 +182,7 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 		
 		if (bill.getId() == null) {
 			if (bill.getCashier() == null) {
-				Provider cashier = getCurrentCashier();
-				if (cashier == null) {
-					throw new RestClientException(
-					        "The current user (" + Context.getAuthenticatedUser().getUsername() + ") is not a provider");
-				}
-				
-				bill.setCashier(cashier);
+				assignCurrentCashier(bill);
 			}
 			
 			if (bill.getCashPoint() == null) {
@@ -196,21 +190,10 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			}
 			
 			if (bill.getVisit() == null && bill.getPatient() != null) {
-				List<Visit> active = Context.getVisitService().getActiveVisitsByPatient(bill.getPatient());
-				if (active != null && active.size() == 1) {
-					bill.setVisit(active.get(0));
-				} else if (active != null && active.size() > 1) {
-					log.info("Bill for patient {} has {} active visits; leaving visit unset", bill.getPatient().getUuid(),
-					    active.size());
-				}
+				assignActiveVisit(bill);
 			}
 			
-			// Now that all attributes have been set (i.e., payments and bill status) we can check to see if the bill
-			// is fully paid.
-			bill.synchronizeBillStatus();
-			if (bill.getStatus() == null) {
-				bill.setStatus(BillStatus.PENDING);
-			}
+			initializeBillStatus(bill);
 		}
 		
 		return Context.getService(BillService.class).saveBill(bill);
@@ -259,6 +242,40 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 	
 	private Provider getCurrentCashier() {
 		return ProviderUtil.getCurrentProvider();
+	}
+	
+	private void assignCurrentCashier(Bill bill) {
+		Provider cashier = getCurrentCashier();
+		if (cashier == null) {
+			throw new RestClientException(
+			        "The current user (" + Context.getAuthenticatedUser().getUsername() + ") is not a provider");
+		}
+		
+		bill.setCashier(cashier);
+	}
+	
+	private void assignActiveVisit(Bill bill) {
+		List<Visit> activeVisits = Context.getVisitService().getActiveVisitsByPatient(bill.getPatient());
+		if (activeVisits == null || activeVisits.isEmpty()) {
+			return;
+		}
+		
+		if (activeVisits.size() == 1) {
+			bill.setVisit(activeVisits.get(0));
+			return;
+		}
+		
+		log.info("Bill for patient {} has {} active visits; leaving visit unset", bill.getPatient().getUuid(),
+		    activeVisits.size());
+	}
+	
+	private void initializeBillStatus(Bill bill) {
+		// Now that all attributes have been set (i.e., payments and bill status) we can check to see if the bill
+		// is fully paid.
+		bill.synchronizeBillStatus();
+		if (bill.getStatus() == null) {
+			bill.setStatus(BillStatus.PENDING);
+		}
 	}
 	
 	private void loadBillCashPoint(Bill bill) {
