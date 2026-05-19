@@ -104,6 +104,22 @@
 			</list>
 		</property>
 	</bean>
+	<bean parent="serviceContext">
+		<property name="moduleService">
+			<list merge="true">
+				<value>org.openmrs.module.billing.api.BillDiscountService</value>
+				<ref bean="billDiscountService"/>
+			</list>
+		</property>
+	</bean>
+	<bean parent="serviceContext">
+		<property name="moduleService">
+			<list merge="true">
+				<value>org.openmrs.module.billing.api.BillRefundService</value>
+				<ref bean="billRefundService"/>
+			</list>
+		</property>
+	</bean>
 
 	<!-- Service Bean Definitions -->
 	<bean id="itemPriceService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
@@ -221,6 +237,26 @@
 		<property name="preInterceptors" ref="serviceInterceptors"/>
 		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
 	</bean>
+	<bean id="billDiscountService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target">
+			<bean class="org.openmrs.module.billing.api.impl.BillDiscountServiceImpl">
+				<constructor-arg name="billDiscountDAO" ref="billDiscountDAO"/>
+			</bean>
+		</property>
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+	</bean>
+	<bean id="billRefundService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="target">
+			<bean class="org.openmrs.module.billing.api.impl.BillRefundServiceImpl">
+				<constructor-arg name="billRefundDAO" ref="billRefundDAO"/>
+			</bean>
+		</property>
+		<property name="preInterceptors" ref="serviceInterceptors"/>
+		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
+	</bean>
 
 
 	<bean id="genericRepositoryDao"
@@ -236,6 +272,14 @@
 	</bean>
 	<bean id="billExemptionDAO"
 		  class="org.openmrs.module.billing.api.db.hibernate.BillExemptionDAOImpl">
+		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	<bean id="billDiscountDAO"
+		  class="org.openmrs.module.billing.api.db.hibernate.HibernateBillDiscountDAO">
+		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+	<bean id="billRefundDAO"
+		  class="org.openmrs.module.billing.api.db.hibernate.HibernateBillRefundDAO">
 		<constructor-arg name="sessionFactory" ref="sessionFactory"/>
 	</bean>
 	<bean id="billableServiceDAO"
@@ -256,6 +300,8 @@
 	</bean>
 
 	<bean id="billValidator" class="org.openmrs.module.billing.validator.BillValidator"/>
+	<bean id="billDiscountValidator" class="org.openmrs.module.billing.validator.BillDiscountValidator"/>
+	<bean id="billRefundValidator" class="org.openmrs.module.billing.validator.BillRefundValidator"/>
 
 	<!-- Order Billing: Event Listener and Strategies -->
 	<bean id="orderBillingEventListener"

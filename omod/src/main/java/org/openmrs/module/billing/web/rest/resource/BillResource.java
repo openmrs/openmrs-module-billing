@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,9 +24,11 @@ import org.openmrs.module.billing.api.base.ProviderUtil;
 import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.module.billing.api.model.BillDiscount;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.model.CashPoint;
+import org.openmrs.module.billing.api.model.DiscountStatus;
 import org.openmrs.module.billing.api.model.Payment;
 import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.module.billing.api.util.RoundingUtil;
@@ -34,6 +37,7 @@ import org.openmrs.module.billing.web.base.resource.PagingUtil;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
+import org.openmrs.module.webservices.rest.web.annotation.PropertyGetter;
 import org.openmrs.module.webservices.rest.web.annotation.PropertySetter;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
@@ -42,6 +46,7 @@ import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.impl.AlreadyPaged;
 import org.openmrs.module.webservices.rest.web.resource.impl.DataDelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
+import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.springframework.web.client.RestClientException;
 
@@ -67,6 +72,9 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			description.addProperty("receiptNumber");
 			description.addProperty("status");
 			description.addProperty("adjustmentReason");
+			description.addProperty("discounts", Representation.DEFAULT);
+			description.addProperty("total");
+			description.addProperty("amountAfterDiscount");
 			description.addProperty("uuid");
 			return description;
 		}
@@ -75,7 +83,30 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 	
 	@Override
 	public DelegatingResourceDescription getCreatableProperties() {
-		return getRepresentationDescription(new DefaultRepresentation());
+		// Discounts are deliberately excluded — they go through BillDiscountResource so the
+		// BillDiscountValidator (privileges, scope rules, status transitions) actually runs.
+		// Computed fields (total, amountAfterDiscount, dateCreated) are server-derived.
+		DelegatingResourceDescription description = new DelegatingResourceDescription();
+		description.addProperty("adjustedBy");
+		description.addProperty("billAdjusted");
+		description.addProperty("cashPoint");
+		description.addProperty("cashier");
+		description.addProperty("lineItems");
+		description.addProperty("patient");
+		description.addProperty("payments");
+		description.addProperty("receiptNumber");
+		description.addProperty("status");
+		description.addProperty("adjustmentReason");
+		description.addProperty("uuid");
+		return description;
+	}
+	
+	// Override the default getter so the rep ships only non-voided discounts. The raw
+	// Hibernate-mapped set on Bill includes voided rows for audit purposes; consumers that
+	// want the full audit history should call GET /billDiscount?bill=<uuid>.
+	@PropertyGetter("discounts")
+	public List<BillDiscount> getActiveDiscounts(Bill bill) {
+		return bill.getActiveDiscounts();
 	}
 	
 	@PropertySetter("lineItems")
@@ -235,13 +266,28 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 		String status = context.getRequest().getParameter("status");
 		if (StringUtils.isNotBlank(status)) {
 			List<BillStatus> statuses = Arrays.stream(status.split(",")).map(String::trim).filter(StringUtils::isNotBlank)
-			        .map(s -> BillStatus.valueOf(s.toUpperCase())).collect(Collectors.toList());
+			        .map(s -> BillStatus.valueOf(s.toUpperCase(Locale.ROOT))).collect(Collectors.toList());
 			billSearch.setStatuses(statuses);
 		}
 		
 		String cashPointUuid = context.getRequest().getParameter("cashPointUuid");
 		if (StringUtils.isNotBlank(cashPointUuid)) {
 			billSearch.setCashPointUuid(cashPointUuid);
+		}
+		
+		String discountStatus = context.getRequest().getParameter("discountStatus");
+		if (StringUtils.isNotBlank(discountStatus)) {
+			List<DiscountStatus> discountStatuses = Arrays.stream(discountStatus.split(",")).map(String::trim)
+			        .filter(StringUtils::isNotBlank).map(s -> {
+				        try {
+					        return DiscountStatus.valueOf(s.toUpperCase(Locale.ROOT));
+				        }
+				        catch (IllegalArgumentException e) {
+					        throw new InvalidSearchException("Invalid discountStatus '" + s + "'. Allowed values: "
+					                + Arrays.toString(DiscountStatus.values()));
+				        }
+			        }).collect(Collectors.toList());
+			billSearch.setDiscountStatuses(discountStatuses);
 		}
 		
 		String includeAll = context.getRequest().getParameter("includeAll");

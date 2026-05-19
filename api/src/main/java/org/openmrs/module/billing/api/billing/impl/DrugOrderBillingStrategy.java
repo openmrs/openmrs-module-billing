@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.openmrs.DrugOrder;
 import org.openmrs.Order;
 import org.openmrs.Provider;
+import org.openmrs.module.billing.api.model.BillLineItemStatus;
 import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.ItemPriceService;
 import org.openmrs.module.billing.api.model.BillLineItem;
@@ -64,7 +65,7 @@ public class DrugOrderBillingStrategy extends AbstractDefaultOrderBillingStrateg
 		
 		int quantity = (int) (drugOrder.getQuantity() != null ? drugOrder.getQuantity() : 0.0);
 		boolean isExempted = checkIfOrderIsExempted(order, ExemptionType.COMMODITY);
-		BillStatus lineItemStatus = isExempted ? BillStatus.EXEMPTED : BillStatus.PENDING;
+		BillLineItemStatus lineItemStatus = isExempted ? BillLineItemStatus.EXEMPTED : BillLineItemStatus.PENDING;
 		
 		StockItem stockItem = stockItems.get(0);
 		BillLineItem lineItem = createLineItem(resolvePrice(stockItem), quantity, lineItemStatus, order);

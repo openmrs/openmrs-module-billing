@@ -11,9 +11,11 @@ package org.openmrs.module.billing.db;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +29,7 @@ import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.db.BillDAO;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillStatus;
+import org.openmrs.module.billing.api.model.DiscountStatus;
 import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 
@@ -293,5 +296,86 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 			assertFalse(current.before(next), "Bill at index " + i + " (dateCreated=" + current
 			        + ") should be >= bill at index " + (i + 1) + " (dateCreated=" + next + ")");
 		}
+	}
+	
+	@Test
+	public void getBills_shouldReturnAllBillsWhenDiscountStatusesIsNull() {
+		executeDataSet(TestConstants.BASE_DATASET_DIR + "BillDiscountStatusFilterTest.xml");
+		BillSearch search = new BillSearch();
+		List<Bill> results = billDAO.getBills(search, null);
+		
+		assertTrue(results.size() >= 5, "Expected at least 5 bills but got " + results.size());
+	}
+	
+	@Test
+	public void getBills_shouldMatchBillsWithPendingDiscount() {
+		executeDataSet(TestConstants.BASE_DATASET_DIR + "BillDiscountStatusFilterTest.xml");
+		BillSearch search = BillSearch.builder().discountStatuses(Arrays.asList(DiscountStatus.PENDING)).build();
+		List<Bill> results = billDAO.getBills(search, null);
+		List<String> resultUuids = uuids(results);
+		
+		assertTrue(resultUuids.contains("b1000000-0000-0000-0000-000000000001"), "Expected bill 1001 (PENDING discount)");
+		assertTrue(resultUuids.contains("b4000000-0000-0000-0000-000000000004"),
+		    "Expected bill 1004 (PENDING + APPROVED discounts)");
+		assertFalse(resultUuids.contains("b5000000-0000-0000-0000-000000000005"),
+		    "Bill 1005 has only a voided PENDING discount — must be excluded");
+	}
+	
+	@Test
+	public void getBills_shouldMatchBillsWithApprovedDiscount() {
+		executeDataSet(TestConstants.BASE_DATASET_DIR + "BillDiscountStatusFilterTest.xml");
+		BillSearch search = BillSearch.builder().discountStatuses(Arrays.asList(DiscountStatus.APPROVED)).build();
+		List<Bill> results = billDAO.getBills(search, null);
+		List<String> resultUuids = uuids(results);
+		
+		assertTrue(resultUuids.contains("b2000000-0000-0000-0000-000000000002"), "Expected bill 1002 (APPROVED discount)");
+		assertTrue(resultUuids.contains("b4000000-0000-0000-0000-000000000004"), "Expected bill 1004 (APPROVED discount)");
+		assertFalse(resultUuids.contains("b1000000-0000-0000-0000-000000000001"),
+		    "Bill 1001 has only a PENDING discount — must not appear for APPROVED filter");
+	}
+	
+	@Test
+	public void getBills_shouldMatchUnionOfMultipleDiscountStatuses() {
+		executeDataSet(TestConstants.BASE_DATASET_DIR + "BillDiscountStatusFilterTest.xml");
+		BillSearch search = BillSearch.builder()
+		        .discountStatuses(Arrays.asList(DiscountStatus.APPROVED, DiscountStatus.REJECTED)).build();
+		List<Bill> results = billDAO.getBills(search, null);
+		List<String> resultUuids = uuids(results);
+		
+		assertTrue(resultUuids.contains("b2000000-0000-0000-0000-000000000002"), "Expected bill 1002 (APPROVED)");
+		assertTrue(resultUuids.contains("b3000000-0000-0000-0000-000000000003"), "Expected bill 1003 (REJECTED)");
+		assertTrue(resultUuids.contains("b4000000-0000-0000-0000-000000000004"), "Expected bill 1004 (APPROVED + PENDING)");
+		assertFalse(resultUuids.contains("b1000000-0000-0000-0000-000000000001"),
+		    "Bill 1001 has only a PENDING discount — must not appear for APPROVED|REJECTED filter");
+	}
+	
+	@Test
+	public void getBills_shouldExcludeVoidedDiscounts() {
+		executeDataSet(TestConstants.BASE_DATASET_DIR + "BillDiscountStatusFilterTest.xml");
+		BillSearch search = BillSearch.builder().discountStatuses(Arrays.asList(DiscountStatus.PENDING)).build();
+		List<Bill> results = billDAO.getBills(search, null);
+		List<String> resultUuids = uuids(results);
+		
+		assertFalse(resultUuids.contains("b5000000-0000-0000-0000-000000000005"),
+		    "Bill 1005 has only a voided PENDING discount and must not appear in results");
+	}
+	
+	@Test
+	public void getBills_shouldNotDuplicateBillsWithMultipleMatchingDiscounts() {
+		executeDataSet(TestConstants.BASE_DATASET_DIR + "BillDiscountStatusFilterTest.xml");
+		BillSearch search = BillSearch.builder()
+		        .discountStatuses(Arrays.asList(DiscountStatus.PENDING, DiscountStatus.APPROVED)).build();
+		List<Bill> results = billDAO.getBills(search, null);
+		List<String> resultUuids = uuids(results);
+		
+		long countOf1004 = results.stream().filter(b -> "b4000000-0000-0000-0000-000000000004".equals(b.getUuid())).count();
+		
+		assertEquals(1, countOf1004, "Bill 1004 matches both PENDING and APPROVED discounts but must appear exactly once");
+		assertFalse(resultUuids.contains("b3000000-0000-0000-0000-000000000003"),
+		    "Bill 1003 has only a REJECTED discount — must not appear for PENDING|APPROVED filter");
+	}
+	
+	private List<String> uuids(List<Bill> bills) {
+		return bills.stream().map(Bill::getUuid).sorted().collect(Collectors.toList());
 	}
 }

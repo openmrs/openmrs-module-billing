@@ -39,6 +39,10 @@ public class ModuleSettings {
 	
 	public static final String AUTOFILL_PAYMENT_AMOUNT = "billing.autofillPaymentAmount";
 	
+	public static final String DISCOUNT_ENABLED = "billing.discountEnabled";
+	
+	public static final String REFUND_ENABLED = "billing.refundEnabled";
+	
 	public static final String PATIENT_DASHBOARD_2_BILL_COUNT = "billing.patientDashboard2BillCount";
 	
 	private static final Integer DEFAULT_PATIENT_DASHBOARD_2_BILL_COUNT = 4;

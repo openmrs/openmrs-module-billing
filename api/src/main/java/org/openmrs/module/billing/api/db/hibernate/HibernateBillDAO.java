@@ -21,6 +21,7 @@ import org.openmrs.api.db.hibernate.HibernatePatientDAO;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.db.BillDAO;
 import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.module.billing.api.model.BillDiscount;
 import org.openmrs.module.billing.api.search.BillSearch;
 
 import javax.annotation.Nonnull;
@@ -29,6 +30,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -111,7 +113,7 @@ public class HibernateBillDAO implements BillDAO {
 		CriteriaQuery<Bill> cq = cb.createQuery(Bill.class);
 		Root<Bill> root = cq.from(Bill.class);
 		
-		List<Predicate> predicates = buildBillSearchPredicate(cb, root, billSearch);
+		List<Predicate> predicates = buildBillSearchPredicate(cb, cq, root, billSearch);
 		
 		if (!predicates.isEmpty()) {
 			cq.where(predicates.toArray(new Predicate[0]));
@@ -142,7 +144,8 @@ public class HibernateBillDAO implements BillDAO {
 		sessionFactory.getCurrentSession().remove(bill);
 	}
 	
-	private List<Predicate> buildBillSearchPredicate(CriteriaBuilder cb, Root<Bill> root, BillSearch billSearch) {
+	private List<Predicate> buildBillSearchPredicate(CriteriaBuilder cb, CriteriaQuery<?> cq, Root<Bill> root,
+	        BillSearch billSearch) {
 		List<Predicate> predicates = new ArrayList<>();
 		
 		if (billSearch.getPatientUuid() != null) {
@@ -173,6 +176,15 @@ public class HibernateBillDAO implements BillDAO {
 		
 		if (!Boolean.TRUE.equals(billSearch.getIncludeVoided())) {
 			predicates.add(cb.equal(root.get("voided"), false));
+		}
+		
+		if (billSearch.getDiscountStatuses() != null && !billSearch.getDiscountStatuses().isEmpty()) {
+			Subquery<Integer> sub = cq.subquery(Integer.class);
+			Root<BillDiscount> discountRoot = sub.from(BillDiscount.class);
+			sub.select(cb.literal(1)).where(cb.equal(discountRoot.get("bill"), root),
+			    cb.equal(discountRoot.get("voided"), false),
+			    discountRoot.get("status").in(billSearch.getDiscountStatuses()));
+			predicates.add(cb.exists(sub));
 		}
 		
 		return predicates;
