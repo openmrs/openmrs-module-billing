@@ -58,6 +58,12 @@ public class BillRefundRecordSerializer extends AbstractRecordSerializer<BillRef
 		if (bill == null || bill.getPatient() == null) {
 			return;
 		}
+		// Defensive: AbstractIndexingAdvice swallows RuntimeException per-entity, so an NPE here
+		// would silently drop the refund from the index with only a warn-level log. A partially
+		// constructed refund (validator gap, recovered transient) should be skipped, not crash.
+		if (refund.getRefundAmount() == null) {
+			return;
+		}
 		
 		RefundStatus status = refund.getStatus();
 		String receiptOrUuid = bill.getReceiptNumber() != null ? bill.getReceiptNumber() : bill.getUuid();

@@ -9,9 +9,7 @@
  */
 package org.openmrs.module.billing.api.querystore;
 
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.openmrs.api.context.Context;
@@ -20,10 +18,14 @@ import org.openmrs.module.querystore.bridge.AbstractIndexingAdvice;
 
 public class BillRefundIndexingAdvice extends AbstractIndexingAdvice<BillRefund> {
 	
-	static final Set<String> TRIGGER_METHODS = new HashSet<>(
-	        Arrays.asList("saveBillRefund", "voidBillRefund", "unvoidBillRefund", "purgeBillRefund"));
+	// BillRefundService exposes only saveBillRefund — void/unvoid happen by setting the voided
+	// flag on the entity and calling saveBillRefund (AbstractIndexingAdvice's per-node voided
+	// policy routes voided records to delete on the resave path). There is no purgeBillRefund
+	// method, so PURGE_METHODS is empty rather than aspirationally listing a name AOP can never
+	// match — if hard-delete becomes a real path it should land on a service method first.
+	static final Set<String> TRIGGER_METHODS = Collections.singleton("saveBillRefund");
 	
-	static final Set<String> PURGE_METHODS = Collections.singleton("purgeBillRefund");
+	static final Set<String> PURGE_METHODS = Collections.emptySet();
 	
 	@Override
 	protected Class<BillRefund> getSupportedType() {

@@ -87,7 +87,10 @@ public class BillDiscountServiceImpl implements BillDiscountService {
 			Context.addProxyPrivilege(PrivilegeConstants.MANAGE_BILLS);
 			Bill freshBill = Context.getService(BillService.class).getBill(billId);
 			if (freshBill == null) {
-				log.error("Discount {} references bill {} which could not be loaded; parent bill not touched",
+				// Bill was concurrently voided/purged between this discount's save and the reload —
+				// recoverable race, not a hard failure. warn rather than error so ops dashboards
+				// don't page on routine concurrent edits.
+				log.warn("Discount {} references bill {} which could not be loaded; parent bill not touched",
 				    discount.getUuid(), billId);
 				return;
 			}
