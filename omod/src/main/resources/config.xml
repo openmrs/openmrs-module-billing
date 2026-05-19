@@ -173,6 +173,17 @@
 		</description>
 	</globalProperty>
 
+	<globalProperty>
+		<property>${project.parent.artifactId}.patientPaymentStatusResolver</property>
+		<description>
+			Fully qualified class name of a Spring-managed bean implementing
+			org.openmrs.module.billing.api.PatientPaymentStatusResolver. The bean must
+			be registered as a component by some OpenMRS module so that
+			Context.getRegisteredComponents() can find it. Leave blank to use the
+			default resolver, which derives PAID/UNPAID from existing Bill records.
+		</description>
+	</globalProperty>
+
 
 	<!-- Extensions -->
 	<!--	<extension>-->
