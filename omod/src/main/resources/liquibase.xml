@@ -1356,4 +1356,16 @@
             onDelete="SET NULL"
             onUpdate="CASCADE" />
     </changeSet>
+
+    <changeSet id="openmrs.billing-012-20260519-index-bill-visit" author="Nethmi Rodrigo">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="cashier_bill" indexName="cashier_bill_visit_id_idx" />
+            </not>
+        </preConditions>
+        <comment>Add index for cashier_bill.visit_id</comment>
+        <createIndex indexName="cashier_bill_visit_id_idx" tableName="cashier_bill">
+            <column name="visit_id" />
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>
