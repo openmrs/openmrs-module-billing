@@ -12,10 +12,15 @@ package org.openmrs.module.billing.validator;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.openmrs.Patient;
+import org.openmrs.Visit;
+import org.openmrs.VisitType;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.VisitService;
 import org.openmrs.module.billing.TestConstants;
 import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.PaymentModeService;
@@ -134,6 +139,50 @@ public class BillValidatorTest extends BaseModuleContextSensitiveTest {
 		billValidator.validate(postedBill, errors);
 		
 		assertFalse(errors.hasErrors());
+	}
+	
+	@Test
+	public void validate_shouldRejectVisitThatDoesNotExist() {
+		Bill pendingBill = billService.getBill(2);
+		assertNotNull(pendingBill);
+		
+		Visit missingVisit = new Visit();
+		missingVisit.setVisitId(Integer.MAX_VALUE);
+		pendingBill.setVisit(missingVisit);
+		
+		Errors errors = new BindException(pendingBill, "bill");
+		billValidator.validate(pendingBill, errors);
+		
+		assertTrue(errors.hasGlobalErrors());
+		assertEquals("billing.error.visitDoesNotExist", errors.getGlobalError().getCode());
+	}
+	
+	@Test
+	public void validate_shouldRejectVisitThatDoesNotBelongToPatient() {
+		Bill pendingBill = billService.getBill(2);
+		assertNotNull(pendingBill);
+		assertNotEquals(0, pendingBill.getPatient().getPatientId());
+		
+		VisitService visitService = Context.getVisitService();
+		VisitType visitType = visitService.getAllVisitTypes().isEmpty()
+		        ? visitService.saveVisitType(new VisitType("Test", "Test visit type"))
+		        : visitService.getAllVisitTypes().get(0);
+		Patient otherPatient = Context.getPatientService().getPatient(0);
+		otherPatient.setBirthdateEstimated(false);
+		
+		Visit otherPatientVisit = new Visit();
+		otherPatientVisit.setPatient(otherPatient);
+		otherPatientVisit.setVisitType(visitType);
+		otherPatientVisit.setStartDatetime(new Date());
+		otherPatientVisit = visitService.saveVisit(otherPatientVisit);
+		
+		pendingBill.setVisit(otherPatientVisit);
+		
+		Errors errors = new BindException(pendingBill, "bill");
+		billValidator.validate(pendingBill, errors);
+		
+		assertTrue(errors.hasGlobalErrors());
+		assertEquals("billing.error.visitDoesNotBelongToPatient", errors.getGlobalError().getCode());
 	}
 	
 }
