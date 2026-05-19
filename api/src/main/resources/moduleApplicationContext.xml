@@ -337,6 +337,26 @@
 		</constructor-arg>
 	</bean>
 
+	<!-- Querystore SPI: serializers, providers, and indexing advice. The advice classes extend
+	     org.openmrs.module.querystore.bridge.AbstractIndexingAdvice; the providers implement
+	     org.openmrs.module.querystore.spi.ResourceTypeProvider. All require querystore-api on the
+	     classpath at module load (require_module is declared in omod/config.xml). -->
+	<bean id="billing.querystore.serializer.bill"
+	      class="org.openmrs.module.billing.api.querystore.BillRecordSerializer"/>
+
+	<bean id="billing.querystore.serializer.bill_refund"
+	      class="org.openmrs.module.billing.api.querystore.BillRefundRecordSerializer"/>
+
+	<bean id="billing.querystore.provider.bill"
+	      class="org.openmrs.module.billing.api.querystore.BillResourceTypeProvider">
+		<constructor-arg ref="billing.querystore.serializer.bill"/>
+	</bean>
+
+	<bean id="billing.querystore.provider.bill_refund"
+	      class="org.openmrs.module.billing.api.querystore.BillRefundResourceTypeProvider">
+		<constructor-arg ref="billing.querystore.serializer.bill_refund"/>
+	</bean>
+
 	<bean id="defaultPatientPaymentStatusResolver"
 	      class="org.openmrs.module.billing.api.impl.DefaultPatientPaymentStatusResolver">
 		<constructor-arg ref="billService"/>

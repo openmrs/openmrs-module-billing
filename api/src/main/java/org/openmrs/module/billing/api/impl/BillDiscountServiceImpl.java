@@ -9,15 +9,22 @@
  */
 package org.openmrs.module.billing.api.impl;
 
+import java.util.Date;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillDiscountService;
+import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.db.BillDiscountDAO;
+import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillDiscount;
 import org.openmrs.module.billing.api.model.DiscountStatus;
+import org.openmrs.module.billing.api.util.PrivilegeConstants;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @RequiredArgsConstructor
 public class BillDiscountServiceImpl implements BillDiscountService {
 	
@@ -56,12 +63,39 @@ public class BillDiscountServiceImpl implements BillDiscountService {
 	@Override
 	@Transactional
 	public BillDiscount saveBillDiscount(BillDiscount billDiscount) {
-		return billDiscountDAO.saveBillDiscount(billDiscount);
+		BillDiscount saved = billDiscountDAO.saveBillDiscount(billDiscount);
+		touchParentBill(saved);
+		return saved;
 	}
 	
 	@Override
 	@Transactional(readOnly = true)
 	public DiscountStatus getStatusById(Integer id) {
 		return billDiscountDAO.getStatusById(id);
+	}
+	
+	// Bill.getAmountAfterDiscount() is derived; a discount mutation changes the bill's effective
+	// value without touching any bill column, so the parent row stays clean. Re-save to advance
+	// dateChanged — the querystore BillIndexingAdvice fires on the resulting BillService.saveBill.
+	private void touchParentBill(BillDiscount discount) {
+		Integer billId = discount.getBill() == null ? null : discount.getBill().getId();
+		if (billId == null) {
+			log.error("Saved discount {} has no associated bill; skipping parent bill touch", discount.getUuid());
+			return;
+		}
+		try {
+			Context.addProxyPrivilege(PrivilegeConstants.MANAGE_BILLS);
+			Bill freshBill = Context.getService(BillService.class).getBill(billId);
+			if (freshBill == null) {
+				log.error("Discount {} references bill {} which could not be loaded; parent bill not touched",
+				    discount.getUuid(), billId);
+				return;
+			}
+			freshBill.setDateChanged(new Date());
+			Context.getService(BillService.class).saveBill(freshBill);
+		}
+		finally {
+			Context.removeProxyPrivilege(PrivilegeConstants.MANAGE_BILLS);
+		}
 	}
 }

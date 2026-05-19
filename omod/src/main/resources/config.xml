@@ -40,7 +40,18 @@
 		<require_module version="${stockmanagementVersion}">org.openmrs.module.stockmanagement</require_module>
 		<require_module version="${fhir2Version}">org.openmrs.module.fhir2</require_module>
 		<require_module version="${eventVersion}">org.openmrs.event</require_module>
+		<require_module version="${querystoreVersion}">org.openmrs.module.querystore</require_module>
 	</require_modules>
+
+	<advice>
+		<point>org.openmrs.module.billing.api.BillService</point>
+		<class>org.openmrs.module.billing.api.querystore.BillIndexingAdvice</class>
+	</advice>
+
+	<advice>
+		<point>org.openmrs.module.billing.api.BillRefundService</point>
+		<class>org.openmrs.module.billing.api.querystore.BillRefundIndexingAdvice</class>
+	</advice>
 
 	<!-- Module Activator -->
 	<activator>org.openmrs.module.billing.BillingModuleActivator</activator>
