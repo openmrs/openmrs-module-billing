@@ -257,8 +257,8 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 		assertNotNull(bill);
 		assertNotNull(billDiscountService.getBillDiscountByUuid("90000000-0000-0000-0000-000000000d00"));
 		assertNotNull(billDiscountService.getBillDiscountByUuid("90000000-0000-0000-0000-000000000d01"));
-		assertNotNull(billRefundService.getBillRefundByUuid("90000000-0000-0000-0000-000000000r00"));
-		assertNotNull(billRefundService.getBillRefundByUuid("90000000-0000-0000-0000-000000000r01"));
+		assertNotNull(billRefundService.getBillRefundByUuid("r0000000-0000-0000-0000-000000000900"));
+		assertNotNull(billRefundService.getBillRefundByUuid("r0000000-0000-0000-0000-000000000901"));
 		
 		billDAO.purgeBill(bill);
 		Context.flushSession();
@@ -267,8 +267,8 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 		assertNull(billDAO.getBill(900));
 		assertNull(billDiscountService.getBillDiscountByUuid("90000000-0000-0000-0000-000000000d00"));
 		assertNull(billDiscountService.getBillDiscountByUuid("90000000-0000-0000-0000-000000000d01"));
-		assertNull(billRefundService.getBillRefundByUuid("90000000-0000-0000-0000-000000000r00"));
-		assertNull(billRefundService.getBillRefundByUuid("90000000-0000-0000-0000-000000000r01"));
+		assertNull(billRefundService.getBillRefundByUuid("r0000000-0000-0000-0000-000000000900"));
+		assertNull(billRefundService.getBillRefundByUuid("r0000000-0000-0000-0000-000000000901"));
 	}
 	
 	@Test
