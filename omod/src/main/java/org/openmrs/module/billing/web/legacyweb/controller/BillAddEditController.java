@@ -26,9 +26,7 @@ import org.openmrs.module.billing.api.ICashierOptionsService;
 import org.openmrs.module.billing.api.base.util.UrlUtil;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.CashierOptions;
-import org.openmrs.module.billing.api.model.Timesheet;
 import org.openmrs.module.billing.api.util.PrivilegeConstants;
-import org.openmrs.module.billing.api.util.TimesheetUtil;
 import org.openmrs.module.billing.web.CashierWebConstants;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -52,21 +50,6 @@ public class BillAddEditController {
 	@RequestMapping(method = RequestMethod.GET)
 	public String bill(ModelMap model, @RequestParam(value = "billUuid", required = false) String billUuid,
 	        @RequestParam(value = "patientUuid", required = false) String patientUuid, HttpServletRequest request) {
-		Timesheet timesheet;
-		try {
-			timesheet = TimesheetUtil.getCurrentTimesheet();
-		}
-		catch (Exception e) {
-			log.error("Error retrieving provider for current user. ", e);
-			return "redirect:/login.htm";
-			
-		}
-		
-		if (timesheet == null && TimesheetUtil.isTimesheetRequired()) {
-			return buildRedirectUrl(request);
-		}
-		
-		model.addAttribute("timesheet", timesheet);
 		model.addAttribute("user", Context.getAuthenticatedUser());
 		model.addAttribute("url", buildUrlModelAttribute(request));
 		
@@ -93,7 +76,6 @@ public class BillAddEditController {
 		} else {
 			addPatientAttributes(model, patientUuid);
 			model.addAttribute("showPrint", true);
-			model.addAttribute("cashPoint", timesheet != null ? timesheet.getCashPoint() : null);
 		}
 		
 		return CashierWebConstants.BILL_PAGE;
