@@ -37,6 +37,8 @@ public class BillSearch {
 	
 	private String cashPointUuid;
 	
+	private String visitUuid;
+	
 	private List<BillStatus> statuses;
 	
 	private List<DiscountStatus> discountStatuses;

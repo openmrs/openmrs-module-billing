@@ -11,9 +11,11 @@ package org.openmrs.module.billing.api.billing.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -23,18 +25,28 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Concept;
 import org.openmrs.DrugOrder;
+import org.openmrs.Encounter;
+import org.openmrs.Order;
+import org.openmrs.Patient;
+import org.openmrs.Provider;
 import org.openmrs.TestOrder;
+import org.openmrs.Visit;
 import org.openmrs.module.billing.api.BillExemptionService;
+import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.BillableServiceService;
+import org.openmrs.module.billing.api.CashPointService;
 import org.openmrs.module.billing.api.ItemPriceService;
+import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillLineItemStatus;
 import org.openmrs.module.billing.api.model.BillableService;
+import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
 import org.openmrs.module.billing.api.search.BillableServiceSearch;
 
@@ -49,6 +61,12 @@ public class TestOrderBillingStrategyTest {
 	
 	@Mock
 	private BillExemptionService billExemptionService;
+	
+	@Mock
+	private BillService billService;
+	
+	@Mock
+	private CashPointService cashPointService;
 	
 	@InjectMocks
 	private TestOrderBillingStrategy strategy;
@@ -130,5 +148,49 @@ public class TestOrderBillingStrategyTest {
 		Optional<BillLineItem> result = strategy.createBillLineItem(testOrder);
 		
 		assertFalse(result.isPresent());
+	}
+	
+	@Test
+	public void createBill_shouldInheritVisitFromOrderEncounter() {
+		Patient patient = new Patient();
+		Visit visit = new Visit();
+		Encounter encounter = new Encounter();
+		encounter.setVisit(visit);
+		Provider cashier = new Provider();
+		Order order = new TestOrder();
+		order.setEncounter(encounter);
+		order.setOrderer(cashier);
+		CashPoint cashPoint = new CashPoint();
+		BillLineItem lineItem = new BillLineItem();
+		
+		when(cashPointService.getAllCashPoints(false)).thenReturn(Collections.singletonList(cashPoint));
+		when(billService.saveBill(any(Bill.class))).thenAnswer(inv -> inv.getArgument(0));
+		
+		strategy.createBill(patient, lineItem, order);
+		
+		ArgumentCaptor<Bill> captor = ArgumentCaptor.forClass(Bill.class);
+		verify(billService).saveBill(captor.capture());
+		assertEquals(visit, captor.getValue().getVisit());
+	}
+	
+	@Test
+	public void createBill_shouldLeaveVisitNullWhenEncounterHasNoVisit() {
+		Patient patient = new Patient();
+		Encounter encounter = new Encounter();
+		Provider cashier = new Provider();
+		Order order = new TestOrder();
+		order.setEncounter(encounter);
+		order.setOrderer(cashier);
+		CashPoint cashPoint = new CashPoint();
+		BillLineItem lineItem = new BillLineItem();
+		
+		when(cashPointService.getAllCashPoints(false)).thenReturn(Collections.singletonList(cashPoint));
+		when(billService.saveBill(any(Bill.class))).thenAnswer(inv -> inv.getArgument(0));
+		
+		strategy.createBill(patient, lineItem, order);
+		
+		ArgumentCaptor<Bill> captor = ArgumentCaptor.forClass(Bill.class);
+		verify(billService).saveBill(captor.capture());
+		assertNull(captor.getValue().getVisit());
 	}
 }
