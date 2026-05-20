@@ -108,5 +108,7 @@ public class BillRefundRecordSerializer extends AbstractRecordSerializer<BillRef
 		if (refund.getCompleter() != null) {
 			doc.putMetadata(BillingQueryStoreConstants.FIELD_COMPLETER_UUID, refund.getCompleter().getUuid());
 		}
+		
+		BillingAuditFields.populate(doc, refund);
 	}
 }

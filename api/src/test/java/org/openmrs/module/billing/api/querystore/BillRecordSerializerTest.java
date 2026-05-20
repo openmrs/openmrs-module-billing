@@ -28,6 +28,9 @@ import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.model.DiscountStatus;
 import org.openmrs.module.billing.api.model.DiscountType;
+import org.openmrs.Order;
+import org.openmrs.User;
+import org.openmrs.module.billing.api.model.BillLineItemStatus;
 import org.openmrs.module.billing.api.model.Payment;
 import org.openmrs.module.billing.api.model.PaymentMode;
 import org.openmrs.module.querystore.model.QueryDocument;
@@ -270,6 +273,185 @@ public class BillRecordSerializerTest {
 		
 		assertNotNull(doc);
 		assertFalse(doc.getMetadata().containsKey(BillingQueryStoreConstants.FIELD_LINE_ITEM_NAMES));
+	}
+	
+	@Test
+	public void serialize_shouldEmitPaymentModeAmountsInParallelToModes() {
+		// payment_modes and payment_mode_amounts must be parallel — payment_modes[i] paid amount
+		// payment_mode_amounts[i]. Two payments of the same mode are summed into one entry.
+		Bill bill = postedBillWithLineItem("R-300", new BigDecimal("100"), 1);
+		addPayment(bill, new BigDecimal("30.00"), paymentMode("Mobile Money"));
+		addPayment(bill, new BigDecimal("40.00"), paymentMode("Cash"));
+		addPayment(bill, new BigDecimal("20.00"), paymentMode("Mobile Money"));
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertEquals(Arrays.asList("Cash", "Mobile Money"),
+		    doc.getMetadata().get(BillingQueryStoreConstants.FIELD_PAYMENT_MODES));
+		assertEquals(Arrays.asList("40.00", "50.00"),
+		    doc.getMetadata().get(BillingQueryStoreConstants.FIELD_PAYMENT_MODE_AMOUNTS));
+	}
+	
+	@Test
+	public void serialize_shouldOmitPaymentModeAmountsWhenNoPayments() {
+		Bill bill = postedBillWithLineItem("R-301", new BigDecimal("100"), 1);
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertFalse(doc.getMetadata().containsKey(BillingQueryStoreConstants.FIELD_PAYMENT_MODE_AMOUNTS));
+	}
+	
+	@Test
+	public void serialize_shouldEmitDistinctSortedLineItemStatuses() {
+		// "Find bills with a REFUND_REQUESTED line item" requires the workflow status surfaced;
+		// the BillStatus field is bill-level only. Voided line items are excluded so a once-
+		// requested-then-voided line doesn't leave a phantom REFUND_REQUESTED in the index.
+		Bill bill = postedBillWithLineItem("R-302", new BigDecimal("50"), 1);
+		bill.getLineItems().get(0).setStatus(BillLineItemStatus.PAID);
+		BillLineItem second = newLineItem(new BigDecimal("20"), 1);
+		second.setStatus(BillLineItemStatus.REFUND_REQUESTED);
+		bill.getLineItems().add(second);
+		BillLineItem voided = newLineItem(new BigDecimal("10"), 1);
+		voided.setStatus(BillLineItemStatus.REFUNDED);
+		voided.setVoided(true);
+		bill.getLineItems().add(voided);
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertEquals(Arrays.asList("PAID", "REFUND_REQUESTED"),
+		    doc.getMetadata().get(BillingQueryStoreConstants.FIELD_LINE_ITEM_STATUSES));
+	}
+	
+	@Test
+	public void serialize_shouldOmitLineItemStatusesWhenAllNullOrVoided() {
+		Bill bill = postedBillWithLineItem("R-303", new BigDecimal("50"), 1);
+		// line item has no status set (null)
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertFalse(doc.getMetadata().containsKey(BillingQueryStoreConstants.FIELD_LINE_ITEM_STATUSES));
+	}
+	
+	@Test
+	public void serialize_shouldEmitDistinctSortedOrderUuids() {
+		// Clinical-to-billing trace: "find the bill for this lab order" matches against
+		// order_uuids. Voided line items contribute nothing — the index reflects the bill's
+		// current effective ordered work, not its history.
+		Bill bill = postedBillWithLineItem("R-304", new BigDecimal("50"), 1);
+		Order orderA = new Order();
+		orderA.setUuid("z-order");
+		Order orderB = new Order();
+		orderB.setUuid("a-order");
+		bill.getLineItems().get(0).setOrder(orderA);
+		BillLineItem second = newLineItem(new BigDecimal("20"), 1);
+		second.setOrder(orderB);
+		bill.getLineItems().add(second);
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertEquals(Arrays.asList("a-order", "z-order"),
+		    doc.getMetadata().get(BillingQueryStoreConstants.FIELD_ORDER_UUIDS));
+	}
+	
+	@Test
+	public void serialize_shouldOmitOrderUuidsWhenNoLineItemHasOrder() {
+		Bill bill = postedBillWithLineItem("R-305", new BigDecimal("50"), 1);
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertFalse(doc.getMetadata().containsKey(BillingQueryStoreConstants.FIELD_ORDER_UUIDS));
+	}
+	
+	@Test
+	public void serialize_shouldEmitCashierNameAlongsideUuid() {
+		// "Find bills cashier-handled by Mary" — denormalized name avoids a Provider lookup.
+		// Provider.getName() derives from the linked Person's PersonName when there's no metadata
+		// name; we build a Person+PersonName to match the production data shape.
+		Bill bill = postedBillWithLineItem("R-306", new BigDecimal("50"), 1);
+		bill.setCashier(providerWithPersonName("cashier-uuid", "Mary"));
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertEquals("cashier-uuid", doc.getMetadata().get(BillingQueryStoreConstants.FIELD_CASHIER_UUID));
+		assertEquals("Mary", doc.getMetadata().get(BillingQueryStoreConstants.FIELD_CASHIER_NAME));
+	}
+	
+	@Test
+	public void serialize_shouldOmitCashierNameWhenProviderHasNoName() {
+		// Production providers usually have a Person; system providers (REST-created with no
+		// Person and no metadata name) would otherwise emit an empty/whitespace cashier_name —
+		// the guard must skip the field entirely so a "find bills with a named cashier"
+		// exists-filter doesn't match these system rows.
+		Bill bill = postedBillWithLineItem("R-306b", new BigDecimal("50"), 1);
+		Provider cashier = new Provider();
+		cashier.setUuid("cashier-no-name");
+		bill.setCashier(cashier);
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertEquals("cashier-no-name", doc.getMetadata().get(BillingQueryStoreConstants.FIELD_CASHIER_UUID));
+		assertFalse(doc.getMetadata().containsKey(BillingQueryStoreConstants.FIELD_CASHIER_NAME));
+	}
+	
+	@Test
+	public void serialize_shouldOmitAuditFieldsWhenAbsent() {
+		// The audit-fields helper must skip-when-null so a "voided by" exists-query doesn't
+		// false-positive on rows where voidedBy was never set. dateCreated is always present on
+		// a saved bill, but the others (changedBy, voidedBy, dateChanged, dateVoided, voidReason)
+		// are populated only when the bill is touched.
+		Bill bill = postedBillWithLineItem("R-307b", new BigDecimal("50"), 1);
+		bill.setCreator(null);
+		bill.setDateChanged(null);
+		bill.setChangedBy(null);
+		bill.setDateVoided(null);
+		bill.setVoidedBy(null);
+		bill.setVoidReason(null);
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertFalse(doc.getMetadata().containsKey(BillingQueryStoreConstants.FIELD_CREATOR_UUID));
+		assertFalse(doc.getMetadata().containsKey(BillingQueryStoreConstants.FIELD_DATE_CHANGED));
+		assertFalse(doc.getMetadata().containsKey(BillingQueryStoreConstants.FIELD_CHANGED_BY_UUID));
+		assertFalse(doc.getMetadata().containsKey(BillingQueryStoreConstants.FIELD_DATE_VOIDED));
+		assertFalse(doc.getMetadata().containsKey(BillingQueryStoreConstants.FIELD_VOIDED_BY_UUID));
+		assertFalse(doc.getMetadata().containsKey(BillingQueryStoreConstants.FIELD_VOID_REASON));
+	}
+	
+	@Test
+	public void serialize_shouldEmitAuditFieldsWhenPresent() {
+		// Audit context (creator, changedBy, voidedBy, voidReason, dateChanged, dateVoided,
+		// createdAt) is what makes "who voided this bill and when" queries possible. dateCreated
+		// is already on the parent QueryDocument as LocalDate; created_at is the Date timestamp
+		// for time-of-day filtering.
+		Bill bill = postedBillWithLineItem("R-307", new BigDecimal("50"), 1);
+		bill.setCreator(userWithUuid("creator-uuid"));
+		bill.setChangedBy(userWithUuid("changer-uuid"));
+		bill.setVoidedBy(userWithUuid("voider-uuid"));
+		bill.setVoidReason("erroneously created");
+		Date changed = new Date();
+		bill.setDateChanged(changed);
+		Date voided = new Date();
+		bill.setDateVoided(voided);
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertEquals("creator-uuid", doc.getMetadata().get(BillingQueryStoreConstants.FIELD_CREATOR_UUID));
+		assertEquals("changer-uuid", doc.getMetadata().get(BillingQueryStoreConstants.FIELD_CHANGED_BY_UUID));
+		assertEquals("voider-uuid", doc.getMetadata().get(BillingQueryStoreConstants.FIELD_VOIDED_BY_UUID));
+		assertEquals("erroneously created", doc.getMetadata().get(BillingQueryStoreConstants.FIELD_VOID_REASON));
+		assertEquals(changed, doc.getMetadata().get(BillingQueryStoreConstants.FIELD_DATE_CHANGED));
+		assertEquals(voided, doc.getMetadata().get(BillingQueryStoreConstants.FIELD_DATE_VOIDED));
+		assertNotNull(doc.getMetadata().get(BillingQueryStoreConstants.FIELD_CREATED_AT));
 	}
 	
 	@Test
@@ -583,6 +765,24 @@ public class BillRecordSerializerTest {
 		PaymentMode mode = new PaymentMode();
 		mode.setName(name);
 		return mode;
+	}
+	
+	private static User userWithUuid(String uuid) {
+		User user = new User();
+		user.setUuid(uuid);
+		return user;
+	}
+	
+	private static Provider providerWithPersonName(String uuid, String name) {
+		Provider provider = new Provider();
+		provider.setUuid(uuid);
+		org.openmrs.Person person = new org.openmrs.Person();
+		org.openmrs.PersonName personName = new org.openmrs.PersonName();
+		personName.setGivenName(name);
+		personName.setFamilyName("");
+		person.addName(personName);
+		provider.setPerson(person);
+		return provider;
 	}
 	
 	private void addDiscount(Bill bill, DiscountStatus status, boolean voided) {

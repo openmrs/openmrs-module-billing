@@ -97,5 +97,7 @@ public class BillDiscountRecordSerializer extends AbstractRecordSerializer<BillD
 		if (discount.getApprover() != null) {
 			doc.putMetadata(BillingQueryStoreConstants.FIELD_APPROVER_UUID, discount.getApprover().getUuid());
 		}
+		
+		BillingAuditFields.populate(doc, discount);
 	}
 }

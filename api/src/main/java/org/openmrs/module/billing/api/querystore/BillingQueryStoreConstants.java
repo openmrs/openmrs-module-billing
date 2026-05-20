@@ -22,6 +22,8 @@ final class BillingQueryStoreConstants {
 	
 	static final String RESOURCE_TYPE_BILL_DISCOUNT = "billing_bill_discount";
 	
+	static final String RESOURCE_TYPE_TIMESHEET = "billing_timesheet";
+	
 	static final String FIELD_RECEIPT_NUMBER = "receipt_number";
 	
 	static final String FIELD_BILL_UUID = "bill_uuid";
@@ -103,6 +105,50 @@ final class BillingQueryStoreConstants {
 	static final String FIELD_DISCOUNT_AMOUNT = "discount_amount";
 	
 	static final String FIELD_JUSTIFICATION = "justification";
+	
+	// Distinct sorted non-voided BillLineItemStatus values across the bill's line items. Lets
+	// workflow queries like "find bills with a REFUND_REQUESTED line item" succeed without
+	// scanning every line item row.
+	static final String FIELD_LINE_ITEM_STATUSES = "line_item_statuses";
+	
+	// Distinct sorted Order.uuid values across the bill's non-voided line items. Lets clinical-to-
+	// billing trace queries like "find the bill for this lab order" succeed.
+	static final String FIELD_ORDER_UUIDS = "order_uuids";
+	
+	// Provider.getName() of the cashier — denormalized alongside cashier_uuid so admin queries
+	// like "find bills cashier-handled by Mary" don't require an extra Provider lookup.
+	static final String FIELD_CASHIER_NAME = "cashier_name";
+	
+	// Parallel to FIELD_PAYMENT_MODES (same TreeMap iteration order). Each entry is the total
+	// non-voided amount tendered for the mode at the same index. Lets "total Cash collected this
+	// week" succeed by zipping the two arrays at query time.
+	static final String FIELD_PAYMENT_MODE_AMOUNTS = "payment_mode_amounts";
+	
+	// OpenMRS BaseOpenmrsData audit fields. `voided` and the (LocalDate) `date` are already on
+	// the document; these add the time-precise create/change timestamps, the change/void actors,
+	// and the void reason so audit queries like "bills modified in the last hour" or "bills
+	// voided by Alice" can succeed.
+	static final String FIELD_CREATED_AT = "created_at";
+	
+	static final String FIELD_DATE_CHANGED = "date_changed";
+	
+	static final String FIELD_DATE_VOIDED = "date_voided";
+	
+	static final String FIELD_CREATOR_UUID = "creator_uuid";
+	
+	static final String FIELD_CHANGED_BY_UUID = "changed_by_uuid";
+	
+	static final String FIELD_VOIDED_BY_UUID = "voided_by_uuid";
+	
+	static final String FIELD_VOID_REASON = "void_reason";
+	
+	// Timesheet fields. clock_in / clock_out let "who was on duty at 2pm" succeed without
+	// scanning every timesheet row; the Provider/CashPoint UUIDs let the query narrow further.
+	static final String FIELD_CLOCK_IN = "clock_in";
+	
+	static final String FIELD_CLOCK_OUT = "clock_out";
+	
+	static final String FIELD_PROVIDER_UUID = "provider_uuid";
 	
 	private BillingQueryStoreConstants() {
 	}
