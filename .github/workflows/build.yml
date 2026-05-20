@@ -14,6 +14,12 @@ concurrency:
 jobs:
   build:
     uses: openmrs/openmrs-contrib-gha-workflows/.github/workflows/build-backend-module.yml@main
+    # Java 8 is excluded because the querystore-api dependency is compiled with Java 11
+    # bytecode (class version 55). A Java 8 deployment cannot load it at runtime, so the
+    # Java 8 matrix cell would only ever surface a compatibility error that doesn't apply
+    # to any deployment that can actually use this slice.
+    with:
+      java_versions: '[11, 17, 21]'
     permissions:
       contents: read
       id-token: write
