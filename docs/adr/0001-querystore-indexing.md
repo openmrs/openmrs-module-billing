@@ -23,6 +23,10 @@
   - [D14. Always-emitted vs conditional fields](#d14-always-emitted-vs-conditional-fields)
   - [D15. `getDate()` returns LocalDate; `created_at` is the full timestamp](#d15-getdate-returns-localdate-created_at-is-the-full-timestamp)
   - [D16. No bulk-reindex bootstrapper](#d16-no-bulk-reindex-bootstrapper)
+  - [D17. Refund preserves voided line-item names (audit-trail divergence)](#d17-refund-preserves-voided-line-item-names-audit-trail-divergence)
+  - [D18. `touchParentBill` is the cross-resource state-propagation contract](#d18-touchparentbill-is-the-cross-resource-state-propagation-contract)
+  - [D19. Per-entity exception isolation drives defensive null-guards](#d19-per-entity-exception-isolation-drives-defensive-null-guards)
+  - [D20. Shared `AbstractBillScopedSerializer<T>` base evaluated and rejected](#d20-shared-abstractbillscopedserializert-base-evaluated-and-rejected)
 - [Open issues (deferred, with failure modes)](#open-issues-deferred-with-failure-modes)
 - [Consequences](#consequences)
   - [What this slice unlocks](#what-this-slice-unlocks)
@@ -177,6 +181,49 @@ Both `BillResourceTypeProvider.getBootstrapper()` and `BillDiscountResourceTypeP
 This is a deliberate v1 scope decision. A bootstrapper would iterate the entire bill table, serialize each row, and push it to the index — useful for backfill but operationally heavy. We chose to skip it on the assumption that the querystore module's own reindex tooling can fill the gap when needed.
 
 Consequence: a "list every bill in the index" query returns only post-deploy bills until a full reindex runs.
+
+### D17. Refund preserves voided line-item names (audit-trail divergence)
+
+The bill serializer skips voided line items when building `line_item_names` — they don't contribute to the bill's current effective state. The refund serializer does the opposite: it emits the refunded line item's display name even when that line item has since been voided on the parent bill.
+
+The asymmetry is deliberate. A refund is an *audit record* of past activity, not a snapshot of current state. Querying "show me every refund for Consultation" must still surface the refund when the original Consultation line was later voided — the refund's significance is that it *happened*, not that the line still exists.
+
+If we shipped without this divergence (i.e., refund also skips voided), the next maintainer would "fix the asymmetry" by adding a voided check on the refund's lineItem — and silently break audit-trail queries. The serializer carries an inline comment for the same reason, and `BillRefundRecordSerializerTest.serialize_shouldStillIncludeRefundLineItemNameWhenLineItemIsVoided` pins the behavior in test form.
+
+### D18. `touchParentBill` is the cross-resource state-propagation contract
+
+A bill's denormalized aggregates (`discount_statuses`, `total_paid`, `payment_modes`, `amount_after_discount`, etc.) depend on child rows that have their own services and their own indexing advices. When `BillDiscountServiceImpl.saveBillDiscount(...)` persists a discount, the *discount* document re-indexes via `BillDiscountIndexingAdvice` — but the parent bill's `discount_statuses` aggregate is now stale unless something else fires `BillIndexingAdvice`.
+
+The pattern: after persisting the child, the service explicitly `Context.getService(BillService.class).saveBill(parentBill)` — going through the proxy boundary so `BillIndexingAdvice` fires on the returning call. Same in `BillLineItemServiceImpl.voidBillLineItem`.
+
+This is the *only* propagation mechanism between resource types in this slice. No event bus, no Hibernate post-update listener, no querystore-side fan-out. A new child resource type that affects bill-level aggregates (a hypothetical `BillNote`, `BillTax`, etc.) must follow the same pattern, or the bill's index goes stale.
+
+Three corollaries:
+- The double-write per save is by design — one for the child's own resource type, one for the parent bill.
+- `BillDiscountServiceImpl.touchParentBill` deliberately uses `Context.getService(...)` rather than a direct `this.save(...)` self-call, because a self-call wouldn't cross the proxy boundary and the advice wouldn't fire. (See D11.)
+- Child-service paths that bypass the service layer entirely — e.g., a DAO `save` from a script — break the contract. The contract is "writes happen through the service interface".
+
+### D19. Per-entity exception isolation drives defensive null-guards
+
+`AbstractIndexingAdvice` swallows `RuntimeException` per entity and logs at WARN. The intent is fault isolation: one malformed row doesn't crash a batch of saves. The consequence is *silent failure* — a null-deref inside `populate(...)` produces no thrown exception at the caller, no failed save, and (depending on log level) no surfaced error. The document simply doesn't appear in the index.
+
+That's why the serializers return early on:
+- `bill.getPatient() == null` (Bill, BillRefund, BillDiscount)
+- `refund.getRefundAmount() == null` (BillRefund)
+- `discount.getDiscountType() == null || discount.getDiscountValue() == null` (BillDiscount)
+- `bill == null` on a child resource (BillRefund, BillDiscount)
+
+Each guard prevents a specific NPE path inside `populate(...)`. The shape is intentional: skip with a null doc, not crash with a logged stack trace, because either way the document is missing — but the null-skip path is honest about it. If `populate(...)` looks paranoid in code review, this is why.
+
+### D20. Shared `AbstractBillScopedSerializer<T>` base evaluated and rejected
+
+The bill / refund / discount serializers share ~12 lines of structurally similar code: extract patient via parent bill, null-guard bill and patient, write `bill_uuid` / `receipt_number` / `status` / `voided`. A template-method base with `additionalPrecondition()` + `populateDomainFields()` hooks could lift those lines into a shared parent.
+
+We rejected the extraction. The divergent preconditions (refund: `refundAmount == null`; discount: `discountType == null || discountValue == null`) and divergent optional fields (refund has `completer` / `line_item_names` / `date_approved` / `date_completed`; discount has `type` / `value` / `amount` / `justification`) would push complexity into override seams. Net cost: ~30 lines of scaffolding for ~24 lines saved.
+
+The deeper concern is the implicit contract a shared base would create. "Every Bill-scoped doc emits `FIELD_BILL_UUID + FIELD_RECEIPT_NUMBER + FIELD_STATUS`" becomes a baked-in expectation. A hypothetical `BillNote` resource (annotations on bills) might not want a status field at all; it would need to override and emit null, breaking consumers who expect the shared shape. Two siblings is below the rule-of-three threshold where abstraction beats duplication.
+
+When the fourth Bill-scoped resource type lands, reopen this decision. Until then: the duplication stays.
 
 ## Open issues (deferred, with failure modes)
 
