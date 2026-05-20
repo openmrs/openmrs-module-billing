@@ -27,6 +27,10 @@
   - [D18. `touchParentBill` is the cross-resource state-propagation contract](#d18-touchparentbill-is-the-cross-resource-state-propagation-contract)
   - [D19. Per-entity exception isolation drives defensive null-guards](#d19-per-entity-exception-isolation-drives-defensive-null-guards)
   - [D20. Shared `AbstractBillScopedSerializer<T>` base evaluated and rejected](#d20-shared-abstractbillscopedserializert-base-evaluated-and-rejected)
+  - [D21. Resource type IDs are namespaced `billing_*`](#d21-resource-type-ids-are-namespaced-billing_)
+  - [D22. `text` is for full-text search; `metadata` is the structured contract](#d22-text-is-for-full-text-search-metadata-is-the-structured-contract)
+  - [D23. Asymmetric denormalization: cashier/cashpoint names yes, patient/visit names no](#d23-asymmetric-denormalization-cashiercashpoint-names-yes-patientvisit-names-no)
+  - [D24. Voided rows stay in the index](#d24-voided-rows-stay-in-the-index)
 - [Open issues (deferred, with failure modes)](#open-issues-deferred-with-failure-modes)
 - [Consequences](#consequences)
   - [What this slice unlocks](#what-this-slice-unlocks)
@@ -224,6 +228,46 @@ We rejected the extraction. The divergent preconditions (refund: `refundAmount =
 The deeper concern is the implicit contract a shared base would create. "Every Bill-scoped doc emits `FIELD_BILL_UUID + FIELD_RECEIPT_NUMBER + FIELD_STATUS`" becomes a baked-in expectation. A hypothetical `BillNote` resource (annotations on bills) might not want a status field at all; it would need to override and emit null, breaking consumers who expect the shared shape. Two siblings is below the rule-of-three threshold where abstraction beats duplication.
 
 When the fourth Bill-scoped resource type lands, reopen this decision. Until then: the duplication stays.
+
+### D21. Resource type IDs are namespaced `billing_*`
+
+The four resource type constants — `billing_bill`, `billing_bill_refund`, `billing_bill_discount`, `billing_timesheet` — share the `billing_` prefix as a deliberate namespacing convention.
+
+The querystore is keyed by the `(resourceType, resourceUuid)` pair. Without a per-module prefix, two modules each contributing a "bill" type would silently overwrite each other's documents — the second writer wins, the first module's data disappears from the index, and the failure surfaces only as "search results are wrong for that module" with no thrown error.
+
+The convention is: every resource type a module contributes starts with `<module-id>_`. The full identifier is part of the public contract (see D3) — renaming the prefix is a re-index event and breaks every existing consumer.
+
+### D22. `text` is for full-text search; `metadata` is the structured contract
+
+The `text` blob on each document is human-readable prose: `"Bill R-001. Status: PAID. Total: 100.00. Paid: 50.00. Balance: 50.00. Items: Consultation, Paracetamol."` It exists so a full-text query — `"Mobile Money"`, `"Consultation"`, `"REFUND_REQUESTED"` — has something to match against.
+
+It is NOT a machine-parseable structured payload. Consumers that try to extract field values by parsing the prose will break the next time the text format is reshuffled: changing `"Bill"` to `"Invoice"`, or moving the `Items:` clause, or quoting an item name — any of these breaks downstream regexes and exposes the parsing as accidental coupling.
+
+The structured contract is the `metadata` map. Every field that consumers should be able to filter on, group by, or surface in dashboards is in metadata. The `text` blob exists in parallel for free-text relevance ranking, nothing more. If a field you want isn't in metadata, the right move is to add it to metadata — not to parse it out of text.
+
+### D23. Asymmetric denormalization: cashier/cashpoint names yes, patient/visit names no
+
+The Bill document emits both `cashier_uuid` + `cashier_name` and `cash_point_uuid` + `cash_point_name`. It emits `patient_uuid` (via the parent serializer's `getPatientUuid`) and `visit_uuid` — but NOT `patient_name` or `visit_date`.
+
+The boundary is deliberate:
+
+- **Patient is its own querystore document.** The querystore platform's `PatientRecordSerializer` already indexes patient documents with name / identifiers / demographics. A patient-name search joins from billing documents to patient documents via `patient_uuid` — no need to duplicate the name on every bill row.
+- **Visit display would require lazy fetches at index time.** Visit has a `Person` (lazy), a `VisitType` (lazy), and date ranges. Emitting a useful visit label means dereferencing all of them on every bill save. Cross-document join via `visit_uuid` is cheaper.
+- **Cashier and cashpoint names are cheap.** `Provider.getName()` is a one-hop call (through Person.PersonName, lazy but bounded), and `CashPoint.getName()` is a column access. The cost is justified by the query usefulness — "find bills handled by cashier Mary" is a frequent admin query.
+
+The principle: denormalize cheap reference data where the cost is bounded per save and the query is hot; cross-document join for everything else. A future contributor who adds `patient_name` to chase consistency will pay a lazy fetch on every bill save and create a second source of truth for patient names that drifts on rename.
+
+### D24. Voided rows stay in the index
+
+When a bill, refund, discount, or timesheet is voided (soft-delete), the serializer still emits a document — with `voided=true` in metadata. Voided rows are *filtered*, not *removed*.
+
+This is deliberate:
+
+- Audit queries need them. "Show me every refund attempt this month, including the rejected ones" requires the rejected refunds to be in the index.
+- The querystore's purge advice — separate from void — is what removes documents. Hard-delete on the entity (e.g., `purgeBill`) fires `PURGE_METHODS` and deletes the document; soft-delete (void) does not.
+- Consumers default-filter with `voided=false` when they want the live view. The pattern matches the rest of OpenMRS.
+
+Without `voided=true` documents in the index, dashboards that surface "X attempts → Y voided → Z effective" would have to count voided rows out-of-band, defeating the index's whole purpose.
 
 ## Open issues (deferred, with failure modes)
 
