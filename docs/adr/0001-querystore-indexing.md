@@ -3,6 +3,32 @@
 - **Status:** Accepted
 - **Date:** 2026-05-20
 
+## Table of contents
+
+- [Context](#context)
+- [Decisions](#decisions)
+  - [D1. Indexed resource types](#d1-indexed-resource-types)
+  - [D2. Why `BillableService` is NOT a resource type](#d2-why-billableservice-is-not-a-resource-type)
+  - [D3. Field names are part of the public contract](#d3-field-names-are-part-of-the-public-contract)
+  - [D4. Shape contract: multi-valued metadata is `List<String>`, not comma-joined](#d4-shape-contract-multi-valued-metadata-is-liststring-not-comma-joined)
+  - [D5. Multi-valued fields are sorted (TreeSet / TreeMap) for stable bytes](#d5-multi-valued-fields-are-sorted-treeset--treemap-for-stable-bytes)
+  - [D6. `payment_modes` and `payment_mode_amounts` are parallel arrays](#d6-payment_modes-and-payment_mode_amounts-are-parallel-arrays)
+  - [D7. Each query type has both an aggregate and a detail view](#d7-each-query-type-has-both-an-aggregate-and-a-detail-view)
+  - [D8. Audit columns: shared `BillingAuditFields` helper](#d8-audit-columns-shared-billingauditfields-helper)
+  - [D9. `BillingDisplayNames` is querystore-scoped](#d9-billingdisplaynames-is-querystore-scoped)
+  - [D10. Trigger method names match the service interface verbatim](#d10-trigger-method-names-match-the-service-interface-verbatim)
+  - [D11. AOP is intercepting outer calls only — internal `save()` is a self-call](#d11-aop-is-intercepting-outer-calls-only--internal-save-is-a-self-call)
+  - [D12. Serializers and providers are `lazy-init="true"`](#d12-serializers-and-providers-are-lazy-inittrue)
+  - [D13. Whitespace-only and empty values are skipped, not stored](#d13-whitespace-only-and-empty-values-are-skipped-not-stored)
+  - [D14. Always-emitted vs conditional fields](#d14-always-emitted-vs-conditional-fields)
+  - [D15. `getDate()` returns LocalDate; `created_at` is the full timestamp](#d15-getdate-returns-localdate-created_at-is-the-full-timestamp)
+  - [D16. No bulk-reindex bootstrapper](#d16-no-bulk-reindex-bootstrapper)
+- [Open issues (deferred, with failure modes)](#open-issues-deferred-with-failure-modes)
+- [Consequences](#consequences)
+  - [What this slice unlocks](#what-this-slice-unlocks)
+  - [What this slice intentionally does NOT do](#what-this-slice-intentionally-does-not-do)
+  - [Operational notes](#operational-notes)
+
 ## Context
 
 The billing module persists `Bill`, `BillLineItem`, `Payment`, `BillDiscount`, `BillRefund`, `Timesheet`, `BillableService` and related entities. Free-text and structured search across this data — "find bills paid by Mobile Money", "approval queue for pending discounts", "find the bill for this lab order", "who was on duty between 2pm and 3pm" — was previously not feasible without scanning the persistence layer one row at a time.
