@@ -53,6 +53,11 @@
 		<class>org.openmrs.module.billing.api.querystore.BillRefundIndexingAdvice</class>
 	</advice>
 
+	<advice>
+		<point>org.openmrs.module.billing.api.BillDiscountService</point>
+		<class>org.openmrs.module.billing.api.querystore.BillDiscountIndexingAdvice</class>
+	</advice>
+
 	<!-- Module Activator -->
 	<activator>org.openmrs.module.billing.BillingModuleActivator</activator>
 

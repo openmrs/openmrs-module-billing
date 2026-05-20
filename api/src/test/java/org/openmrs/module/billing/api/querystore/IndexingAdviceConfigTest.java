@@ -13,6 +13,7 @@ import java.lang.reflect.Method;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.openmrs.module.billing.api.BillDiscountService;
 import org.openmrs.module.billing.api.BillRefundService;
 import org.openmrs.module.billing.api.BillService;
 
@@ -45,6 +46,18 @@ public class IndexingAdviceConfigTest {
 	public void billRefundIndexingAdvice_purgeMethodsShouldBeSubsetOfTriggerMethods() {
 		assertSubset(BillRefundIndexingAdvice.PURGE_METHODS, BillRefundIndexingAdvice.TRIGGER_METHODS,
 		    "BillRefundIndexingAdvice");
+	}
+	
+	@Test
+	public void billDiscountIndexingAdvice_triggerMethodsShouldAllExistOnBillDiscountService() {
+		assertAllMethodsExist(BillDiscountIndexingAdvice.TRIGGER_METHODS, BillDiscountService.class,
+		    "BillDiscountIndexingAdvice");
+	}
+	
+	@Test
+	public void billDiscountIndexingAdvice_purgeMethodsShouldBeSubsetOfTriggerMethods() {
+		assertSubset(BillDiscountIndexingAdvice.PURGE_METHODS, BillDiscountIndexingAdvice.TRIGGER_METHODS,
+		    "BillDiscountIndexingAdvice");
 	}
 	
 	private static void assertAllMethodsExist(Set<String> methodNames, Class<?> iface, String adviceName) {

@@ -13,12 +13,17 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.openmrs.Patient;
 import org.openmrs.Visit;
 import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.module.billing.api.model.BillDiscount;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
+import org.openmrs.module.billing.api.model.Payment;
+import org.openmrs.module.billing.api.model.PaymentMode;
 import org.openmrs.module.querystore.model.QueryDocument;
 import org.openmrs.module.querystore.serialization.AbstractRecordSerializer;
 import org.openmrs.module.querystore.util.DateFormatUtil;
@@ -100,6 +105,31 @@ public class BillRecordSerializer extends AbstractRecordSerializer<Bill> {
 		if (visit != null) {
 			doc.putMetadata(BillingQueryStoreConstants.FIELD_VISIT_UUID, visit.getUuid());
 		}
+		
+		List<String> paymentModes = collectPaymentModes(bill);
+		if (!paymentModes.isEmpty()) {
+			doc.putMetadata(BillingQueryStoreConstants.FIELD_PAYMENT_MODES, paymentModes);
+		}
+		List<String> discountStatuses = collectDiscountStatuses(bill);
+		if (!discountStatuses.isEmpty()) {
+			doc.putMetadata(BillingQueryStoreConstants.FIELD_DISCOUNT_STATUSES, discountStatuses);
+		}
+		if (bill.getBillAdjusted() != null) {
+			doc.putMetadata(BillingQueryStoreConstants.FIELD_BILL_ADJUSTED_UUID, bill.getBillAdjusted().getUuid());
+		}
+		List<String> adjustedByUuids = collectAdjustedByUuids(bill);
+		if (!adjustedByUuids.isEmpty()) {
+			doc.putMetadata(BillingQueryStoreConstants.FIELD_ADJUSTED_BY_UUIDS, adjustedByUuids);
+		}
+		if (bill.getAdjustmentReason() != null && !bill.getAdjustmentReason().trim().isEmpty()) {
+			doc.putMetadata(BillingQueryStoreConstants.FIELD_ADJUSTMENT_REASON, bill.getAdjustmentReason());
+		}
+		// Boolean.TRUE.equals normalizes null → false. Persisted bills always have a value
+		// (Bill.hbm.xml: not-null, defaults to false), so this only matters for hand-built bills
+		// in tests or for in-flight bills constructed via the builder paths. Always-emit pattern
+		// lets consumers write "paid bills not yet printed" as a single term filter, no
+		// exists-clause.
+		doc.putMetadata(BillingQueryStoreConstants.FIELD_RECEIPT_PRINTED, Boolean.TRUE.equals(bill.getReceiptPrinted()));
 	}
 	
 	private List<String> collectLineItemNames(Bill bill) {
@@ -117,5 +147,58 @@ public class BillRecordSerializer extends AbstractRecordSerializer<Bill> {
 			}
 		}
 		return names;
+	}
+	
+	// Distinct + sorted. Bill.payments and Bill.discounts are Set<>s, so iteration order is
+	// non-deterministic — sorting gives consumers a stable list for snapshot / cache use without
+	// committing to any source-side ordering contract. Also keeps the resulting bill document
+	// bytewise-identical across reindexes of the same logical state.
+	private List<String> collectPaymentModes(Bill bill) {
+		Set<String> modes = new TreeSet<>();
+		if (bill.getPayments() == null) {
+			return new ArrayList<>(modes);
+		}
+		for (Payment payment : bill.getPayments()) {
+			if (payment == null || payment.getVoided()) {
+				continue;
+			}
+			PaymentMode mode = payment.getInstanceType();
+			// Whitespace-only names slip past isEmpty(); a tender mode literally named "   "
+			// would otherwise show up in the indexed list between Cash and Mobile Money.
+			if (mode != null && mode.getName() != null && !mode.getName().trim().isEmpty()) {
+				modes.add(mode.getName());
+			}
+		}
+		return new ArrayList<>(modes);
+	}
+	
+	private List<String> collectDiscountStatuses(Bill bill) {
+		Set<String> statuses = new TreeSet<>();
+		if (bill.getDiscounts() == null) {
+			return new ArrayList<>(statuses);
+		}
+		for (BillDiscount discount : bill.getDiscounts()) {
+			if (discount == null || discount.getVoided() || discount.getStatus() == null) {
+				continue;
+			}
+			statuses.add(discount.getStatus().name());
+		}
+		return new ArrayList<>(statuses);
+	}
+	
+	private List<String> collectAdjustedByUuids(Bill bill) {
+		// Sorted for the same reason payment_modes / discount_statuses are: Bill.adjustedBy is a
+		// HashSet, so iteration order is non-deterministic. Without the sort, the same logical
+		// state would emit different document bytes across reindexes.
+		Set<String> uuids = new TreeSet<>();
+		if (bill.getAdjustedBy() == null) {
+			return new ArrayList<>(uuids);
+		}
+		for (Bill adjuster : bill.getAdjustedBy()) {
+			if (adjuster != null && adjuster.getUuid() != null) {
+				uuids.add(adjuster.getUuid());
+			}
+		}
+		return new ArrayList<>(uuids);
 	}
 }

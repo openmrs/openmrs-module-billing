@@ -355,6 +355,10 @@
 	      class="org.openmrs.module.billing.api.querystore.BillRefundRecordSerializer"
 	      lazy-init="true"/>
 
+	<bean id="billing.querystore.serializer.bill_discount"
+	      class="org.openmrs.module.billing.api.querystore.BillDiscountRecordSerializer"
+	      lazy-init="true"/>
+
 	<bean id="billing.querystore.provider.bill"
 	      class="org.openmrs.module.billing.api.querystore.BillResourceTypeProvider"
 	      lazy-init="true">
@@ -365,6 +369,12 @@
 	      class="org.openmrs.module.billing.api.querystore.BillRefundResourceTypeProvider"
 	      lazy-init="true">
 		<constructor-arg ref="billing.querystore.serializer.bill_refund"/>
+	</bean>
+
+	<bean id="billing.querystore.provider.bill_discount"
+	      class="org.openmrs.module.billing.api.querystore.BillDiscountResourceTypeProvider"
+	      lazy-init="true">
+		<constructor-arg ref="billing.querystore.serializer.bill_discount"/>
 	</bean>
 
 	<bean id="defaultPatientPaymentStatusResolver"

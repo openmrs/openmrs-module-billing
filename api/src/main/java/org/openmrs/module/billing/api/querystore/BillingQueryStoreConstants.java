@@ -20,6 +20,8 @@ final class BillingQueryStoreConstants {
 	
 	static final String RESOURCE_TYPE_BILL_REFUND = "billing_bill_refund";
 	
+	static final String RESOURCE_TYPE_BILL_DISCOUNT = "billing_bill_discount";
+	
 	static final String FIELD_RECEIPT_NUMBER = "receipt_number";
 	
 	static final String FIELD_BILL_UUID = "bill_uuid";
@@ -65,6 +67,42 @@ final class BillingQueryStoreConstants {
 	static final String FIELD_APPROVER_UUID = "approver_uuid";
 	
 	static final String FIELD_COMPLETER_UUID = "completer_uuid";
+	
+	// Distinct non-voided PaymentMode.name values across the bill's payments. Lets ops queries
+	// like "settlements by tender type" succeed without scanning every payment row.
+	static final String FIELD_PAYMENT_MODES = "payment_modes";
+	
+	// Distinct non-voided DiscountStatus values on the bill, sorted alphabetically (NOT workflow
+	// order — APPROVED comes before PENDING). The aggregate exists for presence queries ("which
+	// bills have a pending discount?") — consumers must not treat the list as a timeline; the
+	// BillDiscount resource type carries the per-discount detail when ordering matters.
+	static final String FIELD_DISCOUNT_STATUSES = "discount_statuses";
+	
+	// UUID of the bill this one adjusts (if any). Together with FIELD_ADJUSTED_BY_UUIDS, lets a
+	// query trace the adjustment chain in either direction.
+	static final String FIELD_BILL_ADJUSTED_UUID = "bill_adjusted_uuid";
+	
+	static final String FIELD_ADJUSTED_BY_UUIDS = "adjusted_by_uuids";
+	
+	static final String FIELD_ADJUSTMENT_REASON = "adjustment_reason";
+	
+	static final String FIELD_RECEIPT_PRINTED = "receipt_printed";
+	
+	// BillDiscount fields. The BillDiscount document is keyed to its parent bill's patient so the
+	// "approval queue" question — "show me all pending discounts requiring my review" — is a
+	// patient-scoped search per the querystore SPI contract.
+	static final String FIELD_DISCOUNT_TYPE = "discount_type";
+	
+	// Raw input — a percentage (e.g., 15 for "15% off") when discount_type=PERCENTAGE, a money
+	// amount when discount_type=FIXED_AMOUNT. Always paired with discount_type to be meaningful.
+	static final String FIELD_DISCOUNT_VALUE = "discount_value";
+	
+	// Computed money figure — the actual currency amount removed from the bill, derived from
+	// (value, type, current base). Use this for "find discounts > $50" queries; use discount_value
+	// for "find 15% discounts" queries.
+	static final String FIELD_DISCOUNT_AMOUNT = "discount_amount";
+	
+	static final String FIELD_JUSTIFICATION = "justification";
 	
 	private BillingQueryStoreConstants() {
 	}

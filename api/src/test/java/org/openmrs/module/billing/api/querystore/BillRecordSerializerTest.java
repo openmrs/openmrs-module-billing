@@ -28,6 +28,8 @@ import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.model.DiscountStatus;
 import org.openmrs.module.billing.api.model.DiscountType;
+import org.openmrs.module.billing.api.model.Payment;
+import org.openmrs.module.billing.api.model.PaymentMode;
 import org.openmrs.module.querystore.model.QueryDocument;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
 
@@ -271,6 +273,236 @@ public class BillRecordSerializerTest {
 	}
 	
 	@Test
+	public void serialize_shouldEmitDistinctSortedPaymentModes() {
+		// "Settlements by tender type" is an ops/finance query. The list must be distinct (two
+		// Mobile Money payments don't double-count) and exact-match-queryable (List<String>, not
+		// comma-joined). Sorted because the underlying HashSet<Payment> has no stable iteration
+		// order — sorting gives consumers bytewise-identical docs across reindexes.
+		Bill bill = postedBillWithLineItem("R-200", new BigDecimal("100"), 1);
+		addPayment(bill, new BigDecimal("30"), paymentMode("Mobile Money"));
+		addPayment(bill, new BigDecimal("40"), paymentMode("Cash"));
+		addPayment(bill, new BigDecimal("30"), paymentMode("Mobile Money"));
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertEquals(Arrays.asList("Cash", "Mobile Money"),
+		    doc.getMetadata().get(BillingQueryStoreConstants.FIELD_PAYMENT_MODES));
+	}
+	
+	@Test
+	public void serialize_shouldSkipPaymentsWithMissingMode() {
+		// A payment row can lack a useful mode (legacy data, half-constructed, blank name). Without
+		// the guards the serializer would NPE or emit a blank/whitespace entry, polluting the text
+		// blob and the metadata list — a tender mode literally named "   " would otherwise show up
+		// between Cash and Mobile Money on every ops dashboard.
+		Bill bill = postedBillWithLineItem("R-212", new BigDecimal("100"), 1);
+		Payment noMode = new Payment();
+		noMode.setAmount(new BigDecimal("10"));
+		noMode.setAmountTendered(new BigDecimal("10"));
+		noMode.setVoided(false);
+		bill.setPayments(new HashSet<>());
+		bill.getPayments().add(noMode);
+		PaymentMode blank = new PaymentMode();
+		blank.setName("");
+		addPayment(bill, new BigDecimal("5"), blank);
+		PaymentMode whitespace = new PaymentMode();
+		whitespace.setName("   ");
+		addPayment(bill, new BigDecimal("5"), whitespace);
+		addPayment(bill, new BigDecimal("20"), paymentMode("Cash"));
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertEquals(Arrays.asList("Cash"), doc.getMetadata().get(BillingQueryStoreConstants.FIELD_PAYMENT_MODES));
+	}
+	
+	@Test
+	public void serialize_shouldExcludeVoidedPaymentsFromPaymentModes() {
+		Bill bill = postedBillWithLineItem("R-201", new BigDecimal("100"), 1);
+		addPayment(bill, new BigDecimal("30"), paymentMode("Cash"));
+		Payment voided = new Payment();
+		voided.setAmount(new BigDecimal("20"));
+		voided.setAmountTendered(new BigDecimal("20"));
+		voided.setVoided(true);
+		voided.setInstanceType(paymentMode("Mobile Money"));
+		bill.getPayments().add(voided);
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertEquals(Arrays.asList("Cash"), doc.getMetadata().get(BillingQueryStoreConstants.FIELD_PAYMENT_MODES));
+	}
+	
+	@Test
+	public void serialize_shouldOmitPaymentModesMetadataWhenNoNonVoidedPayments() {
+		Bill bill = postedBillWithLineItem("R-202", new BigDecimal("100"), 1);
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertFalse(doc.getMetadata().containsKey(BillingQueryStoreConstants.FIELD_PAYMENT_MODES));
+	}
+	
+	@Test
+	public void serialize_shouldEmitDistinctDiscountStatuses() {
+		// "Which bills have a pending discount?" is the workflow-queue question this enables.
+		// Voided discounts must not pollute the field — a rejected then re-issued discount
+		// shouldn't show its old rejected status.
+		Bill bill = postedBillWithLineItem("R-203", new BigDecimal("100"), 1);
+		addDiscount(bill, DiscountStatus.PENDING, false);
+		addDiscount(bill, DiscountStatus.APPROVED, false);
+		addDiscount(bill, DiscountStatus.PENDING, false);
+		addDiscount(bill, DiscountStatus.REJECTED, true);
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		@SuppressWarnings("unchecked")
+		List<String> statuses = (List<String>) doc.getMetadata().get(BillingQueryStoreConstants.FIELD_DISCOUNT_STATUSES);
+		assertNotNull(statuses);
+		assertEquals(2, statuses.size());
+		assertTrue(statuses.contains("PENDING"));
+		assertTrue(statuses.contains("APPROVED"));
+		assertFalse(statuses.contains("REJECTED"));
+	}
+	
+	@Test
+	public void serialize_shouldSkipDiscountsWithNullStatus() {
+		// A half-constructed discount may reach the serializer with status still null. Indexing
+		// the literal string "null" or NPE'ing inside the loop would silently drop the bill from
+		// the index via the indexing advice's per-entity exception swallow.
+		Bill bill = postedBillWithLineItem("R-220", new BigDecimal("100"), 1);
+		addDiscount(bill, null, false);
+		addDiscount(bill, DiscountStatus.PENDING, false);
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertEquals(Arrays.asList("PENDING"), doc.getMetadata().get(BillingQueryStoreConstants.FIELD_DISCOUNT_STATUSES));
+	}
+	
+	@Test
+	public void serialize_shouldOmitDiscountStatusesMetadataWhenNoNonVoidedDiscounts() {
+		Bill bill = postedBillWithLineItem("R-204", new BigDecimal("100"), 1);
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertFalse(doc.getMetadata().containsKey(BillingQueryStoreConstants.FIELD_DISCOUNT_STATUSES));
+	}
+	
+	@Test
+	public void serialize_shouldIncludeBillAdjustedUuidWhenBillAdjustsAnother() {
+		Bill original = new Bill();
+		original.setUuid("original-bill-uuid");
+		Bill bill = postedBillWithLineItem("R-205", new BigDecimal("50"), 1);
+		bill.setBillAdjusted(original);
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertEquals("original-bill-uuid", doc.getMetadata().get(BillingQueryStoreConstants.FIELD_BILL_ADJUSTED_UUID));
+	}
+	
+	@Test
+	public void serialize_shouldIncludeAdjustedByUuidsWhenBillHasBeenAdjusted() {
+		Bill bill = postedBillWithLineItem("R-206", new BigDecimal("50"), 1);
+		Bill adjusterA = new Bill();
+		adjusterA.setUuid("adjuster-a");
+		Bill adjusterB = new Bill();
+		adjusterB.setUuid("adjuster-b");
+		bill.setAdjustedBy(new HashSet<>(Arrays.asList(adjusterA, adjusterB)));
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		@SuppressWarnings("unchecked")
+		List<String> uuids = (List<String>) doc.getMetadata().get(BillingQueryStoreConstants.FIELD_ADJUSTED_BY_UUIDS);
+		assertNotNull(uuids);
+		assertEquals(2, uuids.size());
+		assertTrue(uuids.contains("adjuster-a"));
+		assertTrue(uuids.contains("adjuster-b"));
+	}
+	
+	@Test
+	public void serialize_shouldOmitAdjustmentFieldsWhenAbsent() {
+		Bill bill = postedBillWithLineItem("R-207", new BigDecimal("50"), 1);
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertFalse(doc.getMetadata().containsKey(BillingQueryStoreConstants.FIELD_BILL_ADJUSTED_UUID));
+		assertFalse(doc.getMetadata().containsKey(BillingQueryStoreConstants.FIELD_ADJUSTED_BY_UUIDS));
+		assertFalse(doc.getMetadata().containsKey(BillingQueryStoreConstants.FIELD_ADJUSTMENT_REASON));
+	}
+	
+	@Test
+	public void serialize_shouldIncludeAdjustmentReasonWhenSet() {
+		Bill bill = postedBillWithLineItem("R-208", new BigDecimal("50"), 1);
+		bill.setAdjustmentReason("Patient was overcharged for consult");
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertEquals("Patient was overcharged for consult",
+		    doc.getMetadata().get(BillingQueryStoreConstants.FIELD_ADJUSTMENT_REASON));
+	}
+	
+	@Test
+	public void serialize_shouldOmitAdjustmentReasonWhenEmpty() {
+		// An empty-string reason is semantically equivalent to "no reason given" — emitting it
+		// would pollute "find bills with an adjustment reason" exists-queries with empty matches.
+		Bill bill = postedBillWithLineItem("R-208a", new BigDecimal("50"), 1);
+		bill.setAdjustmentReason("");
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertFalse(doc.getMetadata().containsKey(BillingQueryStoreConstants.FIELD_ADJUSTMENT_REASON));
+	}
+	
+	@Test
+	public void serialize_shouldEmitAdjustedByUuidsSorted() {
+		// Bill.adjustedBy is a HashSet — without sorting, the same logical state would emit
+		// different document bytes across reindexes, breaking snapshot/cache stability.
+		Bill bill = postedBillWithLineItem("R-208b", new BigDecimal("50"), 1);
+		Bill adjusterC = new Bill();
+		adjusterC.setUuid("z-uuid");
+		Bill adjusterA = new Bill();
+		adjusterA.setUuid("a-uuid");
+		Bill adjusterB = new Bill();
+		adjusterB.setUuid("m-uuid");
+		bill.setAdjustedBy(new HashSet<>(Arrays.asList(adjusterC, adjusterA, adjusterB)));
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertEquals(Arrays.asList("a-uuid", "m-uuid", "z-uuid"),
+		    doc.getMetadata().get(BillingQueryStoreConstants.FIELD_ADJUSTED_BY_UUIDS));
+	}
+	
+	@Test
+	public void serialize_shouldAlwaysEmitReceiptPrintedAsBoolean() {
+		// Always present so consumers can build "paid bills not yet printed" queries with a single
+		// term filter, no exists-clause. Null on the entity is normalized to false — a half-saved
+		// bill that never set the flag is treated as not-printed, which is the safer default.
+		Bill notPrinted = postedBillWithLineItem("R-209", new BigDecimal("50"), 1);
+		notPrinted.setReceiptPrinted(false);
+		Bill printed = postedBillWithLineItem("R-210", new BigDecimal("50"), 1);
+		printed.setReceiptPrinted(true);
+		Bill unset = postedBillWithLineItem("R-211", new BigDecimal("50"), 1);
+		unset.setReceiptPrinted(null);
+		
+		assertEquals(Boolean.FALSE,
+		    serializer.serialize(notPrinted).getMetadata().get(BillingQueryStoreConstants.FIELD_RECEIPT_PRINTED));
+		assertEquals(Boolean.TRUE,
+		    serializer.serialize(printed).getMetadata().get(BillingQueryStoreConstants.FIELD_RECEIPT_PRINTED));
+		assertEquals(Boolean.FALSE,
+		    serializer.serialize(unset).getMetadata().get(BillingQueryStoreConstants.FIELD_RECEIPT_PRINTED));
+	}
+	
+	@Test
 	public void serialize_shouldReturnNullWhenPatientAbsent() {
 		// Without a patient, the serializer cannot produce a document keyed to a patient. Returning
 		// null short-circuits indexing for this record (per the AbstractRecordSerializer contract:
@@ -332,13 +564,36 @@ public class BillRecordSerializerTest {
 	}
 	
 	private void addPayment(Bill bill, BigDecimal amount) {
+		addPayment(bill, amount, null);
+	}
+	
+	private void addPayment(Bill bill, BigDecimal amount, PaymentMode mode) {
 		if (bill.getPayments() == null) {
 			bill.setPayments(new HashSet<>());
 		}
-		org.openmrs.module.billing.api.model.Payment payment = new org.openmrs.module.billing.api.model.Payment();
+		Payment payment = new Payment();
 		payment.setAmount(amount);
 		payment.setAmountTendered(amount);
 		payment.setVoided(false);
+		payment.setInstanceType(mode);
 		bill.getPayments().add(payment);
+	}
+	
+	private static PaymentMode paymentMode(String name) {
+		PaymentMode mode = new PaymentMode();
+		mode.setName(name);
+		return mode;
+	}
+	
+	private void addDiscount(Bill bill, DiscountStatus status, boolean voided) {
+		if (bill.getDiscounts() == null) {
+			bill.setDiscounts(new HashSet<>());
+		}
+		BillDiscount discount = new BillDiscount();
+		discount.setDiscountType(DiscountType.FIXED_AMOUNT);
+		discount.setDiscountValue(new BigDecimal("5"));
+		discount.setStatus(status);
+		discount.setVoided(voided);
+		bill.getDiscounts().add(discount);
 	}
 }
