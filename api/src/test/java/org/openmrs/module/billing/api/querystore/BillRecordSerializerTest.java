@@ -11,8 +11,10 @@ package org.openmrs.module.billing.api.querystore;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.openmrs.Patient;
@@ -22,10 +24,12 @@ import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillDiscount;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
+import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.model.DiscountStatus;
 import org.openmrs.module.billing.api.model.DiscountType;
 import org.openmrs.module.querystore.model.QueryDocument;
+import org.openmrs.module.stockmanagement.api.model.StockItem;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -138,6 +142,135 @@ public class BillRecordSerializerTest {
 	}
 	
 	@Test
+	public void serialize_shouldIncludeBillableServiceNameInTextAndLineItemNamesMetadata() {
+		// "Find every bill that includes service X" is the core query this slice enables; if the
+		// name does not make it into either the text blob or the structured list, that query has
+		// no signal to match against.
+		Bill bill = postedBillWithLineItem("R-100", new BigDecimal("50"), 1);
+		setBillableService(bill.getLineItems().get(0), "Consultation");
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertEquals(java.util.Collections.singletonList("Consultation"),
+		    doc.getMetadata().get(BillingQueryStoreConstants.FIELD_LINE_ITEM_NAMES));
+		assertTrue(doc.getText().contains("Items: Consultation."),
+		    "text must surface the line item name for full-text search: " + doc.getText());
+	}
+	
+	@Test
+	public void serialize_shouldFallBackToStockItemCommonNameWhenBillableServiceAbsent() {
+		Bill bill = postedBillWithLineItem("R-101", new BigDecimal("50"), 1);
+		setStockItem(bill.getLineItems().get(0), "Paracetamol 500mg");
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertEquals(java.util.Collections.singletonList("Paracetamol 500mg"),
+		    doc.getMetadata().get(BillingQueryStoreConstants.FIELD_LINE_ITEM_NAMES));
+	}
+	
+	@Test
+	public void serialize_shouldPreferBillableServiceNameOverStockItemCommonName() {
+		// Both populated → service wins. A line item with both fields set is rare but possible;
+		// pinning the precedence here prevents future refactors from silently flipping it.
+		Bill bill = postedBillWithLineItem("R-102", new BigDecimal("50"), 1);
+		setBillableService(bill.getLineItems().get(0), "Consultation");
+		setStockItem(bill.getLineItems().get(0), "Paracetamol 500mg");
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertEquals(java.util.Collections.singletonList("Consultation"),
+		    doc.getMetadata().get(BillingQueryStoreConstants.FIELD_LINE_ITEM_NAMES));
+	}
+	
+	@Test
+	public void serialize_shouldSkipVoidedLineItemsFromLineItemNames() {
+		// Voided line items are excluded from total/balance computations, so they must also be
+		// excluded from the indexed names — otherwise a voided item leaves a phantom hit in the
+		// index that contradicts the bill's effective state.
+		Bill bill = postedBillWithLineItem("R-103", new BigDecimal("50"), 1);
+		setBillableService(bill.getLineItems().get(0), "ActiveService");
+		BillLineItem voided = newLineItem(new BigDecimal("10"), 1);
+		voided.setVoided(true);
+		setBillableService(voided, "VoidedService");
+		bill.getLineItems().add(voided);
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertEquals(java.util.Collections.singletonList("ActiveService"),
+		    doc.getMetadata().get(BillingQueryStoreConstants.FIELD_LINE_ITEM_NAMES));
+		assertFalse(doc.getText().contains("VoidedService"),
+		    "voided line item names must not appear in the indexed text: " + doc.getText());
+	}
+	
+	@Test
+	public void serialize_shouldOmitLineItemNamesMetadataWhenAllLineItemsVoided() {
+		Bill bill = postedBillWithLineItem("R-104", new BigDecimal("50"), 1);
+		bill.getLineItems().get(0).setVoided(true);
+		setBillableService(bill.getLineItems().get(0), "VoidedOnly");
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertFalse(doc.getMetadata().containsKey(BillingQueryStoreConstants.FIELD_LINE_ITEM_NAMES),
+		    "metadata key must be absent (not empty list) when no names are eligible");
+		assertFalse(doc.getText().contains("Items:"));
+	}
+	
+	@Test
+	public void serialize_shouldJoinMultipleLineItemNamesInOrder() {
+		Bill bill = postedBillWithLineItem("R-105", new BigDecimal("10"), 1);
+		setBillableService(bill.getLineItems().get(0), "First");
+		BillLineItem second = newLineItem(new BigDecimal("20"), 1);
+		setBillableService(second, "Second");
+		bill.getLineItems().add(second);
+		BillLineItem third = newLineItem(new BigDecimal("30"), 1);
+		setStockItem(third, "Third");
+		bill.getLineItems().add(third);
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		List<String> expected = Arrays.asList("First", "Second", "Third");
+		assertEquals(expected, doc.getMetadata().get(BillingQueryStoreConstants.FIELD_LINE_ITEM_NAMES));
+		assertTrue(doc.getText().contains("Items: First, Second, Third."),
+		    "text must preserve insertion order and join with ', ': " + doc.getText());
+	}
+	
+	@Test
+	public void serialize_shouldSkipLineItemWithNeitherServiceNorStockItem() {
+		// Rounding rows (e.g., RoundingUtil.findRoundingLineItem) have neither field set — they
+		// should not pollute the search text with a blank/null entry.
+		Bill bill = postedBillWithLineItem("R-106", new BigDecimal("50"), 1);
+		setBillableService(bill.getLineItems().get(0), "RealItem");
+		BillLineItem bareRounding = newLineItem(new BigDecimal("0.01"), 1);
+		bill.getLineItems().add(bareRounding);
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertEquals(java.util.Collections.singletonList("RealItem"),
+		    doc.getMetadata().get(BillingQueryStoreConstants.FIELD_LINE_ITEM_NAMES));
+	}
+	
+	@Test
+	public void serialize_shouldHandleNullLineItemsCollection() {
+		// Bills loaded through certain paths can have an unset lineItems collection; collectLineItemNames
+		// must not NPE in that case. The indexing advice swallows RuntimeException per-entity, so an NPE
+		// here would silently drop the bill from the index with only a warn-level log.
+		Bill bill = postedBillWithLineItem("R-107", new BigDecimal("50"), 1);
+		bill.setLineItems(null);
+		
+		QueryDocument doc = serializer.serialize(bill);
+		
+		assertNotNull(doc);
+		assertFalse(doc.getMetadata().containsKey(BillingQueryStoreConstants.FIELD_LINE_ITEM_NAMES));
+	}
+	
+	@Test
 	public void serialize_shouldReturnNullWhenPatientAbsent() {
 		// Without a patient, the serializer cannot produce a document keyed to a patient. Returning
 		// null short-circuits indexing for this record (per the AbstractRecordSerializer contract:
@@ -160,12 +293,28 @@ public class BillRecordSerializerTest {
 		bill.setStatus(BillStatus.POSTED);
 		bill.setDateCreated(new Date());
 		bill.setLineItems(new ArrayList<>());
+		bill.getLineItems().add(newLineItem(price, quantity));
+		return bill;
+	}
+	
+	private static BillLineItem newLineItem(BigDecimal price, int quantity) {
 		BillLineItem lineItem = new BillLineItem();
 		lineItem.setPrice(price);
 		lineItem.setQuantity(quantity);
 		lineItem.setVoided(false);
-		bill.getLineItems().add(lineItem);
-		return bill;
+		return lineItem;
+	}
+	
+	private static void setBillableService(BillLineItem lineItem, String name) {
+		BillableService service = new BillableService();
+		service.setName(name);
+		lineItem.setBillableService(service);
+	}
+	
+	private static void setStockItem(BillLineItem lineItem, String commonName) {
+		StockItem item = new StockItem();
+		item.setCommonName(commonName);
+		lineItem.setItem(item);
 	}
 	
 	private void addApprovedDiscount(Bill bill, BigDecimal amount) {

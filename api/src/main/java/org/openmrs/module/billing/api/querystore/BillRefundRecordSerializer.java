@@ -10,6 +10,7 @@
 package org.openmrs.module.billing.api.querystore;
 
 import java.time.LocalDate;
+import java.util.Collections;
 
 import org.openmrs.Patient;
 import org.openmrs.module.billing.api.model.Bill;
@@ -67,9 +68,17 @@ public class BillRefundRecordSerializer extends AbstractRecordSerializer<BillRef
 		
 		RefundStatus status = refund.getStatus();
 		String receiptOrUuid = bill.getReceiptNumber() != null ? bill.getReceiptNumber() : bill.getUuid();
-		doc.setText(String.format("Refund of %s for bill %s. Status: %s. Reason: %s.",
+		// A refund is an audit record of a past line item. Even if the line item has since been
+		// voided on the bill, the refund must still carry the item's name so the audit trail
+		// reads coherently — the parent bill's indexed names omit voided items, but the refund's
+		// own indexed name preserves them.
+		String itemName = BillingDisplayNames.lineItemDisplayName(refund.getLineItem());
+		// Singular "Item:" (vs. the bill's plural "Items:") is intentional — a refund row is
+		// always line-scoped, so consumers parsing the text blob can rely on at most one item.
+		String itemClause = itemName != null ? " Item: " + itemName + "." : "";
+		doc.setText(String.format("Refund of %s for bill %s. Status: %s. Reason: %s.%s",
 		    refund.getRefundAmount().toPlainString(), receiptOrUuid, status != null ? status.name() : "UNKNOWN",
-		    refund.getReason() != null ? refund.getReason() : ""));
+		    refund.getReason() != null ? refund.getReason() : "", itemClause));
 		
 		doc.putMetadata(BillingQueryStoreConstants.FIELD_BILL_UUID, bill.getUuid());
 		doc.putMetadata(BillingQueryStoreConstants.FIELD_RECEIPT_NUMBER, bill.getReceiptNumber());
@@ -83,6 +92,12 @@ public class BillRefundRecordSerializer extends AbstractRecordSerializer<BillRef
 		BillLineItem lineItem = refund.getLineItem();
 		if (lineItem != null) {
 			doc.putMetadata(BillingQueryStoreConstants.FIELD_BILL_LINE_ITEM_UUID, lineItem.getUuid());
+		}
+		if (itemName != null) {
+			// Stored as a singleton list to match the Bill serializer's shape — consumers branch
+			// on resource type but share the field key, so a String here against a List there
+			// would surface as ClassCastException downstream.
+			doc.putMetadata(BillingQueryStoreConstants.FIELD_LINE_ITEM_NAMES, Collections.singletonList(itemName));
 		}
 		if (refund.getInitiator() != null) {
 			doc.putMetadata(BillingQueryStoreConstants.FIELD_INITIATOR_UUID, refund.getInitiator().getUuid());

@@ -11,10 +11,13 @@ package org.openmrs.module.billing.api.querystore;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.openmrs.Patient;
 import org.openmrs.Visit;
 import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.querystore.model.QueryDocument;
 import org.openmrs.module.querystore.serialization.AbstractRecordSerializer;
@@ -63,11 +66,21 @@ public class BillRecordSerializer extends AbstractRecordSerializer<Bill> {
 		// gross total here would over-state what's still owed.
 		BigDecimal balance = amountAfterDiscount.subtract(totalPaid);
 		
-		String receiptOrUuid = bill.getReceiptNumber() != null ? bill.getReceiptNumber() : bill.getUuid();
-		doc.setText(String.format("Bill %s. Status: %s. Total: %s. Paid: %s. Balance: %s.", receiptOrUuid,
-		    status != null ? status.name() : "UNKNOWN", total.toPlainString(), totalPaid.toPlainString(),
-		    balance.toPlainString()));
+		// Multi-valued metadata is stored as a List<String> per the querystore module convention
+		// (see VisitRecordSerializer's FIELD_ENCOUNTER_UUIDS, AllergyRecordSerializer's FIELD_REACTIONS).
+		// Storing a comma-joined string would force consumers into substring matching, breaking
+		// exact-match queries like "bills containing item X".
+		List<String> itemNames = collectLineItemNames(bill);
 		
+		String receiptOrUuid = bill.getReceiptNumber() != null ? bill.getReceiptNumber() : bill.getUuid();
+		String itemsClause = itemNames.isEmpty() ? "" : " Items: " + String.join(", ", itemNames) + ".";
+		doc.setText(String.format("Bill %s. Status: %s. Total: %s. Paid: %s. Balance: %s.%s", receiptOrUuid,
+		    status != null ? status.name() : "UNKNOWN", total.toPlainString(), totalPaid.toPlainString(),
+		    balance.toPlainString(), itemsClause));
+		
+		if (!itemNames.isEmpty()) {
+			doc.putMetadata(BillingQueryStoreConstants.FIELD_LINE_ITEM_NAMES, itemNames);
+		}
 		doc.putMetadata(BillingQueryStoreConstants.FIELD_RECEIPT_NUMBER, bill.getReceiptNumber());
 		doc.putMetadata(BillingQueryStoreConstants.FIELD_STATUS, status != null ? status.name() : null);
 		doc.putMetadata(BillingQueryStoreConstants.FIELD_TOTAL, total);
@@ -87,5 +100,22 @@ public class BillRecordSerializer extends AbstractRecordSerializer<Bill> {
 		if (visit != null) {
 			doc.putMetadata(BillingQueryStoreConstants.FIELD_VISIT_UUID, visit.getUuid());
 		}
+	}
+	
+	private List<String> collectLineItemNames(Bill bill) {
+		List<String> names = new ArrayList<>();
+		if (bill.getLineItems() == null) {
+			return names;
+		}
+		for (BillLineItem lineItem : bill.getLineItems()) {
+			if (lineItem == null || lineItem.getVoided()) {
+				continue;
+			}
+			String name = BillingDisplayNames.lineItemDisplayName(lineItem);
+			if (name != null) {
+				names.add(name);
+			}
+		}
+		return names;
 	}
 }

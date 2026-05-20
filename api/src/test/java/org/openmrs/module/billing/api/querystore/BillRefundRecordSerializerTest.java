@@ -10,6 +10,7 @@
 package org.openmrs.module.billing.api.querystore;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.Date;
 
 import org.junit.jupiter.api.Test;
@@ -18,13 +19,16 @@ import org.openmrs.User;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillRefund;
+import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.model.RefundStatus;
 import org.openmrs.module.querystore.model.QueryDocument;
+import org.openmrs.module.stockmanagement.api.model.StockItem;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BillRefundRecordSerializerTest {
 	
@@ -96,6 +100,82 @@ public class BillRefundRecordSerializerTest {
 	}
 	
 	@Test
+	public void serialize_shouldIncludeLineItemBillableServiceNameInTextAndMetadata() {
+		// Mirrors the bill serializer: a singleton list under the shared FIELD_LINE_ITEM_NAMES key
+		// so downstream consumers can read the field uniformly across resource types.
+		BillRefund refund = newRefund(new BigDecimal("25.00"), RefundStatus.REQUESTED, "Line correction");
+		BillLineItem lineItem = newLineItemWithBillableService("Consultation");
+		refund.setLineItem(lineItem);
+		
+		QueryDocument doc = serializer.serialize(refund);
+		
+		assertNotNull(doc);
+		assertEquals(Collections.singletonList("Consultation"),
+		    doc.getMetadata().get(BillingQueryStoreConstants.FIELD_LINE_ITEM_NAMES));
+		assertTrue(doc.getText().contains("Item: Consultation."),
+		    "refund text must surface the refunded line item name: " + doc.getText());
+	}
+	
+	@Test
+	public void serialize_shouldFallBackToStockItemCommonNameForRefundLineItem() {
+		BillRefund refund = newRefund(new BigDecimal("25.00"), RefundStatus.REQUESTED, "any");
+		BillLineItem lineItem = new BillLineItem();
+		lineItem.setVoided(false);
+		StockItem item = new StockItem();
+		item.setCommonName("Paracetamol 500mg");
+		lineItem.setItem(item);
+		refund.setLineItem(lineItem);
+		
+		QueryDocument doc = serializer.serialize(refund);
+		
+		assertNotNull(doc);
+		assertEquals(Collections.singletonList("Paracetamol 500mg"),
+		    doc.getMetadata().get(BillingQueryStoreConstants.FIELD_LINE_ITEM_NAMES));
+	}
+	
+	@Test
+	public void serialize_shouldOmitLineItemNamesMetadataWhenLineItemAbsent() {
+		BillRefund refund = newRefund(new BigDecimal("50.00"), RefundStatus.REQUESTED, "any");
+		
+		QueryDocument doc = serializer.serialize(refund);
+		
+		assertNotNull(doc);
+		assertFalse(doc.getMetadata().containsKey(BillingQueryStoreConstants.FIELD_LINE_ITEM_NAMES));
+		assertFalse(doc.getText().contains("Item:"));
+	}
+	
+	@Test
+	public void serialize_shouldOmitLineItemNamesMetadataWhenLineItemHasNeitherServiceNorStockItem() {
+		BillRefund refund = newRefund(new BigDecimal("50.00"), RefundStatus.REQUESTED, "any");
+		BillLineItem lineItem = new BillLineItem();
+		lineItem.setUuid("line-item-uuid-x");
+		refund.setLineItem(lineItem);
+		
+		QueryDocument doc = serializer.serialize(refund);
+		
+		assertNotNull(doc);
+		assertFalse(doc.getMetadata().containsKey(BillingQueryStoreConstants.FIELD_LINE_ITEM_NAMES));
+	}
+	
+	@Test
+	public void serialize_shouldStillIncludeRefundLineItemNameWhenLineItemIsVoided() {
+		// Refunds are an audit record of past activity. The parent bill's indexed names omit voided
+		// line items, but the refund's own indexed name preserves them so the audit trail reads
+		// coherently — querying for refunds of "ServiceA" must still hit the refund even if the
+		// underlying line item has since been voided.
+		BillRefund refund = newRefund(new BigDecimal("25.00"), RefundStatus.COMPLETED, "any");
+		BillLineItem lineItem = newLineItemWithBillableService("OnceBilledService");
+		lineItem.setVoided(true);
+		refund.setLineItem(lineItem);
+		
+		QueryDocument doc = serializer.serialize(refund);
+		
+		assertNotNull(doc);
+		assertEquals(Collections.singletonList("OnceBilledService"),
+		    doc.getMetadata().get(BillingQueryStoreConstants.FIELD_LINE_ITEM_NAMES));
+	}
+	
+	@Test
 	public void serialize_shouldOmitOptionalReferencesWhenAbsent() {
 		BillRefund refund = newRefund(new BigDecimal("50.00"), RefundStatus.REQUESTED, "Patient error");
 		
@@ -163,5 +243,14 @@ public class BillRefundRecordSerializerTest {
 		User user = new User();
 		user.setUuid(uuid);
 		return user;
+	}
+	
+	private static BillLineItem newLineItemWithBillableService(String name) {
+		BillLineItem lineItem = new BillLineItem();
+		lineItem.setVoided(false);
+		BillableService service = new BillableService();
+		service.setName(name);
+		lineItem.setBillableService(service);
+		return lineItem;
 	}
 }

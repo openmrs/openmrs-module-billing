@@ -54,6 +54,12 @@ final class BillingQueryStoreConstants {
 	
 	static final String FIELD_BILL_LINE_ITEM_UUID = "bill_line_item_uuid";
 	
+	// Shape contract: List<String> on BOTH bill and refund docs. The bill emits one entry per
+	// non-voided line item; the refund emits a singleton (refunds are line-scoped). The shared
+	// key + uniform list shape lets a single "find every record referencing item X" query span
+	// both resource types without type-branching downstream.
+	static final String FIELD_LINE_ITEM_NAMES = "line_item_names";
+	
 	static final String FIELD_INITIATOR_UUID = "initiator_uuid";
 	
 	static final String FIELD_APPROVER_UUID = "approver_uuid";
