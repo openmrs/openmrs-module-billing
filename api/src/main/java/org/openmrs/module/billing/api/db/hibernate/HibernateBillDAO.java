@@ -22,6 +22,7 @@ import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.db.BillDAO;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillDiscount;
+import org.openmrs.module.billing.api.model.BillRefund;
 import org.openmrs.module.billing.api.search.BillSearch;
 
 import javax.annotation.Nonnull;
@@ -188,6 +189,14 @@ public class HibernateBillDAO implements BillDAO {
 			sub.select(cb.literal(1)).where(cb.equal(discountRoot.get("bill"), root),
 			    cb.equal(discountRoot.get("voided"), false),
 			    discountRoot.get("status").in(billSearch.getDiscountStatuses()));
+			predicates.add(cb.exists(sub));
+		}
+		
+		if (billSearch.getRefundStatuses() != null && !billSearch.getRefundStatuses().isEmpty()) {
+			Subquery<Integer> sub = cq.subquery(Integer.class);
+			Root<BillRefund> refundRoot = sub.from(BillRefund.class);
+			sub.select(cb.literal(1)).where(cb.equal(refundRoot.get("bill"), root),
+			    cb.equal(refundRoot.get("voided"), false), refundRoot.get("status").in(billSearch.getRefundStatuses()));
 			predicates.add(cb.exists(sub));
 		}
 		

@@ -31,10 +31,12 @@ import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillDiscount;
 import org.openmrs.module.billing.api.model.BillLineItem;
+import org.openmrs.module.billing.api.model.BillRefund;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.model.DiscountStatus;
 import org.openmrs.module.billing.api.model.Payment;
+import org.openmrs.module.billing.api.model.RefundStatus;
 import org.openmrs.module.billing.api.model.Timesheet;
 import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.module.billing.api.util.RoundingUtil;
@@ -81,6 +83,7 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			description.addProperty("status");
 			description.addProperty("adjustmentReason");
 			description.addProperty("discounts", Representation.DEFAULT);
+			description.addProperty("refunds", Representation.DEFAULT);
 			description.addProperty("total");
 			description.addProperty("amountAfterDiscount");
 			description.addProperty("uuid");
@@ -116,6 +119,11 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 	@PropertyGetter("discounts")
 	public List<BillDiscount> getActiveDiscounts(Bill bill) {
 		return bill.getActiveDiscounts();
+	}
+	
+	@PropertyGetter("refunds")
+	public List<BillRefund> getActiveRefunds(Bill bill) {
+		return bill.getActiveRefunds();
 	}
 	
 	@PropertySetter("lineItems")
@@ -352,6 +360,24 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 				        }
 			        }).collect(Collectors.toList());
 			billSearch.setDiscountStatuses(discountStatuses);
+		}
+		
+		String refundStatus = context.getRequest().getParameter("refundStatus");
+		if (StringUtils.isNotBlank(refundStatus)) {
+			List<RefundStatus> refundStatuses = Arrays.stream(refundStatus.split(",")).map(String::trim)
+			        .filter(StringUtils::isNotBlank).map(s -> {
+				        try {
+					        return RefundStatus.valueOf(s.toUpperCase(Locale.ROOT));
+				        }
+				        catch (IllegalArgumentException e) {
+					        throw new InvalidSearchException("Invalid refundStatus '" + s + "'. Allowed values: "
+					                + Arrays.toString(RefundStatus.values()));
+				        }
+			        }).collect(Collectors.toList());
+			if (refundStatuses.isEmpty()) {
+				throw new InvalidSearchException("refundStatus parameter contained no valid values");
+			}
+			billSearch.setRefundStatuses(refundStatuses);
 		}
 		
 		String includeAll = context.getRequest().getParameter("includeAll");

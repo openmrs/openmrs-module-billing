@@ -41,11 +41,15 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.module.billing.api.model.BillRefund;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.model.DiscountStatus;
+import org.openmrs.module.billing.api.model.RefundStatus;
 import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.module.webservices.rest.web.RequestContext;
+import org.openmrs.module.webservices.rest.web.representation.Representation;
+import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
 
 /**
@@ -86,13 +90,28 @@ public class BillResourceTest {
 		}
 	}
 	
-	/**
-	 * Builds a mocked {@link RequestContext} with the given discountStatus request parameter value
-	 * (null means the parameter is absent).
-	 */
 	private RequestContext buildContext(String discountStatusParam) {
 		HttpServletRequest req = mock(HttpServletRequest.class);
 		org.mockito.Mockito.when(req.getParameter("discountStatus")).thenReturn(discountStatusParam);
+		
+		RequestContext context = mock(RequestContext.class);
+		org.mockito.Mockito.when(context.getRequest()).thenReturn(req);
+		org.mockito.Mockito.when(context.getStartIndex()).thenReturn(0);
+		org.mockito.Mockito.when(context.getLimit()).thenReturn(10);
+		
+		return context;
+	}
+	
+	private BillRefund refundWithStatus(RefundStatus status, boolean voided) {
+		BillRefund refund = new BillRefund();
+		refund.setStatus(status);
+		refund.setVoided(voided);
+		return refund;
+	}
+	
+	private RequestContext buildRefundContext(String refundStatusParam) {
+		HttpServletRequest req = mock(HttpServletRequest.class);
+		org.mockito.Mockito.when(req.getParameter("refundStatus")).thenReturn(refundStatusParam);
 		
 		RequestContext context = mock(RequestContext.class);
 		org.mockito.Mockito.when(context.getRequest()).thenReturn(req);
@@ -137,6 +156,43 @@ public class BillResourceTest {
 		resource.doSearch(context);
 		
 		assertNull(capturedSearches.get(0).getDiscountStatuses());
+	}
+	
+	@Test
+	public void doSearch_shouldParseSingleRefundStatusParam() {
+		RequestContext context = buildRefundContext("REQUESTED");
+		
+		resource.doSearch(context);
+		
+		assertEquals(Collections.singletonList(RefundStatus.REQUESTED), capturedSearches.get(0).getRefundStatuses());
+	}
+	
+	@Test
+	public void doSearch_shouldNotSetRefundStatusesWhenParamMissing() {
+		RequestContext context = buildRefundContext(null);
+		
+		resource.doSearch(context);
+		
+		assertNull(capturedSearches.get(0).getRefundStatuses());
+	}
+	
+	@Test
+	public void doSearch_shouldParseCommaSeparatedRefundStatuses() {
+		RequestContext context = buildRefundContext("approved, rejected");
+		
+		resource.doSearch(context);
+		
+		assertEquals(Arrays.asList(RefundStatus.APPROVED, RefundStatus.REJECTED),
+		    capturedSearches.get(0).getRefundStatuses());
+	}
+	
+	@Test
+	public void doSearch_shouldRejectInvalidRefundStatus() {
+		RequestContext context = buildRefundContext("MAYBE");
+		
+		InvalidSearchException ex = assertThrows(InvalidSearchException.class, () -> resource.doSearch(context));
+		assertTrue(ex.getMessage().contains("MAYBE"));
+		assertTrue(ex.getMessage().contains("REQUESTED"));
 	}
 	
 	@Test
@@ -230,6 +286,36 @@ public class BillResourceTest {
 		resource.save(bill);
 		
 		assertNull(bill.getVisit());
+	}
+	
+	@Test
+	public void getActiveRefunds_shouldExcludeVoidedRefunds() {
+		Bill bill = new Bill();
+		bill.setRefunds(new HashSet<>(Arrays.asList(refundWithStatus(RefundStatus.REQUESTED, false),
+		    refundWithStatus(RefundStatus.APPROVED, false), refundWithStatus(RefundStatus.REQUESTED, true))));
+		
+		List<BillRefund> result = resource.getActiveRefunds(bill);
+		
+		assertEquals(2, result.size());
+		assertTrue(result.stream().noneMatch(r -> r.getVoided()));
+	}
+	
+	@Test
+	public void getActiveRefunds_shouldReturnEmptyWhenBillHasNoRefunds() {
+		Bill bill = new Bill();
+		
+		List<BillRefund> result = resource.getActiveRefunds(bill);
+		
+		assertEquals(0, result.size());
+	}
+	
+	@Test
+	public void getRepresentationDescription_shouldIncludeRefundsInDefaultAndFullRep() {
+		DelegatingResourceDescription defaultRep = resource.getRepresentationDescription(Representation.DEFAULT);
+		DelegatingResourceDescription fullRep = resource.getRepresentationDescription(Representation.FULL);
+		
+		assertTrue(defaultRep.getProperties().containsKey("refunds"), "DEFAULT representation must include refunds");
+		assertTrue(fullRep.getProperties().containsKey("refunds"), "FULL representation must include refunds");
 	}
 	
 	@Test
