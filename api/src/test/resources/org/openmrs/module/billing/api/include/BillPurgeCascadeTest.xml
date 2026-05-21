@@ -32,9 +32,9 @@
 	<bill_refund bill_refund_id="900" bill_id="900" refund_amount="20.00"
 	             reason="Purge cascade bill refund" refund_status="REQUESTED"
 	             initiator_id="1" creator="1" date_created="2012-05-18 00:00:00.0" voided="false"
-	             uuid="r0000000-0000-0000-0000-000000000900"/>
+	             uuid="b0000000-0000-0000-0000-000000000900"/>
 	<bill_refund bill_refund_id="901" bill_id="900" bill_line_item_id="900" refund_amount="15.00"
 	             reason="Purge cascade line refund" refund_status="REQUESTED"
 	             initiator_id="1" creator="1" date_created="2012-05-18 00:00:00.0" voided="false"
-	             uuid="r0000000-0000-0000-0000-000000000901"/>
+	             uuid="b0000000-0000-0000-0000-000000000901"/>
 </dataset>
