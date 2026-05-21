@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.openmrs.module.billing.api.BillDiscountService;
 import org.openmrs.module.billing.api.BillRefundService;
 import org.openmrs.module.billing.api.BillService;
-import org.openmrs.module.billing.api.ITimesheetService;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -59,17 +58,6 @@ public class IndexingAdviceConfigTest {
 	public void billDiscountIndexingAdvice_purgeMethodsShouldBeSubsetOfTriggerMethods() {
 		assertSubset(BillDiscountIndexingAdvice.PURGE_METHODS, BillDiscountIndexingAdvice.TRIGGER_METHODS,
 		    "BillDiscountIndexingAdvice");
-	}
-	
-	@Test
-	public void timesheetIndexingAdvice_triggerMethodsShouldAllExistOnTimesheetService() {
-		assertAllMethodsExist(TimesheetIndexingAdvice.TRIGGER_METHODS, ITimesheetService.class, "TimesheetIndexingAdvice");
-	}
-	
-	@Test
-	public void timesheetIndexingAdvice_purgeMethodsShouldBeSubsetOfTriggerMethods() {
-		assertSubset(TimesheetIndexingAdvice.PURGE_METHODS, TimesheetIndexingAdvice.TRIGGER_METHODS,
-		    "TimesheetIndexingAdvice");
 	}
 	
 	private static void assertAllMethodsExist(Set<String> methodNames, Class<?> iface, String adviceName) {

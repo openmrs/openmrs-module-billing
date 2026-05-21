@@ -22,8 +22,6 @@ final class BillingQueryStoreConstants {
 	
 	static final String RESOURCE_TYPE_BILL_DISCOUNT = "billing_bill_discount";
 	
-	static final String RESOURCE_TYPE_TIMESHEET = "billing_timesheet";
-	
 	static final String FIELD_RECEIPT_NUMBER = "receipt_number";
 	
 	static final String FIELD_BILL_UUID = "bill_uuid";
@@ -141,14 +139,6 @@ final class BillingQueryStoreConstants {
 	static final String FIELD_VOIDED_BY_UUID = "voided_by_uuid";
 	
 	static final String FIELD_VOID_REASON = "void_reason";
-	
-	// Timesheet fields. clock_in / clock_out let "who was on duty at 2pm" succeed without
-	// scanning every timesheet row; the Provider/CashPoint UUIDs let the query narrow further.
-	static final String FIELD_CLOCK_IN = "clock_in";
-	
-	static final String FIELD_CLOCK_OUT = "clock_out";
-	
-	static final String FIELD_PROVIDER_UUID = "provider_uuid";
 	
 	private BillingQueryStoreConstants() {
 	}

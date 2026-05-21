@@ -12,8 +12,8 @@ package org.openmrs.module.billing.api.querystore;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.module.querystore.model.QueryDocument;
 
-// OpenMRS BaseOpenmrsData audit columns shared by Bill / BillRefund / BillDiscount / Timesheet.
-// Centralised because all four resource types want the same six audit fields (creator, changedBy,
+// OpenMRS BaseOpenmrsData audit columns shared by Bill / BillRefund / BillDiscount.
+// Centralised because all three resource types want the same six audit fields (creator, changedBy,
 // dateChanged, voidedBy, dateVoided, voidReason) plus the time-precise createdAt; emitting them
 // inline would invite drift — a future refactor adds the field to one serializer and forgets the
 // others, and audit queries silently miss the new resource type.
