@@ -17,6 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 
@@ -82,6 +84,29 @@ public class BillLineItemServiceTest extends BaseModuleContextSensitiveTest {
 		assertEquals("Test void reason", reloaded.getVoidReason());
 		assertNotNull(reloaded.getDateVoided());
 		assertNotNull(reloaded.getVoidedBy());
+	}
+	
+	@Test
+	public void voidBillLineItem_shouldAdvanceParentBillDateChanged() {
+		// Bill.getTotal() / getAmountAfterDiscount() skip voided line items, so voiding one
+		// changes the bill's effective value without touching any bill column. The parent bill
+		// must be re-saved so dateChanged advances and consumers see the change.
+		// Truncate to second precision: the DB TIMESTAMP column drops sub-second precision.
+		Date beforeVoid = Date.from(Instant.now().truncatedTo(ChronoUnit.SECONDS));
+		
+		Bill bill = createBillWithLineItem();
+		BillLineItem lineItem = bill.getLineItems().get(0);
+		lineItemService.voidBillLineItem(lineItem, "Test parent-bill touch");
+		Context.flushSession();
+		Context.clearSession();
+		
+		Bill parentBill = billService.getBill(bill.getId());
+		assertNotNull(parentBill);
+		Date afterDateChanged = parentBill.getDateChanged();
+		assertNotNull(afterDateChanged, "Parent Bill.dateChanged must be set after a line-item void");
+		assertTrue(afterDateChanged.compareTo(beforeVoid) >= 0,
+		    "Parent Bill.dateChanged must be at-or-after the void timestamp (was " + afterDateChanged + ", expected >= "
+		            + beforeVoid + ")");
 	}
 	
 	@Test

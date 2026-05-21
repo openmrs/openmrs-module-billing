@@ -337,6 +337,56 @@
 		</constructor-arg>
 	</bean>
 
+	<!-- Querystore SPI: serializers and providers. The provider classes implement
+	     org.openmrs.module.querystore.spi.ResourceTypeProvider; serializers extend
+	     org.openmrs.module.querystore.serialization.AbstractRecordSerializer.
+
+	     lazy-init: these classes' supertypes live in the optional querystore-api jar. Eager
+	     instantiation would force-load those supertypes when other modules' tests (e.g., the
+	     billing-fhir module) load this Spring context without querystore on the test classpath —
+	     `provided` scope does not propagate to dependent modules' test classpaths. With lazy-init,
+	     the classes stay unloaded until querystore's `getBeansOfType(ResourceTypeProvider.class)`
+	     scan asks for them, by which time querystore-api is guaranteed to be on the classpath. -->
+	<bean id="billing.querystore.serializer.bill"
+	      class="org.openmrs.module.billing.api.querystore.BillRecordSerializer"
+	      lazy-init="true"/>
+
+	<bean id="billing.querystore.serializer.bill_refund"
+	      class="org.openmrs.module.billing.api.querystore.BillRefundRecordSerializer"
+	      lazy-init="true"/>
+
+	<bean id="billing.querystore.serializer.bill_discount"
+	      class="org.openmrs.module.billing.api.querystore.BillDiscountRecordSerializer"
+	      lazy-init="true"/>
+
+	<bean id="billing.querystore.serializer.timesheet"
+	      class="org.openmrs.module.billing.api.querystore.TimesheetRecordSerializer"
+	      lazy-init="true"/>
+
+	<bean id="billing.querystore.provider.bill"
+	      class="org.openmrs.module.billing.api.querystore.BillResourceTypeProvider"
+	      lazy-init="true">
+		<constructor-arg ref="billing.querystore.serializer.bill"/>
+	</bean>
+
+	<bean id="billing.querystore.provider.bill_refund"
+	      class="org.openmrs.module.billing.api.querystore.BillRefundResourceTypeProvider"
+	      lazy-init="true">
+		<constructor-arg ref="billing.querystore.serializer.bill_refund"/>
+	</bean>
+
+	<bean id="billing.querystore.provider.bill_discount"
+	      class="org.openmrs.module.billing.api.querystore.BillDiscountResourceTypeProvider"
+	      lazy-init="true">
+		<constructor-arg ref="billing.querystore.serializer.bill_discount"/>
+	</bean>
+
+	<bean id="billing.querystore.provider.timesheet"
+	      class="org.openmrs.module.billing.api.querystore.TimesheetResourceTypeProvider"
+	      lazy-init="true">
+		<constructor-arg ref="billing.querystore.serializer.timesheet"/>
+	</bean>
+
 	<bean id="defaultPatientPaymentStatusResolver"
 	      class="org.openmrs.module.billing.api.impl.DefaultPatientPaymentStatusResolver">
 		<constructor-arg ref="billService"/>

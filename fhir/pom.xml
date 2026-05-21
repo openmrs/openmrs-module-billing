@@ -44,6 +44,17 @@
             <artifactId>billing-api</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+        <!-- billing-api declares querystore-api at provided scope, which doesn't propagate to this
+             module's test classpath. The FHIR test context loads billing's moduleApplicationContext.xml,
+             which references serializer/provider beans whose supertypes live in querystore-api;
+             Spring's AOP infrastructure resolves every bean class (lazy-init doesn't skip type
+             checks) and fails on the missing supertype. Pulling the SPI jar in at test scope keeps
+             the FHIR test classpath self-sufficient without bundling querystore in the omod. -->
+        <dependency>
+            <groupId>org.openmrs.module</groupId>
+            <artifactId>querystore-api</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.openmrs.module</groupId>
             <artifactId>fhir2-api</artifactId>

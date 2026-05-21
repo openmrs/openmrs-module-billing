@@ -25,6 +25,9 @@ import org.openmrs.module.billing.api.model.DiscountType;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -331,6 +334,31 @@ public class BillDiscountServiceImplTest extends BaseModuleContextSensitiveTest 
 		
 		assertNotNull(saved);
 		assertEquals("Updated justification", saved.getJustification());
+	}
+	
+	@Test
+	public void saveBillDiscount_shouldAdvanceParentBillDateChanged() {
+		// amount_after_discount is derived from the discounts collection — a discount mutation
+		// changes the bill's effective value without touching any bill column. The parent bill
+		// must be re-saved so dateChanged advances and consumers see the change.
+		// Truncate to second precision: the DB TIMESTAMP column drops sub-second precision, so a
+		// ms-precision baseline captured in the same second as the save would fail comparison
+		// against the truncated reloaded value.
+		Date beforeSave = Date.from(Instant.now().truncatedTo(ChronoUnit.SECONDS));
+		
+		BillDiscount discount = buildDiscount(POSTED_BILL_UUID, DiscountType.FIXED_AMOUNT, new BigDecimal("50.00"),
+		    new BigDecimal("50.00"), "Test parent-bill touch");
+		service.saveBillDiscount(discount);
+		Context.flushSession();
+		Context.clearSession();
+		
+		Bill parentBill = billService.getBillByUuid(POSTED_BILL_UUID);
+		assertNotNull(parentBill);
+		Date afterDateChanged = parentBill.getDateChanged();
+		assertNotNull(afterDateChanged, "Parent Bill.dateChanged must be set after a discount save");
+		assertTrue(afterDateChanged.compareTo(beforeSave) >= 0,
+		    "Parent Bill.dateChanged must be at-or-after the discount save timestamp (was " + afterDateChanged
+		            + ", expected >= " + beforeSave + ")");
 	}
 	
 	@Test

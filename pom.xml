@@ -50,12 +50,16 @@
 
 	<properties>
 		<openmrsPlatformVersion>2.7.8</openmrsPlatformVersion>
-		<maven.compiler.source>8</maven.compiler.source>
-		<maven.compiler.target>8</maven.compiler.target>
+		<!-- Bumped from 8 to 11 because querystore-api (now require_module) is compiled with
+		     Java 11 bytecode. A Java 8 build couldn't load it at runtime regardless of source
+		     level, so keeping target=8 only created the illusion of broader compatibility. -->
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
 		<itextPdfVersion>8.0.2</itextPdfVersion>
 		<stockmanagementVersion>1.4.0</stockmanagementVersion>
 		<fhir2Version>2.4.0</fhir2Version>
 		<eventVersion>4.0.0</eventVersion>
+		<querystoreVersion>1.0.0-SNAPSHOT</querystoreVersion>
 		<lombokVersion>1.18.38</lombokVersion>
 		<byteBuddyVersion>1.17.6</byteBuddyVersion>
 	</properties>
@@ -151,6 +155,13 @@
 				<groupId>org.openmrs</groupId>
 				<artifactId>event-api</artifactId>
 				<version>${eventVersion}</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>querystore-api</artifactId>
+				<version>${querystoreVersion}</version>
 				<scope>provided</scope>
 			</dependency>
 
@@ -391,6 +402,9 @@
 			<id>openmrs-repo</id>
 			<name>OpenMRS Public</name>
 			<url>https://mavenrepo.openmrs.org/public</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 		</repository>
 	</repositories>
 
