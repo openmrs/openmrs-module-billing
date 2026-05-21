@@ -1369,7 +1369,7 @@
         </createIndex>
     </changeSet>
 
-	<changeSet id="openmrs.billing-011-20260518-cascade-bill-discounts-refunds" author="Nethmi Rodrigo">
+	<changeSet id="openmrs.billing-013-20260518-cascade-bill-discounts-refunds" author="Nethmi Rodrigo">
 		<preConditions onFail="MARK_RAN">
 			<and>
 				<tableExists tableName="bill_discount"/>
