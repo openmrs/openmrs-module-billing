@@ -1368,4 +1368,39 @@
             <column name="visit_id" />
         </createIndex>
     </changeSet>
+
+	<changeSet id="openmrs.billing-013-20260518-cascade-bill-discounts-refunds" author="Nethmi Rodrigo">
+		<preConditions onFail="MARK_RAN">
+			<and>
+				<tableExists tableName="bill_discount"/>
+				<tableExists tableName="bill_refund"/>
+				<tableExists tableName="cashier_bill"/>
+				<tableExists tableName="cashier_bill_line_item"/>
+			</and>
+		</preConditions>
+		<comment>Allow purging a bill to remove its associated discount and refund audit rows.</comment>
+
+		<dropForeignKeyConstraint baseTableName="bill_discount" constraintName="bill_discount_bill_id_fk"/>
+		<dropForeignKeyConstraint baseTableName="bill_discount" constraintName="bill_discount_bill_line_item_id_fk"/>
+		<dropForeignKeyConstraint baseTableName="bill_refund" constraintName="bill_refund_bill_id_fk"/>
+		<dropForeignKeyConstraint baseTableName="bill_refund" constraintName="bill_refund_bill_line_item_id_fk"/>
+
+		<addForeignKeyConstraint constraintName="bill_discount_bill_id_fk"
+		                         baseTableName="bill_discount" baseColumnNames="bill_id"
+		                         referencedTableName="cashier_bill" referencedColumnNames="bill_id"
+		                         onDelete="CASCADE"/>
+		<addForeignKeyConstraint constraintName="bill_discount_bill_line_item_id_fk"
+		                         baseTableName="bill_discount" baseColumnNames="bill_line_item_id"
+		                         referencedTableName="cashier_bill_line_item" referencedColumnNames="bill_line_item_id"
+		                         onDelete="CASCADE"/>
+		<addForeignKeyConstraint constraintName="bill_refund_bill_id_fk"
+		                         baseTableName="bill_refund" baseColumnNames="bill_id"
+		                         referencedTableName="cashier_bill" referencedColumnNames="bill_id"
+		                         onDelete="CASCADE"/>
+		<addForeignKeyConstraint constraintName="bill_refund_bill_line_item_id_fk"
+		                         baseTableName="bill_refund" baseColumnNames="bill_line_item_id"
+		                         referencedTableName="cashier_bill_line_item" referencedColumnNames="bill_line_item_id"
+		                         onDelete="CASCADE"/>
+	</changeSet>
+
 </databaseChangeLog>
