@@ -349,31 +349,12 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 		
 		String discountStatus = context.getRequest().getParameter("discountStatus");
 		if (StringUtils.isNotBlank(discountStatus)) {
-			List<DiscountStatus> discountStatuses = Arrays.stream(discountStatus.split(",")).map(String::trim)
-			        .filter(StringUtils::isNotBlank).map(s -> {
-				        try {
-					        return DiscountStatus.valueOf(s.toUpperCase(Locale.ROOT));
-				        }
-				        catch (IllegalArgumentException e) {
-					        throw new InvalidSearchException("Invalid discountStatus '" + s + "'. Allowed values: "
-					                + Arrays.toString(DiscountStatus.values()));
-				        }
-			        }).collect(Collectors.toList());
-			billSearch.setDiscountStatuses(discountStatuses);
+			billSearch.setDiscountStatuses(parseDiscountStatuses(discountStatus));
 		}
 		
 		String refundStatus = context.getRequest().getParameter("refundStatus");
 		if (StringUtils.isNotBlank(refundStatus)) {
-			List<RefundStatus> refundStatuses = Arrays.stream(refundStatus.split(",")).map(String::trim)
-			        .filter(StringUtils::isNotBlank).map(s -> {
-				        try {
-					        return RefundStatus.valueOf(s.toUpperCase(Locale.ROOT));
-				        }
-				        catch (IllegalArgumentException e) {
-					        throw new InvalidSearchException("Invalid refundStatus '" + s + "'. Allowed values: "
-					                + Arrays.toString(RefundStatus.values()));
-				        }
-			        }).collect(Collectors.toList());
+			List<RefundStatus> refundStatuses = parseRefundStatuses(refundStatus);
 			if (refundStatuses.isEmpty()) {
 				throw new InvalidSearchException("refundStatus parameter contained no valid values");
 			}
@@ -386,5 +367,29 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 		}
 		
 		return billSearch;
+	}
+	
+	private List<DiscountStatus> parseDiscountStatuses(String param) {
+		return Arrays.stream(param.split(",")).map(String::trim).filter(StringUtils::isNotBlank).map(s -> {
+			try {
+				return DiscountStatus.valueOf(s.toUpperCase(Locale.ROOT));
+			}
+			catch (IllegalArgumentException e) {
+				throw new InvalidSearchException(
+				        "Invalid discountStatus '" + s + "'. Allowed values: " + Arrays.toString(DiscountStatus.values()));
+			}
+		}).collect(Collectors.toList());
+	}
+	
+	private List<RefundStatus> parseRefundStatuses(String param) {
+		return Arrays.stream(param.split(",")).map(String::trim).filter(StringUtils::isNotBlank).map(s -> {
+			try {
+				return RefundStatus.valueOf(s.toUpperCase(Locale.ROOT));
+			}
+			catch (IllegalArgumentException e) {
+				throw new InvalidSearchException(
+				        "Invalid refundStatus '" + s + "'. Allowed values: " + Arrays.toString(RefundStatus.values()));
+			}
+		}).collect(Collectors.toList());
 	}
 }
