@@ -11,12 +11,14 @@ package org.openmrs.module.billing.validator;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
 import org.apache.commons.lang3.StringUtils;
+import org.openmrs.Visit;
 import org.openmrs.annotation.Handler;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillLineItemService;
@@ -47,6 +49,7 @@ public class BillValidator implements Validator {
 			
 			validateNewPaymentsHaveCashier(bill, errors);
 			validateLineItemsNotModified(bill, errors);
+			validateVisitExistsAndBelongsToPatient(bill, errors);
 		}
 	}
 	
@@ -106,6 +109,27 @@ public class BillValidator implements Validator {
 				errors.reject("billing.error.paymentCashierRequired");
 				return;
 			}
+		}
+	}
+	
+	private void validateVisitExistsAndBelongsToPatient(Bill bill, Errors errors) {
+		if (bill.getVisit() == null) {
+			return;
+		}
+		
+		if (bill.getVisit().getVisitId() == null) {
+			errors.reject("billing.error.visitDoesNotExist");
+			return;
+		}
+		
+		Visit billVisit = Context.getVisitService().getVisit(bill.getVisit().getVisitId());
+		if (billVisit == null) {
+			errors.reject("billing.error.visitDoesNotExist");
+			return;
+		}
+		
+		if (!Objects.equals(billVisit.getPatient().getPatientId(), bill.getPatient().getPatientId())) {
+			errors.reject("billing.error.visitDoesNotBelongToPatient");
 		}
 	}
 	

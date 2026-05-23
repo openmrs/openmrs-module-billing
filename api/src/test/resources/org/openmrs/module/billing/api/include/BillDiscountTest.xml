@@ -25,11 +25,11 @@
 	              creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
 	              uuid="d0000000-0000-0000-0000-000000000100" receipt_printed="0"/>
 	<cashier_bill_line_item bill_line_item_id="100" bill_id="100" item_id="0" price="200.00" price_name="default"
-	                        quantity="1" line_item_order="0" payment_status="POSTED"
+	                        quantity="1" line_item_order="0" status="PENDING"
 	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
 	                        uuid="d0000000-0000-0000-0000-000000000110"/>
 	<cashier_bill_line_item bill_line_item_id="102" bill_id="100" item_id="0" price="80.00" price_name="default"
-	                        quantity="1" line_item_order="1" payment_status="POSTED"
+	                        quantity="1" line_item_order="1" status="PENDING"
 	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
 	                        uuid="d0000000-0000-0000-0000-000000000112"/>
 
@@ -39,7 +39,7 @@
 	              creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
 	              uuid="d0000000-0000-0000-0000-000000000101" receipt_printed="0"/>
 	<cashier_bill_line_item bill_line_item_id="101" bill_id="101" item_id="0" price="100.00" price_name="default"
-	                        quantity="1" line_item_order="0" payment_status="PENDING"
+	                        quantity="1" line_item_order="0" status="PENDING"
 	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
 	                        uuid="d0000000-0000-0000-0000-000000000111"/>
 
@@ -49,7 +49,7 @@
 	              creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
 	              uuid="d0000000-0000-0000-0000-000000000200" receipt_printed="0"/>
 	<cashier_bill_line_item bill_line_item_id="200" bill_id="200" item_id="0" price="200.00" price_name="default"
-	                        quantity="1" line_item_order="0" payment_status="POSTED"
+	                        quantity="1" line_item_order="0" status="PENDING"
 	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
 	                        uuid="d0000000-0000-0000-0000-000000000210"/>
 

@@ -13,11 +13,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Provider;
+import org.openmrs.Visit;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.base.ProviderUtil;
@@ -30,6 +33,7 @@ import org.openmrs.module.billing.api.model.BillDiscount;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.model.CashPoint;
+import org.openmrs.module.billing.api.model.DiscountStatus;
 import org.openmrs.module.billing.api.model.Payment;
 import org.openmrs.module.billing.api.model.Timesheet;
 import org.openmrs.module.billing.api.search.BillSearch;
@@ -48,12 +52,14 @@ import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.impl.AlreadyPaged;
 import org.openmrs.module.webservices.rest.web.resource.impl.DataDelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
+import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.springframework.web.client.RestClientException;
 
 /**
  * REST resource representing a {@link Bill}.
  */
+@Slf4j
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
         + "/bill", supportedClass = Bill.class, supportedOpenmrsVersions = { "2.0 - 2.*" })
 public class BillResource extends DataDelegatingCrudResource<Bill> {
@@ -65,6 +71,7 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			description.addProperty("adjustedBy", Representation.REF);
 			description.addProperty("billAdjusted", Representation.REF);
 			description.addProperty("cashPoint", Representation.REF);
+			description.addProperty("visit", Representation.REF);
 			description.addProperty("cashier", Representation.REF);
 			description.addProperty("dateCreated");
 			description.addProperty("lineItems");
@@ -91,6 +98,7 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 		description.addProperty("adjustedBy");
 		description.addProperty("billAdjusted");
 		description.addProperty("cashPoint");
+		description.addProperty("visit");
 		description.addProperty("cashier");
 		description.addProperty("lineItems");
 		description.addProperty("patient");
@@ -174,25 +182,18 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 		
 		if (bill.getId() == null) {
 			if (bill.getCashier() == null) {
-				Provider cashier = getCurrentCashier();
-				if (cashier == null) {
-					throw new RestClientException(
-					        "The current user (" + Context.getAuthenticatedUser().getUsername() + ") is not a provider");
-				}
-				
-				bill.setCashier(cashier);
+				assignCurrentCashier(bill);
 			}
 			
 			if (bill.getCashPoint() == null) {
 				loadBillCashPoint(bill);
 			}
 			
-			// Now that all attributes have been set (i.e., payments and bill status) we can check to see if the bill
-			// is fully paid.
-			bill.synchronizeBillStatus();
-			if (bill.getStatus() == null) {
-				bill.setStatus(BillStatus.PENDING);
+			if (bill.getVisit() == null && bill.getPatient() != null) {
+				assignActiveVisit(bill);
 			}
+			
+			initializeBillStatus(bill);
 		}
 		
 		return Context.getService(BillService.class).saveBill(bill);
@@ -243,6 +244,40 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 		return ProviderUtil.getCurrentProvider();
 	}
 	
+	private void assignCurrentCashier(Bill bill) {
+		Provider cashier = getCurrentCashier();
+		if (cashier == null) {
+			throw new RestClientException(
+			        "The current user (" + Context.getAuthenticatedUser().getUsername() + ") is not a provider");
+		}
+		
+		bill.setCashier(cashier);
+	}
+	
+	private void assignActiveVisit(Bill bill) {
+		List<Visit> activeVisits = Context.getVisitService().getActiveVisitsByPatient(bill.getPatient());
+		if (activeVisits == null || activeVisits.isEmpty()) {
+			return;
+		}
+		
+		if (activeVisits.size() == 1) {
+			bill.setVisit(activeVisits.get(0));
+			return;
+		}
+		
+		log.info("Bill for patient {} has {} active visits; leaving visit unset", bill.getPatient().getUuid(),
+		    activeVisits.size());
+	}
+	
+	private void initializeBillStatus(Bill bill) {
+		// Now that all attributes have been set (i.e., payments and bill status) we can check to see if the bill
+		// is fully paid.
+		bill.synchronizeBillStatus();
+		if (bill.getStatus() == null) {
+			bill.setStatus(BillStatus.PENDING);
+		}
+	}
+	
 	private void loadBillCashPoint(Bill bill) {
 		ITimesheetService service = Context.getService(ITimesheetService.class);
 		Timesheet timesheet = service.getCurrentTimesheet(bill.getCashier());
@@ -290,13 +325,33 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 		String status = context.getRequest().getParameter("status");
 		if (StringUtils.isNotBlank(status)) {
 			List<BillStatus> statuses = Arrays.stream(status.split(",")).map(String::trim).filter(StringUtils::isNotBlank)
-			        .map(s -> BillStatus.valueOf(s.toUpperCase())).collect(Collectors.toList());
+			        .map(s -> BillStatus.valueOf(s.toUpperCase(Locale.ROOT))).collect(Collectors.toList());
 			billSearch.setStatuses(statuses);
 		}
 		
 		String cashPointUuid = context.getRequest().getParameter("cashPointUuid");
 		if (StringUtils.isNotBlank(cashPointUuid)) {
 			billSearch.setCashPointUuid(cashPointUuid);
+		}
+		
+		String visitUuid = context.getRequest().getParameter("visitUuid");
+		if (StringUtils.isNotBlank(visitUuid)) {
+			billSearch.setVisitUuid(visitUuid);
+		}
+		
+		String discountStatus = context.getRequest().getParameter("discountStatus");
+		if (StringUtils.isNotBlank(discountStatus)) {
+			List<DiscountStatus> discountStatuses = Arrays.stream(discountStatus.split(",")).map(String::trim)
+			        .filter(StringUtils::isNotBlank).map(s -> {
+				        try {
+					        return DiscountStatus.valueOf(s.toUpperCase(Locale.ROOT));
+				        }
+				        catch (IllegalArgumentException e) {
+					        throw new InvalidSearchException("Invalid discountStatus '" + s + "'. Allowed values: "
+					                + Arrays.toString(DiscountStatus.values()));
+				        }
+			        }).collect(Collectors.toList());
+			billSearch.setDiscountStatuses(discountStatuses);
 		}
 		
 		String includeAll = context.getRequest().getParameter("includeAll");

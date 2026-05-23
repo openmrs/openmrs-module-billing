@@ -17,6 +17,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.openmrs.module.billing.api.model.BillStatus;
+import org.openmrs.module.billing.api.model.DiscountStatus;
 
 /**
  * A search criteria holder for {@link org.openmrs.module.billing.api.model.Bill} queries. This
@@ -36,7 +37,11 @@ public class BillSearch {
 	
 	private String cashPointUuid;
 	
+	private String visitUuid;
+	
 	private List<BillStatus> statuses;
+	
+	private List<DiscountStatus> discountStatuses;
 	
 	private String patientName;
 	

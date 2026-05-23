@@ -7,23 +7,12 @@
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
  */
-package org.openmrs.module.billing.api.model;
+package org.openmrs.module.billing.api;
 
-/**
- * The allowable statuses that a {@link Bill} can have.
- */
-public enum BillStatus {
+import org.openmrs.Patient;
+import org.openmrs.module.billing.api.model.PatientPaymentStatusResult;
+
+public interface PatientPaymentStatusResolver {
 	
-	PENDING(),
-	POSTED(),
-	PAID(),
-	CANCELLED(),
-	ADJUSTED(),
-	EXEMPTED(),
-	REFUND_REQUESTED(),
-	REFUNDED(),
-	PARTIALLY_REFUNDED();
-	
-	BillStatus() {
-	}
+	PatientPaymentStatusResult resolve(Patient patient);
 }

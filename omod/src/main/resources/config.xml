@@ -101,7 +101,13 @@
 	<globalProperty>
 		<property>${project.parent.artifactId}.discountEnabled</property>
 		<description>true/false whether or not the discount feature is enabled at the facility level.</description>
-		<defaultValue>false</defaultValue>
+		<defaultValue>true</defaultValue>
+	</globalProperty>
+
+	<globalProperty>
+		<property>${project.parent.artifactId}.refundEnabled</property>
+		<description>true/false whether or not the refund feature is enabled at the facility level.</description>
+		<defaultValue>true</defaultValue>
 	</globalProperty>
 
 	<globalProperty>
@@ -164,6 +170,17 @@
 		<property>${project.parent.artifactId}.currencySymbol</property>
 		<description>
 			Currency symbol for billing receipts (e.g., "USD", "KES", or custom text). Falls back to locale default if not set.
+		</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>${project.parent.artifactId}.patientPaymentStatusResolver</property>
+		<description>
+			Fully qualified class name of a Spring-managed bean implementing
+			org.openmrs.module.billing.api.PatientPaymentStatusResolver. The bean must
+			be registered as a component by some OpenMRS module so that
+			Context.getRegisteredComponents() can find it. Leave blank to use the
+			default resolver, which derives PAID/UNPAID from existing Bill records.
 		</description>
 	</globalProperty>
 
@@ -232,6 +249,27 @@
 	<privilege>
 		<name>View Bill Discounts</name>
 		<description>Able to view bill discounts</description>
+	</privilege>
+
+	<!--  Refunds  -->
+	<privilege>
+		<name>Request Bill Refunds</name>
+		<description>Able to raise a refund request against a paid bill</description>
+	</privilege>
+
+	<privilege>
+		<name>Approve Bill Refunds</name>
+		<description>Able to approve or reject pending bill refund requests</description>
+	</privilege>
+
+	<privilege>
+		<name>Complete Bill Refunds</name>
+		<description>Able to record completion of an approved refund (cash or electronic disbursement)</description>
+	</privilege>
+
+	<privilege>
+		<name>View Bill Refunds</name>
+		<description>Able to view bill refunds</description>
 	</privilege>
 
 	<!--  Metadata  -->

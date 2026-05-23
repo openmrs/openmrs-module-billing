@@ -9,21 +9,14 @@
  */
 package org.openmrs.module.billing.api.model;
 
-/**
- * The allowable statuses that a {@link Bill} can have.
- */
-public enum BillStatus {
+import lombok.Builder;
+import lombok.Getter;
+
+@Builder
+@Getter
+public class PatientPaymentStatusResult {
 	
-	PENDING(),
-	POSTED(),
-	PAID(),
-	CANCELLED(),
-	ADJUSTED(),
-	EXEMPTED(),
-	REFUND_REQUESTED(),
-	REFUNDED(),
-	PARTIALLY_REFUNDED();
+	private PatientPaymentStatus status;
 	
-	BillStatus() {
-	}
+	private String reason;
 }

@@ -45,6 +45,8 @@ public class ModuleSettings {
 	
 	public static final String DISCOUNT_ENABLED = "billing.discountEnabled";
 	
+	public static final String REFUND_ENABLED = "billing.refundEnabled";
+	
 	public static final String PATIENT_DASHBOARD_2_BILL_COUNT = "billing.patientDashboard2BillCount";
 	
 	private static final Integer DEFAULT_PATIENT_DASHBOARD_2_BILL_COUNT = 4;
@@ -58,6 +60,8 @@ public class ModuleSettings {
 	public static final String DAILY_SHIFT_SUMMARY_REPORT_ID_PROPERTY = "billing.reports.dailyShiftSummary";
 	
 	public static final String PAYMENTS_BY_PAYMENT_MODE_REPORT_ID_PROPERTY = "billing.reports.paymentsByPaymentMode";
+	
+	public static final String PATIENT_PAYMENT_STATUS_RESOLVER = "billing.patientPaymentStatusResolver";
 	
 	private static final AdministrationService administrationService;
 	

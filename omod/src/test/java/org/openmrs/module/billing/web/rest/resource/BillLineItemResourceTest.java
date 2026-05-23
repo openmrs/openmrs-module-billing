@@ -9,19 +9,19 @@
  */
 package org.openmrs.module.billing.web.rest.resource;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.openmrs.User;
 import org.openmrs.api.context.Context;
@@ -43,7 +43,7 @@ public class BillLineItemResourceTest {
 	
 	private MockedStatic<Context> contextMock;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		resource = new BillLineItemResource();
 		billService = mock(BillService.class);
@@ -54,7 +54,7 @@ public class BillLineItemResourceTest {
 		contextMock.when(() -> Context.getAuthenticatedUser()).thenReturn(authenticatedUser);
 	}
 	
-	@After
+	@AfterEach
 	public void tearDown() {
 		if (contextMock != null) {
 			contextMock.close();
@@ -73,9 +73,9 @@ public class BillLineItemResourceTest {
 		BillLineItem lineItem = new BillLineItem();
 		lineItem.setId(1);
 		lineItem.setBill(bill);
-		assertFalse("Line item should not be voided initially", lineItem.getVoided());
-		assertNull("Void reason should be null initially", lineItem.getVoidReason());
-		assertNull("Voided by should be null initially", lineItem.getVoidedBy());
+		assertFalse(lineItem.getVoided(), "Line item should not be voided initially");
+		assertNull(lineItem.getVoidReason(), "Void reason should be null initially");
+		assertNull(lineItem.getVoidedBy(), "Voided by should be null initially");
 		
 		String reason = "Test deletion reason";
 		RequestContext context = mock(RequestContext.class);
@@ -86,11 +86,11 @@ public class BillLineItemResourceTest {
 		
 		resource.delete(lineItem, reason, context);
 		
-		assertTrue("Line item should be voided", lineItem.getVoided());
-		assertNotNull("Void reason should be set", lineItem.getVoidReason());
-		assertTrue("Void reason should match", reason.equals(lineItem.getVoidReason()));
-		assertNotNull("Voided by should be set", lineItem.getVoidedBy());
-		assertTrue("Voided by should be the authenticated user", authenticatedUser.equals(lineItem.getVoidedBy()));
+		assertTrue(lineItem.getVoided(), "Line item should be voided");
+		assertNotNull(lineItem.getVoidReason(), "Void reason should be set");
+		assertTrue(reason.equals(lineItem.getVoidReason()), "Void reason should match");
+		assertNotNull(lineItem.getVoidedBy(), "Voided by should be set");
+		assertTrue(authenticatedUser.equals(lineItem.getVoidedBy()), "Voided by should be the authenticated user");
 		
 		verify(billService).saveBill(bill);
 	}

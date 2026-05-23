@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
+import org.openmrs.Visit;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.util.PrivilegeConstants;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
@@ -48,6 +49,8 @@ public class Bill extends BaseOpenmrsData {
 	
 	private CashPoint cashPoint;
 	
+	private Visit visit;
+	
 	private Bill billAdjusted;
 	
 	private BillStatus status;
@@ -63,6 +66,8 @@ public class Bill extends BaseOpenmrsData {
 	private String adjustmentReason;
 	
 	private Set<BillDiscount> discounts;
+	
+	private Set<BillRefund> refunds;
 	
 	/**
 	 * Returns every non-voided discount on this bill (bill-level and line-item scoped). Voided rows are
@@ -229,6 +234,11 @@ public class Bill extends BaseOpenmrsData {
 	}
 	
 	public void synchronizeBillStatus() {
+		BillStatus current = getStatus();
+		if (current == BillStatus.REFUND_REQUESTED || current == BillStatus.REFUNDED
+		        || current == BillStatus.PARTIALLY_REFUNDED) {
+			return;
+		}
 		if (!this.getPayments().isEmpty() && getTotalPayments().compareTo(BigDecimal.ZERO) > 0) {
 			// Approved discount exceeds the current bill total — likely a line item was voided
 			// after approval. Stay POSTED so a human can void/reapply rather than letting any
@@ -242,11 +252,11 @@ public class Bill extends BaseOpenmrsData {
 			boolean billFullySettled = getTotalPayments().compareTo(getAmountAfterDiscount()) >= 0;
 			if (billFullySettled) {
 				this.setStatus(BillStatus.PAID);
-				// Update all non-voided bill line items to PAID status
+				// Update all non-voided and non-refunded status bill line items to PAID status
 				if (this.lineItems != null) {
 					for (BillLineItem lineItem : this.lineItems) {
-						if (lineItem != null && !lineItem.getVoided()) {
-							lineItem.setPaymentStatus(BillStatus.PAID);
+						if (lineItem != null && !lineItem.getVoided() && !isRefundStatus(lineItem.getStatus())) {
+							lineItem.setStatus(BillLineItemStatus.PAID);
 						}
 					}
 				}
@@ -298,6 +308,11 @@ public class Bill extends BaseOpenmrsData {
 		for (BillLineItem lineItem : this.getLineItems()) {
 			lineItem.setLineItemOrder(orderCounter++);
 		}
+	}
+	
+	private boolean isRefundStatus(BillLineItemStatus lineItemStatus) {
+		return lineItemStatus == BillLineItemStatus.REFUND_REQUESTED || lineItemStatus == BillLineItemStatus.REFUNDED
+		        || lineItemStatus == BillLineItemStatus.PARTIALLY_REFUNDED;
 	}
 	
 }

@@ -11,9 +11,7 @@ package org.openmrs.module.billing.api.billing.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -29,12 +27,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Concept;
 import org.openmrs.Drug;
 import org.openmrs.DrugOrder;
-import org.openmrs.Order;
 import org.openmrs.TestOrder;
 import org.openmrs.module.billing.api.BillExemptionService;
 import org.openmrs.module.billing.api.ItemPriceService;
 import org.openmrs.module.billing.api.model.BillLineItem;
-import org.openmrs.module.billing.api.model.BillStatus;
+import org.openmrs.module.billing.api.model.BillLineItemStatus;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
 import org.openmrs.module.stockmanagement.api.StockManagementService;
 import org.openmrs.module.stockmanagement.api.model.StockItem;
@@ -100,7 +97,7 @@ public class DrugOrderBillingStrategyTest {
 		BillLineItem lineItem = result.get();
 		assertEquals(new BigDecimal("200.00"), lineItem.getPrice());
 		assertEquals(5, lineItem.getQuantity());
-		assertEquals(BillStatus.PENDING, lineItem.getPaymentStatus());
+		assertEquals(BillLineItemStatus.PENDING, lineItem.getStatus());
 		assertEquals(stockItem, lineItem.getItem());
 	}
 	

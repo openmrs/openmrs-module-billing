@@ -9,21 +9,8 @@
  */
 package org.openmrs.module.billing.api.model;
 
-/**
- * The allowable statuses that a {@link Bill} can have.
- */
-public enum BillStatus {
-	
-	PENDING(),
-	POSTED(),
-	PAID(),
-	CANCELLED(),
-	ADJUSTED(),
-	EXEMPTED(),
-	REFUND_REQUESTED(),
-	REFUNDED(),
-	PARTIALLY_REFUNDED();
-	
-	BillStatus() {
-	}
+public enum PatientPaymentStatus {
+	PAID,
+	UNPAID,
+	UNKNOWN
 }

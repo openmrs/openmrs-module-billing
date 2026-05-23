@@ -16,10 +16,13 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openmrs.Patient;
+import org.openmrs.Visit;
+import org.openmrs.VisitType;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.api.UnchangeableObjectException;
 import org.openmrs.api.ValidationException;
+import org.openmrs.api.VisitService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.TestConstants;
 import org.openmrs.module.billing.api.BillService;
@@ -28,6 +31,7 @@ import org.openmrs.module.billing.api.PaymentModeService;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
+import org.openmrs.module.billing.api.model.BillLineItemStatus;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.model.Payment;
 import org.openmrs.module.billing.api.model.PaymentMode;
@@ -143,7 +147,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		StockItem stockItem = existingItem.getItem();
 		
 		BillLineItem lineItem = newBill.addLineItem(stockItem, BigDecimal.valueOf(150), "New price", 2);
-		lineItem.setPaymentStatus(BillStatus.PENDING);
+		lineItem.setStatus(BillLineItemStatus.PENDING);
 		lineItem.setUuid(UUID.randomUUID().toString());
 		
 		Bill savedBill = billService.saveBill(newBill);
@@ -222,7 +226,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		BillLineItem newLineItem = new BillLineItem();
 		newLineItem.setPrice(BigDecimal.valueOf(25.50));
 		newLineItem.setQuantity(2);
-		newLineItem.setPaymentStatus(BillStatus.PENDING);
+		newLineItem.setStatus(BillLineItemStatus.PENDING);
 		newLineItem.setLineItemOrder(pendingBill.getLineItems().size());
 		pendingBill.addLineItem(newLineItem);
 		
@@ -246,7 +250,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		BillLineItem newLineItem = new BillLineItem();
 		newLineItem.setPrice(BigDecimal.valueOf(25.50));
 		newLineItem.setQuantity(2);
-		newLineItem.setPaymentStatus(BillStatus.PENDING);
+		newLineItem.setStatus(BillLineItemStatus.PENDING);
 		paidBill.addLineItem(newLineItem);
 		
 		// Should throw exception when saving (BillValidator catches line item
@@ -419,6 +423,73 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBills(BillSearch, PagingInfo)
 	 */
 	@Test
+	public void getBills_shouldFilterByVisitUuid() {
+		VisitService visitService = Context.getVisitService();
+		Patient patient = patientService.getPatient(1);
+		
+		org.openmrs.VisitType visitType;
+		if (visitService.getAllVisitTypes().isEmpty()) {
+			visitType = visitService.saveVisitType(new org.openmrs.VisitType("Test", "Test visit type"));
+		} else {
+			visitType = visitService.getAllVisitTypes().get(0);
+		}
+		
+		Visit visitA = new Visit();
+		visitA.setPatient(patient);
+		visitA.setVisitType(visitType);
+		visitA.setStartDatetime(new java.util.Date());
+		visitA = visitService.saveVisit(visitA);
+		
+		Visit visitB = new Visit();
+		visitB.setPatient(patient);
+		visitB.setVisitType(visitType);
+		visitB.setStartDatetime(new java.util.Date());
+		visitB = visitService.saveVisit(visitB);
+		
+		Bill templateBill = billService.getBill(0);
+		assertNotNull(templateBill);
+		assertFalse(templateBill.getLineItems().isEmpty());
+		BillLineItem existingItem = templateBill.getLineItems().get(0);
+		StockItem stockItem = existingItem.getItem();
+		
+		Bill billA = new Bill();
+		billA.setCashier(providerService.getProvider(0));
+		billA.setPatient(patient);
+		billA.setCashPoint(cashPointService.getCashPoint(0));
+		billA.setReceiptNumber("TEST-VISIT-A-" + UUID.randomUUID());
+		billA.setStatus(BillStatus.PENDING);
+		billA.setVisit(visitA);
+		BillLineItem lineItemA = billA.addLineItem(stockItem, BigDecimal.valueOf(100), "Test price", 1);
+		lineItemA.setStatus(BillLineItemStatus.PENDING);
+		lineItemA.setUuid(UUID.randomUUID().toString());
+		billService.saveBill(billA);
+		
+		Bill billB = new Bill();
+		billB.setCashier(providerService.getProvider(0));
+		billB.setPatient(patient);
+		billB.setCashPoint(cashPointService.getCashPoint(0));
+		billB.setReceiptNumber("TEST-VISIT-B-" + UUID.randomUUID());
+		billB.setStatus(BillStatus.PENDING);
+		billB.setVisit(visitB);
+		BillLineItem lineItemB = billB.addLineItem(stockItem, BigDecimal.valueOf(100), "Test price", 1);
+		lineItemB.setStatus(BillLineItemStatus.PENDING);
+		lineItemB.setUuid(UUID.randomUUID().toString());
+		billService.saveBill(billB);
+		
+		Context.flushSession();
+		
+		BillSearch search = new BillSearch();
+		search.setVisitUuid(visitA.getUuid());
+		java.util.List<Bill> results = billService.getBills(search, new PagingInfo());
+		
+		assertEquals(1, results.size());
+		assertEquals(visitA.getUuid(), results.get(0).getVisit().getUuid());
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#getBills(BillSearch, PagingInfo)
+	 */
+	@Test
 	public void getBills_shouldReturnAllBillsWhenSearchIsEmpty() {
 		BillSearch billSearch = new BillSearch();
 		List<Bill> bills = billService.getBills(billSearch, null);
@@ -495,7 +566,7 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		Bill templateBill = billService.getBill(0);
 		BillLineItem existingItem = templateBill.getLineItems().get(0);
 		BillLineItem lineItem = newBill.addLineItem(existingItem.getItem(), BigDecimal.valueOf(100), "Test price", 1);
-		lineItem.setPaymentStatus(BillStatus.PENDING);
+		lineItem.setStatus(BillLineItemStatus.PENDING);
 		lineItem.setUuid(UUID.randomUUID().toString());
 		
 		Bill savedBill = billService.saveBill(newBill);
@@ -503,5 +574,64 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		assertNotNull(savedBill);
 		assertNotNull(savedBill.getReceiptNumber());
 		assertFalse(savedBill.getReceiptNumber().isEmpty());
+	}
+	
+	/**
+	 * @see org.openmrs.module.billing.api.impl.BillServiceImpl#saveBill(Bill)
+	 */
+	@Test
+	public void saveBill_shouldPersistVisitAssociation() {
+		Patient patient = patientService.getPatient(1);
+		assertNotNull(patient);
+		
+		// Obtain a VisitType from the test dataset; create one if none exist
+		VisitService visitService = Context.getVisitService();
+		List<VisitType> visitTypes = visitService.getAllVisitTypes();
+		VisitType visitType;
+		if (visitTypes.isEmpty()) {
+			visitType = visitService.saveVisitType(new VisitType("Test", "Test visit type"));
+		} else {
+			visitType = visitTypes.get(0);
+		}
+		
+		Visit visit = new Visit();
+		visit.setPatient(patient);
+		visit.setVisitType(visitType);
+		visit.setStartDatetime(new java.util.Date());
+		Visit savedVisit = visitService.saveVisit(visit);
+		assertNotNull(savedVisit);
+		assertNotNull(savedVisit.getUuid());
+		
+		// Build a bill the same way saveBill_shouldCreateNewBillWithNewItem does
+		Bill templateBill = billService.getBill(0);
+		assertNotNull(templateBill);
+		assertFalse(templateBill.getLineItems().isEmpty());
+		
+		BillLineItem existingItem = templateBill.getLineItems().get(0);
+		StockItem stockItem = existingItem.getItem();
+		
+		Bill newBill = new Bill();
+		newBill.setCashier(providerService.getProvider(0));
+		newBill.setPatient(patient);
+		newBill.setCashPoint(cashPointService.getCashPoint(0));
+		newBill.setReceiptNumber("TEST-VISIT-" + UUID.randomUUID());
+		newBill.setStatus(BillStatus.PENDING);
+		newBill.setVisit(savedVisit);
+		
+		BillLineItem lineItem = newBill.addLineItem(stockItem, BigDecimal.valueOf(100), "Test price", 1);
+		lineItem.setStatus(BillLineItemStatus.PENDING);
+		lineItem.setUuid(UUID.randomUUID().toString());
+		
+		Bill saved = billService.saveBill(newBill);
+		assertNotNull(saved);
+		assertNotNull(saved.getId());
+		
+		Context.flushSession();
+		Context.clearSession();
+		
+		Bill reloaded = billService.getBill(saved.getId());
+		assertNotNull(reloaded);
+		assertNotNull(reloaded.getVisit());
+		assertEquals(savedVisit.getUuid(), reloaded.getVisit().getUuid());
 	}
 }
