@@ -168,10 +168,6 @@ public class ModuleSettings {
 	
 	// TODO: These functions should be moved to a commons-level base class for module settings classes
 	
-	private static void getBoolProperty(String propertyName, Action1<Boolean> action) {
-		getBoolProperty(propertyName, null, action);
-	}
-	
 	private static void getBoolProperty(String propertyName, Boolean defaultValue, Action1<Boolean> action) {
 		String property = administrationService.getGlobalProperty(propertyName);
 		if (!StringUtils.isEmpty(property)) {
