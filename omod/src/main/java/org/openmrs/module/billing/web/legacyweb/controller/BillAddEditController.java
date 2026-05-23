@@ -33,7 +33,6 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.util.UriUtils;
 
 /**
  * Controller to manage the Bill page.
@@ -161,22 +160,4 @@ public class BillAddEditController {
 		        + ((request.getQueryString() != null) ? "?" + request.getQueryString() : "");
 	}
 	
-	private String buildRedirectUrl(HttpServletRequest request) {
-		String redirectUrl = "redirect:" + UrlUtil.formUrl(CashierWebConstants.CASHIER_PAGE);
-		String returnUrlParam = "?returnUrl=" + UrlUtil.formUrl(CashierWebConstants.BILL_PAGE);
-		String requestQueryParam = "";
-		
-		if (request.getQueryString() != null) {
-			requestQueryParam = encodeRequestQuery(request);
-		}
-		
-		return redirectUrl + returnUrlParam + requestQueryParam;
-	}
-	
-	private String encodeRequestQuery(HttpServletRequest request) {
-		String requestQueryParam;
-		requestQueryParam = UriUtils.encodeQuery("?" + request.getQueryString(), "UTF-8");
-		
-		return requestQueryParam;
-	}
 }
