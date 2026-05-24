@@ -1,4 +1,4 @@
-# this build is designed to replicate the Travis CI workflow
+# GitHub Actions workflow replicating Travis CI build
 name: Build with Maven
 
 on:
@@ -21,39 +21,37 @@ jobs:
       JAVA_VERSION: ${{ matrix.java-version }}
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ matrix.java-version }}
         uses: actions/setup-java@v4
         with:
           java-version: ${{ matrix.java-version }}
-          distribution: 'temurin'
-      - name: Cache local Maven repository
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-      - name: Install dependencies
-        run: mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true --batch-mode --show-version --file pom.xml
-      - name: Build with Maven
+          distribution: temurin
+          cache: maven
+
+      - name: Install dependencies (skip tests/docs)
+        run: mvn clean install -DskipTests -Dmaven.javadoc.skip=true --batch-mode --show-version --file pom.xml
+
+      - name: Run tests
         run: mvn test --batch-mode --file pom.xml
-      # this is necessary to populate the environment variables for Coveralls properly
+
+      # Capture branch name and PR number for Coveralls
       - name: Set branch name and PR number
         id: refs
         continue-on-error: true
-        env:
-          BRANCH_NAME_OR_REF: ${{ github.head_ref || github.ref }}
         run: |
-          echo "::set-output name=branch_name::${BRANCH_NAME_OR_REF#refs/heads/}"
-          echo "::set-output name=pr_number::$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")"
-      - name: Update coverage
-        continue-on-error: true
+          echo "branch_name=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+          echo "pr_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")" >> $GITHUB_OUTPUT
+
+      - name: Update coverage (Jacoco + Coveralls)
         if: ${{ steps.refs.outcome == 'success' }}
+        continue-on-error: true
         env:
-          CI_NAME: Github
+          CI_NAME: GitHub
           CI_BUILD_NUMBER: ${{ github.run_id }}
-          CI_BUILD_URL: https://github.com/${{ github.repository }}/commit/${{ github.event.after }}/checks
+          CI_BUILD_URL: https://github.com/${{ github.repository }}/commit/${{ github.sha }}/checks
           CI_BRANCH: ${{ steps.refs.outputs.branch_name }}
           CI_PULL_REQUEST: ${{ steps.refs.outputs.pr_number }}
         run: mvn jacoco:report coveralls:report --batch-mode --file pom.xml --no-transfer-progress -DrepoToken=${{ secrets.COVERALLS_TOKEN }}
