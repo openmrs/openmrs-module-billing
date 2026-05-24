@@ -31,6 +31,17 @@ public interface BillDAO {
 	 * @return the bill with the specified ID, or null if not found
 	 */
 	Bill getBill(@Nonnull Integer id);
+
+	
+	/**
+	 * Retrieves unpaid bills for a patient and encounter.
+	 *
+	 * @param patientUuid the UUID of the patient
+	 * @param encounterUuid the UUID of the encounter
+	 * @return a list of unpaid bills (DRAFT or PENDING), or empty list if none
+ 	*/
+	List<Bill> getUnpaidBillsByPatientAndEncounter(@Nonnull String patientUuid, @Nonnull String encounterUuid);
+
 	
 	/**
 	 * Retrieves a bill by its UUID.
