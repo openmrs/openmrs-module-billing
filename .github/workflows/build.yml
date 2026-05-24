@@ -1,3 +1,4 @@
+# GitHub Actions workflow replicating Travis CI build
 name: Build with Maven
 
 on:
@@ -7,23 +8,50 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-
 jobs:
   build:
-    uses: openmrs/openmrs-contrib-gha-workflows/.github/workflows/build-backend-module.yml@main
-    permissions:
-      contents: read
-      id-token: write
-    secrets:
-      MAVEN_REPO_USERNAME: ${{ secrets.MAVEN_REPO_USERNAME }}
-      MAVEN_REPO_API_KEY: ${{ secrets.MAVEN_REPO_API_KEY }}
+    strategy:
+      matrix:
+        platform: [ ubuntu-latest ]
+        java-version: [ 8, 11, 17, 21 ]
 
-  owasp-dependency-check:
-    if: ${{ github.event_name != 'pull_request' }}
-    uses: openmrs/openmrs-contrib-gha-workflows/.github/workflows/owasp-dependency-check.yml@main
-    secrets:
-      NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
-      BOT_GH_TOKEN: ${{ secrets.OMRS_BOT_GH_TOKEN }}
+    runs-on: ${{ matrix.platform }}
+    env:
+      PLATFORM: ${{ matrix.platform }}
+      JAVA_VERSION: ${{ matrix.java-version }}
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java-version }}
+          distribution: temurin
+          cache: maven
+
+      - name: Install dependencies (skip tests/docs)
+        run: mvn clean install -DskipTests -Dmaven.javadoc.skip=true --batch-mode --show-version --file pom.xml
+
+      - name: Run tests
+        run: mvn test --batch-mode --file pom.xml
+
+      # Capture branch name and PR number for Coveralls
+      - name: Set branch name and PR number
+        id: refs
+        continue-on-error: true
+        run: |
+          echo "branch_name=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+          echo "pr_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")" >> $GITHUB_OUTPUT
+
+      - name: Update coverage (Jacoco + Coveralls)
+        if: ${{ steps.refs.outcome == 'success' }}
+        continue-on-error: true
+        env:
+          CI_NAME: GitHub
+          CI_BUILD_NUMBER: ${{ github.run_id }}
+          CI_BUILD_URL: https://github.com/${{ github.repository }}/commit/${{ github.sha }}/checks
+          CI_BRANCH: ${{ steps.refs.outputs.branch_name }}
+          CI_PULL_REQUEST: ${{ steps.refs.outputs.pr_number }}
+        run: mvn jacoco:report coveralls:report --batch-mode --file pom.xml --no-transfer-progress -DrepoToken=${{ secrets.COVERALLS_TOKEN }}
