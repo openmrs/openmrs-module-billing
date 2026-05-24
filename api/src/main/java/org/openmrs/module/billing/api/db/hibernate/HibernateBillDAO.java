@@ -120,11 +120,8 @@ public class HibernateBillDAO implements BillDAO {
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(cb.equal(root.get("patient").get("uuid"), patientUuid));
         predicates.add(cb.equal(root.get("encounter").get("uuid"), encounterUuid));
-        
-        //predicates.add(root.get("status").in(Arrays.asList(BillStatus.DRAFT, BillStatus.PENDING)))
-        
-        predicates.add(cb.equal(root.get("voided"), false));
-        
+        predicates.add(root.get("status").in(Arrays.asList(BillStatus.POSTED, BillStatus.PENDING)));
+        predicates.add(cb.equal(root.get("voided"), false));    
         cq.where(predicates.toArray(new Predicate[0]));
         cq.orderBy(cb.asc(root.get("dateCreated"))); // Oldest bill first
         
