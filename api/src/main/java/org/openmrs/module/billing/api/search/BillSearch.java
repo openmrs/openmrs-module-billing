@@ -45,7 +45,10 @@ public class BillSearch {
 	
 	private String patientName;
 	
+	@Builder.Default
 	private Boolean includeVoided = false;
-	
+
+	@Builder.Default
 	private Boolean includeVoidedLineItems = false;
+
 }
