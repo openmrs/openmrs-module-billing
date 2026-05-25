@@ -47,6 +47,7 @@ import org.openmrs.module.billing.api.model.CashPoint;
 import org.openmrs.module.billing.api.model.DiscountStatus;
 import org.openmrs.module.billing.api.model.RefundStatus;
 import org.openmrs.module.billing.api.search.BillSearch;
+import org.openmrs.module.billing.api.util.PrivilegeConstants;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
@@ -290,6 +291,8 @@ public class BillResourceTest {
 	
 	@Test
 	public void getActiveRefunds_shouldExcludeVoidedRefunds() {
+		contextMock.when(() -> Context.hasPrivilege(PrivilegeConstants.VIEW_REFUNDS)).thenReturn(true);
+		
 		Bill bill = new Bill();
 		bill.setRefunds(new HashSet<>(Arrays.asList(refundWithStatus(RefundStatus.REQUESTED, false),
 		    refundWithStatus(RefundStatus.APPROVED, false), refundWithStatus(RefundStatus.REQUESTED, true))));
