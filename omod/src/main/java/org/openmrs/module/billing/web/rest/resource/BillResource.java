@@ -39,6 +39,7 @@ import org.openmrs.module.billing.api.model.Payment;
 import org.openmrs.module.billing.api.model.RefundStatus;
 import org.openmrs.module.billing.api.model.Timesheet;
 import org.openmrs.module.billing.api.search.BillSearch;
+import org.openmrs.module.billing.api.util.PrivilegeConstants;
 import org.openmrs.module.billing.api.util.RoundingUtil;
 import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
 import org.openmrs.module.billing.web.base.resource.PagingUtil;
@@ -123,6 +124,9 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 	
 	@PropertyGetter("refunds")
 	public List<BillRefund> getActiveRefunds(Bill bill) {
+		if (!Context.hasPrivilege(PrivilegeConstants.VIEW_REFUNDS)) {
+			return java.util.Collections.emptyList();
+		}
 		return bill.getActiveRefunds();
 	}
 	
@@ -354,6 +358,7 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 		
 		String refundStatus = context.getRequest().getParameter("refundStatus");
 		if (StringUtils.isNotBlank(refundStatus)) {
+			Context.requirePrivilege(PrivilegeConstants.VIEW_REFUNDS);
 			List<RefundStatus> refundStatuses = parseRefundStatuses(refundStatus);
 			if (refundStatuses.isEmpty()) {
 				throw new InvalidSearchException("refundStatus parameter contained no valid values");
