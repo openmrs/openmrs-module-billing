@@ -31,8 +31,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.openmrs.Patient;
 import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.module.billing.api.model.BillDiscount;
 import org.openmrs.module.billing.api.model.BillLineItem;
+import org.openmrs.module.billing.api.model.BillRefund;
+import org.openmrs.module.billing.api.model.DiscountStatus;
+import org.openmrs.module.billing.api.model.DiscountType;
 import org.openmrs.module.billing.api.model.Payment;
+import org.openmrs.module.billing.api.model.RefundStatus;
 import org.openmrs.module.billing.api.util.CashierModuleConstants;
 import org.openmrs.util.ConfigUtil;
 import org.openmrs.util.LocaleUtility;
@@ -55,6 +60,10 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ReceiptGenerator {
 	
@@ -193,23 +202,97 @@ public class ReceiptGenerator {
 		billLineItemstable.addCell(new Paragraph("Price")).setFontSize(FONT_SIZE_12).setTextAlignment(TextAlignment.RIGHT);
 		billLineItemstable.addCell(new Paragraph("Total")).setFontSize(FONT_SIZE_12).setTextAlignment(TextAlignment.RIGHT);
 		
+		List<BillDiscount> approvedDiscounts = new ArrayList<>();
+		if (bill.getDiscounts() != null) {
+			for (BillDiscount d : bill.getDiscounts()) {
+				if (d == null || d.getVoided() || d.getStatus() != DiscountStatus.APPROVED) {
+					continue;
+				}
+				if (d.getDiscountAmount().signum() == 0) {
+					continue;
+				}
+				approvedDiscounts.add(d);
+			}
+		}
+		Map<String, List<BillDiscount>> lineItemDiscounts = new HashMap<>();
+		List<BillDiscount> billLevelDiscounts = new ArrayList<>();
+		BigDecimal totalDiscount = BigDecimal.ZERO;
+		for (BillDiscount d : approvedDiscounts) {
+			totalDiscount = totalDiscount.add(d.getDiscountAmount());
+			if (d.getLineItem() != null) {
+				lineItemDiscounts.computeIfAbsent(d.getLineItem().getUuid(), k -> new ArrayList<>()).add(d);
+			} else {
+				billLevelDiscounts.add(d);
+			}
+		}
+		
 		for (BillLineItem item : bill.getLineItems()) {
 			if (item.getVoided()) {
 				continue;
 			}
 			
 			addBillLineItem(item, billLineItemstable, billItemSectionFont, nf);
+			
+			List<BillDiscount> lineDiscounts = lineItemDiscounts.get(item.getUuid());
+			if (lineDiscounts != null) {
+				for (BillDiscount d : lineDiscounts) {
+					addLineItemDiscountRow(d, billLineItemstable, billItemSectionFont, nf);
+				}
+			}
+		}
+		
+		BigDecimal totalAfterDiscount = bill.getAmountAfterDiscount();
+		
+		List<BillRefund> completedRefunds = new ArrayList<>();
+		BigDecimal totalRefunded = BigDecimal.ZERO;
+		if (bill.getRefunds() != null) {
+			for (BillRefund r : bill.getRefunds()) {
+				if (r == null || r.getVoided() || r.getStatus() != RefundStatus.COMPLETED) {
+					continue;
+				}
+				if (r.getRefundAmount() == null) {
+					LOG.warn("Skipping refund {} on bill {}: null refundAmount", r.getUuid(), bill.getUuid());
+					continue;
+				}
+				completedRefunds.add(r);
+				totalRefunded = totalRefunded.add(r.getRefundAmount());
+			}
 		}
 		
 		float[] totalColWidth = { 1f, 5f, 2f, 2f };
 		Table totalsSection = new Table(totalColWidth);
 		totalsSection.setWidth(UnitValue.createPercentValue(100f));
 		
+		if (!approvedDiscounts.isEmpty()) {
+			totalsSection.addCell(new Paragraph(" "));
+			totalsSection.addCell(new Paragraph(" "));
+			totalsSection.addCell(new Paragraph("Subtotal")).setFontSize(10).setTextAlignment(TextAlignment.RIGHT)
+			        .setFont(helvetica);
+			totalsSection.addCell(new Paragraph(nf.format(bill.getTotal()))).setFontSize(10)
+			        .setTextAlignment(TextAlignment.RIGHT).setFont(helvetica);
+			
+			for (BillDiscount d : billLevelDiscounts) {
+				totalsSection.addCell(new Paragraph(" "));
+				totalsSection.addCell(new Paragraph(" "));
+				totalsSection.addCell(new Paragraph(discountLabel(d, "Bill discount"))).setFontSize(10)
+				        .setTextAlignment(TextAlignment.RIGHT).setFont(helvetica);
+				totalsSection.addCell(new Paragraph("-" + nf.format(d.getDiscountAmount()))).setFontSize(10)
+				        .setTextAlignment(TextAlignment.RIGHT).setFont(helvetica);
+			}
+			
+			totalsSection.addCell(new Paragraph(" "));
+			totalsSection.addCell(new Paragraph(" "));
+			totalsSection.addCell(new Paragraph("Total Discount")).setFontSize(10).setTextAlignment(TextAlignment.RIGHT)
+			        .setFont(helvetica);
+			totalsSection.addCell(new Paragraph("-" + nf.format(totalDiscount))).setFontSize(10)
+			        .setTextAlignment(TextAlignment.RIGHT).setFont(helvetica);
+		}
+		
 		totalsSection.addCell(new Paragraph(" "));
 		totalsSection.addCell(new Paragraph(" "));
 		totalsSection.addCell(new Paragraph("Total")).setFontSize(10).setTextAlignment(TextAlignment.RIGHT)
 		        .setFont(helvetica).setBold();
-		totalsSection.addCell(new Paragraph(nf.format(bill.getTotal()))).setFontSize(10)
+		totalsSection.addCell(new Paragraph(nf.format(totalAfterDiscount))).setFontSize(10)
 		        .setTextAlignment(TextAlignment.RIGHT).setFont(helvetica).setBold();
 		
 		setInnerCellBorder(receiptHeader, Border.NO_BORDER);
@@ -233,6 +316,27 @@ public class ReceiptGenerator {
 			        .setFontSize(10).setFont(helvetica);
 		}
 		
+		Table refundSection = null;
+		if (!completedRefunds.isEmpty()) {
+			float[] refundColWidth = { 1f, 5f, 2f, 2f };
+			refundSection = new Table(refundColWidth);
+			refundSection.setWidth(UnitValue.createPercentValue(100f));
+			refundSection.addCell(new Paragraph("  "));
+			refundSection.addCell(new Paragraph("  "));
+			refundSection.addCell(new Paragraph("Refund").setTextAlignment(TextAlignment.RIGHT).setBold());
+			refundSection.addCell(new Paragraph(""));
+			for (BillRefund r : completedRefunds) {
+				refundSection.addCell(new Paragraph(" "));
+				refundSection.addCell(new Paragraph(" "));
+				refundSection.addCell(new Paragraph(refundRowLabel(r)).setTextAlignment(TextAlignment.RIGHT)).setFontSize(10)
+				        .setFont(helvetica);
+				refundSection
+				        .addCell(new Paragraph("-" + nf.format(r.getRefundAmount())).setTextAlignment(TextAlignment.RIGHT))
+				        .setFontSize(10).setFont(helvetica);
+			}
+			setInnerCellBorder(refundSection, Border.NO_BORDER);
+		}
+		
 		float[] amountDueColWidth = { 1f, 5f, 2f, 2f };
 		Table amountDueSection = new Table(amountDueColWidth);
 		amountDueSection.setWidth(UnitValue.createPercentValue(100f));
@@ -242,7 +346,8 @@ public class ReceiptGenerator {
 		
 		amountDueSection.addCell(new Paragraph("Due Amount")).setFontSize(10).setTextAlignment(TextAlignment.RIGHT)
 		        .setFont(helvetica).setBold();
-		BigDecimal dueAmount = bill.getTotal().subtract(bill.getTotalPayments());
+		BigDecimal netPaid = bill.getTotalPayments().subtract(totalRefunded);
+		BigDecimal dueAmount = totalAfterDiscount.subtract(netPaid);
 		if (dueAmount.compareTo(BigDecimal.ZERO) > 0) {
 			amountDueSection.addCell(new Paragraph(nf.format(dueAmount))).setFontSize(10)
 			        .setTextAlignment(TextAlignment.RIGHT).setFont(helvetica).setBold();
@@ -270,14 +375,19 @@ public class ReceiptGenerator {
 			doc.add(divider);
 			doc.add(paymentSection);
 			doc.add(divider);
+			if (refundSection != null) {
+				doc.add(refundSection);
+				doc.add(divider);
+			}
 			doc.add(amountDueSection);
 			doc.add(divider);
-			doc.add(new Paragraph("You were served by " + bill.getCashier().getName()).setFont(footerSectionFont)
-			        .setFontSize(8).setTextAlignment(TextAlignment.CENTER));
+			String cashierName = bill.getCashier() != null ? bill.getCashier().getName() : "(unknown)";
+			doc.add(new Paragraph("You were served by " + cashierName).setFont(footerSectionFont).setFontSize(8)
+			        .setTextAlignment(TextAlignment.CENTER));
 		}
 		catch (Exception e) {
-			LOG.error("Exception caught while writing PDF to stream", e);
-			return bos.toByteArray();
+			LOG.error("Exception caught while writing PDF to stream for bill {}", bill.getUuid(), e);
+			throw new RuntimeException("Failed to generate receipt for bill " + bill.getUuid(), e);
 		}
 		
 		return bos.toByteArray();
@@ -307,5 +417,28 @@ public class ReceiptGenerator {
 	private static void addFormattedCell(Table table, String cellValue, PdfFont font, TextAlignment alignment) {
 		table.addCell(new Paragraph(cellValue).setTextAlignment(alignment)).setFontSize(12).setTextAlignment(alignment)
 		        .setBorder(Border.NO_BORDER).setFont(font);
+	}
+	
+	private static void addLineItemDiscountRow(BillDiscount discount, Table table, PdfFont font, NumberFormat nf) {
+		addFormattedCell(table, "", font, TextAlignment.LEFT);
+		addFormattedCell(table, "  > " + discountLabel(discount, "Discount"), font, TextAlignment.LEFT);
+		addFormattedCell(table, "", font, TextAlignment.RIGHT);
+		addFormattedCell(table, "-" + nf.format(discount.getDiscountAmount()), font, TextAlignment.RIGHT);
+	}
+	
+	private static String discountLabel(BillDiscount discount, String prefix) {
+		if (discount.getDiscountType() == DiscountType.PERCENTAGE && discount.getDiscountValue() != null) {
+			return prefix + " (" + discount.getDiscountValue().stripTrailingZeros().toPlainString() + "%)";
+		}
+		return prefix;
+	}
+	
+	private static String refundRowLabel(BillRefund refund) {
+		String reason = refund.getReason();
+		if (StringUtils.isBlank(reason)) {
+			return "Refund";
+		}
+		String trimmed = reason.length() > 30 ? reason.substring(0, 27) + "..." : reason;
+		return "Refund: " + trimmed;
 	}
 }

@@ -257,7 +257,8 @@ public class Bill extends BaseOpenmrsData {
 		        || current == BillStatus.PARTIALLY_REFUNDED) {
 			return;
 		}
-		if (!this.getPayments().isEmpty() && getTotalPayments().compareTo(BigDecimal.ZERO) > 0) {
+		if (this.getPayments() != null && !this.getPayments().isEmpty()
+		        && getTotalPayments().compareTo(BigDecimal.ZERO) > 0) {
 			// Approved discount exceeds the current bill total — likely a line item was voided
 			// after approval. Stay POSTED so a human can void/reapply rather than letting any
 			// non-zero payment silently flip the bill to PAID.
