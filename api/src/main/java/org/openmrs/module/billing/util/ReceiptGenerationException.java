@@ -13,13 +13,13 @@ package org.openmrs.module.billing.util;
  * Thrown when {@link ReceiptGenerator} cannot produce a bill receipt PDF.
  */
 public class ReceiptGenerationException extends RuntimeException {
-
+	
 	private static final long serialVersionUID = 1L;
-
+	
 	public ReceiptGenerationException(String message, Throwable cause) {
 		super(message, cause);
 	}
-
+	
 	public ReceiptGenerationException(Throwable cause) {
 		super(cause);
 	}
