@@ -305,6 +305,8 @@ public class BillResourceTest {
 	
 	@Test
 	public void getActiveRefunds_shouldReturnEmptyWhenBillHasNoRefunds() {
+		contextMock.when(() -> Context.hasPrivilege(PrivilegeConstants.VIEW_REFUNDS)).thenReturn(true);
+		
 		Bill bill = new Bill();
 		
 		List<BillRefund> result = resource.getActiveRefunds(bill);
