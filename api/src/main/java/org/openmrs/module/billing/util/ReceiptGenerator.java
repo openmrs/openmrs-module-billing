@@ -115,7 +115,7 @@ public class ReceiptGenerator {
 			
 		}
 		catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new ReceiptGenerationException(e);
 		}
 		
 		PdfFont headerSectionFont = helveticaBold;
@@ -205,10 +205,8 @@ public class ReceiptGenerator {
 		List<BillDiscount> approvedDiscounts = new ArrayList<>();
 		if (bill.getDiscounts() != null) {
 			for (BillDiscount d : bill.getDiscounts()) {
-				if (d == null || d.getVoided() || d.getStatus() != DiscountStatus.APPROVED) {
-					continue;
-				}
-				if (d.getDiscountAmount().signum() == 0) {
+				if (d == null || d.getVoided() || d.getStatus() != DiscountStatus.APPROVED
+				        || d.getDiscountAmount().signum() == 0) {
 					continue;
 				}
 				approvedDiscounts.add(d);
@@ -252,10 +250,10 @@ public class ReceiptGenerator {
 				}
 				if (r.getRefundAmount() == null) {
 					LOG.warn("Skipping refund {} on bill {}: null refundAmount", r.getUuid(), bill.getUuid());
-					continue;
+				} else {
+					completedRefunds.add(r);
+					totalRefunded = totalRefunded.add(r.getRefundAmount());
 				}
-				completedRefunds.add(r);
-				totalRefunded = totalRefunded.add(r.getRefundAmount());
 			}
 		}
 		
@@ -387,7 +385,7 @@ public class ReceiptGenerator {
 		}
 		catch (Exception e) {
 			LOG.error("Exception caught while writing PDF to stream for bill {}", bill.getUuid(), e);
-			throw new RuntimeException("Failed to generate receipt for bill " + bill.getUuid(), e);
+			throw new ReceiptGenerationException("Failed to generate receipt for bill " + bill.getUuid(), e);
 		}
 		
 		return bos.toByteArray();
