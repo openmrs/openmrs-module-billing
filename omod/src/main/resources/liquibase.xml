@@ -1317,10 +1317,38 @@
 	</changeSet>
 
 	<changeSet id="openmrs.billing-009-20260512-rename-payment-status" author="Wikum Weerakutti">
+		<validCheckSum>9:a29210c745d24868d85ec4689214290b</validCheckSum>
 		<preConditions onFail="MARK_RAN">
-			<columnExists tableName="cashier_bill_line_item" columnName="payment_status"/>
+			<and>
+				<columnExists tableName="cashier_bill_line_item" columnName="payment_status"/>
+				<not>
+					<columnExists tableName="cashier_bill_line_item" columnName="status"/>
+				</not>
+			</and>
 		</preConditions>
+		<comment>Rename only when status does not already exist; the orphan-drop case is handled by 009b.</comment>
 		<renameColumn tableName="cashier_bill_line_item" oldColumnName="payment_status" newColumnName="status" columnDataType="varchar(20)" />
+	</changeSet>
+
+	<changeSet id="openmrs.billing-009b-20260512-drop-orphaned-payment-status" author="Wikum Weerakutti">
+		<preConditions onFail="MARK_RAN">
+			<and>
+				<columnExists tableName="cashier_bill_line_item" columnName="payment_status"/>
+				<columnExists tableName="cashier_bill_line_item" columnName="status"/>
+			</and>
+		</preConditions>
+		<comment>
+			DBs where payment_status and status both exist (partial earlier migration). Backfill any
+			null/empty status rows from payment_status, then drop the orphan so Hibernate inserts succeed.
+		</comment>
+		<sql>
+			UPDATE cashier_bill_line_item
+			SET status = payment_status
+			WHERE (status IS NULL OR status = '')
+			  AND payment_status IS NOT NULL
+			  AND payment_status &lt;&gt; '';
+		</sql>
+		<dropColumn tableName="cashier_bill_line_item" columnName="payment_status"/>
 	</changeSet>
 
 	<changeSet id="openmrs.billing-010-20260512-enforce-line-item-status-not-null" author="Wikum Weerakutti">
