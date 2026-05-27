@@ -22,6 +22,7 @@ import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.db.BillDAO;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillDiscount;
+import org.openmrs.module.billing.api.model.BillRefund;
 import org.openmrs.module.billing.api.search.BillSearch;
 
 import javax.annotation.Nonnull;
@@ -44,6 +45,10 @@ import static org.openmrs.module.billing.api.db.hibernate.PagingUtil.applyPaging
  */
 @AllArgsConstructor
 public class HibernateBillDAO implements BillDAO {
+	
+	private static final String FIELD_STATUS = "status";
+	
+	private static final String FIELD_VOIDED = "voided";
 	
 	@Setter(AccessLevel.PROTECTED)
 	private SessionFactory sessionFactory;
@@ -152,14 +157,8 @@ public class HibernateBillDAO implements BillDAO {
 			predicates.add(cb.equal(root.get("patient").get("uuid"), billSearch.getPatientUuid()));
 		}
 		
-		if (billSearch.getPatientName() != null && !billSearch.getPatientName().trim().isEmpty()) {
-			List<Patient> matchingPatients = Context.getRegisteredComponent("patientDAO", HibernatePatientDAO.class)
-			        .getPatients(billSearch.getPatientName(), 0, null);
-			if (matchingPatients != null && !matchingPatients.isEmpty()) {
-				predicates.add(root.get("patient").in(matchingPatients));
-			} else {
-				predicates.add(cb.disjunction());
-			}
+		if (StringUtils.isNotBlank(billSearch.getPatientName())) {
+			predicates.add(buildPatientNamePredicate(cb, root, billSearch.getPatientName()));
 		}
 		
 		if (StringUtils.isNotEmpty(billSearch.getCashierUuid())) {
@@ -175,23 +174,41 @@ public class HibernateBillDAO implements BillDAO {
 		}
 		
 		if (billSearch.getStatuses() != null && !billSearch.getStatuses().isEmpty()) {
-			predicates.add(root.get("status").in(billSearch.getStatuses()));
+			predicates.add(root.get(FIELD_STATUS).in(billSearch.getStatuses()));
 		}
 		
 		if (!Boolean.TRUE.equals(billSearch.getIncludeVoided())) {
-			predicates.add(cb.equal(root.get("voided"), false));
+			predicates.add(cb.equal(root.get(FIELD_VOIDED), false));
 		}
 		
 		if (billSearch.getDiscountStatuses() != null && !billSearch.getDiscountStatuses().isEmpty()) {
 			Subquery<Integer> sub = cq.subquery(Integer.class);
 			Root<BillDiscount> discountRoot = sub.from(BillDiscount.class);
 			sub.select(cb.literal(1)).where(cb.equal(discountRoot.get("bill"), root),
-			    cb.equal(discountRoot.get("voided"), false),
-			    discountRoot.get("status").in(billSearch.getDiscountStatuses()));
+			    cb.equal(discountRoot.get(FIELD_VOIDED), false),
+			    discountRoot.get(FIELD_STATUS).in(billSearch.getDiscountStatuses()));
+			predicates.add(cb.exists(sub));
+		}
+		
+		if (billSearch.getRefundStatuses() != null && !billSearch.getRefundStatuses().isEmpty()) {
+			Subquery<Integer> sub = cq.subquery(Integer.class);
+			Root<BillRefund> refundRoot = sub.from(BillRefund.class);
+			sub.select(cb.literal(1)).where(cb.equal(refundRoot.get("bill"), root),
+			    cb.equal(refundRoot.get(FIELD_VOIDED), false),
+			    refundRoot.get(FIELD_STATUS).in(billSearch.getRefundStatuses()));
 			predicates.add(cb.exists(sub));
 		}
 		
 		return predicates;
+	}
+	
+	private Predicate buildPatientNamePredicate(CriteriaBuilder cb, Root<Bill> root, String patientName) {
+		List<Patient> matchingPatients = Context.getRegisteredComponent("patientDAO", HibernatePatientDAO.class)
+		        .getPatients(patientName, 0, null);
+		if (matchingPatients != null && !matchingPatients.isEmpty()) {
+			return root.get("patient").in(matchingPatients);
+		}
+		return cb.disjunction();
 	}
 	
 }

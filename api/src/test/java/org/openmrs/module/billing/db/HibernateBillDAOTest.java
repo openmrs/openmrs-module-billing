@@ -32,6 +32,7 @@ import org.openmrs.module.billing.api.db.BillDAO;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.model.DiscountStatus;
+import org.openmrs.module.billing.api.model.RefundStatus;
 import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 
@@ -403,6 +404,39 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 		assertEquals(1, countOf1004, "Bill 1004 matches both PENDING and APPROVED discounts but must appear exactly once");
 		assertFalse(resultUuids.contains("b3000000-0000-0000-0000-000000000003"),
 		    "Bill 1003 has only a REJECTED discount — must not appear for PENDING|APPROVED filter");
+	}
+	
+	@Test
+	public void getBills_shouldFilterByRefundStatus() {
+		executeDataSet(TestConstants.BASE_DATASET_DIR + "BillRefundStatusFilterTest.xml");
+		BillSearch search = BillSearch.builder().refundStatuses(Arrays.asList(RefundStatus.REQUESTED)).build();
+		List<Bill> results = billDAO.getBills(search, null);
+		List<String> resultUuids = uuids(results);
+		
+		assertTrue(resultUuids.contains("c1000000-0000-0000-0000-000000000001"), "Expected bill 2001 (REQUESTED refund)");
+		assertTrue(resultUuids.contains("c4000000-0000-0000-0000-000000000004"),
+		    "Expected bill 2004 (REQUESTED + COMPLETED refunds)");
+		assertFalse(resultUuids.contains("c5000000-0000-0000-0000-000000000005"),
+		    "Bill 2005 has only a voided REQUESTED refund — must be excluded");
+		assertFalse(resultUuids.contains("c6000000-0000-0000-0000-000000000006"),
+		    "Bill 2006 has no refunds at all — must be excluded by the EXISTS predicate");
+	}
+	
+	@Test
+	public void getBills_shouldNotDuplicateBillsWithMultipleMatchingRefunds() {
+		executeDataSet(TestConstants.BASE_DATASET_DIR + "BillRefundStatusFilterTest.xml");
+		BillSearch search = BillSearch.builder()
+		        .refundStatuses(Arrays.asList(RefundStatus.REQUESTED, RefundStatus.COMPLETED)).build();
+		List<Bill> results = billDAO.getBills(search, null);
+		List<String> resultUuids = uuids(results);
+		
+		long countOf2004 = results.stream().filter(b -> "c4000000-0000-0000-0000-000000000004".equals(b.getUuid())).count();
+		
+		assertEquals(1, countOf2004, "Bill 2004 matches both REQUESTED and COMPLETED refunds but must appear exactly once");
+		assertFalse(resultUuids.contains("c3000000-0000-0000-0000-000000000003"),
+		    "Bill 2003 has only a REJECTED refund — must not appear for REQUESTED|COMPLETED filter");
+		assertFalse(resultUuids.contains("c5000000-0000-0000-0000-000000000005"),
+		    "Bill 2005 has only a voided REQUESTED refund — must be excluded even in multi-status query");
 	}
 	
 	private List<String> uuids(List<Bill> bills) {
