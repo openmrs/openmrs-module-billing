@@ -18,6 +18,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.model.DiscountStatus;
+import org.openmrs.module.billing.api.model.RefundStatus;
 
 /**
  * A search criteria holder for {@link org.openmrs.module.billing.api.model.Bill} queries. This
@@ -42,6 +43,8 @@ public class BillSearch {
 	private List<BillStatus> statuses;
 	
 	private List<DiscountStatus> discountStatuses;
+	
+	private List<RefundStatus> refundStatuses;
 	
 	private String patientName;
 	

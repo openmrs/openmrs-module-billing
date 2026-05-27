@@ -70,6 +70,24 @@ public class Bill extends BaseOpenmrsData {
 	private Set<BillRefund> refunds;
 	
 	/**
+	 * Returns every non-voided refund on this bill. Voided rows are excluded — for the full audit
+	 * history, query {@code BillRefundService.getRefundsByBillId} (or the equivalent REST search at
+	 * {@code /billRefund?bill=<uuid>}).
+	 */
+	public List<BillRefund> getActiveRefunds() {
+		if (refunds == null) {
+			return Collections.emptyList();
+		}
+		List<BillRefund> active = new ArrayList<>();
+		for (BillRefund r : refunds) {
+			if (r != null && !r.getVoided()) {
+				active.add(r);
+			}
+		}
+		return active;
+	}
+	
+	/**
 	 * Returns every non-voided discount on this bill (bill-level and line-item scoped). Voided rows are
 	 * excluded — for the full audit history, query {@code BillDiscountService.getDiscountsByBillId} (or
 	 * the equivalent REST search at {@code /billDiscount?bill=<uuid>}).

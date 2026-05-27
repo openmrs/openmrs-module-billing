@@ -1,0 +1,127 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+
+-->
+<dataset>
+	<!-- Five bills (2001–2005) used exclusively to test getBills refund-status filtering.
+	     Uses bill_id range 2001–2005 to avoid colliding with BillTest.xml (0–2),
+	     BillDiscountTest.xml (100–200), and BillDiscountStatusFilterTest.xml (1001–1005). -->
+
+	<!-- bill 2001 — one REQUESTED refund (non-voided) -->
+	<cashier_bill bill_id="2001" receipt_number="refund-filter-2001" provider_id="0" patient_id="0"
+	              cash_point_id="0" status="PENDING"
+	              creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	              uuid="c1000000-0000-0000-0000-000000000001" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="2010" bill_id="2001" item_id="0" price="100.00" price_name="default"
+	                        quantity="1" line_item_order="0" status="PENDING"
+	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                        uuid="f1000000-0000-0000-0000-000000002010"/>
+
+	<!-- bill 2002 — one APPROVED refund (non-voided) -->
+	<cashier_bill bill_id="2002" receipt_number="refund-filter-2002" provider_id="0" patient_id="0"
+	              cash_point_id="0" status="PENDING"
+	              creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	              uuid="c2000000-0000-0000-0000-000000000002" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="2020" bill_id="2002" item_id="0" price="100.00" price_name="default"
+	                        quantity="1" line_item_order="0" status="PENDING"
+	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                        uuid="f1000000-0000-0000-0000-000000002020"/>
+
+	<!-- bill 2003 — one REJECTED refund (non-voided) -->
+	<cashier_bill bill_id="2003" receipt_number="refund-filter-2003" provider_id="0" patient_id="0"
+	              cash_point_id="0" status="PENDING"
+	              creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	              uuid="c3000000-0000-0000-0000-000000000003" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="2030" bill_id="2003" item_id="0" price="100.00" price_name="default"
+	                        quantity="1" line_item_order="0" status="PENDING"
+	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                        uuid="f1000000-0000-0000-0000-000000002030"/>
+
+	<!-- bill 2004 — one REQUESTED + one COMPLETED refund (both non-voided) -->
+	<cashier_bill bill_id="2004" receipt_number="refund-filter-2004" provider_id="0" patient_id="0"
+	              cash_point_id="0" status="PENDING"
+	              creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	              uuid="c4000000-0000-0000-0000-000000000004" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="2040" bill_id="2004" item_id="0" price="100.00" price_name="default"
+	                        quantity="1" line_item_order="0" status="PENDING"
+	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                        uuid="f1000000-0000-0000-0000-000000002040"/>
+	<cashier_bill_line_item bill_line_item_id="2041" bill_id="2004" item_id="0" price="50.00" price_name="default"
+	                        quantity="1" line_item_order="1" status="PENDING"
+	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                        uuid="f1000000-0000-0000-0000-000000002041"/>
+
+	<!-- bill 2005 — one REQUESTED refund that is voided -->
+	<cashier_bill bill_id="2005" receipt_number="refund-filter-2005" provider_id="0" patient_id="0"
+	              cash_point_id="0" status="PENDING"
+	              creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	              uuid="c5000000-0000-0000-0000-000000000005" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="2050" bill_id="2005" item_id="0" price="100.00" price_name="default"
+	                        quantity="1" line_item_order="0" status="PENDING"
+	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                        uuid="f1000000-0000-0000-0000-000000002050"/>
+
+	<!-- bill 2006 — no refund rows at all; must be excluded by any refundStatus filter -->
+	<cashier_bill bill_id="2006" receipt_number="refund-filter-2006" provider_id="0" patient_id="0"
+	              cash_point_id="0" status="PENDING"
+	              creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	              uuid="c6000000-0000-0000-0000-000000000006" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="2060" bill_id="2006" item_id="0" price="100.00" price_name="default"
+	                        quantity="1" line_item_order="0" status="PENDING"
+	                        creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                        uuid="f1000000-0000-0000-0000-000000002060"/>
+
+	<!-- bill_refund rows. A row with bill_line_item_id is listed FIRST so DbUnit column-sensing
+	     picks up the optional column for all subsequent rows. -->
+
+	<!-- bill 2003: REJECTED line-item refund (listed first to prime column sensing) -->
+	<bill_refund bill_refund_id="2003" bill_id="2003" bill_line_item_id="2030"
+	             refund_amount="20.00" reason="Rejected refund request" refund_status="REJECTED"
+	             initiator_id="1" approver_id="5506"
+	             creator="1" date_created="2012-01-02 00:00:00.0" voided="false"
+	             uuid="a1000000-0000-0000-0000-000000002003"/>
+
+	<!-- bill 2001: REQUESTED bill-level refund -->
+	<bill_refund bill_refund_id="2001" bill_id="2001"
+	             refund_amount="10.00" reason="Awaiting approval" refund_status="REQUESTED"
+	             initiator_id="1"
+	             creator="1" date_created="2012-01-02 00:00:00.0" voided="false"
+	             uuid="a1000000-0000-0000-0000-000000002001"/>
+
+	<!-- bill 2002: APPROVED bill-level refund -->
+	<bill_refund bill_refund_id="2002" bill_id="2002"
+	             refund_amount="15.00" reason="Approved refund" refund_status="APPROVED"
+	             initiator_id="1" approver_id="5506"
+	             creator="1" date_created="2012-01-02 00:00:00.0" voided="false"
+	             uuid="a1000000-0000-0000-0000-000000002002"/>
+
+	<!-- bill 2004: REQUESTED line-item refund -->
+	<bill_refund bill_refund_id="2004" bill_id="2004" bill_line_item_id="2040"
+	             refund_amount="5.00" reason="Pending line item refund" refund_status="REQUESTED"
+	             initiator_id="1"
+	             creator="1" date_created="2012-01-02 00:00:00.0" voided="false"
+	             uuid="a1000000-0000-0000-0000-000000002004"/>
+
+	<!-- bill 2004: COMPLETED line-item refund -->
+	<bill_refund bill_refund_id="2005" bill_id="2004" bill_line_item_id="2041"
+	             refund_amount="5.00" reason="Completed line item refund" refund_status="COMPLETED"
+	             initiator_id="1" approver_id="5506" completer_id="1"
+	             creator="1" date_created="2012-01-02 00:00:00.0" voided="false"
+	             uuid="a1000000-0000-0000-0000-000000002005"/>
+
+	<!-- bill 2005: REQUESTED refund — voided -->
+	<bill_refund bill_refund_id="2006" bill_id="2005" bill_line_item_id="2050"
+	             refund_amount="10.00" reason="Will be voided" refund_status="REQUESTED"
+	             initiator_id="1"
+	             creator="1" date_created="2012-01-02 00:00:00.0"
+	             voided="true" voided_by="1" date_voided="2012-01-03 00:00:00.0" void_reason="Test void"
+	             uuid="a1000000-0000-0000-0000-000000002006"/>
+</dataset>
