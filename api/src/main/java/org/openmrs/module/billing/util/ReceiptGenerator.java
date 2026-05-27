@@ -436,7 +436,6 @@ public class ReceiptGenerator {
 		if (StringUtils.isBlank(reason)) {
 			return "Refund";
 		}
-		String trimmed = reason.length() > 30 ? reason.substring(0, 27) + "..." : reason;
-		return "Refund: " + trimmed;
+		return "Refund: " + StringUtils.abbreviate(reason, 30);
 	}
 }
