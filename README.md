@@ -6,11 +6,23 @@ The OpenMRS Billing Module is a comprehensive billing and payment management sys
 
 ### Bill Management
 
-Create and manage patient bills with multiple line items, track bills through various states (draft, posted, adjusted), and handle bill adjustments with full audit trail and refunds with proper authorization.
+Create and manage patient bills with multiple line items, track bills and individual line items through their lifecycle (pending, paid, exempted, refunded, etc.), and associate bills with patient visits. Supports bill adjustments with full audit trail.
+
+### Bill Discounts
+
+Apply line-item or whole-bill discounts with a full audit trail. Discounts can be filtered on, and are linked back to the bill so they are purged along with it. Enabled by default; toggle via `billing.discountEnabled`.
+
+### Bill Refunds
+
+Request and approve refunds against paid bills with proper privilege controls. Refunds are surfaced in the bill representation and can be filtered on via the `refundStatus` parameter on `GET /bill`. Enabled by default; toggle via `billing.refundEnabled`.
+
+### Patient Payment Status
+
+Resolve a patient's overall payment status (paid / pending / exempted / no active bills) via a pluggable resolver, configurable through the `billing.patientPaymentStatusResolver` global property. Designed to surface payment state without blocking access to clinical forms.
 
 ### Payment Processing
 
-Process payments using multiple payment modes (cash, insurance, mobile money, credit/debit cards, custom modes) with support for partial payments, payment attributes, and automatic change calculation.
+Process payments using multiple payment modes (cash, insurance, mobile money, credit/debit cards, custom modes) with support for partial payments, payment attributes, automatic change calculation, and per-payment cashier attribution.
 
 ### Receipt Generation
 
@@ -38,21 +50,26 @@ Generate shift summary reports, daily shift summaries, department collections, d
 
 ### Order Integration
 
-Automatically generate bills from clinical orders with order-to-bill line item mapping.
+Automatically generate billable items and bill line items from clinical orders, including medication orders, with order-to-bill line item mapping.
 
 ### REST API & Integration
 
-Provides REST API endpoints at `/rest/v1/billing/*` for bills, payments, payment modes, billable services, cash points, timesheets, and item prices. Includes patient dashboard integration for OpenMRS 2.x with configurable bill history widget. Supports English, French, and Spanish translations.
+Provides REST API endpoints at `/rest/v1/billing/*` for bills, payments, payment modes, billable services, cash points, timesheets, item prices, discounts, refunds, and patient payment status. Includes patient dashboard integration for OpenMRS 2.x with configurable bill history widget. Supports English, French, and Spanish translations.
+
+### FHIR Invoice Support
+
+Exposes bills as FHIR `Invoice` resources via the `fhir` submodule, built against the `fhir2` module. Supports OpenMRS Platform 2.5, 2.6, and 2.7 FHIR variants.
 
 ## Requirements
 
-- **OpenMRS Version**: 2.4.0 or higher
+- **OpenMRS Platform**: 2.7.8 (built and tested against; module `require_version` follows the build property)
 - **Java Version**: 1.8 or higher
 - **Required Modules**:
   - Web Services REST Module 2.9+
   - Stock Management Module 1.4.0+
 - **Optional Modules**:
-  - IDGen Module 4.7.0+ (for custom receipt number generation)
+  - FHIR2 Module 2.4.0+ (required to use the FHIR Invoice submodule)
+  - IDGen Module 2.8+ (for custom receipt number generation)
   - UI Framework Module
   - App Framework Module
   - Provider Management Module
@@ -93,7 +110,10 @@ The module provides several global properties for configuration:
 - `billing.allowBillAdjustments`: Enable/disable bill adjustments (default: true)
 - `billing.adjustmentReasonField`: Require adjustment reason field (true/false)
 - `billing.autofillPaymentAmount`: Auto-fill payment amount with remaining balance (default: false)
-- `billing.patientDashboard2BillCount`: Number of bills to show on patient dashboard (default: 5)
+- `billing.discountEnabled`: Enable bill discount management (default: true)
+- `billing.refundEnabled`: Enable refund requests and approval (default: true)
+- `billing.patientPaymentStatusResolver`: Fully-qualified class name of the patient payment status resolver
+- `billing.patientDashboard2BillCount`: Number of bills to show on patient dashboard (default: 4)
 
 **Financial Reports**:
 
@@ -105,7 +125,7 @@ The module provides several global properties for configuration:
 
 ### Privileges
 
-The module defines granular privileges for bill management (view, manage, adjust, purge, refund, reprint), metadata management (view, manage, purge), timesheet management (view, manage, purge), and app access for OpenMRS 2.x (cashier app, tasks, reports). See `omod/src/main/resources/config.xml` for the complete list.
+The module defines granular privileges for bill management (view, manage, adjust, purge, refund, reprint), discount management (view, manage, approve), refund management (view, request, approve, complete), metadata management (view, manage, purge), timesheet management (view, manage, purge), and app access for OpenMRS 2.x (cashier app, tasks, reports). See `omod/src/main/resources/config.xml` for the complete list.
 
 ## Documentation
 
