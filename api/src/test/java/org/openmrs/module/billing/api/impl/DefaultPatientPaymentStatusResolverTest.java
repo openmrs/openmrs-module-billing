@@ -58,6 +58,8 @@ public class DefaultPatientPaymentStatusResolverTest {
 		        .thenReturn("Outstanding bill(s) present");
 		lenient().when(messageSourceService.getMessage(DefaultPatientPaymentStatusResolver.MSG_NO_OUTSTANDING))
 		        .thenReturn("No outstanding bills");
+		lenient().when(messageSourceService.getMessage(DefaultPatientPaymentStatusResolver.MSG_NO_BILLS))
+		        .thenReturn("No bills on record");
 		contextMock = mockStatic(Context.class);
 		contextMock.when(Context::getMessageSourceService).thenReturn(messageSourceService);
 		
@@ -74,13 +76,13 @@ public class DefaultPatientPaymentStatusResolverTest {
 	}
 	
 	@Test
-	public void resolve_shouldReturnPaidWhenPatientHasNoBills() {
+	public void resolve_shouldReturnUnknownWhenPatientHasNoBills() {
 		when(billService.getBillsByPatientUuid(PATIENT_UUID, null)).thenReturn(Collections.emptyList());
 		
 		PatientPaymentStatusResult result = resolver.resolve(patient);
 		
-		assertEquals(PatientPaymentStatus.PAID, result.getStatus());
-		assertEquals("No outstanding bills", result.getReason());
+		assertEquals(PatientPaymentStatus.UNKNOWN, result.getStatus());
+		assertEquals("No bills on record", result.getReason());
 	}
 	
 	@Test
@@ -120,11 +122,22 @@ public class DefaultPatientPaymentStatusResolverTest {
 	}
 	
 	@Test
-	public void resolve_shouldIgnoreVoidedPendingBills() {
+	public void resolve_shouldReturnUnknownWhenAllBillsAreVoided() {
 		when(billService.getBillsByPatientUuid(PATIENT_UUID, null))
 		        .thenReturn(Collections.singletonList(bill(BillStatus.PENDING, true)));
 		
-		assertEquals(PatientPaymentStatus.PAID, resolver.resolve(patient).getStatus());
+		PatientPaymentStatusResult result = resolver.resolve(patient);
+		
+		assertEquals(PatientPaymentStatus.UNKNOWN, result.getStatus());
+		assertEquals("No bills on record", result.getReason());
+	}
+	
+	@Test
+	public void resolve_shouldReturnUnknownWhenMultipleBillsAreAllVoided() {
+		when(billService.getBillsByPatientUuid(PATIENT_UUID, null)).thenReturn(
+		    Arrays.asList(bill(BillStatus.PENDING, true), bill(BillStatus.PAID, true), bill(BillStatus.POSTED, true)));
+		
+		assertEquals(PatientPaymentStatus.UNKNOWN, resolver.resolve(patient).getStatus());
 	}
 	
 	@Test

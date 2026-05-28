@@ -20,6 +20,7 @@ import org.openmrs.module.billing.api.model.PatientPaymentStatus;
 import org.openmrs.module.billing.api.model.PatientPaymentStatusResult;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class DefaultPatientPaymentStatusResolver implements PatientPaymentStatusResolver {
@@ -28,12 +29,22 @@ public class DefaultPatientPaymentStatusResolver implements PatientPaymentStatus
 	
 	static final String MSG_NO_OUTSTANDING = "billing.patientPaymentStatus.noOutstanding";
 	
+	static final String MSG_NO_BILLS = "billing.patientPaymentStatus.noBills";
+	
 	private final BillService billService;
 	
 	@Override
 	public PatientPaymentStatusResult resolve(Patient patient) {
 		List<Bill> bills = billService.getBillsByPatientUuid(patient.getUuid(), null);
-		boolean hasOutstanding = bills.stream().filter(b -> !Boolean.TRUE.equals(b.getVoided()))
+		List<Bill> activeBills = bills.stream().filter(b -> !Boolean.TRUE.equals(b.getVoided()))
+		        .collect(Collectors.toList());
+		
+		if (activeBills.isEmpty()) {
+			String reason = Context.getMessageSourceService().getMessage(MSG_NO_BILLS);
+			return PatientPaymentStatusResult.builder().status(PatientPaymentStatus.UNKNOWN).reason(reason).build();
+		}
+		
+		boolean hasOutstanding = activeBills.stream()
 		        .anyMatch(b -> b.getStatus() == BillStatus.PENDING || b.getStatus() == BillStatus.POSTED);
 		
 		String reason = Context.getMessageSourceService().getMessage(hasOutstanding ? MSG_OUTSTANDING : MSG_NO_OUTSTANDING);
