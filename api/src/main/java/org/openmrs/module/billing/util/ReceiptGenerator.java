@@ -436,6 +436,6 @@ public class ReceiptGenerator {
 		if (StringUtils.isBlank(reason)) {
 			return "Refund";
 		}
-		return "Refund: " + StringUtils.abbreviate(reason, 30);
+		return "Refund: " + reason;
 	}
 }
