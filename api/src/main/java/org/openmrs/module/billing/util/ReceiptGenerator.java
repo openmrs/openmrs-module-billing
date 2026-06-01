@@ -242,7 +242,6 @@ public class ReceiptGenerator {
 		BigDecimal totalAfterDiscount = bill.getAmountAfterDiscount();
 		
 		List<BillRefund> completedRefunds = new ArrayList<>();
-		BigDecimal totalRefunded = BigDecimal.ZERO;
 		if (bill.getRefunds() != null) {
 			for (BillRefund r : bill.getRefunds()) {
 				if (r == null || r.getVoided() || r.getStatus() != RefundStatus.COMPLETED) {
@@ -252,7 +251,6 @@ public class ReceiptGenerator {
 					LOG.warn("Skipping refund {} on bill {}: null refundAmount", r.getUuid(), bill.getUuid());
 				} else {
 					completedRefunds.add(r);
-					totalRefunded = totalRefunded.add(r.getRefundAmount());
 				}
 			}
 		}
@@ -344,8 +342,7 @@ public class ReceiptGenerator {
 		
 		amountDueSection.addCell(new Paragraph("Due Amount")).setFontSize(10).setTextAlignment(TextAlignment.RIGHT)
 		        .setFont(helvetica).setBold();
-		BigDecimal netPaid = bill.getTotalPayments().subtract(totalRefunded);
-		BigDecimal dueAmount = totalAfterDiscount.subtract(netPaid);
+		BigDecimal dueAmount = totalAfterDiscount.subtract(bill.getTotalPayments());
 		if (dueAmount.compareTo(BigDecimal.ZERO) > 0) {
 			amountDueSection.addCell(new Paragraph(nf.format(dueAmount))).setFontSize(10)
 			        .setTextAlignment(TextAlignment.RIGHT).setFont(helvetica).setBold();
