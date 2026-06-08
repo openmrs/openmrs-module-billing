@@ -17,13 +17,15 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.billing.api.ISequentialReceiptNumberGeneratorService;
+import org.openmrs.module.billing.api.SequentialReceiptNumberGeneratorService;
 import org.openmrs.module.billing.api.SequentialReceiptNumberGenerator;
 import org.openmrs.module.billing.api.model.GroupSequence;
 import org.openmrs.module.billing.api.model.SequentialReceiptNumberGeneratorModel;
-import org.openmrs.module.billing.base.entity.IObjectDataServiceTest;
+import org.openmrs.module.billing.base.BaseModuleContextTest;
 
-public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataServiceTest<ISequentialReceiptNumberGeneratorService, SequentialReceiptNumberGeneratorModel> {
+public class SequentialReceiptNumberGeneratorServiceTest extends BaseModuleContextTest {
+	
+	protected SequentialReceiptNumberGeneratorService service;
 	
 	public static final String SEQUENTIAL_RECEIPT_NUMBER_GENERATOR_DATASET = TestConstants.BASE_DATASET_DIR
 	        + "SequentialReceiptNumberGenerator.xml";
@@ -40,29 +42,9 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	
 	@Before
 	public void before() throws Exception {
-		super.before();
+		service = Context.getService(SequentialReceiptNumberGeneratorService.class);
 		
 		executeDataSet(SEQUENTIAL_RECEIPT_NUMBER_GENERATOR_DATASET);
-	}
-	
-	@Override
-	public SequentialReceiptNumberGeneratorModel createEntity(boolean valid) {
-		SequentialReceiptNumberGeneratorModel model = new SequentialReceiptNumberGeneratorModel();
-		model.setGroupingType(SequentialReceiptNumberGenerator.GroupingType.NONE);
-		model.setSequenceType(SequentialReceiptNumberGenerator.SequenceType.COUNTER);
-		model.setSeparator("-");
-		model.setSequencePadding(4);
-		model.setIncludeCheckDigit(true);
-		
-		if (valid) {
-			model.setCashierPrefix(SequentialReceiptNumberGeneratorModel.DEFAULT_CASHIER_PREFIX);
-			model.setCashPointPrefix(SequentialReceiptNumberGeneratorModel.DEFAULT_CASH_POINT_PREFIX);
-		} else {
-			model.setCashierPrefix(null);
-			model.setCashPointPrefix(null);
-		}
-		
-		return model;
 	}
 	
 	protected GroupSequence createSequence(String group, int value) {
@@ -74,37 +56,9 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 		return result;
 	}
 	
-	@Override
-	protected int getTestEntityCount() {
-		return 1;
-	}
-	
-	@Override
-	protected void updateEntityFields(SequentialReceiptNumberGeneratorModel entity) {
-		entity.setCashierPrefix("UP");
-		entity.setCashPointPrefix("UCP");
-		entity.setGroupingType(SequentialReceiptNumberGenerator.GroupingType.CASH_POINT);
-		entity.setSequenceType(SequentialReceiptNumberGenerator.SequenceType.DATE_TIME_COUNTER);
-		entity.setSeparator("_");
-		entity.setSequencePadding(8);
-		entity.setIncludeCheckDigit(!entity.getIncludeCheckDigit());
-	}
-	
-	@Override
-	protected void assertEntity(SequentialReceiptNumberGeneratorModel expected,
-	        SequentialReceiptNumberGeneratorModel actual) {
-		Assert.assertEquals(expected.getCashierPrefix(), actual.getCashierPrefix());
-		Assert.assertEquals(expected.getCashPointPrefix(), actual.getCashPointPrefix());
-		Assert.assertEquals(expected.getGroupingType(), actual.getGroupingType());
-		Assert.assertEquals(expected.getSeparator(), actual.getSeparator());
-		Assert.assertEquals(expected.getSequencePadding(), actual.getSequencePadding());
-		Assert.assertEquals(expected.getSequenceType(), actual.getSequenceType());
-		Assert.assertEquals(expected.getIncludeCheckDigit(), actual.getIncludeCheckDigit());
-	}
-	
 	/**
 	 * @verifies Increment and return the sequence value for existing groups
-	 * @see ISequentialReceiptNumberGeneratorService#reserveNextSequence(String)
+	 * @see SequentialReceiptNumberGeneratorService#reserveNextSequence(String)
 	 */
 	@Test
 	public void reserveNextSequence_shouldIncrementAndReturnTheSequenceValueForExistingGroups() {
@@ -146,7 +100,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	
 	/**
 	 * @verifies Create a new sequence with a value of one if the group does not exist
-	 * @see ISequentialReceiptNumberGeneratorService#reserveNextSequence(String)
+	 * @see SequentialReceiptNumberGeneratorService#reserveNextSequence(String)
 	 */
 	@Test
 	public void reserveNextSequence_shouldCreateANewSequenceWithAValueOfOneIfTheGroupDoesNotExist() {
@@ -165,7 +119,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	
 	/**
 	 * @verifies Throw IllegalArgumentException if the group is null
-	 * @see ISequentialReceiptNumberGeneratorService#reserveNextSequence(String)
+	 * @see SequentialReceiptNumberGeneratorService#reserveNextSequence(String)
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void reserveNextSequence_shouldThrowIllegalArgumentExceptionIfTheGroupIsNull() {
@@ -174,7 +128,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	
 	/**
 	 * @verifies return all sequences
-	 * @see ISequentialReceiptNumberGeneratorService#getSequences()
+	 * @see SequentialReceiptNumberGeneratorService#getSequences()
 	 */
 	@Test
 	public void getSequences_shouldReturnAllSequences() {
@@ -186,7 +140,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	
 	/**
 	 * @verifies return an empty list if no sequences have been defined
-	 * @see ISequentialReceiptNumberGeneratorService#getSequences()
+	 * @see SequentialReceiptNumberGeneratorService#getSequences()
 	 */
 	@Test
 	public void getSequences_shouldReturnAnEmptyListIfNoSequencesHaveBeenDefined() {
@@ -204,7 +158,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	
 	/**
 	 * @verifies Throw a NullPointerException if sequence is null
-	 * @see ISequentialReceiptNumberGeneratorService#saveSequence(GroupSequence)
+	 * @see SequentialReceiptNumberGeneratorService#saveSequence(GroupSequence)
 	 */
 	@Test(expected = NullPointerException.class)
 	public void saveSequence_shouldThrowANullPointerExceptionIfSequenceIsNull() {
@@ -213,7 +167,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	
 	/**
 	 * @verifies return the saved sequence
-	 * @see ISequentialReceiptNumberGeneratorService#saveSequence(GroupSequence)
+	 * @see SequentialReceiptNumberGeneratorService#saveSequence(GroupSequence)
 	 */
 	@Test
 	public void saveSequence_shouldReturnTheSavedSequence() {
@@ -231,7 +185,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	
 	/**
 	 * @verifies update the sequence successfully
-	 * @see ISequentialReceiptNumberGeneratorService#saveSequence(GroupSequence)
+	 * @see SequentialReceiptNumberGeneratorService#saveSequence(GroupSequence)
 	 */
 	@Test
 	public void saveSequence_shouldUpdateTheSequenceSuccessfully() {
@@ -250,7 +204,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	
 	/**
 	 * @verifies create the sequence successfully
-	 * @see ISequentialReceiptNumberGeneratorService#saveSequence(GroupSequence)
+	 * @see SequentialReceiptNumberGeneratorService#saveSequence(GroupSequence)
 	 */
 	@Test
 	public void saveSequence_shouldCreateTheSequenceSuccessfully() {
@@ -268,7 +222,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	
 	/**
 	 * @verifies Throw a NullPointerException if the sequence is null
-	 * @see ISequentialReceiptNumberGeneratorService#purgeSequence(GroupSequence)
+	 * @see SequentialReceiptNumberGeneratorService#purgeSequence(GroupSequence)
 	 */
 	@Test(expected = NullPointerException.class)
 	public void purgeSequence_shouldThrowANullPointerExceptionIfTheSequenceIsNull() {
@@ -277,7 +231,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	
 	/**
 	 * @verifies delete the sequence from the database
-	 * @see ISequentialReceiptNumberGeneratorService#purgeSequence(GroupSequence)
+	 * @see SequentialReceiptNumberGeneratorService#purgeSequence(GroupSequence)
 	 */
 	@Test
 	public void purgeSequence_shouldDeleteTheSequenceFromTheDatabase() {
@@ -292,7 +246,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	
 	/**
 	 * @verifies not throw an exception if the sequence is not in the database
-	 * @see ISequentialReceiptNumberGeneratorService#purgeSequence(GroupSequence)
+	 * @see SequentialReceiptNumberGeneratorService#purgeSequence(GroupSequence)
 	 */
 	@Test
 	public void purgeSequence_shouldNotThrowAnExceptionIfTheSequenceIsNotInTheDatabase() {
@@ -306,7 +260,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	
 	/**
 	 * @verifies Throw an IllegalArgumentException if group is null
-	 * @see ISequentialReceiptNumberGeneratorService#getSequence(String)
+	 * @see SequentialReceiptNumberGeneratorService#getSequence(String)
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public void getSequence_shouldThrowAnIllegalArgumentExceptionIfGroupIsNull() {
@@ -315,7 +269,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	
 	/**
 	 * @verifies return the sequence if group is empty
-	 * @see ISequentialReceiptNumberGeneratorService#getSequence(String)
+	 * @see SequentialReceiptNumberGeneratorService#getSequence(String)
 	 */
 	@Test
 	public void getSequence_shouldReturnTheSequenceIfGroupIsEmpty() {
@@ -327,7 +281,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	
 	/**
 	 * @verifies return the specified sequence
-	 * @see ISequentialReceiptNumberGeneratorService#getSequence(String)
+	 * @see SequentialReceiptNumberGeneratorService#getSequence(String)
 	 */
 	@Test
 	public void getSequence_shouldReturnTheSpecifiedSequence() {
@@ -340,7 +294,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	
 	/**
 	 * @verifies return null if the sequence cannot be found
-	 * @see ISequentialReceiptNumberGeneratorService#getSequence(String)
+	 * @see SequentialReceiptNumberGeneratorService#getSequence(String)
 	 */
 	@Test
 	public void getSequence_shouldReturnNullIfTheSequenceCannotBeFound() {
@@ -351,7 +305,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	
 	/**
 	 * @verifies return the first model.
-	 * @see ISequentialReceiptNumberGeneratorService#getOnly()
+	 * @see SequentialReceiptNumberGeneratorService#getOnly()
 	 */
 	@Test
 	public void getOnly_shouldReturnTheFirstModel() {
@@ -363,7 +317,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	
 	/**
 	 * @verifies return a new model if none has been defined.
-	 * @see ISequentialReceiptNumberGeneratorService#getOnly()
+	 * @see SequentialReceiptNumberGeneratorService#getOnly()
 	 */
 	@Test
 	public void getOnly_shouldReturnANewModelIfNoneHasBeenDefined() {

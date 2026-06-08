@@ -10,7 +10,7 @@
 package org.openmrs.module.billing.web.legacyweb.controller;
 
 import org.openmrs.api.context.Context;
-import org.openmrs.module.billing.api.ISequentialReceiptNumberGeneratorService;
+import org.openmrs.module.billing.api.SequentialReceiptNumberGeneratorService;
 import org.openmrs.module.billing.web.CashierWebConstants;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,8 +29,8 @@ public class SequentialReceiptNumberGenerator2xController extends AbstractSequen
 	}
 	
 	@Override
-	public ISequentialReceiptNumberGeneratorService getService() {
-		return Context.getService(ISequentialReceiptNumberGeneratorService.class);
+	public SequentialReceiptNumberGeneratorService getService() {
+		return Context.getService(SequentialReceiptNumberGeneratorService.class);
 	}
 	
 	@Override

@@ -13,7 +13,7 @@ import java.util.List;
 
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
-import org.openmrs.module.billing.api.ISequentialReceiptNumberGeneratorService;
+import org.openmrs.module.billing.api.SequentialReceiptNumberGeneratorService;
 import org.openmrs.module.billing.api.base.entity.impl.BaseObjectDataServiceImpl;
 import org.openmrs.module.billing.api.model.GroupSequence;
 import org.openmrs.module.billing.api.model.SequentialReceiptNumberGeneratorModel;
@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Data service implementation class for {@link SequentialReceiptNumberGeneratorModel}s.
  */
 @Transactional
-public class SequentialReceiptNumberGeneratorServiceImpl extends BaseObjectDataServiceImpl<SequentialReceiptNumberGeneratorModel, BasicEntityAuthorizationPrivileges> implements ISequentialReceiptNumberGeneratorService {
+public class SequentialReceiptNumberGeneratorServiceImpl extends BaseObjectDataServiceImpl<SequentialReceiptNumberGeneratorModel, BasicEntityAuthorizationPrivileges> implements SequentialReceiptNumberGeneratorService {
 	
 	@Override
 	protected BasicEntityAuthorizationPrivileges getPrivileges() {

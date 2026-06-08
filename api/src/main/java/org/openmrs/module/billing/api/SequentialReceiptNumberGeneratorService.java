@@ -11,7 +11,8 @@ package org.openmrs.module.billing.api;
 
 import java.util.List;
 
-import org.openmrs.module.billing.api.base.entity.IObjectDataService;
+import org.openmrs.api.OpenmrsService;
+import org.openmrs.module.billing.api.base.entity.db.hibernate.BaseHibernateRepository;
 import org.openmrs.module.billing.api.model.GroupSequence;
 import org.openmrs.module.billing.api.model.SequentialReceiptNumberGeneratorModel;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +22,16 @@ import org.springframework.transaction.annotation.Transactional;
  * {@link SequentialReceiptNumberGeneratorModel}. The {@link SequentialReceiptNumberGeneratorModel}
  * model class.
  */
-public interface ISequentialReceiptNumberGeneratorService extends IObjectDataService<SequentialReceiptNumberGeneratorModel> {
+public interface SequentialReceiptNumberGeneratorService extends OpenmrsService {
+	
+	void setRepository(BaseHibernateRepository repository);
+	
+	SequentialReceiptNumberGeneratorModel save(SequentialReceiptNumberGeneratorModel object);
+	
+	void purge(SequentialReceiptNumberGeneratorModel object);
+	
+	@Transactional(readOnly = true)
+	List<SequentialReceiptNumberGeneratorModel> getAll();
 	
 	/**
 	 * Gets the first {@link SequentialReceiptNumberGeneratorModel} or creates a new model if none have
@@ -31,6 +41,7 @@ public interface ISequentialReceiptNumberGeneratorService extends IObjectDataSer
 	 * @should return the first model.
 	 * @should return a new model if none has been defined.
 	 */
+	@Transactional(readOnly = true)
 	SequentialReceiptNumberGeneratorModel getOnly();
 	
 	/**

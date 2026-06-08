@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.openmrs.module.billing.web.base.controller.HeaderController;
 import org.openmrs.module.billing.ModuleSettings;
-import org.openmrs.module.billing.api.ISequentialReceiptNumberGeneratorService;
+import org.openmrs.module.billing.api.SequentialReceiptNumberGeneratorService;
 import org.openmrs.module.billing.api.ReceiptNumberGeneratorFactory;
 import org.openmrs.module.billing.api.SequentialReceiptNumberGenerator;
 import org.openmrs.module.billing.api.base.util.UrlUtil;
@@ -29,7 +29,7 @@ import org.springframework.web.context.request.WebRequest;
  */
 public abstract class AbstractSequentialReceiptNumberGenerator {
 	
-	public abstract ISequentialReceiptNumberGeneratorService getService();
+	public abstract SequentialReceiptNumberGeneratorService getService();
 	
 	public abstract String getReceiptNumberGeneratorUrl();
 	
