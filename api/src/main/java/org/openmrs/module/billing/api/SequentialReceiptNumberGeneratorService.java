@@ -12,7 +12,6 @@ package org.openmrs.module.billing.api;
 import java.util.List;
 
 import org.openmrs.api.OpenmrsService;
-import org.openmrs.module.billing.api.base.entity.db.hibernate.BaseHibernateRepository;
 import org.openmrs.module.billing.api.model.GroupSequence;
 import org.openmrs.module.billing.api.model.SequentialReceiptNumberGeneratorModel;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,15 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 public interface SequentialReceiptNumberGeneratorService extends OpenmrsService {
 	
-	void setRepository(BaseHibernateRepository repository);
-	
-	SequentialReceiptNumberGeneratorModel save(SequentialReceiptNumberGeneratorModel object);
-	
-	void purge(SequentialReceiptNumberGeneratorModel object);
-	
-	@Transactional(readOnly = true)
-	List<SequentialReceiptNumberGeneratorModel> getAll();
-	
 	/**
 	 * Gets the first {@link SequentialReceiptNumberGeneratorModel} or creates a new model if none have
 	 * been defined.
@@ -43,6 +33,18 @@ public interface SequentialReceiptNumberGeneratorService extends OpenmrsService 
 	 */
 	@Transactional(readOnly = true)
 	SequentialReceiptNumberGeneratorModel getOnly();
+	
+	/**
+	 * Saves the {@link SequentialReceiptNumberGeneratorModel}, creating a new one or updating an
+	 * existing one.
+	 *
+	 * @param model The model to save.
+	 * @return The saved model.
+	 * @throws IllegalArgumentException if model is null
+	 * @should save the model successfully
+	 */
+	@Transactional
+	SequentialReceiptNumberGeneratorModel save(SequentialReceiptNumberGeneratorModel model);
 	
 	/**
 	 * Reserves the next sequence value for the specified group.
@@ -84,7 +86,7 @@ public interface SequentialReceiptNumberGeneratorService extends OpenmrsService 
 	 *
 	 * @param sequence The sequence to save.
 	 * @return The saved sequence.
-	 * @should Throw a NullPointerException if sequence is null
+	 * @should Throw an IllegalArgumentException if sequence is null
 	 * @should return the saved sequence
 	 * @should update the sequence successfully
 	 * @should create the sequence successfully
@@ -96,7 +98,7 @@ public interface SequentialReceiptNumberGeneratorService extends OpenmrsService 
 	 * Complete removes the specified sequence from the database.
 	 *
 	 * @param sequence The sequence to remove.
-	 * @should Throw a NullPointerException if the sequence is null
+	 * @should Throw an IllegalArgumentException if the sequence is null
 	 * @should delete the sequence from the database
 	 * @should not throw an exception if the sequence is not in the database
 	 */

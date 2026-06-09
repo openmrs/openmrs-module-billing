@@ -18,7 +18,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.SequentialReceiptNumberGeneratorService;
-import org.openmrs.module.billing.api.SequentialReceiptNumberGenerator;
 import org.openmrs.module.billing.api.model.GroupSequence;
 import org.openmrs.module.billing.api.model.SequentialReceiptNumberGeneratorModel;
 import org.openmrs.module.billing.base.BaseModuleContextTest;
@@ -45,15 +44,6 @@ public class SequentialReceiptNumberGeneratorServiceTest extends BaseModuleConte
 		service = Context.getService(SequentialReceiptNumberGeneratorService.class);
 		
 		executeDataSet(SEQUENTIAL_RECEIPT_NUMBER_GENERATOR_DATASET);
-	}
-	
-	protected GroupSequence createSequence(String group, int value) {
-		GroupSequence result = new GroupSequence();
-		
-		result.setGroup(group);
-		result.setValue(value);
-		
-		return result;
 	}
 	
 	/**
@@ -157,11 +147,11 @@ public class SequentialReceiptNumberGeneratorServiceTest extends BaseModuleConte
 	}
 	
 	/**
-	 * @verifies Throw a NullPointerException if sequence is null
+	 * @verifies Throw an IllegalArgumentException if sequence is null
 	 * @see SequentialReceiptNumberGeneratorService#saveSequence(GroupSequence)
 	 */
-	@Test(expected = NullPointerException.class)
-	public void saveSequence_shouldThrowANullPointerExceptionIfSequenceIsNull() {
+	@Test(expected = IllegalArgumentException.class)
+	public void saveSequence_shouldThrowAnIllegalArgumentExceptionIfSequenceIsNull() {
 		service.saveSequence(null);
 	}
 	
@@ -221,11 +211,11 @@ public class SequentialReceiptNumberGeneratorServiceTest extends BaseModuleConte
 	}
 	
 	/**
-	 * @verifies Throw a NullPointerException if the sequence is null
+	 * @verifies Throw an IllegalArgumentException if the sequence is null
 	 * @see SequentialReceiptNumberGeneratorService#purgeSequence(GroupSequence)
 	 */
-	@Test(expected = NullPointerException.class)
-	public void purgeSequence_shouldThrowANullPointerExceptionIfTheSequenceIsNull() {
+	@Test(expected = IllegalArgumentException.class)
+	public void purgeSequence_shouldThrowAnIllegalArgumentExceptionIfTheSequenceIsNull() {
 		service.purgeSequence(null);
 	}
 	
@@ -315,17 +305,12 @@ public class SequentialReceiptNumberGeneratorServiceTest extends BaseModuleConte
 		Assert.assertEquals((Integer) 0, model.getId());
 	}
 	
-	/**
-	 * @verifies return a new model if none has been defined.
-	 * @see SequentialReceiptNumberGeneratorService#getOnly()
-	 */
-	@Test
-	public void getOnly_shouldReturnANewModelIfNoneHasBeenDefined() {
-		SequentialReceiptNumberGeneratorModel model = service.getOnly();
-		service.purge(model);
+	protected GroupSequence createSequence(String group, int value) {
+		GroupSequence result = new GroupSequence();
 		
-		model = service.getOnly();
-		Assert.assertNotNull(model);
-		Assert.assertNull(model.getId());
+		result.setGroup(group);
+		result.setValue(value);
+		
+		return result;
 	}
 }

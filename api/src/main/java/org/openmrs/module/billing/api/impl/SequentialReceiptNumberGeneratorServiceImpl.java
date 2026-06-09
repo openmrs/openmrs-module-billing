@@ -13,39 +13,44 @@ import java.util.List;
 
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
+import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.billing.api.SequentialReceiptNumberGeneratorService;
-import org.openmrs.module.billing.api.base.entity.impl.BaseObjectDataServiceImpl;
+import org.openmrs.module.billing.api.base.entity.db.hibernate.BaseHibernateRepository;
 import org.openmrs.module.billing.api.model.GroupSequence;
 import org.openmrs.module.billing.api.model.SequentialReceiptNumberGeneratorModel;
-import org.openmrs.module.billing.api.security.BasicEntityAuthorizationPrivileges;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Data service implementation class for {@link SequentialReceiptNumberGeneratorModel}s.
  */
 @Transactional
-public class SequentialReceiptNumberGeneratorServiceImpl extends BaseObjectDataServiceImpl<SequentialReceiptNumberGeneratorModel, BasicEntityAuthorizationPrivileges> implements SequentialReceiptNumberGeneratorService {
+public class SequentialReceiptNumberGeneratorServiceImpl extends BaseOpenmrsService implements SequentialReceiptNumberGeneratorService {
 	
-	@Override
-	protected BasicEntityAuthorizationPrivileges getPrivileges() {
-		// No authorization required
-		return null;
-	}
+	private BaseHibernateRepository repository;
 	
-	@Override
-	protected void validate(SequentialReceiptNumberGeneratorModel entity) {
+	public void setRepository(BaseHibernateRepository repository) {
+		this.repository = repository;
 	}
 	
 	@Override
 	@Transactional(readOnly = true)
 	public SequentialReceiptNumberGeneratorModel getOnly() {
-		List<SequentialReceiptNumberGeneratorModel> records = getAll();
+		List<SequentialReceiptNumberGeneratorModel> records = repository.select(SequentialReceiptNumberGeneratorModel.class);
 		
 		if (!records.isEmpty()) {
 			return records.get(0);
 		} else {
 			return new SequentialReceiptNumberGeneratorModel();
 		}
+	}
+	
+	@Override
+	@Transactional
+	public SequentialReceiptNumberGeneratorModel save(SequentialReceiptNumberGeneratorModel model) {
+		if (model == null) {
+			throw new IllegalArgumentException("The model to save must be defined.");
+		}
+		return repository.save(model);
 	}
 	
 	@Override
@@ -73,7 +78,7 @@ public class SequentialReceiptNumberGeneratorServiceImpl extends BaseObjectDataS
 	@Override
 	@Transactional(readOnly = true)
 	public List<GroupSequence> getSequences() {
-		return getRepository().select(GroupSequence.class);
+		return repository.select(GroupSequence.class);
 	}
 	
 	@Override
@@ -83,29 +88,30 @@ public class SequentialReceiptNumberGeneratorServiceImpl extends BaseObjectDataS
 			throw new IllegalArgumentException("The group must be defined.");
 		}
 		
-		Criteria criteria = getRepository().createCriteria(GroupSequence.class);
+		Criteria criteria = repository.createCriteria(GroupSequence.class);
 		criteria.add(Restrictions.eq("group", group));
 		
-		return getRepository().selectSingle(GroupSequence.class, criteria);
+		return repository.selectSingle(GroupSequence.class, criteria);
 	}
 	
 	@Override
 	@Transactional
 	public GroupSequence saveSequence(GroupSequence sequence) {
 		if (sequence == null) {
-			throw new NullPointerException("The sequence to save must be defined.");
+			throw new IllegalArgumentException("The sequence to save must be defined.");
 		}
 		
-		return getRepository().save(sequence);
+		return repository.save(sequence);
 	}
 	
 	@Override
 	@Transactional
 	public void purgeSequence(GroupSequence sequence) {
 		if (sequence == null) {
-			throw new NullPointerException("The sequence to purge must be defined.");
+			throw new IllegalArgumentException("The sequence to purge must be defined.");
 		}
 		
-		getRepository().delete(sequence);
+		repository.delete(sequence);
 	}
+	
 }
