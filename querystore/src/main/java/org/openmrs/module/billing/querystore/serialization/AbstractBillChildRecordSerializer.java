@@ -21,28 +21,28 @@ import org.openmrs.module.querystore.util.DateFormatUtil;
  * Base for the billing record types that hang off a parent {@link Bill} (discounts, refunds). It
  * centralizes the "child-of-bill" cross-cutting fields those types share: patient scope via the
  * parent bill, the resource uuid, the record date, and the parent-bill reference metadata
- * ({@code bill_uuid} + {@code receipt_number}). Subclasses supply {@link #billOf(BaseOpenmrsData)}
- * and their type-specific {@link #populate} text/metadata.
+ * ({@code bill_uuid} + {@code receipt_number}). Subclasses supply {@link #billOf} and their
+ * type-specific {@link #populate} text/metadata.
  */
 abstract class AbstractBillChildRecordSerializer<T extends BaseOpenmrsData> extends AbstractRecordSerializer<T> {
 	
-	/** The parent bill this record hangs off (its patient is the document's scope). */
-	protected abstract Bill billOf(T record);
+	/** The parent bill this entity hangs off (its patient is the document's scope). */
+	protected abstract Bill billOf(T entity);
 	
 	@Override
-	protected String getPatientUuid(T record) {
-		Bill bill = billOf(record);
+	protected String getPatientUuid(T entity) {
+		Bill bill = billOf(entity);
 		return bill != null && bill.getPatient() != null ? bill.getPatient().getUuid() : null;
 	}
 	
 	@Override
-	protected String getResourceUuid(T record) {
-		return record.getUuid();
+	protected String getResourceUuid(T entity) {
+		return entity.getUuid();
 	}
 	
 	@Override
-	protected LocalDate getDate(T record) {
-		return DateFormatUtil.toLocalDate(record.getDateCreated());
+	protected LocalDate getDate(T entity) {
+		return DateFormatUtil.toLocalDate(entity.getDateCreated());
 	}
 	
 	/** Trimmed receipt number of the parent bill (used in both text and metadata), or null. */

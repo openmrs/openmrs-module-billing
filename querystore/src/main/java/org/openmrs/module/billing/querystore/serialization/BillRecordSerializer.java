@@ -158,13 +158,12 @@ public class BillRecordSerializer extends AbstractRecordSerializer<Bill> {
 				continue;
 			}
 			String label = labelFor(item);
-			if (label == null) {
-				continue;
+			if (label != null) {
+				if (item.getQuantity() != null && item.getQuantity() != 1) {
+					label = label + " (x" + item.getQuantity() + ")";
+				}
+				labels.add(label);
 			}
-			if (item.getQuantity() != null && item.getQuantity() != 1) {
-				label = label + " (x" + item.getQuantity() + ")";
-			}
-			labels.add(label);
 		}
 		return labels;
 	}
