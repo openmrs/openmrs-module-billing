@@ -405,4 +405,23 @@
 		</pluginRepository>
 	</pluginRepositories>
 
+	<profiles>
+		<!--
+			Optional QueryStore integration (produces a separate billing-querystore .omod).
+
+			It is deliberately NOT one of the default <modules>: the querystore module and the
+			core `*ServiceEvent` API it consumes (openmrs-core #6084 / TRUNK-6429) require the
+			OpenMRS platform 2.9, whereas the rest of this module still targets 2.7.8. Keeping it
+			behind a profile leaves the default build - and the base billing.omod - unchanged.
+
+			Build it with:  mvn -Pquerystore clean install
+		-->
+		<profile>
+			<id>querystore</id>
+			<modules>
+				<module>querystore</module>
+			</modules>
+		</profile>
+	</profiles>
+
 </project>

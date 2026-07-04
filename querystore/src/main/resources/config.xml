@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+
+-->
+<module configVersion="1.2">
+
+	<!-- Module Properties -->
+	<id>billingquerystore</id>
+	<name>OpenMRS Billing Module QueryStore Integration</name>
+	<version>${project.parent.version}</version>
+	<package>org.openmrs.module.billing.querystore</package>
+	<author>OpenMRS</author>
+	<description>
+		Projects billing records (bills, discounts, refunds) into the OpenMRS QueryStore so a
+		clinician-facing semantic/keyword chart search can retrieve them.
+	</description>
+	<!-- The core *ServiceEvent API this integration relies on (openmrs-core #6084) is 2.9-only. -->
+	<require_version>2.9.0</require_version>
+	<!-- / Module Properties -->
+
+	<require_modules>
+		<require_module version="2.4">org.openmrs.module.billing</require_module>
+		<require_module version="1.0">org.openmrs.module.querystore</require_module>
+	</require_modules>
+
+	<!-- Module Activator -->
+	<activator>org.openmrs.module.billing.querystore.BillingQuerystoreActivator</activator>
+
+</module>

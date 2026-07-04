@@ -60,6 +60,24 @@ Provides REST API endpoints at `/rest/v1/billing/*` for bills, payments, payment
 
 Exposes bills as FHIR `Invoice` resources via the `fhir` submodule, built against the `fhir2` module. Supports OpenMRS Platform 2.5, 2.6, and 2.7 FHIR variants.
 
+### QueryStore / Chart Search Integration
+
+Projects billing records into the [OpenMRS QueryStore](https://github.com/openmrs/openmrs-module-querystore) so a clinician-facing semantic / keyword chart search (e.g. `chartsearchai`) can retrieve them. Three patient-scoped resource types are contributed through QueryStore's `ResourceTypeProvider` SPI:
+
+- **`billing_bill`** — one document per bill; its searchable text folds in the billed services / drugs / tests (line items), totals, amount paid, outstanding balance, payment status and cash point.
+- **`billing_discount`** — fee waivers / discounts (often a signal of a subsidized programme or financial hardship).
+- **`billing_refund`** — refunds.
+
+Steady-state indexing is event-driven and needs **no** changes to the base billing services: QueryStore's events-first consumer projects any entity for which a serializer is registered, using the `*ServiceEvent`s that core [openmrs-core#6084](https://github.com/openmrs/openmrs-core/pull/6084) publishes for `save*` / `void*` / `purge*` service methods — which billing's `saveBill` / `voidBill` / `purgeBill` (and `saveBillDiscount` / `saveBillRefund`) already are. Backfill of pre-existing records is admin-triggered via QueryStore's reindex endpoint (`POST /ws/rest/v1/querystore/reindex {"scope":"all"}`) or `BootstrapService`.
+
+Because QueryStore and the core `*ServiceEvent` API require **OpenMRS Platform 2.9** plus its Elasticsearch / Lucene backend, this integration is packaged as a **separate, optional `billing-querystore` omod** and is **not** part of the default build — the base billing module is unaffected and still targets 2.7.8. Build it explicitly and install the resulting `querystore/target/billing-querystore-*.omod` alongside billing only on servers that run QueryStore:
+
+```bash
+mvn -Pquerystore clean install
+```
+
+> **Runtime note:** the QueryStore SPI documents that whether a *module's* services emit the core `*ServiceEvent`s is deployment-dependent and should be verified on a live 2.9 server. If bills backfill but do not live-update, billing's services can publish the events themselves via a small aspect added to this submodule; backfill works regardless.
+
 ## Requirements
 
 - **OpenMRS Platform**: 2.7.8 (built and tested against; module `require_version` follows the build property)
@@ -69,6 +87,7 @@ Exposes bills as FHIR `Invoice` resources via the `fhir` submodule, built agains
   - Stock Management Module 1.4.0+
 - **Optional Modules**:
   - FHIR2 Module 2.4.0+ (required to use the FHIR Invoice submodule)
+  - QueryStore Module 1.0.0+ on Platform 2.9+ (required to use the optional `billing-querystore` chart-search integration)
   - IDGen Module 2.8+ (for custom receipt number generation)
   - UI Framework Module
   - App Framework Module

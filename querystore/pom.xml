@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.openmrs.module</groupId>
+		<artifactId>billing</artifactId>
+		<version>2.4.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>billing-querystore</artifactId>
+	<packaging>jar</packaging>
+	<name>OpenMRS Billing Module QueryStore Integration</name>
+	<description>
+		Projects billing records (bills, discounts, refunds) into the OpenMRS QueryStore so a
+		clinician-facing semantic/keyword chart search (e.g. chartsearchai) can retrieve them.
+		Packaged as a separate, optional billing-querystore.omod that requires the querystore module
+		and OpenMRS platform 2.9.
+	</description>
+
+	<properties>
+		<!--
+			Override the parent's 2.7.8 floor for THIS module only. The querystore SPI and the core
+			`*ServiceEvent` classes it depends on (openmrs-core #6084) are 2.9-only. Because the
+			parent's dependencyManagement pins openmrs-api/openmrs-web to ${openmrsPlatformVersion},
+			overriding the property here is enough to compile this module against 2.9.
+		-->
+		<openmrsPlatformVersion>2.9.0-SNAPSHOT</openmrsPlatformVersion>
+		<querystoreVersion>1.0.0-SNAPSHOT</querystoreVersion>
+	</properties>
+
+	<!-- querystore-api and openmrs 2.9 are still SNAPSHOTs, so snapshot resolution must be on. -->
+	<repositories>
+		<repository>
+			<id>openmrs-repo-snapshots</id>
+			<name>OpenMRS Snapshots</name>
+			<url>https://mavenrepo.openmrs.org/public</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
+	<dependencies>
+
+		<!-- The billing domain model (Bill, BillDiscount, BillRefund, ...). Provided at runtime by
+		     the required `billing` module. -->
+		<dependency>
+			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>billing-api</artifactId>
+			<version>${project.parent.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- The QueryStore SPI (ResourceTypeProvider, ClinicalRecordSerializer, QueryDocument,
+		     HibernateTypeBootstrapper, BootstrapService). Provided by the required `querystore` module. -->
+		<dependency>
+			<groupId>org.openmrs.module</groupId>
+			<artifactId>querystore-api</artifactId>
+			<version>${querystoreVersion}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Core 2.9 (brings in the DbSessionFactory the bootstrappers use, and the aop.event
+		     classes referenced by the optional fallback documented in the README). -->
+		<dependency>
+			<groupId>org.openmrs.api</groupId>
+			<artifactId>openmrs-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- StockItem: a line item may bill a stock item (e.g. a dispensed drug) rather than a
+		     BillableService; its name is clinically the useful part of the bill text. Provided by
+		     the stockmanagement module, which billing already requires. -->
+		<dependency>
+			<groupId>org.openmrs.module</groupId>
+			<artifactId>stockmanagement-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Begin test dependencies -->
+		<dependency>
+			<groupId>org.openmrs.api</groupId>
+			<artifactId>openmrs-api</artifactId>
+			<classifier>tests</classifier>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.openmrs.test</groupId>
+			<artifactId>openmrs-test</artifactId>
+			<type>pom</type>
+			<scope>test</scope>
+		</dependency>
+		<!-- End test dependencies -->
+
+	</dependencies>
+
+	<build>
+		<finalName>billing-querystore-${project.parent.version}</finalName>
+
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+
+		<plugins>
+			<plugin>
+				<groupId>org.openmrs.maven.plugins</groupId>
+				<artifactId>maven-openmrs-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>init</id>
+						<phase>initialize</phase>
+						<goals>
+							<goal>initialize-module</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>pack</id>
+						<phase>package</phase>
+						<goals>
+							<goal>package-module</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
