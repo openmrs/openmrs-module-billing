@@ -12,30 +12,30 @@ package org.openmrs.module.billing.querystore.serialization;
 import java.math.BigDecimal;
 
 /**
- * Small formatting helpers shared by the billing record serializers so bill, discount and refund
- * documents render money and enum/status text the same way.
+ * Billing-specific formatting helpers shared by the bill / discount / refund serializers so money
+ * and enum-status text render the same way in every document. (String trimming is provided by the
+ * SPI base {@code AbstractRecordSerializer.trimToNull}.)
  */
 final class BillDocFormat {
 	
 	private BillDocFormat() {
 	}
 	
-	/** Plain (non-scientific, no grouping) decimal string; treats null as zero. */
+	/**
+	 * Plain (non-scientific, no grouping) decimal string; treats null as zero. Use for a bare numeric
+	 * value such as a percentage, where {@link #money} would misread at the call site.
+	 */
+	static String plain(BigDecimal value) {
+		return (value != null ? value : BigDecimal.ZERO).toPlainString();
+	}
+	
+	/** A currency amount rendered as a plain decimal string; treats null as zero. */
 	static String money(BigDecimal amount) {
-		return (amount != null ? amount : BigDecimal.ZERO).toPlainString();
+		return plain(amount);
 	}
 	
 	/** Turns an enum constant such as {@code PARTIALLY_REFUNDED} into {@code partially refunded}. */
 	static String readable(String enumName) {
 		return enumName == null ? "" : enumName.toLowerCase().replace('_', ' ');
-	}
-	
-	/** Trims and returns null when null/blank, so callers null-check once. */
-	static String trimToNull(String value) {
-		if (value == null) {
-			return null;
-		}
-		String trimmed = value.trim();
-		return trimmed.isEmpty() ? null : trimmed;
 	}
 }

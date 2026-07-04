@@ -29,6 +29,9 @@
 	<require_modules>
 		<require_module version="2.4">org.openmrs.module.billing</require_module>
 		<require_module version="1.0">org.openmrs.module.querystore</require_module>
+		<!-- The bill serializer references StockItem/Drug for line items that bill a stock item;
+		     require stockmanagement (billing already does) so those classes resolve on our classloader. -->
+		<require_module version="1.4">org.openmrs.module.stockmanagement</require_module>
 	</require_modules>
 
 	<!-- Module Activator -->

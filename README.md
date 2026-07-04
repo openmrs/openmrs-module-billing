@@ -64,7 +64,7 @@ Exposes bills as FHIR `Invoice` resources via the `fhir` submodule, built agains
 
 Projects billing records into the [OpenMRS QueryStore](https://github.com/openmrs/openmrs-module-querystore) so a clinician-facing semantic / keyword chart search (e.g. `chartsearchai`) can retrieve them. Three patient-scoped resource types are contributed through QueryStore's `ResourceTypeProvider` SPI:
 
-- **`billing_bill`** — one document per bill; its searchable text folds in the billed services / drugs / tests (line items), totals, amount paid, outstanding balance, payment status and cash point.
+- **`billing_bill`** — one document per bill; its searchable text folds in the billed services / drugs / tests (line items), the raw total, amount paid, payment status and cash point. (Discount-adjusted figures are intentionally left to `billing_discount`, since approving a discount does not re-save the bill and a folded balance would go stale.)
 - **`billing_discount`** — fee waivers / discounts (often a signal of a subsidized programme or financial hardship).
 - **`billing_refund`** — refunds.
 

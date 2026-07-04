@@ -11,12 +11,15 @@ package org.openmrs.module.billing.querystore.serialization;
 
 import static org.openmrs.module.billing.querystore.serialization.BillDocFormat.money;
 import static org.openmrs.module.billing.querystore.serialization.BillDocFormat.readable;
-import static org.openmrs.module.billing.querystore.serialization.BillDocFormat.trimToNull;
+import static org.openmrs.module.querystore.QueryStoreConstants.FIELD_VISIT_UUID;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.openmrs.Drug;
 import org.openmrs.module.billing.api.model.Bill;
@@ -31,35 +34,31 @@ import org.openmrs.module.stockmanagement.api.model.StockItem;
  * Serializes a {@link Bill} into a single, clinician-oriented {@code billing_bill} document.
  * <p>
  * A bill is the patient-anchored unit here: its line items (the services / drugs / tests the
- * patient was charged for) and its payments cascade with it and are always current when the bill is
- * saved, so they are folded into this one document rather than indexed separately. The searchable
- * {@code text} leads with the billed items - what a clinician reading the chart would actually
- * search for - and carries the payment picture (total, paid, outstanding balance, status) so a
- * cost-of-care / affordability signal is retrievable too.
+ * patient was charged for) and its payments cascade with it and are persisted atomically on
+ * {@code saveBill}, so they are folded into this one document rather than indexed separately. The
+ * searchable {@code text} leads with the billed items - what a clinician reading the chart would
+ * actually search for - then the raw total, amount paid and status.
+ * <p>
+ * <b>Only bill-aggregate-derived, always-refreshed fields are folded in.</b> The projection is
+ * re-run by querystore's events consumer whenever a {@code *ServiceEvent} fires for the bill
+ * ({@code saveBill} / {@code voidBill} / {@code purgeBill}), so a folded field is only kept current
+ * if every mutation that changes it re-saves the bill. That holds for line items, payments and
+ * status. It deliberately does <em>not</em> hold for the discount-adjusted total / outstanding
+ * balance: approving a fee waiver goes through {@code BillDiscountService.saveBillDiscount}, which
+ * persists the discount alone and does not re-save the bill - so a denormalized "amount after
+ * discount" here would silently overstate what the patient owes until the bill's next save. We
+ * therefore expose the raw (pre-discount) line-item {@code total} plus {@code amount_paid} and
+ * leave discount detail to the {@code billing_discount} document; {@code status} conveys
+ * settled-ness.
+ * <p>
+ * Residual eventual-consistency: the dedicated single-child endpoints ({@code voidBillLineItem},
+ * discount approval) mutate bill-child state without re-saving the bill, so a folded item can lag
+ * until the bill's next save. Acceptable for a retrieval index and self-healing; authoritative
+ * figures live in the billing UI/API.
  */
 public class BillRecordSerializer extends AbstractRecordSerializer<Bill> {
 	
 	public static final String RESOURCE_TYPE = "billing_bill";
-	
-	static final String FIELD_BILL_STATUS = "bill_status";
-	
-	static final String FIELD_RECEIPT_NUMBER = "receipt_number";
-	
-	static final String FIELD_TOTAL = "total";
-	
-	static final String FIELD_AMOUNT_PAID = "amount_paid";
-	
-	static final String FIELD_BALANCE = "balance";
-	
-	static final String FIELD_CASH_POINT = "cash_point";
-	
-	static final String FIELD_VISIT_UUID = "visit_uuid";
-	
-	static final String FIELD_SERVICES = "services";
-	
-	static final String FIELD_PAYMENT_MODES = "payment_modes";
-	
-	static final String FIELD_LINE_ITEM_COUNT = "line_item_count";
 	
 	@Override
 	public String getResourceType() {
@@ -83,17 +82,23 @@ public class BillRecordSerializer extends AbstractRecordSerializer<Bill> {
 	
 	@Override
 	protected LocalDate getDate(Bill bill) {
-		return bill.getDateCreated() != null ? DateFormatUtil.toLocalDate(bill.getDateCreated()) : null;
+		return DateFormatUtil.toLocalDate(bill.getDateCreated());
 	}
 	
 	@Override
 	protected void populate(Bill bill, QueryDocument doc) {
+		if (doc.getPatientUuid() == null) {
+			// No patient scope (unreachable for a persisted bill - patient is a NOT NULL FK). Leaving
+			// text unset makes serialize() skip it, matching the backfill scan's patient IS NOT NULL filter.
+			return;
+		}
+		
 		List<String> services = billedItemLabels(bill);
 		
+		// Raw line-item total (discount-independent). See the class javadoc for why the
+		// discount-adjusted total/balance are intentionally not folded in here.
 		BigDecimal total = bill.getTotal();
-		BigDecimal afterDiscount = bill.getAmountAfterDiscount();
 		BigDecimal paid = bill.getTotalPayments();
-		BigDecimal balance = afterDiscount.subtract(paid);
 		
 		StringBuilder text = new StringBuilder("Bill");
 		String receipt = trimToNull(bill.getReceiptNumber());
@@ -106,11 +111,7 @@ public class BillRecordSerializer extends AbstractRecordSerializer<Bill> {
 		if (!services.isEmpty()) {
 			text.append(". Services billed: ").append(String.join(", ", services));
 		}
-		text.append(". Total: ").append(money(total));
-		if (afterDiscount.compareTo(total) != 0) {
-			text.append(" (after discount ").append(money(afterDiscount)).append(')');
-		}
-		text.append(", paid: ").append(money(paid)).append(", balance: ").append(money(balance));
+		text.append(". Total: ").append(money(total)).append(", paid: ").append(money(paid));
 		String cashPoint = bill.getCashPoint() != null ? trimToNull(bill.getCashPoint().getName()) : null;
 		if (cashPoint != null) {
 			text.append(". Cash point: ").append(cashPoint);
@@ -119,39 +120,39 @@ public class BillRecordSerializer extends AbstractRecordSerializer<Bill> {
 		doc.setText(text.toString());
 		
 		if (bill.getStatus() != null) {
-			doc.putMetadata(FIELD_BILL_STATUS, bill.getStatus().name());
+			doc.putMetadata(BillingQueryFields.BILL_STATUS, bill.getStatus().name());
 		}
 		if (receipt != null) {
-			doc.putMetadata(FIELD_RECEIPT_NUMBER, receipt);
+			doc.putMetadata(BillingQueryFields.RECEIPT_NUMBER, receipt);
 		}
-		doc.putMetadata(FIELD_TOTAL, money(afterDiscount));
-		doc.putMetadata(FIELD_AMOUNT_PAID, money(paid));
-		doc.putMetadata(FIELD_BALANCE, money(balance));
+		doc.putMetadata(BillingQueryFields.TOTAL, money(total));
+		doc.putMetadata(BillingQueryFields.AMOUNT_PAID, money(paid));
 		if (cashPoint != null) {
-			doc.putMetadata(FIELD_CASH_POINT, cashPoint);
+			doc.putMetadata(BillingQueryFields.CASH_POINT, cashPoint);
 		}
 		if (bill.getVisit() != null) {
 			doc.putMetadata(FIELD_VISIT_UUID, bill.getVisit().getUuid());
 		}
 		if (!services.isEmpty()) {
-			doc.putMetadata(FIELD_SERVICES, services);
-			doc.putMetadata(FIELD_LINE_ITEM_COUNT, services.size());
+			doc.putMetadata(BillingQueryFields.SERVICES, services);
+			doc.putMetadata(BillingQueryFields.BILLED_SERVICE_COUNT, services.size());
 		}
 		List<String> modes = paymentModes(bill);
 		if (!modes.isEmpty()) {
-			doc.putMetadata(FIELD_PAYMENT_MODES, modes);
+			doc.putMetadata(BillingQueryFields.PAYMENT_MODES, modes);
 		}
 	}
 	
 	/**
-	 * Human-readable label for each non-voided line item, preferring the billable service name and
+	 * Label for each non-voided line item (one entry per line item - not de-duplicated, since two line
+	 * items for the same service are two distinct charges), preferring the billable service name and
 	 * falling back to the stock item (dispensed drug / supply) or the price name.
 	 */
 	private static List<String> billedItemLabels(Bill bill) {
-		List<String> labels = new ArrayList<String>();
 		if (bill.getLineItems() == null) {
-			return labels;
+			return Collections.emptyList();
 		}
+		List<String> labels = new ArrayList<String>();
 		for (BillLineItem item : bill.getLineItems()) {
 			if (item == null || Boolean.TRUE.equals(item.getVoided())) {
 				continue;
@@ -192,22 +193,23 @@ public class BillRecordSerializer extends AbstractRecordSerializer<Bill> {
 		return trimToNull(item.getPriceName());
 	}
 	
+	/** Distinct payment-mode names across the bill's non-voided payments. */
 	private static List<String> paymentModes(Bill bill) {
-		List<String> modes = new ArrayList<String>();
 		if (bill.getPayments() == null) {
-			return modes;
+			return Collections.emptyList();
 		}
+		Set<String> modes = new LinkedHashSet<String>();
 		for (Payment payment : bill.getPayments()) {
 			if (payment == null || Boolean.TRUE.equals(payment.getVoided())) {
 				continue;
 			}
 			if (payment.getInstanceType() != null) {
 				String name = trimToNull(payment.getInstanceType().getName());
-				if (name != null && !modes.contains(name)) {
+				if (name != null) {
 					modes.add(name);
 				}
 			}
 		}
-		return modes;
+		return new ArrayList<String>(modes);
 	}
 }

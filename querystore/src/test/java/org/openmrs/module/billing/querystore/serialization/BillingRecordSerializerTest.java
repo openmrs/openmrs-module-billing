@@ -73,9 +73,10 @@ public class BillingRecordSerializerTest {
 		assertThat(doc.getText(), containsString("Malaria RDT (x2)"));
 		assertThat(doc.getText(), containsString("Status: paid"));
 		assertThat(doc.getText(), containsString("Total: 200"));
-		assertThat(doc.getText(), containsString("balance: 0"));
+		assertThat(doc.getText(), containsString("paid: 200"));
 		assertThat(doc.getMetadata().get("bill_status"), is((Object) "PAID"));
-		assertThat(doc.getMetadata().get("balance"), is((Object) "0"));
+		assertThat(doc.getMetadata().get("total"), is((Object) "200"));
+		assertThat(doc.getMetadata().get("amount_paid"), is((Object) "200"));
 		assertThat(asStrings(doc.getMetadata().get("services")), hasItem("Consultation"));
 		assertThat(asStrings(doc.getMetadata().get("payment_modes")), hasItem("Cash"));
 	}
@@ -146,7 +147,7 @@ public class BillingRecordSerializerTest {
 	}
 	
 	@Test
-	public void serialize_shouldNotScopeDiscountWhenBillHasNoPatient() {
+	public void serialize_shouldSkipDiscountWhenBillHasNoPatient() {
 		BillDiscount discount = new BillDiscount();
 		discount.setUuid("discount-uuid");
 		discount.setBill(new Bill());
@@ -157,7 +158,72 @@ public class BillingRecordSerializerTest {
 		
 		QueryDocument doc = discountSerializer.serialize(discount);
 		
-		assertThat(doc.getPatientUuid(), is(nullValue()));
+		// No patient scope -> no document at all (parity with the backfill scan's patient filter).
+		assertThat(doc, is(nullValue()));
+	}
+	
+	@Test
+	public void serialize_shouldUseRawTotalUnaffectedByApprovedDiscount() {
+		// billing_bill must not denormalize the discount-adjusted total: saveBillDiscount does not
+		// re-save the bill, so a folded after-discount figure would go stale. Assert we expose the
+		// raw line-item total even when an approved discount is present on the bill.
+		Bill bill = new Bill();
+		bill.setUuid("bill-uuid");
+		bill.setPatient(patient("patient-uuid"));
+		bill.setStatus(BillStatus.POSTED);
+		bill.setLineItems(Arrays.asList(lineItem("Consultation", "200", 1)));
+		BillDiscount approved = new BillDiscount();
+		approved.setBill(bill);
+		approved.setDiscountType(DiscountType.FIXED_AMOUNT);
+		approved.setDiscountValue(new BigDecimal("50"));
+		approved.setStatus(DiscountStatus.APPROVED);
+		approved.setVoided(false);
+		Set<BillDiscount> discounts = new HashSet<BillDiscount>();
+		discounts.add(approved);
+		bill.setDiscounts(discounts);
+		
+		QueryDocument doc = billSerializer.serialize(bill);
+		
+		assertThat(doc.getMetadata().get("total"), is((Object) "200"));
+		assertThat(doc.getText(), containsString("Total: 200"));
+	}
+	
+	@Test
+	public void serialize_shouldProjectBillWithNoLineItems() {
+		Bill bill = new Bill();
+		bill.setUuid("bill-uuid");
+		bill.setPatient(patient("patient-uuid"));
+		bill.setStatus(BillStatus.PENDING);
+		
+		QueryDocument doc = billSerializer.serialize(bill);
+		
+		assertThat(doc, is(notNullValue()));
+		assertThat(doc.getText(), containsString("Total: 0"));
+		assertThat(doc.getMetadata().get("services"), is(nullValue()));
+		assertThat(doc.getMetadata().get("billed_service_count"), is(nullValue()));
+	}
+	
+	@Test
+	public void serialize_shouldExposeDiscountPercentForPercentageDiscount() {
+		Bill bill = new Bill();
+		bill.setReceiptNumber("RCT-1001");
+		bill.setPatient(patient("patient-uuid"));
+		bill.setLineItems(Arrays.asList(lineItem("Consultation", "200", 1)));
+		
+		BillDiscount discount = new BillDiscount();
+		discount.setUuid("discount-uuid");
+		discount.setBill(bill);
+		discount.setDiscountType(DiscountType.PERCENTAGE);
+		discount.setDiscountValue(new BigDecimal("10"));
+		discount.setStatus(DiscountStatus.APPROVED);
+		discount.setDateCreated(new Date());
+		
+		QueryDocument doc = discountSerializer.serialize(discount);
+		
+		assertThat(doc.getMetadata().get("discount_percent"), is((Object) "10"));
+		// discount_amount is always the resolved currency amount: 10% of the 200 bill total = 20.00
+		assertThat(doc.getMetadata().get("discount_amount"), is((Object) "20.00"));
+		assertThat(doc.getMetadata().get("discount_type"), is((Object) "PERCENTAGE"));
 	}
 	
 	private static Patient patient(String uuid) {
