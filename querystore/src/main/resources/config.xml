@@ -22,13 +22,20 @@
 		Projects billing records (bills, discounts, refunds) into the OpenMRS QueryStore so a
 		clinician-facing semantic/keyword chart search can retrieve them.
 	</description>
-	<!-- The core *ServiceEvent API this integration relies on (openmrs-core #6084) is 2.9-only. -->
-	<require_version>2.9.0</require_version>
+	<!-- The core *ServiceEvent API this integration relies on (openmrs-core #6084) is 2.9-only.
+	     Filtered to the built-against platform version (currently 2.9.0-SNAPSHOT); OpenMRS treats a
+	     bare "2.9.0" as newer than a running "2.9.0-SNAPSHOT", so requiring the exact version avoids
+	     a spurious platform-version rejection - same reason chartsearchai pins 2.9.0-SNAPSHOT. -->
+	<require_version>${openmrsPlatformVersion}</require_version>
 	<!-- / Module Properties -->
 
 	<require_modules>
-		<require_module version="2.4">org.openmrs.module.billing</require_module>
-		<require_module version="1.0">org.openmrs.module.querystore</require_module>
+		<!-- Match the exact (SNAPSHOT) dependency versions: OpenMRS ranks "X.Y.Z-SNAPSHOT" below a
+		     bare "X.Y.Z" required version, so a bare require would be left unsatisfied by the running
+		     SNAPSHOT builds. Filtered from this module's properties (= the sibling billing version and
+		     the querystore version we build against), matching chartsearchai's require of querystore. -->
+		<require_module version="${project.parent.version}">org.openmrs.module.billing</require_module>
+		<require_module version="${querystoreVersion}">org.openmrs.module.querystore</require_module>
 		<!-- The bill serializer references StockItem/Drug for line items that bill a stock item;
 		     require stockmanagement (billing already does) so those classes resolve on our classloader. -->
 		<require_module version="1.4">org.openmrs.module.stockmanagement</require_module>
