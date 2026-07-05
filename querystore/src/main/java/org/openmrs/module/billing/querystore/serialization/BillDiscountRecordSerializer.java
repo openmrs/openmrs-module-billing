@@ -22,9 +22,11 @@ import org.openmrs.module.querystore.model.QueryDocument;
  * Serializes a {@link BillDiscount} into a {@code billing_discount} document. A discount / fee
  * waiver is patient-relevant because it often signals a subsidized programme (HIV, TB, under-5,
  * indigent) or financial hardship. It is indexed as its own type - rather than folded into the bill
- * - because its lifecycle (PENDING -> APPROVED/REJECTED) is driven through its own
- * {@code saveBillDiscount} service call, so its own save events keep the projection current without
- * re-saving the bill.
+ * - because its lifecycle (PENDING -> APPROVED/REJECTED) changes independently of the bill.
+ * {@code BillDiscountService} is not an {@code OpenmrsService}, so core #6084's service-event
+ * advice never fires for {@code saveBillDiscount}; live-sync is instead handled by
+ * {@link org.openmrs.module.billing.querystore.BillChildDbEventListener} (core's non-AOP Hibernate
+ * {@code SaveDbEvent}), with initial backfill by {@code BillDiscountBootstrapper}.
  */
 public class BillDiscountRecordSerializer extends AbstractBillChildRecordSerializer<BillDiscount> {
 	

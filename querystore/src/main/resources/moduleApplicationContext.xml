@@ -71,4 +71,13 @@
 		<constructor-arg ref="billing.querystore.bootstrapper.refund"/>
 	</bean>
 
+	<!--
+		Live-sync for billing_discount / billing_refund. Their services are not OpenmrsServices, so
+		core #6084's AOP service-event advice never fires for them; instead we consume core's non-AOP
+		Hibernate SaveDbEvent/DeleteDbEvent (which fire for every entity) and drive the same querystore
+		projection pipeline. Bill itself is handled by querystore's own consumer via its SaveServiceEvent.
+	-->
+	<bean id="billing.querystore.dbEventListener"
+	      class="org.openmrs.module.billing.querystore.BillChildDbEventListener"/>
+
 </beans>

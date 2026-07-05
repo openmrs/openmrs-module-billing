@@ -20,8 +20,10 @@ import org.openmrs.module.querystore.model.QueryDocument;
  * Serializes a {@link BillRefund} into a {@code billing_refund} document. Refunds are the weakest
  * clinical signal of the three billing types (mostly administrative), but they complete the record
  * and are indexed as their own type because their lifecycle (REQUESTED -> APPROVED -> COMPLETED)
- * runs through the dedicated {@code saveBillRefund} service, whose save events keep the projection
- * current.
+ * changes independently of the bill. {@code BillRefundService} is not an {@code OpenmrsService}, so
+ * live-sync is handled by {@link org.openmrs.module.billing.querystore.BillChildDbEventListener}
+ * (core's non-AOP Hibernate {@code SaveDbEvent}), not #6084 service events; initial backfill is by
+ * {@code BillRefundBootstrapper}.
  */
 public class BillRefundRecordSerializer extends AbstractBillChildRecordSerializer<BillRefund> {
 	
