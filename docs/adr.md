@@ -98,25 +98,51 @@ omod, hard-requiring `billing` + `querystore` + platform 2.9. It is **not** in t
 Accepted
 
 ### Context
-The goal is "what would help a clinician reading the patient chart," not a full financial export.
-The billing domain has many persistent types, but only some are patient-anchored and clinically
-useful, and QueryStore only projects `OpenmrsData` (not metadata).
+The selection question is "what would help a clinician reading the patient chart" — a retrieval aid,
+not a full financial export. Two hard filters narrow the billing domain's ~15 persistent types:
+
+- **Patient-scoped.** The document must belong to a patient's chart; this drops facility/ops records.
+- **`OpenmrsData`, not `OpenmrsMetadata`.** QueryStore's projection pipeline only handles
+  `OpenmrsData` (its consumer needs `getVoided()` and routes voided → delete), so metadata types
+  cannot be indexed even if we wanted them.
+
+A third, softer consideration is *marginal value*: billed drugs/tests often already appear in the
+chart as orders/obs, so billing earns its place mainly where it adds what those don't — services
+billed but not order-entered (procedures, bed/consultation charges), and the **financial** dimension
+(an unpaid balance is a real barrier to care; a fee waiver is social context).
 
 ### Decision
-Index three patient-scoped resource types: **`billing_bill`**, **`billing_discount`**, and
-**`billing_refund`**.
-- `Bill` line items and payments are **folded into** `billing_bill` (they cascade with the bill and
-  have no independent lifecycle) — the searchable text leads with the billed services/drugs/tests.
-- Discounts and refunds are indexed as their **own** types (their lifecycles — waiver approval,
-  refund request/approval/completion — are patient-relevant in their own right).
-- Excluded: cash points, payment modes, the billable-service catalog, item prices, exemption
-  *rules*, timesheets, and sequence/infra models — facility config/ops or not patient-scoped (and,
-  being `OpenmrsMetadata` in several cases, not projectable by QueryStore anyway).
+Index three patient-scoped `OpenmrsData` types, each justified by what it tells a clinician:
+
+- **`billing_bill`** — the anchor. Its line items are a proxy for the services / drugs / tests the
+  patient was charged for (i.e. what care they received), and its status + total/paid answer "does
+  this patient owe money?". `Bill` line items and payments are **folded into** this one document
+  (they cascade with the bill and have no independent lifecycle), so the searchable text leads with
+  the billed items.
+- **`billing_discount`** — a fee waiver / discount is patient-relevant because it often signals
+  enrollment in a subsidized programme (HIV, TB, under-5, indigent) or financial hardship. Indexed
+  as its **own** type because its lifecycle (PENDING → APPROVED/REJECTED) changes independently of
+  the bill.
+- **`billing_refund`** — the weakest clinical signal (mostly administrative), included to complete
+  the record; near-free to add since it already carries its own lifecycle (REQUESTED → APPROVED →
+  COMPLETED).
+
+Excluded, with reasons:
+- **Not patient-scoped:** timesheets (cashier / shift), sequence generators and group sequences
+  (infra).
+- **Facility configuration / reference data:** cash points, payment modes (+ attribute types), the
+  billable-service catalog, item prices — they describe the facility, not a patient's care.
+- **Policy, not a per-patient record:** exemption *rules* (`BillExemption` / `BillExemptionRule`)
+  define *who* is exempt, not a given patient's exemption event.
+- Several of the above are `OpenmrsMetadata`, so the technical filter excludes them regardless.
 
 ### Consequences
-- High signal-to-noise for chart search: a clinician can find what a patient was charged for, and
-  whether an unpaid balance or a fee waiver exists.
-- Fewer types to serialize and keep in sync.
+- High signal-to-noise for chart search: a clinician can find what a patient was charged for, whether
+  there is an unpaid balance, and whether a fee waiver or refund applies.
+- Complementary to — not duplicative of — the orders/obs already indexed: billing adds the financial
+  view and any services billed outside order entry.
+- Fewer types to serialize and keep in sync; the excluded config/metadata would add noise and mostly
+  isn't projectable anyway.
 
 ---
 
