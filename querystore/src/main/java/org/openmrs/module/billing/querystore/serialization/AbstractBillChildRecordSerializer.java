@@ -23,6 +23,12 @@ import org.openmrs.module.querystore.util.DateFormatUtil;
  * parent bill, the resource uuid, the record date, and the parent-bill reference metadata
  * ({@code bill_uuid} + {@code receipt_number}). Subclasses supply {@link #billOf} and their
  * type-specific {@link #populate} text/metadata.
+ * <p>
+ * <b>Flush-thread constraint.</b> These types live-sync from a Hibernate flush (via
+ * {@code BillChildDbEventListener} consuming core's {@code SaveDbEvent}), so {@link #populate} may
+ * run on the flush thread. It must therefore navigate only id-loadable to-one proxies (as
+ * {@link #getPatientUuid} / {@link #receiptOf} do: bill → patient / receipt number) and must not
+ * issue a query or force a lazy collection, which could trigger a flush-inside-flush.
  */
 abstract class AbstractBillChildRecordSerializer<T extends BaseOpenmrsData> extends AbstractRecordSerializer<T> {
 	

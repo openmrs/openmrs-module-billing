@@ -16,13 +16,15 @@ import org.slf4j.LoggerFactory;
 /**
  * Lifecycle hooks for the billing &lt;-&gt; query store integration.
  * <p>
- * No wiring happens here: the {@code ResourceTypeProvider}, serializer and bootstrapper beans are
- * registered in {@code moduleApplicationContext.xml} and discovered by querystore through
- * {@code Context.getRegisteredComponents(...)}. Steady-state indexing is driven by the core
- * {@code *ServiceEvent}s that billing's {@code save*}/{@code void*}/{@code purge*} service methods
- * emit (openmrs-core #6084), so nothing needs to be started here.
+ * No wiring happens here: the {@code ResourceTypeProvider}, serializer, bootstrapper and
+ * {@link BillChildDbEventListener} beans are all registered in {@code moduleApplicationContext.xml}
+ * and discovered by querystore / Spring. Steady-state indexing therefore needs nothing started
+ * here, and it flows through two paths: {@code Bill} rides core #6084's {@code *ServiceEvent}s (its
+ * {@code BillService} is an {@code OpenmrsService}, which querystore's own consumer handles), while
+ * {@code BillDiscount} / {@code BillRefund} are projected by {@link BillChildDbEventListener} from
+ * core's Hibernate {@code SaveDbEvent}s (their services are not {@code OpenmrsService}s).
  * <p>
- * Initial backfill of pre-existing bills is deliberately <em>not</em> auto-run from here (a full
+ * Initial backfill of pre-existing records is deliberately <em>not</em> auto-run from here (a full
  * scan should not block module startup). Trigger it once, admin-side, via querystore's reindex
  * endpoint ({@code POST /ws/rest/v1/querystore/reindex {"scope":"all"}}) or
  * {@code BootstrapService.bootstrap(...)}.

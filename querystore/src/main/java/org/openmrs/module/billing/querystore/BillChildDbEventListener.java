@@ -43,6 +43,11 @@ import org.springframework.context.event.EventListener;
  * uses ({@link RecordProjector} + the reachable {@code querystore.sync.*} beans, per the SPI).
  * {@code Bill} is deliberately ignored here - it already live-syncs via its
  * {@code SaveServiceEvent}, so handling it again would be redundant (idempotent, but wasteful).
+ * <p>
+ * Because {@code SaveDbEvent} fires for <em>every</em> entity, {@link #project} takes a raw
+ * {@code SaveDbEvent<?>} and matches its two types with a cheap, proxy-safe {@code instanceof} -
+ * mirroring querystore's own {@code CoreServiceEventListener}, which likewise consumes
+ * {@code SaveServiceEvent<?>} and filters by type.
  */
 public class BillChildDbEventListener {
 	
@@ -65,18 +70,18 @@ public class BillChildDbEventListener {
 			return;
 		}
 		BaseOpenmrsData data = (BaseOpenmrsData) entity;
-		ClinicalRecordSerializer<BaseOpenmrsData> serializer = registry().resolve(data);
-		if (serializer == null) {
-			return;
-		}
 		try {
-			// Mirrors CoreServiceEventListener: serialize now (session open) and defer the
-			// embed + write to after-commit; the entity's own voided flag routes index-vs-delete.
+			// Resolve + serialize now (session open); RecordProjector defers the embed + write to
+			// after-commit, and the entity's own voided flag routes index-vs-delete. The querystore
+			// bean lookups sit inside the try too, so an infra hiccup can't escape into - and roll
+			// back - the clinical transaction that saved the discount/refund.
+			ClinicalRecordSerializer<BaseOpenmrsData> serializer = registry().resolve(data);
+			if (serializer == null) {
+				return;
+			}
 			RecordProjector.project(serializer, data, purge, indexer(), dispatcher());
 		}
 		catch (RuntimeException e) {
-			// Best-effort: a projection failure must not break the clinical transaction that saved
-			// the discount/refund (same contract as querystore's own consumer).
 			log.warn("Failed to project {} into the query store; swallowing", data.getClass().getSimpleName(), e);
 		}
 	}

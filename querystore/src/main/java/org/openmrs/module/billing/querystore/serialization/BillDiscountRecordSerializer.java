@@ -27,6 +27,12 @@ import org.openmrs.module.querystore.model.QueryDocument;
  * advice never fires for {@code saveBillDiscount}; live-sync is instead handled by
  * {@link org.openmrs.module.billing.querystore.BillChildDbEventListener} (core's non-AOP Hibernate
  * {@code SaveDbEvent}), with initial backfill by {@code BillDiscountBootstrapper}.
+ * <p>
+ * Note: for a PERCENTAGE discount, {@code discount_amount} (and the amount shown in the text) is
+ * derived from the bill total at projection time. If the bill total later changes without the
+ * discount being re-saved, that figure can lag until the discount's next save — the same
+ * cross-entity eventual-consistency the ADR notes for {@code billing_bill}. The intrinsic
+ * {@code discount_percent} is always current.
  */
 public class BillDiscountRecordSerializer extends AbstractBillChildRecordSerializer<BillDiscount> {
 	
