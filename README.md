@@ -76,7 +76,9 @@ Because QueryStore and the core `*ServiceEvent` API require **OpenMRS Platform 2
 mvn -Pquerystore clean install
 ```
 
-> **Runtime note:** the QueryStore SPI documents that whether a *module's* services emit the core `*ServiceEvent`s is deployment-dependent and should be verified on a live 2.9 server. If bills backfill but do not live-update, billing's services can publish the events themselves via a small aspect added to this submodule; backfill works regardless.
+Live sync uses two core event paths: `billing_bill` rides core #6084's AOP `*ServiceEvent`s (its `BillService` is an `OpenmrsService`), while `billing_discount` / `billing_refund` — whose services are plain interfaces — are projected by a `SaveDbEvent` listener over core's non-AOP Hibernate interceptor. All three also backfill via QueryStore's `reindex`. Verified end-to-end on a 2.9 + QueryStore + chartsearchai standalone.
+
+> The design decisions behind this integration (SPI vs. events, the optional-omod packaging, the two sync paths, indexed-type scope) are recorded in [docs/adr.md](docs/adr.md).
 
 ## Requirements
 
