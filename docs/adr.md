@@ -144,6 +144,25 @@ Excluded, with reasons:
 - Fewer types to serialize and keep in sync; the excluded config/metadata would add noise and mostly
   isn't projectable anyway.
 
+### Example chart-search queries
+Natural-language questions a clinician asks chart search (`POST /ws/rest/v1/chartsearchai/search`
+with `{"question": ..., "patient": ...}`), and the resource each is expected to surface. The
+*italicized* ones were exercised during verification (see the PR's verification comments) and
+returned the corresponding `resourceType`.
+
+- **`billing_bill`** — *"What has this patient been billed for, and what is the outstanding
+  balance?"*; "Does this patient have any unpaid bills?"; "Was the patient charged for a malaria
+  test / X-ray / consultation?"
+- **`billing_discount`** — *"Does this patient have any billing discounts or fee waivers, and for
+  how much?"*; "Is there a hardship or subsidized-programme waiver on this patient's bills?"
+- **`billing_refund`** — *"Has this patient had any bill refunds? What amount and reason?"*; "Was any
+  charge reversed or refunded for this patient?"
+
+Retrieval is semantic, not keyword-exact, so phrasing varies freely — "money owed", "charges",
+"waiver", "reimbursement" route to the right documents without matching the stored text verbatim.
+(A single question may cite more than one type — e.g. a refund question surfaced both
+`billing_refund` and the parent `billing_bill`, whose status had flipped to REFUND_REQUESTED.)
+
 ---
 
 ## Decision 4: billing_bill folds only fields that stay fresh on a bill save
