@@ -48,6 +48,9 @@ public class PaymentModeAttributeTypeResource extends MetadataDelegatingCrudReso
 			description.addProperty("retireReason");
 			description.addProperty("format");
 			description.addProperty("regExp");
+			description.addProperty("attributeOrder");
+			description.addProperty("foreignKey");
+			description.addProperty("required");
 		}
 		return description;
 	}
