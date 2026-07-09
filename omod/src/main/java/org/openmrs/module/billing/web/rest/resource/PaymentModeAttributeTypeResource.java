@@ -32,7 +32,7 @@ import org.openmrs.module.webservices.rest.web.response.ResponseException;
  */
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
         + "/paymentModeAttributeType", supportedClass = PaymentModeAttributeType.class, supportedOpenmrsVersions = {
-                "2.0 - 2.*" })
+                "2.7.8 - 9.*" })
 public class PaymentModeAttributeTypeResource extends MetadataDelegatingCrudResource<PaymentModeAttributeType> {
 	
 	private final PaymentModeAttributeTypeService service = Context.getService(PaymentModeAttributeTypeService.class);

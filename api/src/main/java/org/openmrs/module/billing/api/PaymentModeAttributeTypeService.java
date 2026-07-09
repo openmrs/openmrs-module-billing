@@ -18,18 +18,18 @@ import org.openmrs.module.billing.api.util.PrivilegeConstants;
 
 public interface PaymentModeAttributeTypeService extends OpenmrsService {
 	
-	@Authorized({ PrivilegeConstants.MANAGE_METADATA })
+	@Authorized({ PrivilegeConstants.VIEW_METADATA })
 	PaymentModeAttributeType getPaymentModeAttributeType(Integer id);
 	
-	@Authorized({ PrivilegeConstants.MANAGE_METADATA })
+	@Authorized({ PrivilegeConstants.VIEW_METADATA })
 	PaymentModeAttributeType getPaymentModeAttributeTypeByUuid(String uuid);
 	
-	@Authorized({ PrivilegeConstants.MANAGE_METADATA })
+	@Authorized({ PrivilegeConstants.VIEW_METADATA })
 	List<PaymentModeAttributeType> getAllPaymentModeAttributeTypes(boolean includeRetired);
 	
 	@Authorized({ PrivilegeConstants.MANAGE_METADATA })
 	PaymentModeAttributeType savePaymentModeAttributeType(PaymentModeAttributeType attributeType);
 	
-	@Authorized({ PrivilegeConstants.MANAGE_METADATA })
+	@Authorized({ PrivilegeConstants.PURGE_METADATA })
 	void purgePaymentModeAttributeType(PaymentModeAttributeType attributeType);
 }
