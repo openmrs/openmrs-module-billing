@@ -116,7 +116,7 @@ public class PaymentModeAttributeTypeServiceImplTest extends BaseModuleContextSe
 	 */
 	@Test
 	public void savePaymentModeAttributeType_shouldThrowIfNull() {
-		assertThrows(NullPointerException.class, () -> service.savePaymentModeAttributeType(null));
+		assertThrows(IllegalArgumentException.class, () -> service.savePaymentModeAttributeType(null));
 	}
 	
 	/**
@@ -138,6 +138,6 @@ public class PaymentModeAttributeTypeServiceImplTest extends BaseModuleContextSe
 	 */
 	@Test
 	public void purgePaymentModeAttributeType_shouldThrowIfNull() {
-		assertThrows(NullPointerException.class, () -> service.purgePaymentModeAttributeType(null));
+		assertThrows(IllegalArgumentException.class, () -> service.purgePaymentModeAttributeType(null));
 	}
 }
