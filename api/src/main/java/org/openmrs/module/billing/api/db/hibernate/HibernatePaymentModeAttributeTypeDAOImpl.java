@@ -9,14 +9,15 @@
  */
 package org.openmrs.module.billing.api.db.hibernate;
 
-import lombok.RequiredArgsConstructor;
-import org.hibernate.SessionFactory;
-import org.openmrs.module.billing.api.db.PaymentModeAttributeTypeDAO;
-import org.openmrs.module.billing.api.model.PaymentModeAttributeType;
+import java.util.List;
 
 import javax.annotation.Nonnull;
-import javax.persistence.TypedQuery;
-import java.util.List;
+
+import lombok.RequiredArgsConstructor;
+import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
+import org.openmrs.module.billing.api.db.PaymentModeAttributeTypeDAO;
+import org.openmrs.module.billing.api.model.PaymentModeAttributeType;
 
 @RequiredArgsConstructor
 public class HibernatePaymentModeAttributeTypeDAOImpl implements PaymentModeAttributeTypeDAO {
@@ -30,7 +31,7 @@ public class HibernatePaymentModeAttributeTypeDAOImpl implements PaymentModeAttr
 	
 	@Override
 	public PaymentModeAttributeType getPaymentModeAttributeTypeByUuid(@Nonnull String uuid) {
-		TypedQuery<PaymentModeAttributeType> query = sessionFactory.getCurrentSession().createQuery(
+		Query<PaymentModeAttributeType> query = sessionFactory.getCurrentSession().createQuery(
 		    "select p from PaymentModeAttributeType p where p.uuid = :uuid", PaymentModeAttributeType.class);
 		query.setParameter("uuid", uuid);
 		return query.getResultStream().findFirst().orElse(null);
