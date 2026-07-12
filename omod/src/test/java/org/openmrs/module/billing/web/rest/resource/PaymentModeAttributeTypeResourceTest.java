@@ -23,6 +23,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.PaymentModeAttributeTypeService;
 import org.openmrs.module.billing.api.model.PaymentModeAttributeType;
 import org.openmrs.module.webservices.rest.web.RequestContext;
+import org.openmrs.module.webservices.rest.web.representation.CustomRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
@@ -79,6 +80,13 @@ public class PaymentModeAttributeTypeResourceTest {
 		assertNotNull(description.getProperties().get("attributeOrder"));
 		assertNotNull(description.getProperties().get("foreignKey"));
 		assertNotNull(description.getProperties().get("required"));
+	}
+	
+	@Test
+	public void getRepresentationDescription_shouldReturnNullForCustomRepresentation() {
+		DelegatingResourceDescription description = resource.getRepresentationDescription(new CustomRepresentation("uuid,format"));
+		
+		assertNull(description);
 	}
 	
 	@Test

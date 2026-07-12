@@ -10,6 +10,7 @@
 package org.openmrs.module.billing.impl;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -116,7 +117,7 @@ public class PaymentModeAttributeTypeServiceImplTest extends BaseModuleContextSe
 	 */
 	@Test
 	public void savePaymentModeAttributeType_shouldThrowIfNull() {
-		assertThrows(IllegalArgumentException.class, () -> service.savePaymentModeAttributeType(null));
+		assertThrows(NullPointerException.class, () -> service.savePaymentModeAttributeType(null));
 	}
 	
 	/**
@@ -138,6 +139,6 @@ public class PaymentModeAttributeTypeServiceImplTest extends BaseModuleContextSe
 	 */
 	@Test
 	public void purgePaymentModeAttributeType_shouldThrowIfNull() {
-		assertThrows(IllegalArgumentException.class, () -> service.purgePaymentModeAttributeType(null));
+		assertThrows(NullPointerException.class, () -> service.purgePaymentModeAttributeType(null));
 	}
 }
