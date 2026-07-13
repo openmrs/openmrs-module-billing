@@ -84,7 +84,8 @@ public class PaymentModeAttributeTypeResourceTest {
 	
 	@Test
 	public void getRepresentationDescription_shouldReturnNullForCustomRepresentation() {
-		DelegatingResourceDescription description = resource.getRepresentationDescription(new CustomRepresentation("uuid,format"));
+		DelegatingResourceDescription description = resource
+		        .getRepresentationDescription(new CustomRepresentation("uuid,format"));
 		
 		assertNull(description);
 	}
