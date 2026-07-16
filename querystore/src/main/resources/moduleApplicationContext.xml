@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<!--
+		Each billing resource type contributes three beans: a serializer (entity -> QueryDocument), a
+		bootstrapper (one-time backfill of existing rows), and a provider that bundles them and declares
+		the resource type name. querystore discovers the providers - and the serializers, which its
+		events consumer resolves per save - via Context.getRegisteredComponents(...). `dbSessionFactory`
+		is the core Hibernate session factory the bootstrappers page over.
+	-->
+
+	<!-- ============================ billing_bill ============================ -->
+	<bean id="billing.querystore.serializer.bill"
+	      class="org.openmrs.module.billing.querystore.serialization.BillRecordSerializer"/>
+
+	<bean id="billing.querystore.bootstrapper.bill"
+	      class="org.openmrs.module.billing.querystore.bootstrap.BillBootstrapper">
+		<constructor-arg ref="billing.querystore.serializer.bill"/>
+		<constructor-arg ref="dbSessionFactory"/>
+	</bean>
+
+	<bean id="billing.querystore.provider.bill"
+	      class="org.openmrs.module.billing.querystore.spi.BillProvider">
+		<constructor-arg ref="billing.querystore.serializer.bill"/>
+		<constructor-arg ref="billing.querystore.bootstrapper.bill"/>
+	</bean>
+
+	<!-- ========================== billing_discount ========================== -->
+	<bean id="billing.querystore.serializer.discount"
+	      class="org.openmrs.module.billing.querystore.serialization.BillDiscountRecordSerializer"/>
+
+	<bean id="billing.querystore.bootstrapper.discount"
+	      class="org.openmrs.module.billing.querystore.bootstrap.BillDiscountBootstrapper">
+		<constructor-arg ref="billing.querystore.serializer.discount"/>
+		<constructor-arg ref="dbSessionFactory"/>
+	</bean>
+
+	<bean id="billing.querystore.provider.discount"
+	      class="org.openmrs.module.billing.querystore.spi.BillDiscountProvider">
+		<constructor-arg ref="billing.querystore.serializer.discount"/>
+		<constructor-arg ref="billing.querystore.bootstrapper.discount"/>
+	</bean>
+
+	<!-- =========================== billing_refund =========================== -->
+	<bean id="billing.querystore.serializer.refund"
+	      class="org.openmrs.module.billing.querystore.serialization.BillRefundRecordSerializer"/>
+
+	<bean id="billing.querystore.bootstrapper.refund"
+	      class="org.openmrs.module.billing.querystore.bootstrap.BillRefundBootstrapper">
+		<constructor-arg ref="billing.querystore.serializer.refund"/>
+		<constructor-arg ref="dbSessionFactory"/>
+	</bean>
+
+	<bean id="billing.querystore.provider.refund"
+	      class="org.openmrs.module.billing.querystore.spi.BillRefundProvider">
+		<constructor-arg ref="billing.querystore.serializer.refund"/>
+		<constructor-arg ref="billing.querystore.bootstrapper.refund"/>
+	</bean>
+
+	<!--
+		Live-sync for billing_discount / billing_refund. Their services are not OpenmrsServices, so
+		core #6084's AOP service-event advice never fires for them; instead we consume core's non-AOP
+		Hibernate SaveDbEvent/DeleteDbEvent (which fire for every entity) and drive the same querystore
+		projection pipeline. Bill itself is handled by querystore's own consumer via its SaveServiceEvent.
+	-->
+	<bean id="billing.querystore.dbEventListener"
+	      class="org.openmrs.module.billing.querystore.BillChildDbEventListener"/>
+
+</beans>

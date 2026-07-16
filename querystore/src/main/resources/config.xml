@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+
+-->
+<module configVersion="1.2">
+
+	<!-- Module Properties -->
+	<id>billingquerystore</id>
+	<name>OpenMRS Billing Module QueryStore Integration</name>
+	<version>${project.parent.version}</version>
+	<package>org.openmrs.module.billing.querystore</package>
+	<author>OpenMRS</author>
+	<description>
+		Projects billing records (bills, discounts, refunds) into the OpenMRS QueryStore so a
+		clinician-facing semantic/keyword chart search can retrieve them.
+	</description>
+	<!-- The core *ServiceEvent API this integration relies on (openmrs-core #6084) is 2.9-only.
+	     Filtered to the built-against platform version (currently 2.9.0-SNAPSHOT); OpenMRS treats a
+	     bare "2.9.0" as newer than a running "2.9.0-SNAPSHOT", so requiring the exact version avoids
+	     a spurious platform-version rejection - same reason chartsearchai pins 2.9.0-SNAPSHOT. -->
+	<require_version>${openmrsPlatformVersion}</require_version>
+	<!-- / Module Properties -->
+
+	<require_modules>
+		<!-- Match the exact (SNAPSHOT) dependency versions: OpenMRS ranks "X.Y.Z-SNAPSHOT" below a
+		     bare "X.Y.Z" required version, so a bare require would be left unsatisfied by the running
+		     SNAPSHOT builds. Filtered from this module's properties (= the sibling billing version and
+		     the querystore version we build against), matching chartsearchai's require of querystore. -->
+		<require_module version="${project.parent.version}">org.openmrs.module.billing</require_module>
+		<require_module version="${querystoreVersion}">org.openmrs.module.querystore</require_module>
+		<!-- The bill serializer references StockItem/Drug for line items that bill a stock item;
+		     require stockmanagement (billing already does) so those classes resolve on our classloader. -->
+		<require_module version="${stockmanagementVersion}">org.openmrs.module.stockmanagement</require_module>
+	</require_modules>
+
+	<!-- Module Activator -->
+	<activator>org.openmrs.module.billing.querystore.BillingQuerystoreActivator</activator>
+
+</module>
