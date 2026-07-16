@@ -27,7 +27,7 @@ import org.openmrs.patient.impl.LuhnIdentifierValidator;
 @Slf4j
 public class SequentialReceiptNumberGenerator implements IReceiptNumberGenerator {
 	
-	private final ISequentialReceiptNumberGeneratorService service;
+	private final SequentialReceiptNumberGeneratorService service;
 	
 	private SequentialReceiptNumberGeneratorModel model;
 	
@@ -36,7 +36,7 @@ public class SequentialReceiptNumberGenerator implements IReceiptNumberGenerator
 	private boolean loaded = false;
 	
 	public SequentialReceiptNumberGenerator() {
-		service = Context.getService(ISequentialReceiptNumberGeneratorService.class);
+		service = Context.getService(SequentialReceiptNumberGeneratorService.class);
 		checkDigitGenerator = new LuhnIdentifierValidator();
 	}
 	

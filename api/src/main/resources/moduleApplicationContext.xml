@@ -67,7 +67,7 @@
 	<bean parent="serviceContext">
 		<property name="moduleService">
 			<list merge="true">
-				<value>org.openmrs.module.billing.api.ISequentialReceiptNumberGeneratorService</value>
+				<value>org.openmrs.module.billing.api.SequentialReceiptNumberGeneratorService</value>
 				<ref bean="seqReceiptNumberGeneratorService"/>
 			</list>
 		</property>
@@ -182,8 +182,7 @@
 		<property name="preInterceptors" ref="serviceInterceptors"/>
 		<property name="transactionAttributeSource" ref="transactionAttributeSource"/>
 	</bean>
-	<bean id="seqReceiptNumberGeneratorService"
-	      class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+	<bean id="seqReceiptNumberGeneratorService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager" ref="transactionManager"/>
 		<property name="target">
 			<bean class="org.openmrs.module.billing.api.impl.SequentialReceiptNumberGeneratorServiceImpl">

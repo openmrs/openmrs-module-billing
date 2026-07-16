@@ -22,7 +22,7 @@ import org.junit.Test;
 import org.mockito.MockedStatic;
 import org.openmrs.Provider;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.billing.api.ISequentialReceiptNumberGeneratorService;
+import org.openmrs.module.billing.api.SequentialReceiptNumberGeneratorService;
 import org.openmrs.module.billing.api.SequentialReceiptNumberGenerator;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.CashPoint;
@@ -31,7 +31,7 @@ import org.openmrs.patient.impl.LuhnIdentifierValidator;
 
 public class SequentialReceiptNumberGeneratorTest {
 	
-	private ISequentialReceiptNumberGeneratorService service;
+	private SequentialReceiptNumberGeneratorService service;
 	
 	private SequentialReceiptNumberGenerator generator;
 	
@@ -40,8 +40,8 @@ public class SequentialReceiptNumberGeneratorTest {
 	@Before
 	public void before() {
 		contextMock = mockStatic(Context.class);
-		service = mock(ISequentialReceiptNumberGeneratorService.class);
-		contextMock.when(() -> Context.getService(ISequentialReceiptNumberGeneratorService.class)).thenReturn(service);
+		service = mock(SequentialReceiptNumberGeneratorService.class);
+		contextMock.when(() -> Context.getService(SequentialReceiptNumberGeneratorService.class)).thenReturn(service);
 		
 		generator = new SequentialReceiptNumberGenerator();
 	}
