@@ -439,6 +439,98 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 		    "Bill 2005 has only a voided REQUESTED refund — must be excluded even in multi-status query");
 	}
 	
+	@Test
+	public void getBills_shouldFilterByStartDate() {
+		Date now = new Date();
+		Patient patient = patientService.getPatient(0);
+		
+		Bill olderBill = new Bill();
+		olderBill.setCashier(providerService.getProvider(0));
+		olderBill.setPatient(patient);
+		olderBill.setCashPoint(cashPointService.getCashPoint(0));
+		olderBill.setReceiptNumber("START-DATE-OLD-" + UUID.randomUUID());
+		olderBill.setStatus(BillStatus.PENDING);
+		olderBill.setDateCreated(new Date(now.getTime() - 1000000));
+		billDAO.saveBill(olderBill);
+		
+		Bill newerBill = new Bill();
+		newerBill.setCashier(providerService.getProvider(0));
+		newerBill.setPatient(patient);
+		newerBill.setCashPoint(cashPointService.getCashPoint(0));
+		newerBill.setReceiptNumber("START-DATE-NEW-" + UUID.randomUUID());
+		newerBill.setStatus(BillStatus.PENDING);
+		newerBill.setDateCreated(new Date(now.getTime() + 1000000));
+		billDAO.saveBill(newerBill);
+		
+		Context.flushSession();
+		
+		BillSearch search = BillSearch.builder().startDate(new Date(now.getTime() + 500000)).build();
+		List<Bill> results = billDAO.getBills(search, null);
+		List<String> resultUuids = uuids(results);
+		
+		assertTrue(resultUuids.contains(newerBill.getUuid()));
+		assertFalse(resultUuids.contains(olderBill.getUuid()));
+	}
+	
+	@Test
+	public void getBills_shouldFilterByEndDate() {
+		Date now = new Date();
+		Patient patient = patientService.getPatient(0);
+		
+		Bill olderBill = new Bill();
+		olderBill.setCashier(providerService.getProvider(0));
+		olderBill.setPatient(patient);
+		olderBill.setCashPoint(cashPointService.getCashPoint(0));
+		olderBill.setReceiptNumber("END-DATE-OLD-" + UUID.randomUUID());
+		olderBill.setStatus(BillStatus.PENDING);
+		olderBill.setDateCreated(new Date(now.getTime() - 1000000));
+		billDAO.saveBill(olderBill);
+		
+		Bill newerBill = new Bill();
+		newerBill.setCashier(providerService.getProvider(0));
+		newerBill.setPatient(patient);
+		newerBill.setCashPoint(cashPointService.getCashPoint(0));
+		newerBill.setReceiptNumber("END-DATE-NEW-" + UUID.randomUUID());
+		newerBill.setStatus(BillStatus.PENDING);
+		newerBill.setDateCreated(new Date(now.getTime() + 1000000));
+		billDAO.saveBill(newerBill);
+		
+		Context.flushSession();
+		
+		BillSearch search = BillSearch.builder().endDate(new Date(now.getTime() - 500000)).build();
+		List<Bill> results = billDAO.getBills(search, null);
+		List<String> resultUuids = uuids(results);
+		
+		assertTrue(resultUuids.contains(olderBill.getUuid()));
+		assertFalse(resultUuids.contains(newerBill.getUuid()));
+	}
+	
+	@Test
+	public void getBills_shouldFilterByDateRange() {
+		Date now = new Date();
+		Patient patient = patientService.getPatient(0);
+		
+		Bill targetBill = new Bill();
+		targetBill.setCashier(providerService.getProvider(0));
+		targetBill.setPatient(patient);
+		targetBill.setCashPoint(cashPointService.getCashPoint(0));
+		targetBill.setReceiptNumber("RANGE-TARGET-" + UUID.randomUUID());
+		targetBill.setStatus(BillStatus.PENDING);
+		targetBill.setDateCreated(now);
+		billDAO.saveBill(targetBill);
+		
+		Context.flushSession();
+		
+		BillSearch search = BillSearch.builder()
+		        .startDate(new Date(now.getTime() - 10000))
+		        .endDate(new Date(now.getTime() + 10000))
+		        .build();
+		List<Bill> results = billDAO.getBills(search, null);
+		List<String> resultUuids = uuids(results);
+		
+		assertTrue(resultUuids.contains(targetBill.getUuid()));
+	}
+	
 	private List<String> uuids(List<Bill> bills) {
 		return bills.stream().map(Bill::getUuid).sorted().collect(Collectors.toList());
 	}

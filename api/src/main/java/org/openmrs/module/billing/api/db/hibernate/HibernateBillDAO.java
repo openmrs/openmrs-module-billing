@@ -50,6 +50,8 @@ public class HibernateBillDAO implements BillDAO {
 	
 	private static final String FIELD_VOIDED = "voided";
 	
+	private static final String FIELD_DATE_CREATED = "dateCreated";
+	
 	@Setter(AccessLevel.PROTECTED)
 	private SessionFactory sessionFactory;
 	
@@ -96,7 +98,7 @@ public class HibernateBillDAO implements BillDAO {
 		
 		Predicate predicate = cb.equal(root.get("patient").get("uuid"), patientUuid);
 		cq.where(predicate);
-		cq.orderBy(cb.desc(root.get("dateCreated")));
+		cq.orderBy(cb.desc(root.get(FIELD_DATE_CREATED)));
 		
 		TypedQuery<Bill> query = session.createQuery(cq);
 		
@@ -123,7 +125,7 @@ public class HibernateBillDAO implements BillDAO {
 		if (!predicates.isEmpty()) {
 			cq.where(predicates.toArray(new Predicate[0]));
 		}
-		cq.orderBy(cb.desc(root.get("dateCreated")));
+		cq.orderBy(cb.desc(root.get(FIELD_DATE_CREATED)));
 		
 		TypedQuery<Bill> query = session.createQuery(cq);
 		
@@ -197,6 +199,14 @@ public class HibernateBillDAO implements BillDAO {
 			    cb.equal(refundRoot.get(FIELD_VOIDED), false),
 			    refundRoot.get(FIELD_STATUS).in(billSearch.getRefundStatuses()));
 			predicates.add(cb.exists(sub));
+		}
+		
+		if (billSearch.getStartDate() != null) {
+			predicates.add(cb.greaterThanOrEqualTo(root.get(FIELD_DATE_CREATED), billSearch.getStartDate()));
+		}
+		
+		if (billSearch.getEndDate() != null) {
+			predicates.add(cb.lessThanOrEqualTo(root.get(FIELD_DATE_CREATED), billSearch.getEndDate()));
 		}
 		
 		return predicates;
