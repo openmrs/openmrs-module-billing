@@ -11,6 +11,7 @@ package org.openmrs.module.billing.web.rest.resource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -44,6 +45,7 @@ import org.openmrs.module.billing.api.util.RoundingUtil;
 import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
 import org.openmrs.module.billing.web.base.resource.PagingUtil;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
+import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.PropertyGetter;
@@ -369,6 +371,16 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 		String includeAll = context.getRequest().getParameter("includeAll");
 		if (StringUtils.isNotBlank(includeAll)) {
 			billSearch.setIncludeVoidedLineItems(Boolean.parseBoolean(includeAll));
+		}
+		
+		String startDate = context.getRequest().getParameter("startDate");
+		if (StringUtils.isNotBlank(startDate)) {
+			billSearch.setStartDate((Date) ConversionUtil.convert(startDate, Date.class));
+		}
+		
+		String endDate = context.getRequest().getParameter("endDate");
+		if (StringUtils.isNotBlank(endDate)) {
+			billSearch.setEndDate((Date) ConversionUtil.convert(endDate, Date.class));
 		}
 		
 		return billSearch;

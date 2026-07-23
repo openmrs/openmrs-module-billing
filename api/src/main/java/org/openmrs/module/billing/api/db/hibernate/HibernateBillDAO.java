@@ -199,6 +199,14 @@ public class HibernateBillDAO implements BillDAO {
 			predicates.add(cb.exists(sub));
 		}
 		
+		if (billSearch.getStartDate() != null) {
+			predicates.add(cb.greaterThanOrEqualTo(root.get("dateCreated"), billSearch.getStartDate()));
+		}
+		
+		if (billSearch.getEndDate() != null) {
+			predicates.add(cb.lessThanOrEqualTo(root.get("dateCreated"), billSearch.getEndDate()));
+		}
+		
 		return predicates;
 	}
 	
