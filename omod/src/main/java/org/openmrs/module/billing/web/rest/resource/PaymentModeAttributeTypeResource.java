@@ -40,22 +40,24 @@ public class PaymentModeAttributeTypeResource extends MetadataDelegatingCrudReso
 	
 	@Override
 	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
+		if (rep instanceof CustomRepresentation) {
+			return null;
+		}
 		DelegatingResourceDescription description = new DelegatingResourceDescription();
 		description.addProperty("uuid");
 		description.addProperty("name");
 		description.addProperty("description");
 		description.addProperty("retired");
+		description.addProperty("attributeOrder");
+		description.addProperty("format");
+		description.addProperty("foreignKey");
+		description.addProperty("regExp");
+		description.addProperty("required");
 		if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
 			description.addProperty("retireReason");
-			description.addProperty("format");
-			description.addProperty("regExp");
-			description.addProperty("attributeOrder");
-			description.addProperty("foreignKey");
-			description.addProperty("required");
-		} else if (rep instanceof CustomRepresentation) {
-			// For custom representation, must be null
-			// - let the user decide which properties should be included in the response
-			return null;
+		}
+		if (rep instanceof FullRepresentation) {
+			description.addProperty("auditInfo");
 		}
 		return description;
 	}

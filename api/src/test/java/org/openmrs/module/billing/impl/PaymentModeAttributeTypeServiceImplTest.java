@@ -38,6 +38,7 @@ public class PaymentModeAttributeTypeServiceImplTest extends BaseModuleContextSe
 		service = Context.getService(PaymentModeAttributeTypeService.class);
 		executeDataSet(TestConstants.CORE_DATASET2);
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "PaymentModeTest.xml");
+		executeDataSet(TestConstants.BASE_DATASET_DIR + "PaymentModeAttributeTypeTest.xml");
 	}
 	
 	/**
@@ -108,7 +109,7 @@ public class PaymentModeAttributeTypeServiceImplTest extends BaseModuleContextSe
 	public void getAllPaymentModeAttributeTypes_shouldReturnAllIncludingRetired() {
 		List<PaymentModeAttributeType> types = service.getAllPaymentModeAttributeTypes(true);
 		assertNotNull(types);
-		assertEquals(3, types.size());
+		assertEquals(4, types.size());
 	}
 	
 	/**
