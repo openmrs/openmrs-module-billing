@@ -26,6 +26,7 @@ import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.representation.CustomRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
+import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
 
@@ -77,6 +78,18 @@ public class PaymentModeAttributeTypeResourceTest {
 		DelegatingResourceDescription description = resource.getRepresentationDescription(new DefaultRepresentation());
 		
 		assertNotNull(description);
+		assertNotNull(description.getProperties().get("attributeOrder"));
+		assertNotNull(description.getProperties().get("foreignKey"));
+		assertNotNull(description.getProperties().get("required"));
+	}
+	
+	@Test
+	public void getRepresentationDescription_shouldIncludeAttributeFieldsForRefRepresentation() {
+		DelegatingResourceDescription description = resource.getRepresentationDescription(new RefRepresentation());
+		
+		assertNotNull(description);
+		assertNotNull(description.getProperties().get("format"));
+		assertNotNull(description.getProperties().get("regExp"));
 		assertNotNull(description.getProperties().get("attributeOrder"));
 		assertNotNull(description.getProperties().get("foreignKey"));
 		assertNotNull(description.getProperties().get("required"));

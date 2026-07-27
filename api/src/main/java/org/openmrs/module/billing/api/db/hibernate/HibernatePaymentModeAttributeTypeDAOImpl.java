@@ -39,7 +39,7 @@ public class HibernatePaymentModeAttributeTypeDAOImpl implements PaymentModeAttr
 	
 	@Override
 	public List<PaymentModeAttributeType> getAllPaymentModeAttributeTypes(boolean includeRetired) {
-		String hql = "from PaymentModeAttributeType" + (includeRetired ? "" : " where retired = false");
+		String hql = "from PaymentModeAttributeType" + (includeRetired ? "" : " where retired = false") + " order by name";
 		return sessionFactory.getCurrentSession().createQuery(hql, PaymentModeAttributeType.class).getResultList();
 	}
 	
