@@ -96,6 +96,7 @@ The module provides several global properties for configuration:
 - `billing.defaultShiftReportId`: Jasper report ID for shift reports
 - `billing.receipt.logoPath`: Path to receipt logo image
 - `billing.systemReceiptNumberGenerator`: Class name for receipt number generator (default: `org.openmrs.module.billing.api.SequentialReceiptNumberGenerator`)
+- `billing.sequenceBlockSize`: Number of receipt sequence values reserved per database round-trip (default: 100). Larger blocks reduce database contention; smaller blocks reduce the sequence values skipped on restart (up to blockSize - 1 per group). Receipt numbers are always unique but may skip values.
 
 **Bill Rounding**:
 

@@ -66,6 +66,7 @@ public interface ISequentialReceiptNumberGeneratorService extends IObjectDataSer
 	 * @param blockSize The number of values to reserve.
 	 * @return The first value of the reserved block.
 	 * @should Reserve non overlapping blocks
+	 * @should Not hand out overlapping blocks under concurrency
 	 * @should Commit independently of an enclosing transaction
 	 * @should Throw IllegalArgumentException if the group is null
 	 * @should Throw IllegalArgumentException if blockSize is less than one

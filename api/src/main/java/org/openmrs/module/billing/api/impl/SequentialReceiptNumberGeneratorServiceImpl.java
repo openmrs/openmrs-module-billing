@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.LockMode;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.exception.LockAcquisitionException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.ModuleSettings;
 import org.openmrs.module.billing.api.ISequentialReceiptNumberGeneratorService;
@@ -25,6 +26,7 @@ import org.openmrs.module.billing.api.base.entity.impl.BaseObjectDataServiceImpl
 import org.openmrs.module.billing.api.model.GroupSequence;
 import org.openmrs.module.billing.api.model.SequentialReceiptNumberGeneratorModel;
 import org.openmrs.module.billing.api.security.BasicEntityAuthorizationPrivileges;
+import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -195,7 +197,7 @@ public class SequentialReceiptNumberGeneratorServiceImpl extends BaseObjectDataS
 			return getProxy().reserveSequenceBlock(group, blockSize);
 		}
 		catch (RuntimeException ex) {
-			if (!isConstraintViolation(ex)) {
+			if (!isRetryable(ex)) {
 				throw ex;
 			}
 			
@@ -255,12 +257,12 @@ public class SequentialReceiptNumberGeneratorServiceImpl extends BaseObjectDataS
 		}
 	}
 	
-	private static boolean isConstraintViolation(Throwable ex) {
+	private static boolean isRetryable(Throwable ex) {
 		Throwable t = ex;
 		for (int depth = 0; t != null && depth < MAX_CAUSE_CHAIN_DEPTH; depth++) {
 			if (t instanceof org.hibernate.exception.ConstraintViolationException
-			        || t instanceof SQLIntegrityConstraintViolationException
-			        || t instanceof DataIntegrityViolationException) {
+			        || t instanceof SQLIntegrityConstraintViolationException || t instanceof DataIntegrityViolationException
+			        || t instanceof LockAcquisitionException || t instanceof ConcurrencyFailureException) {
 				return true;
 			}
 			t = t.getCause();

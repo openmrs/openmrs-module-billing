@@ -9,6 +9,12 @@
  */
 package org.openmrs.module.billing;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -180,6 +186,47 @@ public class SequentialReceiptNumberGeneratorReserveTest extends BaseModuleConte
 	
 	private TransactionTemplate newTransactionTemplate() {
 		return new TransactionTemplate(applicationContext.getBean("transactionManager", PlatformTransactionManager.class));
+	}
+	
+	@Test
+	public void reserveSequenceBlock_shouldNotHandOutOverlappingBlocksUnderConcurrency() throws Exception {
+		service.reserveSequenceBlock("reserve-lock", 1);
+		
+		final ConcurrentLinkedQueue<Integer> firsts = new ConcurrentLinkedQueue<>();
+		final ConcurrentLinkedQueue<Throwable> failures = new ConcurrentLinkedQueue<>();
+		final CountDownLatch start = new CountDownLatch(1);
+		
+		List<Thread> threads = new ArrayList<>();
+		for (int i = 0; i < 4; i++) {
+			Thread thread = new Thread(() -> {
+				Context.openSession();
+				try {
+					start.await();
+					ISequentialReceiptNumberGeneratorService threadService = Context
+					        .getService(ISequentialReceiptNumberGeneratorService.class);
+					for (int call = 0; call < 25; call++) {
+						firsts.add(threadService.reserveSequenceBlock("reserve-lock", 10));
+					}
+				}
+				catch (Throwable t) {
+					failures.add(t);
+				}
+				finally {
+					Context.closeSession();
+				}
+			});
+			threads.add(thread);
+			thread.start();
+		}
+		
+		start.countDown();
+		for (Thread thread : threads) {
+			thread.join(180000);
+		}
+		
+		Assert.assertTrue("Worker threads failed: " + failures, failures.isEmpty());
+		Assert.assertEquals(100, firsts.size());
+		Assert.assertEquals("Overlapping blocks were handed out", 100, new HashSet<>(firsts).size());
 	}
 	
 	@Test(expected = IllegalArgumentException.class)

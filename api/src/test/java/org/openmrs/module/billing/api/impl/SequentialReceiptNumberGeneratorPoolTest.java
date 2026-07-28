@@ -17,6 +17,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -28,10 +29,12 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.hibernate.exception.ConstraintViolationException;
+import org.hibernate.exception.LockAcquisitionException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.module.billing.api.ISequentialReceiptNumberGeneratorService;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataIntegrityViolationException;
 
 /**
@@ -127,6 +130,18 @@ public class SequentialReceiptNumberGeneratorPoolTest {
 		Assert.assertEquals(1, service.reserveNextSequence("race"));
 		
 		verify(blockReserver, times(2)).reserveSequenceBlock("race", BLOCK_SIZE);
+	}
+	
+	@Test
+	public void reserveNextSequence_shouldRetryOnceWhenBlockReservationHitsADeadlock() {
+		when(blockReserver.reserveSequenceBlock("deadlock", BLOCK_SIZE))
+		        .thenThrow(new CannotAcquireLockException("deadlock",
+		                new LockAcquisitionException("deadlock", new SQLException("Deadlock found", "40001", 1213))))
+		        .thenReturn(1);
+		
+		Assert.assertEquals(1, service.reserveNextSequence("deadlock"));
+		
+		verify(blockReserver, times(2)).reserveSequenceBlock("deadlock", BLOCK_SIZE);
 	}
 	
 	@Test
