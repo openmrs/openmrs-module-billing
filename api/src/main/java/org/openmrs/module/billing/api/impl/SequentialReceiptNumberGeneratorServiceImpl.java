@@ -89,32 +89,38 @@ public class SequentialReceiptNumberGeneratorServiceImpl extends BaseObjectDataS
 		}
 		
 		while (true) {
-			SequencePool pool = pools.computeIfAbsent(group, g -> new SequencePool());
-			if (pool.isInvalidated()) {
-				pools.remove(group, pool);
-				continue;
-			}
-			
-			Integer value = pool.tryTake();
+			Integer value = tryReserveFromPool(group);
 			if (value != null) {
 				return value;
 			}
-			
-			synchronized (pool.refillLock) {
-				value = pool.tryTake();
-				if (value != null) {
-					return value;
-				}
-				if (pool.isInvalidated()) {
-					continue;
-				}
-				
-				int blockSize = getBlockSize();
-				value = pool.refillAndTake(reserveBlockWithRetry(group, blockSize), blockSize);
-				if (value != null) {
-					return value;
-				}
+		}
+	}
+	
+	// Returns null when the pool was invalidated concurrently and the reservation must be retried
+	private Integer tryReserveFromPool(String group) {
+		SequencePool pool = pools.computeIfAbsent(group, g -> new SequencePool());
+		if (pool.isInvalidated()) {
+			pools.remove(group, pool);
+			return null;
+		}
+		
+		Integer value = pool.tryTake();
+		if (value != null) {
+			return value;
+		}
+		
+		// The DB round-trip must not run under the pool monitor: it deadlocks against invalidatePool
+		synchronized (pool.refillLock) {
+			value = pool.tryTake();
+			if (value != null) {
+				return value;
 			}
+			if (pool.isInvalidated()) {
+				return null;
+			}
+			
+			int blockSize = getBlockSize();
+			return pool.refillAndTake(reserveBlockWithRetry(group, blockSize), blockSize);
 		}
 	}
 	
