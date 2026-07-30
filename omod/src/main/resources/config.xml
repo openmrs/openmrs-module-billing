@@ -78,6 +78,15 @@
 	</globalProperty>
 
 	<globalProperty>
+		<property>${project.parent.artifactId}.sequenceBlockSize</property>
+		<description>Number of receipt sequence values reserved per database round-trip. Larger blocks
+			reduce database contention but increase the sequence values skipped on restart (up to
+			blockSize - 1 per group). Must be at least 1; defaults to 100.
+		</description>
+		<defaultValue>100</defaultValue>
+	</globalProperty>
+
+	<globalProperty>
 		<property>${project.parent.artifactId}.roundingItemId</property>
 		<description>ID of the item used to account for bill total rounding.</description>
 	</globalProperty>
