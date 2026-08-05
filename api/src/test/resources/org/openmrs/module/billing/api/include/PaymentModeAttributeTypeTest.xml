@@ -13,7 +13,7 @@
 <dataset>
 	<cashier_payment_mode_attribute_type payment_mode_attribute_type_id="10"
 	                    payment_mode_id="0"
-	                    attribute_order="0"
+	                    attribute_order="3"
 	                    name="Retired Attribute Type"
 	                    description="A retired attribute type for testing"
 	                    format="java.lang.String"
