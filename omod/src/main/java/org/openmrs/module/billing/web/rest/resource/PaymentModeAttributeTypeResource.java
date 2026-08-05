@@ -63,6 +63,19 @@ public class PaymentModeAttributeTypeResource extends MetadataDelegatingCrudReso
 	}
 	
 	@Override
+	public DelegatingResourceDescription getCreatableProperties() {
+		DelegatingResourceDescription description = new DelegatingResourceDescription();
+		description.addProperty("name");
+		description.addProperty("description");
+		description.addProperty("format");
+		description.addProperty("regExp");
+		description.addProperty("required");
+		description.addProperty("attributeOrder");
+		description.addProperty("foreignKey");
+		return description;
+	}
+	
+	@Override
 	public PageableResult doGetAll(RequestContext context) throws ResponseException {
 		List<PaymentModeAttributeType> attributeTypes = service.getAllPaymentModeAttributeTypes(context.getIncludeAll());
 		return new NeedsPaging<>(attributeTypes, context);

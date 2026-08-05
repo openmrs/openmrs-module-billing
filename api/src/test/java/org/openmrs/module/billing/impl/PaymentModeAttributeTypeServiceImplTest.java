@@ -25,14 +25,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests for {@link PaymentModeAttributeTypeServiceImpl}.
  */
 public class PaymentModeAttributeTypeServiceImplTest extends BaseModuleContextSensitiveTest {
-	
+
 	private PaymentModeAttributeTypeService service;
-	
+
 	@BeforeEach
 	public void setup() {
 		service = Context.getService(PaymentModeAttributeTypeService.class);
@@ -40,7 +41,7 @@ public class PaymentModeAttributeTypeServiceImplTest extends BaseModuleContextSe
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "PaymentModeTest.xml");
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "PaymentModeAttributeTypeTest.xml");
 	}
-	
+
 	/**
 	 * @see PaymentModeAttributeTypeServiceImpl#getPaymentModeAttributeType(Integer)
 	 */
@@ -50,7 +51,7 @@ public class PaymentModeAttributeTypeServiceImplTest extends BaseModuleContextSe
 		assertNotNull(type);
 		assertEquals(0, type.getId());
 	}
-	
+
 	/**
 	 * @see PaymentModeAttributeTypeServiceImpl#getPaymentModeAttributeType(Integer)
 	 */
@@ -59,7 +60,7 @@ public class PaymentModeAttributeTypeServiceImplTest extends BaseModuleContextSe
 		PaymentModeAttributeType type = service.getPaymentModeAttributeType(null);
 		assertNull(type);
 	}
-	
+
 	/**
 	 * @see PaymentModeAttributeTypeServiceImpl#getPaymentModeAttributeTypeByUuid(String)
 	 */
@@ -69,7 +70,7 @@ public class PaymentModeAttributeTypeServiceImplTest extends BaseModuleContextSe
 		assertNotNull(type);
 		assertEquals("4028814B39B565A20139B56712DD0003", type.getUuid());
 	}
-	
+
 	/**
 	 * @see PaymentModeAttributeTypeServiceImpl#getPaymentModeAttributeTypeByUuid(String)
 	 */
@@ -78,7 +79,7 @@ public class PaymentModeAttributeTypeServiceImplTest extends BaseModuleContextSe
 		PaymentModeAttributeType type = service.getPaymentModeAttributeTypeByUuid(null);
 		assertNull(type);
 	}
-	
+
 	/**
 	 * @see PaymentModeAttributeTypeServiceImpl#getPaymentModeAttributeTypeByUuid(String)
 	 */
@@ -87,7 +88,16 @@ public class PaymentModeAttributeTypeServiceImplTest extends BaseModuleContextSe
 		PaymentModeAttributeType type = service.getPaymentModeAttributeTypeByUuid("");
 		assertNull(type);
 	}
-	
+
+	/**
+	 * @see PaymentModeAttributeTypeServiceImpl#getPaymentModeAttributeTypeByUuid(String)
+	 */
+	@Test
+	public void getPaymentModeAttributeTypeByUuid_shouldReturnNullForNonExistentUuid() {
+		PaymentModeAttributeType type = service.getPaymentModeAttributeTypeByUuid("non-existent-uuid-12345");
+		assertNull(type);
+	}
+
 	/**
 	 * @see PaymentModeAttributeTypeServiceImpl#getAllPaymentModeAttributeTypes(boolean)
 	 */
@@ -101,7 +111,7 @@ public class PaymentModeAttributeTypeServiceImplTest extends BaseModuleContextSe
 			assertFalse(type.getRetired());
 		}
 	}
-	
+
 	/**
 	 * @see PaymentModeAttributeTypeServiceImpl#getAllPaymentModeAttributeTypes(boolean)
 	 */
@@ -111,7 +121,39 @@ public class PaymentModeAttributeTypeServiceImplTest extends BaseModuleContextSe
 		assertNotNull(types);
 		assertEquals(4, types.size());
 	}
-	
+
+	/**
+	 * @see PaymentModeAttributeTypeServiceImpl#getAllPaymentModeAttributeTypes(boolean)
+	 */
+	@Test
+	public void getAllPaymentModeAttributeTypes_shouldReturnResultsOrderedByName() {
+		List<PaymentModeAttributeType> types = service.getAllPaymentModeAttributeTypes(true);
+		assertNotNull(types);
+		for (int i = 1; i < types.size(); i++) {
+			assertTrue(types.get(i - 1).getName().compareToIgnoreCase(types.get(i).getName()) <= 0,
+			    "Results should be ordered by name");
+		}
+	}
+
+	/**
+	 * @see PaymentModeAttributeTypeServiceImpl#savePaymentModeAttributeType(PaymentModeAttributeType)
+	 */
+	@Test
+	public void savePaymentModeAttributeType_shouldSaveAndReturnAttributeType() {
+		PaymentModeAttributeType type = service.getPaymentModeAttributeType(0);
+		assertNotNull(type);
+		type.setName("Updated Name");
+
+		PaymentModeAttributeType saved = service.savePaymentModeAttributeType(type);
+		Context.flushSession();
+
+		assertNotNull(saved);
+		assertEquals("Updated Name", saved.getName());
+
+		PaymentModeAttributeType fetched = service.getPaymentModeAttributeType(0);
+		assertEquals("Updated Name", fetched.getName());
+	}
+
 	/**
 	 * @see PaymentModeAttributeTypeServiceImpl#savePaymentModeAttributeType(PaymentModeAttributeType)
 	 */
@@ -119,7 +161,7 @@ public class PaymentModeAttributeTypeServiceImplTest extends BaseModuleContextSe
 	public void savePaymentModeAttributeType_shouldThrowIfNull() {
 		assertThrows(IllegalArgumentException.class, () -> service.savePaymentModeAttributeType(null));
 	}
-	
+
 	/**
 	 * @see PaymentModeAttributeTypeServiceImpl#purgePaymentModeAttributeType(PaymentModeAttributeType)
 	 */
@@ -127,13 +169,13 @@ public class PaymentModeAttributeTypeServiceImplTest extends BaseModuleContextSe
 	public void purgePaymentModeAttributeType_shouldDeleteAttributeType() {
 		PaymentModeAttributeType type = service.getPaymentModeAttributeType(0);
 		assertNotNull(type);
-		
+
 		service.purgePaymentModeAttributeType(type);
 		Context.flushSession();
-		
+
 		assertNull(service.getPaymentModeAttributeType(0));
 	}
-	
+
 	/**
 	 * @see PaymentModeAttributeTypeServiceImpl#purgePaymentModeAttributeType(PaymentModeAttributeType)
 	 */
