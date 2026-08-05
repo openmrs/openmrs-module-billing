@@ -9,22 +9,55 @@
  */
 package org.openmrs.module.billing.api.impl;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
+import org.hibernate.LockMode;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.exception.LockAcquisitionException;
+import org.openmrs.api.context.Context;
+import org.openmrs.module.billing.ModuleSettings;
 import org.openmrs.module.billing.api.ISequentialReceiptNumberGeneratorService;
 import org.openmrs.module.billing.api.base.entity.impl.BaseObjectDataServiceImpl;
 import org.openmrs.module.billing.api.model.GroupSequence;
 import org.openmrs.module.billing.api.model.SequentialReceiptNumberGeneratorModel;
 import org.openmrs.module.billing.api.security.BasicEntityAuthorizationPrivileges;
+import org.springframework.dao.ConcurrencyFailureException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Data service implementation class for {@link SequentialReceiptNumberGeneratorModel}s.
+ * <p>
+ * Sequence values are handed out from an in-memory per-group pool that is refilled by reserving
+ * blocks of values (size configured by the {@code billing.sequenceBlockSize} global property,
+ * default {@link #DEFAULT_SEQUENCE_BLOCK_SIZE}) in a separate, immediately-committed transaction
+ * that pessimistically locks the sequence row. This keeps concurrent reservations unique across
+ * threads and JVMs, at the cost of gaps in the sequence: a rolled-back consumer burns its value,
+ * and a restart discards the unused remainder of the current block.
+ * </p>
+ * <p>
+ * Pool invalidation on {@link #saveSequence} / {@link #purgeSequence} is JVM-local: other nodes in
+ * a cluster keep serving their already-reserved blocks. Manually editing a sequence value is
+ * therefore only safe when done on all nodes or while the other nodes are stopped.
+ * </p>
  */
+@Slf4j
 @Transactional
 public class SequentialReceiptNumberGeneratorServiceImpl extends BaseObjectDataServiceImpl<SequentialReceiptNumberGeneratorModel, BasicEntityAuthorizationPrivileges> implements ISequentialReceiptNumberGeneratorService {
+	
+	public static final int DEFAULT_SEQUENCE_BLOCK_SIZE = 100;
+	
+	private static final int MAX_CAUSE_CHAIN_DEPTH = 10;
+	
+	private final ConcurrentHashMap<String, SequencePool> pools = new ConcurrentHashMap<>();
 	
 	@Override
 	protected BasicEntityAuthorizationPrivileges getPrivileges() {
@@ -51,23 +84,75 @@ public class SequentialReceiptNumberGeneratorServiceImpl extends BaseObjectDataS
 	@Override
 	@Transactional
 	public int reserveNextSequence(String group) {
-		// Get the sequence
-		GroupSequence sequence = getSequence(group);
-		if (sequence == null) {
-			// Sequence not found so create it
-			sequence = new GroupSequence();
-			sequence.setGroup(group);
-			sequence.setValue(1);
-		} else {
-			// Increment the value
-			sequence.setValue(sequence.getValue() + 1);
+		if (group == null) {
+			throw new IllegalArgumentException("The group must be defined.");
 		}
 		
-		// Store the sequence and save the updated or new sequence
-		int result = sequence.getValue();
-		saveSequence(sequence);
+		while (true) {
+			Integer value = tryReserveFromPool(group);
+			if (value != null) {
+				return value;
+			}
+		}
+	}
+	
+	// Returns null when the pool was invalidated concurrently and the reservation must be retried
+	private Integer tryReserveFromPool(String group) {
+		SequencePool pool = pools.computeIfAbsent(group, g -> new SequencePool());
+		if (pool.isInvalidated()) {
+			pools.remove(group, pool);
+			return null;
+		}
 		
-		return result;
+		Integer value = pool.tryTake();
+		if (value != null) {
+			return value;
+		}
+		
+		// The DB round-trip must not run under the pool monitor: it deadlocks against invalidatePool
+		synchronized (pool.refillLock) {
+			value = pool.tryTake();
+			if (value != null) {
+				return value;
+			}
+			if (pool.isInvalidated()) {
+				return null;
+			}
+			
+			int blockSize = getBlockSize();
+			return pool.refillAndTake(reserveBlockWithRetry(group, blockSize), blockSize);
+		}
+	}
+	
+	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public int reserveSequenceBlock(String group, int blockSize) {
+		if (group == null) {
+			throw new IllegalArgumentException("The group must be defined.");
+		}
+		if (blockSize < 1) {
+			throw new IllegalArgumentException("The block size must be at least one.");
+		}
+		
+		Criteria criteria = getRepository().createCriteria(GroupSequence.class);
+		criteria.add(Restrictions.eq("group", group));
+		criteria.setLockMode(LockMode.PESSIMISTIC_WRITE);
+		GroupSequence sequence = getRepository().selectSingle(GroupSequence.class, criteria);
+		
+		int first;
+		if (sequence == null) {
+			sequence = new GroupSequence();
+			sequence.setGroup(group);
+			sequence.setValue(blockSize);
+			first = 1;
+		} else {
+			first = sequence.getValue() + 1;
+			sequence.setValue(sequence.getValue() + blockSize);
+		}
+		
+		getRepository().save(sequence);
+		
+		return first;
 	}
 	
 	@Override
@@ -96,7 +181,10 @@ public class SequentialReceiptNumberGeneratorServiceImpl extends BaseObjectDataS
 			throw new NullPointerException("The sequence to save must be defined.");
 		}
 		
-		return getRepository().save(sequence);
+		GroupSequence result = getRepository().save(sequence);
+		invalidatePoolAfterCommit(sequence.getGroup());
+		
+		return result;
 	}
 	
 	@Override
@@ -107,5 +195,123 @@ public class SequentialReceiptNumberGeneratorServiceImpl extends BaseObjectDataS
 		}
 		
 		getRepository().delete(sequence);
+		invalidatePoolAfterCommit(sequence.getGroup());
+	}
+	
+	private int reserveBlockWithRetry(String group, int blockSize) {
+		try {
+			return getProxy().reserveSequenceBlock(group, blockSize);
+		}
+		catch (RuntimeException ex) {
+			if (!isRetryable(ex)) {
+				throw ex;
+			}
+			
+			return getProxy().reserveSequenceBlock(group, blockSize);
+		}
+	}
+	
+	protected ISequentialReceiptNumberGeneratorService getProxy() {
+		return Context.getService(ISequentialReceiptNumberGeneratorService.class);
+	}
+	
+	protected int getBlockSize() {
+		String property = Context.getAdministrationService().getGlobalProperty(ModuleSettings.SEQUENCE_BLOCK_SIZE_PROPERTY);
+		if (StringUtils.isNotBlank(property)) {
+			try {
+				int blockSize = Integer.parseInt(property.trim());
+				if (blockSize >= 1) {
+					return blockSize;
+				}
+				log.warn("Ignoring global property {}={}; the block size must be at least one.",
+				    ModuleSettings.SEQUENCE_BLOCK_SIZE_PROPERTY, property);
+			}
+			catch (NumberFormatException ex) {
+				log.warn("Ignoring non-numeric global property {}={}.", ModuleSettings.SEQUENCE_BLOCK_SIZE_PROPERTY,
+				    property);
+			}
+		}
+		
+		return DEFAULT_SEQUENCE_BLOCK_SIZE;
+	}
+	
+	// Invalidating before commit blocks concurrent refills on this transaction's row lock,
+	// and a rollback would discard a still-valid pool
+	private void invalidatePoolAfterCommit(String group) {
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+				
+				@Override
+				public void afterCommit() {
+					invalidatePool(group);
+				}
+			});
+		} else {
+			invalidatePool(group);
+		}
+	}
+	
+	void invalidatePool(String group) {
+		if (group == null) {
+			return;
+		}
+		
+		SequencePool pool = pools.get(group);
+		if (pool != null) {
+			pool.invalidate();
+			pools.remove(group, pool);
+		}
+	}
+	
+	private static boolean isRetryable(Throwable ex) {
+		Throwable t = ex;
+		for (int depth = 0; t != null && depth < MAX_CAUSE_CHAIN_DEPTH; depth++) {
+			if (t instanceof org.hibernate.exception.ConstraintViolationException
+			        || t instanceof SQLIntegrityConstraintViolationException || t instanceof DataIntegrityViolationException
+			        || t instanceof LockAcquisitionException || t instanceof ConcurrencyFailureException) {
+				return true;
+			}
+			t = t.getCause();
+		}
+		
+		return false;
+	}
+	
+	private static final class SequencePool {
+		
+		private final Object refillLock = new Object();
+		
+		private int next = 1;
+		
+		private int max = 0;
+		
+		private boolean invalidated = false;
+		
+		synchronized boolean isInvalidated() {
+			return invalidated;
+		}
+		
+		synchronized void invalidate() {
+			invalidated = true;
+		}
+		
+		synchronized Integer tryTake() {
+			if (invalidated || next > max) {
+				return null;
+			}
+			
+			return next++;
+		}
+		
+		synchronized Integer refillAndTake(int first, int blockSize) {
+			if (invalidated) {
+				return null;
+			}
+			
+			next = first;
+			max = first + blockSize - 1;
+			
+			return next++;
+		}
 	}
 }

@@ -14,6 +14,7 @@ import java.util.List;
 import org.openmrs.module.billing.api.base.entity.IObjectDataService;
 import org.openmrs.module.billing.api.model.GroupSequence;
 import org.openmrs.module.billing.api.model.SequentialReceiptNumberGeneratorModel;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -34,16 +35,44 @@ public interface ISequentialReceiptNumberGeneratorService extends IObjectDataSer
 	SequentialReceiptNumberGeneratorModel getOnly();
 	
 	/**
-	 * Reserves the next sequence value for the specified group.
+	 * Reserves the next sequence value for the specified group. Values are handed out from an in-memory
+	 * pool backed by blocks reserved via {@link #reserveSequenceBlock(String, int)}, so the persisted
+	 * sequence value advances a block at a time. The block size is configured by the
+	 * {@code billing.sequenceBlockSize} global property (default 100).
+	 * <p>
+	 * Values may be skipped: a consumer whose transaction rolls back burns its value, and a restart or
+	 * module reload discards the unused remainder of the current block. Values are unique but not
+	 * gapless, and interleave (without colliding) across application servers.
+	 * </p>
 	 *
 	 * @param group The grouping value.
 	 * @return The next sequence value.
-	 * @should Increment and return the sequence value for existing groups
-	 * @should Create a new sequence with a value of one if the group does not exist
+	 * @should Return one and persist a full block for a new group
+	 * @should Hand out consecutive values from the pool
+	 * @should Continue from the persisted value for an existing group
+	 * @should Reserve a new block when the pool is drained
+	 * @should Use the block size from the global property
 	 * @should Throw IllegalArgumentException if the group is null
 	 */
 	@Transactional
 	int reserveNextSequence(String group);
+	
+	/**
+	 * Atomically reserves a contiguous block of sequence values for the specified group in its own
+	 * transaction, committed immediately and independently of any enclosing transaction. The reserved
+	 * block is {@code [first, first + blockSize - 1]} where {@code first} is the returned value.
+	 *
+	 * @param group The grouping value.
+	 * @param blockSize The number of values to reserve.
+	 * @return The first value of the reserved block.
+	 * @should Reserve non overlapping blocks
+	 * @should Not hand out overlapping blocks under concurrency
+	 * @should Commit independently of an enclosing transaction
+	 * @should Throw IllegalArgumentException if the group is null
+	 * @should Throw IllegalArgumentException if blockSize is less than one
+	 */
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	int reserveSequenceBlock(String group, int blockSize);
 	
 	/**
 	 * Returns all sequences.
@@ -69,7 +98,11 @@ public interface ISequentialReceiptNumberGeneratorService extends IObjectDataSer
 	GroupSequence getSequence(String group);
 	
 	/**
-	 * Saves the sequence, creating a new sequences or updating an existing one.
+	 * Saves the sequence, creating a new sequences or updating an existing one. Once the transaction
+	 * commits, the in-memory reservation pool for the sequence's group is invalidated so future
+	 * reservations continue from the saved value. The invalidation is JVM-local: other nodes in a
+	 * cluster keep serving their already-reserved blocks, so manual sequence edits are not
+	 * cluster-safe.
 	 *
 	 * @param sequence The sequence to save.
 	 * @return The saved sequence.
@@ -77,6 +110,8 @@ public interface ISequentialReceiptNumberGeneratorService extends IObjectDataSer
 	 * @should return the saved sequence
 	 * @should update the sequence successfully
 	 * @should create the sequence successfully
+	 * @should Invalidate the pool for the group
+	 * @should Not invalidate the pool when the transaction rolls back
 	 */
 	@Transactional
 	GroupSequence saveSequence(GroupSequence sequence);
@@ -88,6 +123,7 @@ public interface ISequentialReceiptNumberGeneratorService extends IObjectDataSer
 	 * @should Throw a NullPointerException if the sequence is null
 	 * @should delete the sequence from the database
 	 * @should not throw an exception if the sequence is not in the database
+	 * @should Invalidate the pool for the group
 	 */
 	@Transactional
 	void purgeSequence(GroupSequence sequence);

@@ -65,15 +65,6 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 		return model;
 	}
 	
-	protected GroupSequence createSequence(String group, int value) {
-		GroupSequence result = new GroupSequence();
-		
-		result.setGroup(group);
-		result.setValue(value);
-		
-		return result;
-	}
-	
 	@Override
 	protected int getTestEntityCount() {
 		return 1;
@@ -100,67 +91,6 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 		Assert.assertEquals(expected.getSequencePadding(), actual.getSequencePadding());
 		Assert.assertEquals(expected.getSequenceType(), actual.getSequenceType());
 		Assert.assertEquals(expected.getIncludeCheckDigit(), actual.getIncludeCheckDigit());
-	}
-	
-	/**
-	 * @verifies Increment and return the sequence value for existing groups
-	 * @see ISequentialReceiptNumberGeneratorService#reserveNextSequence(String)
-	 */
-	@Test
-	public void reserveNextSequence_shouldIncrementAndReturnTheSequenceValueForExistingGroups() {
-		GroupSequence sequence = createSequence("test", 1);
-		service.saveSequence(sequence);
-		sequence = createSequence("test2", 53);
-		service.saveSequence(sequence);
-		sequence = createSequence("test3", 10);
-		service.saveSequence(sequence);
-		Context.flushSession();
-		
-		int result = service.reserveNextSequence("test");
-		Assert.assertEquals(2, result);
-		sequence = service.getSequence("test");
-		Assert.assertNotNull(sequence);
-		Assert.assertEquals(2, sequence.getValue());
-		Context.flushSession();
-		
-		result = service.reserveNextSequence("test");
-		Assert.assertEquals(3, result);
-		sequence = service.getSequence("test");
-		Assert.assertNotNull(sequence);
-		Assert.assertEquals(3, sequence.getValue());
-		Context.flushSession();
-		
-		result = service.reserveNextSequence("test2");
-		Assert.assertEquals(54, result);
-		sequence = service.getSequence("test2");
-		Assert.assertNotNull(sequence);
-		Assert.assertEquals(54, sequence.getValue());
-		Context.flushSession();
-		
-		result = service.reserveNextSequence("test3");
-		Assert.assertEquals(11, result);
-		sequence = service.getSequence("test3");
-		Assert.assertNotNull(sequence);
-		Assert.assertEquals(11, sequence.getValue());
-	}
-	
-	/**
-	 * @verifies Create a new sequence with a value of one if the group does not exist
-	 * @see ISequentialReceiptNumberGeneratorService#reserveNextSequence(String)
-	 */
-	@Test
-	public void reserveNextSequence_shouldCreateANewSequenceWithAValueOfOneIfTheGroupDoesNotExist() {
-		GroupSequence sequence = service.getSequence("test");
-		Assert.assertNull(sequence);
-		
-		int result = service.reserveNextSequence("test");
-		Assert.assertEquals(1, result);
-		
-		Context.flushSession();
-		
-		sequence = service.getSequence("test");
-		Assert.assertNotNull(sequence);
-		Assert.assertEquals(1, sequence.getValue());
 	}
 	
 	/**

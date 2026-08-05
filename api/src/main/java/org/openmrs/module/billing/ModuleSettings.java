@@ -37,6 +37,8 @@ public class ModuleSettings {
 	
 	public static final String SYSTEM_RECEIPT_NUMBER_GENERATOR = "billing.systemReceiptNumberGenerator";
 	
+	public static final String SEQUENCE_BLOCK_SIZE_PROPERTY = "billing.sequenceBlockSize";
+	
 	public static final String ADJUSTMENT_REASON_FIELD = "billing.adjustmentReasonField";
 	
 	public static final String ALLOW_BILL_ADJUSTMENT = "billing.allowBillAdjustments";
