@@ -42,7 +42,7 @@ Manage billable healthcare services, configure item prices with price history tr
 
 ### Billing Exemptions
 
-Exempt a service or commodity from billing when an order for it is placed. Each exemption targets a concept and carries one or more JavaScript rules, evaluated against the patient, their age, the order and their active program enrolments — so age-based, program-based and other custom criteria are all expressible.
+Exempt a service or commodity from billing when an order for it is placed. Each exemption targets a concept and carries one or more JavaScript rules, evaluated against the patient's age (`patientAge`) and basic order details (`order.uuid`, `order.conceptId`), so age-based and order-based criteria are supported.
 
 ### Financial Reports
 
@@ -54,7 +54,7 @@ Automatically generate billable items and bill line items from clinical orders, 
 
 ### REST API & Integration
 
-Provides REST API endpoints at `/rest/v1/billing/*` for bills, payments, payment modes, billable services, cash points, item prices, discounts, refunds, and patient payment status; timesheets are served at `/rest/v2/billing/timesheet`. Includes patient dashboard integration for OpenMRS 2.x with configurable bill history widget. Supports English, French, and Spanish translations.
+Provides REST API endpoints at `/rest/v1/billing/*` for bills, payments, payment modes, billable services, cash points, item prices, discounts, refunds, and patient payment status. Includes patient dashboard integration for OpenMRS 2.x with configurable bill history widget. Supports English, French, and Spanish translations.
 
 ### FHIR Invoice Support
 
@@ -79,7 +79,7 @@ Exposes bills as FHIR `Invoice` resources via the `fhir` submodule, built agains
 ## Installation
 
 1. Download the latest release from the [releases page](https://github.com/openmrs/openmrs-module-billing/releases) or the [OpenMRS Add Ons](https://addons.openmrs.org/) directory
-2. Install the required dependency modules (webservices.rest, stockmanagement)
+2. Install the required dependency modules (webservices.rest, stockmanagement, fhir2, event)
 3. Upload and start the Billing module via the OpenMRS Module Management interface
 4. Configure global properties and module settings
 5. Set up payment modes, cash points, and billable items
@@ -104,7 +104,7 @@ configuration/backend_configuration/
 
 ### Global properties
 
-Every `billing.*` property defined in a `<globalProperty>` tag in this repository's `omod/src/main/resources/config.xml` goes in `globalproperties/billing.xml`. The file can have any name, as long as it sits inside the `globalproperties` folder.
+Every `<globalProperty>` declared with the `${project.parent.artifactId}` prefix in this repository's `omod/src/main/resources/config.xml` resolves to `billing.*` and goes in `globalproperties/billing.xml`. The file can have any name, as long as it has a `.xml` extension and sits inside the `globalproperties` folder.
 
 Example -
 
