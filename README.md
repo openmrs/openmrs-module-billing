@@ -42,7 +42,7 @@ Manage billable healthcare services, configure item prices with price history tr
 
 ### Billing Exemptions
 
-Configure automated billing exemptions based on patient attributes with support for age-based, location-based, and custom exemption rules.
+Exempt a service or commodity from billing when an order for it is placed. Each exemption targets a concept and carries one or more JavaScript rules, evaluated against the patient, their age, the order and their active program enrolments — so age-based, program-based and other custom criteria are all expressible.
 
 ### Financial Reports
 
@@ -54,7 +54,7 @@ Automatically generate billable items and bill line items from clinical orders, 
 
 ### REST API & Integration
 
-Provides REST API endpoints at `/rest/v1/billing/*` for bills, payments, payment modes, billable services, cash points, timesheets, item prices, discounts, refunds, and patient payment status. Includes patient dashboard integration for OpenMRS 2.x with configurable bill history widget. Supports English, French, and Spanish translations.
+Provides REST API endpoints at `/rest/v1/billing/*` for bills, payments, payment modes, billable services, cash points, item prices, discounts, refunds, and patient payment status; timesheets are served at `/rest/v2/billing/timesheet`. Includes patient dashboard integration for OpenMRS 2.x with configurable bill history widget. Supports English, French, and Spanish translations.
 
 ### FHIR Invoice Support
 
@@ -87,9 +87,11 @@ Exposes bills as FHIR `Invoice` resources via the `fhir` submodule, built agains
 
 ## Configuration
 
-The billing module can be configured through a **content package** that the [Initializer module](https://github.com/mekomsolutions/openmrs-module-initializer) applies when the server starts.
+The billing module can be configured through a **content package** that the [Initializer module](https://github.com/mekomsolutions/openmrs-module-initializer) 2.12.0 or later applies when the server starts.
 
 Billing configuration lives in your content package under `configuration/backend_configuration/`:
+
+**The folder names must match exactly.**
 
 ```
 configuration/backend_configuration/
@@ -100,16 +102,11 @@ configuration/backend_configuration/
 └── cashieritemprices/cashierItemPrices.csv
 ```
 
-**Please make sure that the folder names are named correctly.**
+### Global properties
 
-#### Global properties
+Every `billing.*` property defined in a `<globalProperty>` tag in this repository's `omod/src/main/resources/config.xml` goes in `globalproperties/billing.xml`. The file can have any name, as long as it sits inside the `globalproperties` folder.
 
-- `billing.defaultReceiptReportId`: Jasper report ID for receipt generation
-- `billing.defaultShiftReportId`: Jasper report ID for shift reports
-- `billing.receipt.logoPath`: Path to receipt logo image
-- `billing.systemReceiptNumberGenerator`: Class name for receipt number generator (default: `org.openmrs.module.billing.api.SequentialReceiptNumberGenerator`)
-- `billing.sequenceBlockSize`: Number of receipt sequence values reserved per database round-trip (default: 100). Larger blocks reduce database contention; smaller blocks reduce the sequence values skipped on restart (up to blockSize - 1 per group). Receipt numbers are always unique but may skip values.
-  Every `billing.*` property which you can find defined in the `config.xml` file in this repository inside a `<globalProperty>` tag, goes in `globalproperties/billing.xml`
+Example -
 
 ```xml
 <config>
@@ -132,7 +129,7 @@ configuration/backend_configuration/
 
 See [Global properties reference](#global-properties-reference) below for the full list.
 
-#### Billable services
+### Billable services
 
 Services a facility can charge for. `Concept` and `Service Type` are references to existing concepts — by UUID, name,
 or a `source:code` mapping.
@@ -145,7 +142,7 @@ Uuid, Void/Retire, Service Name, Short Name, Concept, Service Type, Service Stat
 
 `Service Status` defaults to `Enabled` when left blank.
 
-#### Payment modes
+### Payment modes
 
 The forms of payment a cashier can accept. `attributes` is optional and defines the extra fields captured with a
 payment: a semicolon-separated list, each entry split by `::` into `name`, `format`, `regex` and `required`.
@@ -157,7 +154,7 @@ Uuid, Void/Retire, name, attributes
 e168c141-f5fd-4eec-bd3e-633bed1c9606,, Mobile money, Phone Number::Text::::True;Reference
 ```
 
-#### Cash points
+### Cash points
 
 The cashier stations bills are raised at. `location` references an existing location, so define your locations in the
 same content package.
@@ -168,7 +165,7 @@ Uuid, Void/Retire, name, description, location
 ba685651-ed3b-4e63-9b35-78893060758a,, IPD Cash Point, IPD cash point for billing, Inpatient Ward
 ```
 
-#### Item prices
+### Item prices
 
 What each service or stock item costs under a given payment mode. Set **exactly one** of `Stock Item` or
 `Billable Service` per row — rows with both, or neither, are rejected.
@@ -201,14 +198,14 @@ configuration.
 
 **Receipts and reports**
 
-| Property                               | Default                                                           | Description                                                                                                 |
-| -------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `billing.defaultReceiptReportId`       | —                                                                 | ID of the Jasper report used to generate a receipt on the Bill page                                         |
-| `billing.defaultShiftReportId`         | —                                                                 | ID of the Jasper cashier shift report                                                                       |
-| `billing.receipt.logoPath`             | —                                                                 | Path to the logo image printed on receipts                                                                  |
-| `billing.currencySymbol`               | —                                                                 | Currency shown on receipts (e.g. `USD`, `KES`, or custom text). Falls back to the locale default when unset |
-| `billing.systemReceiptNumberGenerator` | `org.openmrs.module.billing.api.SequentialReceiptNumberGenerator` | Fully-qualified class name of the receipt number generator                                                  |
-| `billing.sequenceBlockSize`            | `100`                                                             | Receipt sequence values reserved per database round-trip. Must be at least 1                                |
+| Property                               | Default                                                           | Description                                                                                                                       |
+| -------------------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `billing.defaultReceiptReportId`       | —                                                                 | ID of the Jasper report used to generate a receipt on the Bill page                                                               |
+| `billing.defaultShiftReportId`         | —                                                                 | ID of the Jasper cashier shift report                                                                                             |
+| `billing.receipt.logoPath`             | —                                                                 | Path to the logo image printed on receipts                                                                                        |
+| `billing.currencySymbol`               | —                                                                 | Currency shown on receipts (e.g. `USD`, `KES`, or custom text). Falls back to the locale default when unset                       |
+| `billing.systemReceiptNumberGenerator` | `org.openmrs.module.billing.api.SequentialReceiptNumberGenerator` | Fully-qualified class name of the receipt number generator. See [Receipt numbering](#receipt-numbering) below                     |
+| `billing.sequenceBlockSize`            | `100`                                                             | Receipt sequence values reserved per database round-trip. Must be at least one. See [Receipt numbering](#receipt-numbering) below |
 
 **Bill rounding**
 
@@ -221,16 +218,16 @@ configuration.
 
 **Bill behaviour**
 
-| Property                               | Default | Description                                                                                               |
-| -------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------- |
-| `billing.timesheetRequired`            | —       | Require an active timesheet before a bill can be created                                                  |
-| `billing.allowBillAdjustments`         | `true`  | Enable bill adjustments                                                                                   |
-| `billing.adjustmentReasonField`        | —       | Require a reason when adjusting a bill                                                                    |
-| `billing.autofillPaymentAmount`        | `false` | Pre-fill the payment amount with the remaining balance                                                    |
-| `billing.discountEnabled`              | `true`  | Enable bill discount management                                                                           |
-| `billing.refundEnabled`                | `true`  | Enable refund requests and approval                                                                       |
-| `billing.patientDashboard2BillCount`   | `5`     | Bills shown on the OpenMRS 2.x patient dashboard. Falls back to 4 if the property is blank or non-numeric |
-| `billing.patientPaymentStatusResolver` | —       | Fully-qualified class name of the patient payment status resolver. Blank uses the built-in one            |
+| Property                               | Default | Description                                                                                                                                                 |
+| -------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `billing.timesheetRequired`            | —       | Require an active timesheet before a bill can be created                                                                                                    |
+| `billing.allowBillAdjustments`         | `true`  | Enable bill adjustments                                                                                                                                     |
+| `billing.adjustmentReasonField`        | —       | Require a reason when adjusting a bill                                                                                                                      |
+| `billing.autofillPaymentAmount`        | `false` | Pre-fill the payment amount with the remaining balance                                                                                                      |
+| `billing.discountEnabled`              | `true`  | Enable bill discount management                                                                                                                             |
+| `billing.refundEnabled`                | `true`  | Enable refund requests and approval                                                                                                                         |
+| `billing.patientDashboard2BillCount`   | `5`     | Bills shown on the OpenMRS 2.x patient dashboard. Falls back to 4 if the property is blank or non-numeric                                                   |
+| `billing.patientPaymentStatusResolver` | —       | Fully-qualified class name of the patient payment status resolver. Blank uses the built-in one. See [Patient payment status resolver](#patient-payment-status-resolver) below |
 
 **Financial reports**
 
@@ -247,12 +244,17 @@ configuration.
 The default generator hands out sequential receipt numbers. To avoid a database round-trip per bill it reserves a block
 of `billing.sequenceBlockSize` values at a time and serves them from memory. Receipt numbers are always unique, but
 values can be skipped: restarting the server discards whatever is left of the current block, losing up to
-`blockSize - 1` values per sequence group. Larger blocks reduce contention under load; smaller blocks reduce the gaps.
+`blockSize - 1` values per sequence group, and a transaction that rolls back burns the value it took. Larger blocks
+reduce contention under load; smaller blocks reduce the gaps.
+
+Reserved blocks are held per JVM. If you edit or purge a sequence value on a clustered installation, the other nodes
+keep serving the blocks they have already reserved, so only do it on every node at once or while the other nodes are
+stopped.
 
 To use your own numbering scheme, implement `org.openmrs.module.billing.api.IReceiptNumberGenerator` in another module
 and set `billing.systemReceiptNumberGenerator` to its fully-qualified class name.
 
-### Patient payment status
+### Patient payment status resolver
 
 `billing.patientPaymentStatusResolver` selects how a patient's overall payment status is derived. Leave it blank to use
 the built-in resolver, which reads existing bill records. To override it, implement
