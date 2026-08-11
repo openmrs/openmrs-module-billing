@@ -176,13 +176,132 @@ c1c1c1c1-0000-0000-0000-000000000001,, ANC Service Price, 150.00, 526bf278-ba81-
 c1c1c1c1-0000-0000-0000-000000000004,, Paracetamol Item Price, 20.00, 526bf278-ba81-4436-b867-c2f6641d060a, b2b2b2b2-0000-0000-0000-000000000001,
 ```
 
-`Payment Mode`, `Stock Item` and `Billable Service` are all matched by UUID.
+`Payment Mode`, `Stock Item` and `Billable Service` are all matched by UUID. Which of the two an order is priced
+through depends on its type — see [Automatic billing for orders](#automatic-billing-for-orders) below.
 
 For the full header-by-header documentation of each domain, see the Initializer docs for
 [billableservices](https://github.com/mekomsolutions/openmrs-module-initializer/blob/main/readme/billableservices.md),
 [paymentmodes](https://github.com/mekomsolutions/openmrs-module-initializer/blob/main/readme/paymentmodes.md),
 [cashpoints](https://github.com/mekomsolutions/openmrs-module-initializer/blob/main/readme/cashpoints.md) and
 [cashieritemprices](https://github.com/mekomsolutions/openmrs-module-initializer/blob/main/readme/cashieritemprices.md).
+
+#### Automatic billing for orders
+
+Test and drug orders are billed automatically — nobody has to raise the bill in the cashier app. Saving an order
+publishes a `CREATED` event through the Event module, and the billing module reacts to it in a daemon thread: it picks
+the first registered billing strategy that supports the order, works out the price, and saves a pending bill with a
+single line item for that order.
+
+Two strategies ship with the module, matched on the order's Java class: `org.openmrs.TestOrder` and
+`org.openmrs.DrugOrder`. They differ only in where the price comes from. Orders of any other class — including order
+types your distribution has defined against plain `org.openmrs.Order` — are not billed automatically; see
+[Customising the strategies](#customising-the-strategies) for how to add support for them.
+
+Renewing or revising an order re-bills it, voiding the line item from the previous order first; discontinuing an order
+voids its line item without creating a new bill. An order that has already been billed is never billed twice.
+
+##### Test orders — priced through a billable service
+
+This covers labs on a stock OpenMRS install, where the Test Order type is defined against `org.openmrs.TestOrder`.
+Check your `ordertypes` configuration first: distributions that define their own Lab or Radiology order types can
+map them to plain `org.openmrs.Order`, and those are not picked up.
+
+A test order is priced through its concept. Define a billable service whose `Concept` is the ordered concept and whose
+`Service Status` is `Enabled` — a retired or disabled service is not matched — then add an item price row pointing at
+that service:
+
+```csv
+# billableservices/billableServices.csv
+Uuid, Void/Retire, Service Name, Short Name, Concept, Service Type, Service Status
+7f1cbf6a-1b1b-4f24-9d0a-2e6e3f2b1a01,, Malaria smear, MALS, 32AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA, Laboratory Services, Enabled
+```
+
+```csv
+# cashieritemprices/cashierItemPrices.csv
+Uuid, Void/Retire, Name, Price, Payment Mode, Stock Item, Billable Service
+c1c1c1c1-0000-0000-0000-000000000010,, Malaria smear price, 200.00, 526bf278-ba81-4436-b867-c2f6641d060a,, 7f1cbf6a-1b1b-4f24-9d0a-2e6e3f2b1a01
+```
+
+The line item quantity is always 1. Both rows are needed: a concept with no enabled billable service is not billed at
+all, and a service with no item price is billed at `0.00`. A lab showing up free on a bill usually means the price row
+is missing.
+
+##### Drug orders — priced through a stock item
+
+Drug orders can be priced through the **stock item** linked to the ordered drug in the Stock Management module or from your `cashieritemprices` configuration.
+
+When a drug order is saved, the module finds the stock item for the drug, then takes the first of these that exists:
+
+1. a `cashieritemprices` row whose `Stock Item` is that stock item — the price you configured, if not,
+2. the stock item's purchase price, as recorded in the Stock Management module, if not
+3. `0.00`.
+
+So pricing drugs in `cashieritemprices` is optional. Leave the rows out and patients are billed the purchase price
+Stock Management already holds.
+
+```csv
+# cashieritemprices/cashierItemPrices.csv
+Uuid, Void/Retire, Name, Price, Payment Mode, Stock Item, Billable Service
+c1c1c1c1-0000-0000-0000-000000000011,, Paracetamol 500mg price, 20.00, 526bf278-ba81-4436-b867-c2f6641d060a, b2b2b2b2-0000-0000-0000-000000000001,
+```
+
+Either way a stock item has to be linked to the drug: if none is, or if the order is free-text with no drug set, no
+line item is created. The line item quantity comes from the quantity on the drug order.
+
+When several prices exist for the same stock item or billable service, automatic billing takes the most recently
+created one; it does not pick by `Payment Mode`.
+
+##### Customising the strategies
+
+Both strategies are replaceable. A strategy is any Spring bean implementing
+`org.openmrs.module.billing.api.billing.OrderBillingStrategy`; the module collects every registered implementation,
+sorts them by `getOrder()` (lowest value first) and hands the order to the first one whose `supports()` returns true.
+The two shipped strategies return `Ordered.LOWEST_PRECEDENCE`, so any bean returning a lower value is consulted before
+them.
+
+Pick the base class that matches how much you want to change:
+
+- **Change how a line item is priced or built** — extend `AbstractDefaultOrderBillingStrategy` and implement
+  `createBillLineItem(Order)`. Duplicate detection, exemption evaluation, void-on-revise, void-on-discontinue and bill
+  creation all stay as they are. This is the right level for a different price source, a different quantity rule, or
+  picking between several stock items for one drug.
+- **Change who the bill is attributed to** — override `resolveCashier(Order)` and `resolveCashPoint()`. The defaults
+  use the orderer as the cashier and the first non-retired cash point, which is rarely what a multi-site facility
+  wants.
+- **Change what happens per order action** — extend `AbstractOrderBillingStrategy` and implement `handleNewOrder`,
+  `handleRenewOrder`, `handleRevisedOrder` and `handleDiscontinuedOrder` yourself, or implement `OrderBillingStrategy`
+  directly for full control. Call `setSupportedActions(...)` to limit which of `NEW`, `RENEW`, `REVISE` and
+  `DISCONTINUE` the strategy responds to.
+
+Implementing `supportsOrder(Order)` for a type nothing currently handles — a radiology or referral order, say — adds
+automatic billing for that type rather than overriding anything.
+
+```java
+public class InsuranceDrugOrderBillingStrategy extends AbstractDefaultOrderBillingStrategy {
+
+    @Override
+    protected boolean supportsOrder(Order order) {
+        return order instanceof DrugOrder;
+    }
+
+    @Override
+    protected Optional<BillLineItem> createBillLineItem(Order order) {
+        // resolve the price however your implementation needs to
+    }
+
+    @Override
+    public int getOrder() {
+        return 0; // beats the shipped strategy's LOWEST_PRECEDENCE
+    }
+}
+```
+
+Register it in your own module's `moduleApplicationContext.xml` and it is picked up on startup:
+
+```xml
+<bean id="insuranceDrugOrderBillingStrategy"
+      class="org.openmrs.module.myfacility.billing.InsuranceDrugOrderBillingStrategy"/>
+```
 
 ### Assign privileges
 
@@ -218,15 +337,15 @@ configuration.
 
 **Bill behaviour**
 
-| Property                               | Default | Description                                                                                                                                                 |
-| -------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `billing.timesheetRequired`            | —       | Require an active timesheet before a bill can be created                                                                                                    |
-| `billing.allowBillAdjustments`         | `true`  | Enable bill adjustments                                                                                                                                     |
-| `billing.adjustmentReasonField`        | —       | Require a reason when adjusting a bill                                                                                                                      |
-| `billing.autofillPaymentAmount`        | `false` | Pre-fill the payment amount with the remaining balance                                                                                                      |
-| `billing.discountEnabled`              | `true`  | Enable bill discount management                                                                                                                             |
-| `billing.refundEnabled`                | `true`  | Enable refund requests and approval                                                                                                                         |
-| `billing.patientDashboard2BillCount`   | `5`     | Bills shown on the OpenMRS 2.x patient dashboard. Falls back to 4 if the property is blank or non-numeric                                                   |
+| Property                               | Default | Description                                                                                                                                                                   |
+| -------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `billing.timesheetRequired`            | —       | Require an active timesheet before a bill can be created                                                                                                                      |
+| `billing.allowBillAdjustments`         | `true`  | Enable bill adjustments                                                                                                                                                       |
+| `billing.adjustmentReasonField`        | —       | Require a reason when adjusting a bill                                                                                                                                        |
+| `billing.autofillPaymentAmount`        | `false` | Pre-fill the payment amount with the remaining balance                                                                                                                        |
+| `billing.discountEnabled`              | `true`  | Enable bill discount management                                                                                                                                               |
+| `billing.refundEnabled`                | `true`  | Enable refund requests and approval                                                                                                                                           |
+| `billing.patientDashboard2BillCount`   | `5`     | Bills shown on the OpenMRS 2.x patient dashboard. Falls back to 4 if the property is blank or non-numeric                                                                     |
 | `billing.patientPaymentStatusResolver` | —       | Fully-qualified class name of the patient payment status resolver. Blank uses the built-in one. See [Patient payment status resolver](#patient-payment-status-resolver) below |
 
 **Financial reports**
