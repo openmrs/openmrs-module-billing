@@ -195,10 +195,9 @@ single line item for that order.
 Two strategies ship with the module, matched on the order's Java class: `org.openmrs.TestOrder` and
 `org.openmrs.DrugOrder`. They differ only in where the price comes from. Orders of any other class — including order
 types your distribution has defined against plain `org.openmrs.Order` — are not billed automatically; see
-[Customising the strategies](#customising-the-strategies) for how to add support for them.
+[Adding a strategy for another order type](#adding-a-strategy-for-another-order-type) for how to add support for them.
 
-Renewing or revising an order re-bills it, voiding the line item from the previous order first; discontinuing an order
-voids its line item without creating a new bill. An order that has already been billed is never billed twice.
+Renewing an order creates a new bill without voiding the previous order's line item. Revising an order voids the previous line item before creating a replacement bill; discontinuing an order voids the previous line item without creating a new bill. An order that has already been billed is never billed twice.
 
 ##### Test orders — priced through a billable service
 
@@ -208,16 +207,18 @@ map them to plain `org.openmrs.Order`, and those are not picked up.
 
 A test order is priced through its concept. Define a billable service whose `Concept` is the ordered concept and whose
 `Service Status` is `Enabled` — a retired or disabled service is not matched — then add an item price row pointing at
-that service:
+that service.
+
+In `billableservices/billableServices.csv`:
 
 ```csv
-# billableservices/billableServices.csv
 Uuid, Void/Retire, Service Name, Short Name, Concept, Service Type, Service Status
 7f1cbf6a-1b1b-4f24-9d0a-2e6e3f2b1a01,, Malaria smear, MALS, 32AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA, Laboratory Services, Enabled
 ```
 
+In `cashieritemprices/cashierItemPrices.csv`:
+
 ```csv
-# cashieritemprices/cashierItemPrices.csv
 Uuid, Void/Retire, Name, Price, Payment Mode, Stock Item, Billable Service
 c1c1c1c1-0000-0000-0000-000000000010,, Malaria smear price, 200.00, 526bf278-ba81-4436-b867-c2f6641d060a,, 7f1cbf6a-1b1b-4f24-9d0a-2e6e3f2b1a01
 ```
@@ -239,8 +240,9 @@ When a drug order is saved, the module finds the stock item for the drug, then t
 So pricing drugs in `cashieritemprices` is optional. Leave the rows out and patients are billed the purchase price
 Stock Management already holds.
 
+In `cashieritemprices/cashierItemPrices.csv`:
+
 ```csv
-# cashieritemprices/cashierItemPrices.csv
 Uuid, Void/Retire, Name, Price, Payment Mode, Stock Item, Billable Service
 c1c1c1c1-0000-0000-0000-000000000011,, Paracetamol 500mg price, 20.00, 526bf278-ba81-4436-b867-c2f6641d060a, b2b2b2b2-0000-0000-0000-000000000001,
 ```
@@ -251,56 +253,104 @@ line item is created. The line item quantity comes from the quantity on the drug
 When several prices exist for the same stock item or billable service, automatic billing takes the most recently
 created one; it does not pick by `Payment Mode`.
 
-##### Customising the strategies
+##### Adding a strategy for another order type
 
-Both strategies are replaceable. A strategy is any Spring bean implementing
-`org.openmrs.module.billing.api.billing.OrderBillingStrategy`; the module collects every registered implementation,
-sorts them by `getOrder()` (lowest value first) and hands the order to the first one whose `supports()` returns true.
-The two shipped strategies return `Ordered.LOWEST_PRECEDENCE`, so any bean returning a lower value is consulted before
-them.
+Say your distribution defines a Radiology Order type against plain `org.openmrs.Order`. Nothing bills it today. To bill
+it automatically, write a strategy of your own in your distribution's module. There are three steps.
 
-Pick the base class that matches how much you want to change:
+**Step 1: Extend `AbstractDefaultOrderBillingStrategy`.** Both shipped strategies extend this class, and it already
+detects duplicates, voids line items on revise and discontinue, and creates the bill. You supply only the parts that
+are specific to your order type.
 
-- **Change how a line item is priced or built** — extend `AbstractDefaultOrderBillingStrategy` and implement
-  `createBillLineItem(Order)`. Duplicate detection, exemption evaluation, void-on-revise, void-on-discontinue and bill
-  creation all stay as they are. This is the right level for a different price source, a different quantity rule, or
-  picking between several stock items for one drug.
-- **Change who the bill is attributed to** — override `resolveCashier(Order)` and `resolveCashPoint()`. The defaults
-  use the orderer as the cashier and the first non-retired cash point, which is rarely what a multi-site facility
-  wants.
-- **Change what happens per order action** — extend `AbstractOrderBillingStrategy` and implement `handleNewOrder`,
-  `handleRenewOrder`, `handleRevisedOrder` and `handleDiscontinuedOrder` yourself, or implement `OrderBillingStrategy`
-  directly for full control. Call `setSupportedActions(...)` to limit which of `NEW`, `RENEW`, `REVISE` and
-  `DISCONTINUE` the strategy responds to.
+**Step 2: Implement four methods.**
 
-Implementing `supportsOrder(Order)` for a type nothing currently handles — a radiology or referral order, say — adds
-automatic billing for that type rather than overriding anything.
+- `supportsOrder(Order)` tells the module which orders you handle. The order is already deproxied, so you can use
+  `instanceof`. For an order type defined against plain `org.openmrs.Order`, check `order.getOrderType()` instead.
+- `createBillLineItem(Order)` builds the line item, or returns `Optional.empty()` to leave the order unbilled. Call
+  `createLineItem(price, quantity, status, order)` to fill in the common fields, then call `setBillableService(...)` or `setItem(...)`. Exemptions aren't applied for you. To honour them, call `checkIfOrderIsExempted(order, ExemptionType.SERVICE)`, or `ExemptionType.COMMODITY` for stock items, and use `BillLineItemStatus.EXEMPTED` when it returns true.
+- `resolveCashier(Order)` and `resolveCashPoint()` decide who the bill is attributed to and where it was raised.
+  Neither method is abstract. Both are inherited and return `null`, and the module skips bill creation when either one
+  is null, so a strategy that leaves them out compiles and runs but never creates a bill.
+
+Putting those together for the radiology example:
 
 ```java
-public class InsuranceDrugOrderBillingStrategy extends AbstractDefaultOrderBillingStrategy {
+public class RadiologyOrderBillingStrategy extends AbstractDefaultOrderBillingStrategy {
 
     @Override
     protected boolean supportsOrder(Order order) {
-        return order instanceof DrugOrder;
+        OrderType orderType = order.getOrderType();
+        return orderType != null && "Radiology Order".equals(orderType.getName());
     }
 
     @Override
     protected Optional<BillLineItem> createBillLineItem(Order order) {
-        // resolve the price however your implementation needs to
+        // look up the enabled billable service for order.getConcept() and price it,
+        // as TestOrderBillingStrategy does
     }
 
     @Override
-    public int getOrder() {
-        return 0; // beats the shipped strategy's LOWEST_PRECEDENCE
+    public Provider resolveCashier(Order order) {
+        return order.getOrderer();
+    }
+
+    @Override
+    public CashPoint resolveCashPoint() {
+        List<CashPoint> cashPoints = cashPointService.getAllCashPoints(false);
+        return cashPoints.isEmpty() ? null : cashPoints.get(0);
     }
 }
 ```
 
-Register it in your own module's `moduleApplicationContext.xml` and it is picked up on startup:
+**Step 3: Register the class as a Spring bean** in your module's `moduleApplicationContext.xml`:
 
 ```xml
-<bean id="insuranceDrugOrderBillingStrategy"
-      class="org.openmrs.module.myfacility.billing.InsuranceDrugOrderBillingStrategy"/>
+<bean id="radiologyOrderBillingStrategy"
+      class="org.openmrs.module.myfacility.billing.RadiologyOrderBillingStrategy"/>
+```
+
+That's the whole setup. At startup the module collects every registered `OrderBillingStrategy`, and from then on each
+saved order goes to the first strategy whose `supports()` returns true.
+
+You don't need to implement `getOrder()`. The module sorts strategies by that value, lowest first, but it only decides
+between strategies that claim the same order. Nothing else claims your radiology orders, and the shipped strategies
+carry on billing test and drug orders as before.
+
+##### Replacing a shipped strategy
+
+To take over an order type that a shipped strategy already handles, give your bean a `getOrder()` value lower than
+`Ordered.LOWEST_PRECEDENCE`. The module then consults your strategy first, and the shipped strategy doesn't run for
+that order. Register the bean the same way as above.
+
+Choose a base class based on how much of the default behaviour you want to keep:
+
+- **`TestOrderBillingStrategy` or `DrugOrderBillingStrategy`**: override `createBillLineItem(Order)` to change how an
+  order is priced. You keep their cashier and cash point resolution. The exemption check sits inside the method you
+  replace, so repeat it if exemptions still apply. Choose this level for a different price source, a different quantity
+  rule, or to pick between several stock items for one drug.
+- **`AbstractDefaultOrderBillingStrategy`**: implement the same four methods described above to change how the bill is
+  attributed as well. The shipped strategies bill to the ordering provider and the first non-retired cash point, which
+  rarely suits a facility with several cash points.
+- **`AbstractOrderBillingStrategy`**: implement `handleNewOrder`, `handleRenewOrder`, `handleRevisedOrder` and
+  `handleDiscontinuedOrder` to change what happens for each order action. For full control, implement
+  `OrderBillingStrategy` directly. Call `setSupportedActions(...)` to limit which of `NEW`, `RENEW`, `REVISE` and
+  `DISCONTINUE` your strategy responds to.
+
+```java
+public class InsuranceDrugOrderBillingStrategy extends DrugOrderBillingStrategy {
+
+    @Override
+    protected Optional<BillLineItem> createBillLineItem(Order order) {
+        // resolve the price however your implementation needs to,
+        // calling checkIfOrderIsExempted(order, ExemptionType.COMMODITY)
+        // if exemptions should still apply
+    }
+
+    @Override
+    public int getOrder() {
+        return 0; // lower than the shipped strategy's LOWEST_PRECEDENCE
+    }
+}
 ```
 
 ### Assign privileges
