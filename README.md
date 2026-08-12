@@ -42,7 +42,7 @@ Manage billable healthcare services, configure item prices with price history tr
 
 ### Billing Exemptions
 
-Configure automated billing exemptions based on patient attributes with support for age-based, location-based, and custom exemption rules.
+Exempt a service or commodity from billing when an order for it is placed. Each exemption targets a concept and carries one or more JavaScript rules, evaluated against the patient's age (`patientAge`) and basic order details (`order.uuid`, `order.conceptId`), so age-based and order-based criteria are supported.
 
 ### Financial Reports
 
@@ -54,7 +54,7 @@ Automatically generate billable items and bill line items from clinical orders, 
 
 ### REST API & Integration
 
-Provides REST API endpoints at `/rest/v1/billing/*` for bills, payments, payment modes, billable services, cash points, timesheets, item prices, discounts, refunds, and patient payment status. Includes patient dashboard integration for OpenMRS 2.x with configurable bill history widget. Supports English, French, and Spanish translations.
+Provides REST API endpoints at `/rest/v1/billing/*` for bills, payments, payment modes, billable services, cash points, item prices, discounts, refunds, and patient payment status. Includes patient dashboard integration for OpenMRS 2.x with configurable bill history widget. Supports English, French, and Spanish translations.
 
 ### FHIR Invoice Support
 
@@ -67,9 +67,10 @@ Exposes bills as FHIR `Invoice` resources via the `fhir` submodule, built agains
 - **Required Modules**:
   - Web Services REST Module 2.9+
   - Stock Management Module 1.4.0+
+  - FHIR2 Module 2.4.0+
+  - Event Module 4.0.0+
 - **Optional Modules**:
-  - FHIR2 Module 2.4.0+ (required to use the FHIR Invoice submodule)
-  - IDGen Module 2.8+ (for custom receipt number generation)
+  - IDGen Module 2.8+
   - UI Framework Module
   - App Framework Module
   - Provider Management Module
@@ -78,7 +79,7 @@ Exposes bills as FHIR `Invoice` resources via the `fhir` submodule, built agains
 ## Installation
 
 1. Download the latest release from the [releases page](https://github.com/openmrs/openmrs-module-billing/releases) or the [OpenMRS Add Ons](https://addons.openmrs.org/) directory
-2. Install the required dependency modules (webservices.rest, stockmanagement)
+2. Install the required dependency modules (webservices.rest, stockmanagement, fhir2, event)
 3. Upload and start the Billing module via the OpenMRS Module Management interface
 4. Configure global properties and module settings
 5. Set up payment modes, cash points, and billable items
@@ -86,47 +87,348 @@ Exposes bills as FHIR `Invoice` resources via the `fhir` submodule, built agains
 
 ## Configuration
 
-### Global Properties
+The billing module can be configured through a **content package** that the [Initializer module](https://github.com/mekomsolutions/openmrs-module-initializer) 2.12.0 or later applies when the server starts.
 
-The module provides several global properties for configuration:
+Billing configuration lives in your content package under `configuration/backend_configuration/`:
 
-**Receipt and Report Configuration**:
+**The folder names must match exactly.**
 
-- `billing.defaultReceiptReportId`: Jasper report ID for receipt generation
-- `billing.defaultShiftReportId`: Jasper report ID for shift reports
-- `billing.receipt.logoPath`: Path to receipt logo image
-- `billing.systemReceiptNumberGenerator`: Class name for receipt number generator (default: `org.openmrs.module.billing.api.SequentialReceiptNumberGenerator`)
-- `billing.sequenceBlockSize`: Number of receipt sequence values reserved per database round-trip (default: 100). Larger blocks reduce database contention; smaller blocks reduce the sequence values skipped on restart (up to blockSize - 1 per group). Receipt numbers are always unique but may skip values.
+```
+configuration/backend_configuration/
+├── globalproperties/billing.xml
+├── billableservices/billableServices.csv
+├── paymentmodes/paymentModes.csv
+├── cashpoints/cashPoints.csv
+└── cashieritemprices/cashierItemPrices.csv
+```
 
-**Bill Rounding**:
+### Global properties
 
-- `billing.roundingMode`: Bill total rounding mode (FLOOR, MID, CEILING)
-- `billing.roundToNearest`: Nearest unit to round to (decimal number)
-- `billing.roundingItemId`: ID of the item used to account for bill total rounding
-- `billing.roundingDeptId`: ID of the department of the rounding item
+Every `<globalProperty>` declared with the `${project.parent.artifactId}` prefix in this repository's `omod/src/main/resources/config.xml` resolves to `billing.*` and goes in `globalproperties/billing.xml`. The file can have any name, as long as it has a `.xml` extension and sits inside the `globalproperties` folder.
 
-**Bill Behavior**:
+Example -
 
-- `billing.timesheetRequired`: Require active timesheet for bill creation (true/false)
-- `billing.allowBillAdjustments`: Enable/disable bill adjustments (default: true)
-- `billing.adjustmentReasonField`: Require adjustment reason field (true/false)
-- `billing.autofillPaymentAmount`: Auto-fill payment amount with remaining balance (default: false)
-- `billing.discountEnabled`: Enable bill discount management (default: true)
-- `billing.refundEnabled`: Enable refund requests and approval (default: true)
-- `billing.patientPaymentStatusResolver`: Fully-qualified class name of the patient payment status resolver
-- `billing.patientDashboard2BillCount`: Number of bills to show on patient dashboard (default: 4)
+```xml
+<config>
+    <globalProperties>
+        <globalProperty>
+            <property>billing.systemReceiptNumberGenerator</property>
+            <value>org.openmrs.module.billing.api.SequentialReceiptNumberGenerator</value>
+        </globalProperty>
+        <globalProperty>
+            <property>billing.receipt.logoPath</property>
+            <value>/openmrs/assets/logo.png</value>
+        </globalProperty>
+        <globalProperty>
+            <property>billing.currencySymbol</property>
+            <value>KES</value>
+        </globalProperty>
+    </globalProperties>
+</config>
+```
 
-**Financial Reports**:
+See [Global properties reference](#global-properties-reference) below for the full list.
 
-- `billing.reports.departmentCollections`: ID of the Department Collections report
-- `billing.reports.departmentRevenue`: ID of the Department Revenue report
-- `billing.reports.shiftSummary`: ID of the Shift Summary report
-- `billing.reports.dailyShiftSummary`: ID of the Daily Shift Summary report
-- `billing.reports.paymentsByPaymentMode`: ID of the Payments by Payment Mode report
+### Billable services
 
-### Privileges
+Services a facility can charge for. `Concept` and `Service Type` are references to existing concepts — by UUID, name,
+or a `source:code` mapping.
 
-The module defines granular privileges for bill management (view, manage, adjust, purge, refund, reprint), discount management (view, manage, approve), refund management (view, request, approve, complete), metadata management (view, manage, purge), timesheet management (view, manage, purge), and app access for OpenMRS 2.x (cashier app, tasks, reports). See `omod/src/main/resources/config.xml` for the complete list.
+```csv
+Uuid, Void/Retire, Service Name, Short Name, Concept, Service Type, Service Status
+44ebd6cd-04ad-4eba-8ce1-0de4564bfd17,, Antenatal care, ANTC, 1592AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA, Antenatal Services, Enabled
+360fab13-d92b-4a9f-ad4e-0ac223e7f54c,, OPD consultation, OPDC, 160542AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA, Outpatient Services, Enabled
+```
+
+`Service Status` defaults to `Enabled` when left blank.
+
+### Payment modes
+
+The forms of payment a cashier can accept. `attributes` is optional and defines the extra fields captured with a
+payment: a semicolon-separated list, each entry split by `::` into `name`, `format`, `regex` and `required`.
+
+```csv
+Uuid, Void/Retire, name, attributes
+526bf278-ba81-4436-b867-c2f6641d060a,, Cash,
+2b1b9aae-5d35-43dd-9214-3fd370fd7737,, Bank transfer,
+e168c141-f5fd-4eec-bd3e-633bed1c9606,, Mobile money, Phone Number::Text::::True;Reference
+```
+
+### Cash points
+
+The cashier stations bills are raised at. `location` references an existing location, so define your locations in the
+same content package.
+
+```csv
+Uuid, Void/Retire, name, description, location
+54065383-b4d4-42d2-af4d-d250a1fd2590,, OPD Cash Point, OPD cash point for billing, Opd Clinic
+ba685651-ed3b-4e63-9b35-78893060758a,, IPD Cash Point, IPD cash point for billing, Inpatient Ward
+```
+
+### Item prices
+
+What each service or stock item costs under a given payment mode. Set **exactly one** of `Stock Item` or
+`Billable Service` per row — rows with both, or neither, are rejected.
+
+```csv
+Uuid, Void/Retire, Name, Price, Payment Mode, Stock Item, Billable Service
+c1c1c1c1-0000-0000-0000-000000000001,, ANC Service Price, 150.00, 526bf278-ba81-4436-b867-c2f6641d060a,, 44ebd6cd-04ad-4eba-8ce1-0de4564bfd17
+c1c1c1c1-0000-0000-0000-000000000004,, Paracetamol Item Price, 20.00, 526bf278-ba81-4436-b867-c2f6641d060a, b2b2b2b2-0000-0000-0000-000000000001,
+```
+
+`Payment Mode`, `Stock Item` and `Billable Service` are all matched by UUID. Which of the two an order is priced
+through depends on its type — see [Automatic billing for orders](#automatic-billing-for-orders) below.
+
+For the full header-by-header documentation of each domain, see the Initializer docs for
+[billableservices](https://github.com/mekomsolutions/openmrs-module-initializer/blob/main/readme/billableservices.md),
+[paymentmodes](https://github.com/mekomsolutions/openmrs-module-initializer/blob/main/readme/paymentmodes.md),
+[cashpoints](https://github.com/mekomsolutions/openmrs-module-initializer/blob/main/readme/cashpoints.md) and
+[cashieritemprices](https://github.com/mekomsolutions/openmrs-module-initializer/blob/main/readme/cashieritemprices.md).
+
+#### Automatic billing for orders
+
+Test and drug orders are billed automatically — nobody has to raise the bill in the cashier app. Saving an order
+publishes a `CREATED` event through the Event module, and the billing module reacts to it in a daemon thread: it picks
+the first registered billing strategy that supports the order, works out the price, and saves a pending bill with a
+single line item for that order.
+
+Two strategies ship with the module, matched on the order's Java class: `org.openmrs.TestOrder` and
+`org.openmrs.DrugOrder`. They differ only in where the price comes from. Orders of any other class — including order
+types your distribution has defined against plain `org.openmrs.Order` — are not billed automatically; see
+[Adding a strategy for another order type](#adding-a-strategy-for-another-order-type) for how to add support for them.
+
+Renewing an order creates a new bill without voiding the previous order's line item. Revising an order voids the previous line item before creating a replacement bill; discontinuing an order voids the previous line item without creating a new bill. An order that has already been billed is never billed twice.
+
+##### Test orders — priced through a billable service
+
+This covers labs on a stock OpenMRS install, where the Test Order type is defined against `org.openmrs.TestOrder`.
+Check your `ordertypes` configuration first: distributions that define their own Lab or Radiology order types can
+map them to plain `org.openmrs.Order`, and those are not picked up.
+
+A test order is priced through its concept. Define a billable service whose `Concept` is the ordered concept and whose
+`Service Status` is `Enabled` — a retired or disabled service is not matched — then add an item price row pointing at
+that service.
+
+In `billableservices/billableServices.csv`:
+
+```csv
+Uuid, Void/Retire, Service Name, Short Name, Concept, Service Type, Service Status
+7f1cbf6a-1b1b-4f24-9d0a-2e6e3f2b1a01,, Malaria smear, MALS, 32AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA, Laboratory Services, Enabled
+```
+
+In `cashieritemprices/cashierItemPrices.csv`:
+
+```csv
+Uuid, Void/Retire, Name, Price, Payment Mode, Stock Item, Billable Service
+c1c1c1c1-0000-0000-0000-000000000010,, Malaria smear price, 200.00, 526bf278-ba81-4436-b867-c2f6641d060a,, 7f1cbf6a-1b1b-4f24-9d0a-2e6e3f2b1a01
+```
+
+The line item quantity is always 1. Both rows are needed: a concept with no enabled billable service is not billed at
+all, and a service with no item price is billed at `0.00`. A lab showing up free on a bill usually means the price row
+is missing.
+
+##### Drug orders — priced through a stock item
+
+Drug orders can be priced through the **stock item** linked to the ordered drug in the Stock Management module or from your `cashieritemprices` configuration.
+
+When a drug order is saved, the module finds the stock item for the drug, then takes the first of these that exists:
+
+1. a `cashieritemprices` row whose `Stock Item` is that stock item — the price you configured, if not,
+2. the stock item's purchase price, as recorded in the Stock Management module, if not
+3. `0.00`.
+
+So pricing drugs in `cashieritemprices` is optional. Leave the rows out and patients are billed the purchase price
+Stock Management already holds.
+
+In `cashieritemprices/cashierItemPrices.csv`:
+
+```csv
+Uuid, Void/Retire, Name, Price, Payment Mode, Stock Item, Billable Service
+c1c1c1c1-0000-0000-0000-000000000011,, Paracetamol 500mg price, 20.00, 526bf278-ba81-4436-b867-c2f6641d060a, b2b2b2b2-0000-0000-0000-000000000001,
+```
+
+Either way a stock item has to be linked to the drug: if none is, or if the order is free-text with no drug set, no
+line item is created. The line item quantity comes from the quantity on the drug order.
+
+When several prices exist for the same stock item or billable service, automatic billing takes the most recently
+created one; it does not pick by `Payment Mode`.
+
+##### Adding a strategy for another order type
+
+Say your distribution defines a Radiology Order type against plain `org.openmrs.Order`. Nothing bills it today. To bill
+it automatically, write a strategy of your own in your distribution's module. There are three steps.
+
+**Step 1: Extend `AbstractDefaultOrderBillingStrategy`.** Both shipped strategies extend this class, and it already
+detects duplicates, voids line items on revise and discontinue, and creates the bill. You supply only the parts that
+are specific to your order type.
+
+**Step 2: Implement four methods.**
+
+- `supportsOrder(Order)` tells the module which orders you handle. The order is already deproxied, so you can use
+  `instanceof`. For an order type defined against plain `org.openmrs.Order`, check `order.getOrderType()` instead.
+- `createBillLineItem(Order)` builds the line item, or returns `Optional.empty()` to leave the order unbilled. Call
+  `createLineItem(price, quantity, status, order)` to fill in the common fields, then call `setBillableService(...)` or `setItem(...)`. Exemptions aren't applied for you. To honour them, call `checkIfOrderIsExempted(order, ExemptionType.SERVICE)`, or `ExemptionType.COMMODITY` for stock items, and use `BillLineItemStatus.EXEMPTED` when it returns true.
+- `resolveCashier(Order)` and `resolveCashPoint()` decide who the bill is attributed to and where it was raised.
+  Neither method is abstract. Both are inherited and return `null`, and the module skips bill creation when either one
+  is null, so a strategy that leaves them out compiles and runs but never creates a bill.
+
+Putting those together for the radiology example:
+
+```java
+public class RadiologyOrderBillingStrategy extends AbstractDefaultOrderBillingStrategy {
+
+    @Override
+    protected boolean supportsOrder(Order order) {
+        OrderType orderType = order.getOrderType();
+        return orderType != null && "Radiology Order".equals(orderType.getName());
+    }
+
+    @Override
+    protected Optional<BillLineItem> createBillLineItem(Order order) {
+        // look up the enabled billable service for order.getConcept() and price it,
+        // as TestOrderBillingStrategy does
+    }
+
+    @Override
+    public Provider resolveCashier(Order order) {
+        return order.getOrderer();
+    }
+
+    @Override
+    public CashPoint resolveCashPoint() {
+        List<CashPoint> cashPoints = cashPointService.getAllCashPoints(false);
+        return cashPoints.isEmpty() ? null : cashPoints.get(0);
+    }
+}
+```
+
+**Step 3: Register the class as a Spring bean** in your module's `moduleApplicationContext.xml`:
+
+```xml
+<bean id="radiologyOrderBillingStrategy"
+      class="org.openmrs.module.myfacility.billing.RadiologyOrderBillingStrategy"/>
+```
+
+That's the whole setup. At startup the module collects every registered `OrderBillingStrategy`, and from then on each
+saved order goes to the first strategy whose `supports()` returns true.
+
+You don't need to implement `getOrder()`. The module sorts strategies by that value, lowest first, but it only decides
+between strategies that claim the same order. Nothing else claims your radiology orders, and the shipped strategies
+carry on billing test and drug orders as before.
+
+##### Replacing a shipped strategy
+
+To take over an order type that a shipped strategy already handles, give your bean a `getOrder()` value lower than
+`Ordered.LOWEST_PRECEDENCE`. The module then consults your strategy first, and the shipped strategy doesn't run for
+that order. Register the bean the same way as above.
+
+Choose a base class based on how much of the default behaviour you want to keep:
+
+- **`TestOrderBillingStrategy` or `DrugOrderBillingStrategy`**: override `createBillLineItem(Order)` to change how an
+  order is priced. You keep their cashier and cash point resolution. The exemption check sits inside the method you
+  replace, so repeat it if exemptions still apply. Choose this level for a different price source, a different quantity
+  rule, or to pick between several stock items for one drug.
+- **`AbstractDefaultOrderBillingStrategy`**: implement the same four methods described above to change how the bill is
+  attributed as well. The shipped strategies bill to the ordering provider and the first non-retired cash point, which
+  rarely suits a facility with several cash points.
+- **`AbstractOrderBillingStrategy`**: implement `handleNewOrder`, `handleRenewOrder`, `handleRevisedOrder` and
+  `handleDiscontinuedOrder` to change what happens for each order action. For full control, implement
+  `OrderBillingStrategy` directly. Call `setSupportedActions(...)` to limit which of `NEW`, `RENEW`, `REVISE` and
+  `DISCONTINUE` your strategy responds to.
+
+```java
+public class InsuranceDrugOrderBillingStrategy extends DrugOrderBillingStrategy {
+
+    @Override
+    protected Optional<BillLineItem> createBillLineItem(Order order) {
+        // resolve the price however your implementation needs to,
+        // calling checkIfOrderIsExempted(order, ExemptionType.COMMODITY)
+        // if exemptions should still apply
+    }
+
+    @Override
+    public int getOrder() {
+        return 0; // lower than the shipped strategy's LOWEST_PRECEDENCE
+    }
+}
+```
+
+### Assign privileges
+
+The module defines granular privileges for bill management (view, manage, adjust, purge, refund, reprint), discount
+management (view, manage, approve), refund management (view, request, approve, complete), metadata management (view,
+manage, purge), timesheet management (view, manage, purge), and app access for OpenMRS 2.x (cashier app, tasks,
+reports). See `omod/src/main/resources/config.xml` for the complete list.
+
+Assign them to roles through the Initializer `roles` and `privileges` domains so role setup ships with the rest of your
+configuration.
+
+## Global properties reference
+
+**Receipts and reports**
+
+| Property                               | Default                                                           | Description                                                                                                                       |
+| -------------------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `billing.defaultReceiptReportId`       | —                                                                 | ID of the Jasper report used to generate a receipt on the Bill page                                                               |
+| `billing.defaultShiftReportId`         | —                                                                 | ID of the Jasper cashier shift report                                                                                             |
+| `billing.receipt.logoPath`             | —                                                                 | Path to the logo image printed on receipts                                                                                        |
+| `billing.currencySymbol`               | —                                                                 | Currency shown on receipts (e.g. `USD`, `KES`, or custom text). Falls back to the locale default when unset                       |
+| `billing.systemReceiptNumberGenerator` | `org.openmrs.module.billing.api.SequentialReceiptNumberGenerator` | Fully-qualified class name of the receipt number generator. See [Receipt numbering](#receipt-numbering) below                     |
+| `billing.sequenceBlockSize`            | `100`                                                             | Receipt sequence values reserved per database round-trip. Must be at least one. See [Receipt numbering](#receipt-numbering) below |
+
+**Bill rounding**
+
+| Property                 | Default | Description                                              |
+| ------------------------ | ------- | -------------------------------------------------------- |
+| `billing.roundingMode`   | —       | How bill totals are rounded: `FLOOR`, `MID` or `CEILING` |
+| `billing.roundToNearest` | —       | Nearest unit to round to. May be a decimal               |
+| `billing.roundingItemId` | —       | ID of the item used to account for bill total rounding   |
+| `billing.roundingDeptId` | —       | ID of the department the rounding item belongs to        |
+
+**Bill behaviour**
+
+| Property                               | Default | Description                                                                                                                                                                   |
+| -------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `billing.timesheetRequired`            | —       | Require an active timesheet before a bill can be created                                                                                                                      |
+| `billing.allowBillAdjustments`         | `true`  | Enable bill adjustments                                                                                                                                                       |
+| `billing.adjustmentReasonField`        | —       | Require a reason when adjusting a bill                                                                                                                                        |
+| `billing.autofillPaymentAmount`        | `false` | Pre-fill the payment amount with the remaining balance                                                                                                                        |
+| `billing.discountEnabled`              | `true`  | Enable bill discount management                                                                                                                                               |
+| `billing.refundEnabled`                | `true`  | Enable refund requests and approval                                                                                                                                           |
+| `billing.patientDashboard2BillCount`   | `5`     | Bills shown on the OpenMRS 2.x patient dashboard. Falls back to 4 if the property is blank or non-numeric                                                                     |
+| `billing.patientPaymentStatusResolver` | —       | Fully-qualified class name of the patient payment status resolver. Blank uses the built-in one. See [Patient payment status resolver](#patient-payment-status-resolver) below |
+
+**Financial reports**
+
+| Property                                | Default | Description                               |
+| --------------------------------------- | ------- | ----------------------------------------- |
+| `billing.reports.departmentCollections` | —       | ID of the Department Collections report   |
+| `billing.reports.departmentRevenue`     | —       | ID of the Department Revenue report       |
+| `billing.reports.shiftSummary`          | —       | ID of the Shift Summary report            |
+| `billing.reports.dailyShiftSummary`     | —       | ID of the Daily Shift Summary report      |
+| `billing.reports.paymentsByPaymentMode` | —       | ID of the Payments by Payment Mode report |
+
+### Receipt numbering
+
+The default generator hands out sequential receipt numbers. To avoid a database round-trip per bill it reserves a block
+of `billing.sequenceBlockSize` values at a time and serves them from memory. Receipt numbers are always unique, but
+values can be skipped: restarting the server discards whatever is left of the current block, losing up to
+`blockSize - 1` values per sequence group, and a transaction that rolls back burns the value it took. Larger blocks
+reduce contention under load; smaller blocks reduce the gaps.
+
+Reserved blocks are held per JVM. If you edit or purge a sequence value on a clustered installation, the other nodes
+keep serving the blocks they have already reserved, so only do it on every node at once or while the other nodes are
+stopped.
+
+To use your own numbering scheme, implement `org.openmrs.module.billing.api.IReceiptNumberGenerator` in another module
+and set `billing.systemReceiptNumberGenerator` to its fully-qualified class name.
+
+### Patient payment status resolver
+
+`billing.patientPaymentStatusResolver` selects how a patient's overall payment status is derived. Leave it blank to use
+the built-in resolver, which reads existing bill records. To override it, implement
+`org.openmrs.module.billing.api.PatientPaymentStatusResolver`, register your implementation as a Spring component in
+your own module so it is discoverable, and set the property to its fully-qualified class name.
 
 ## Documentation
 
