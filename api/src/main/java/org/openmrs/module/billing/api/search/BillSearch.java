@@ -48,6 +48,10 @@ public class BillSearch {
 	
 	private String patientName;
 	
+	private java.util.Date startDate;
+	
+	private java.util.Date endDate;
+	
 	private Boolean includeVoided = false;
 	
 	private Boolean includeVoidedLineItems = false;
