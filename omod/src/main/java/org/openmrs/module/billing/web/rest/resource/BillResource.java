@@ -11,6 +11,7 @@ package org.openmrs.module.billing.web.rest.resource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -45,6 +46,7 @@ import org.openmrs.module.billing.web.base.resource.BaseRestDataResource;
 import org.openmrs.module.billing.web.base.resource.PagingUtil;
 import org.openmrs.module.billing.web.rest.controller.base.CashierResourceController;
 import org.openmrs.module.webservices.rest.web.RequestContext;
+import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.PropertyGetter;
 import org.openmrs.module.webservices.rest.web.annotation.PropertySetter;
@@ -55,6 +57,7 @@ import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.impl.AlreadyPaged;
 import org.openmrs.module.webservices.rest.web.resource.impl.DataDelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
+import org.openmrs.module.webservices.rest.web.response.ConversionException;
 import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.springframework.web.client.RestClientException;
@@ -351,6 +354,18 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 			billSearch.setVisitUuid(visitUuid);
 		}
 		
+		String locationUuid = context.getRequest().getParameter("locationUuid");
+		if (StringUtils.isNotBlank(locationUuid)) {
+			billSearch.setLocationUuid(locationUuid);
+		}
+		
+		billSearch.setStartDate(parseDateParameter(context, "startDate"));
+		billSearch.setEndDate(parseDateParameter(context, "endDate"));
+		if (billSearch.getStartDate() != null && billSearch.getEndDate() != null
+		        && billSearch.getStartDate().after(billSearch.getEndDate())) {
+			throw new InvalidSearchException("startDate must not be after endDate");
+		}
+		
 		String discountStatus = context.getRequest().getParameter("discountStatus");
 		if (StringUtils.isNotBlank(discountStatus)) {
 			billSearch.setDiscountStatuses(parseDiscountStatuses(discountStatus));
@@ -372,6 +387,19 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 		}
 		
 		return billSearch;
+	}
+	
+	private Date parseDateParameter(RequestContext context, String name) {
+		String value = context.getRequest().getParameter(name);
+		if (StringUtils.isBlank(value)) {
+			return null;
+		}
+		try {
+			return (Date) ConversionUtil.convert(value, Date.class);
+		}
+		catch (ConversionException e) {
+			throw new InvalidSearchException("Invalid " + name + " '" + value + "'. Expected an ISO 8601 date");
+		}
 	}
 	
 	private List<DiscountStatus> parseDiscountStatuses(String param) {

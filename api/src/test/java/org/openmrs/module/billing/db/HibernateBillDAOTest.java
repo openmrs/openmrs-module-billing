@@ -9,10 +9,17 @@
  */
 package org.openmrs.module.billing.db;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -37,6 +44,18 @@ import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 
 public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
+	
+	private static final String LOCATION_0_UUID = "ef93c695-ac43-450a-93f8-4b2b4d50a3c8";
+	
+	private static final String LOCATION_1_UUID = "FF8081813D91C2DA013D91C3D8040001";
+	
+	private static final String LOCATION_WITHOUT_CASH_POINT_UUID = "FF8081813D93C2DA012D91C3D8040041";
+	
+	private static final String BILL_0_UUID = "4028814B39B565A20139B95D74360004";
+	
+	private static final String BILL_1_UUID = "5028814B39B565A20139B95D74360004";
+	
+	private static final String BILL_2_UUID = "6028814B39B565A20139B95D74360004";
 	
 	private BillDAO billDAO;
 	
@@ -209,6 +228,82 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 		List<Bill> bills = billDAO.getBills(billSearch, null);
 		assertNotNull(bills);
 		assertFalse(bills.isEmpty());
+	}
+	
+	@Test
+	public void getBills_shouldFilterByLocationUuid() {
+		Bill billAtLocation1 = new Bill();
+		billAtLocation1.setCashier(providerService.getProvider(0));
+		billAtLocation1.setPatient(patientService.getPatient(1));
+		billAtLocation1.setCashPoint(cashPointService.getCashPoint(1));
+		billAtLocation1.setReceiptNumber("LOC1-" + UUID.randomUUID());
+		billAtLocation1.setStatus(BillStatus.PENDING);
+		billDAO.saveBill(billAtLocation1);
+		
+		List<Bill> location1Bills = billDAO.getBills(BillSearch.builder().locationUuid(LOCATION_1_UUID).build(), null);
+		assertEquals(Collections.singletonList(billAtLocation1.getUuid()), uuids(location1Bills));
+		
+		List<String> location0Uuids = uuids(
+		    billDAO.getBills(BillSearch.builder().locationUuid(LOCATION_0_UUID).build(), null));
+		assertTrue(location0Uuids.containsAll(Arrays.asList(BILL_0_UUID, BILL_1_UUID, BILL_2_UUID)));
+		assertFalse(location0Uuids.contains(billAtLocation1.getUuid()));
+	}
+	
+	@Test
+	public void getBills_shouldReturnEmptyListForLocationWithoutBills() {
+		List<Bill> bills = billDAO.getBills(BillSearch.builder().locationUuid(LOCATION_WITHOUT_CASH_POINT_UUID).build(),
+		    null);
+		assertTrue(bills.isEmpty());
+	}
+	
+	@Test
+	public void getBills_shouldFilterByStartDateInclusive() {
+		List<String> resultUuids = uuids(
+		    billDAO.getBills(BillSearch.builder().startDate(date(2012, Calendar.FEBRUARY, 1)).build(), null));
+		
+		assertFalse(resultUuids.contains(BILL_0_UUID), "Bill 0 (2012-01-01) is before startDate");
+		assertTrue(resultUuids.contains(BILL_1_UUID), "Bill 1 (2012-02-01) equals startDate and must be included");
+		assertTrue(resultUuids.contains(BILL_2_UUID), "Bill 2 (2012-03-01) is after startDate");
+	}
+	
+	@Test
+	public void getBills_shouldFilterByEndDateInclusive() {
+		List<String> resultUuids = uuids(
+		    billDAO.getBills(BillSearch.builder().endDate(date(2012, Calendar.FEBRUARY, 1)).build(), null));
+		
+		assertTrue(resultUuids.contains(BILL_0_UUID), "Bill 0 (2012-01-01) is before endDate");
+		assertTrue(resultUuids.contains(BILL_1_UUID), "Bill 1 (2012-02-01) equals endDate and must be included");
+		assertFalse(resultUuids.contains(BILL_2_UUID), "Bill 2 (2012-03-01) is after endDate");
+	}
+	
+	@Test
+	public void getBills_shouldTreatEndDateAsExactInstantNotWholeDay() {
+		Bill midMorningBill = new Bill();
+		midMorningBill.setCashier(providerService.getProvider(0));
+		midMorningBill.setPatient(patientService.getPatient(1));
+		midMorningBill.setCashPoint(cashPointService.getCashPoint(0));
+		midMorningBill.setReceiptNumber("MIDDAY-" + UUID.randomUUID());
+		midMorningBill.setStatus(BillStatus.PENDING);
+		midMorningBill.setDateCreated(new GregorianCalendar(2012, Calendar.MARCH, 15, 10, 30).getTime());
+		billDAO.saveBill(midMorningBill);
+		
+		List<String> upToMidnight = uuids(
+		    billDAO.getBills(BillSearch.builder().endDate(date(2012, Calendar.MARCH, 15)).build(), null));
+		assertFalse(upToMidnight.contains(midMorningBill.getUuid()),
+		    "endDate of 2012-03-15 00:00 must exclude a bill created at 10:30 that day");
+		
+		List<String> upToNextMidnight = uuids(
+		    billDAO.getBills(BillSearch.builder().endDate(date(2012, Calendar.MARCH, 16)).build(), null));
+		assertTrue(upToNextMidnight.contains(midMorningBill.getUuid()),
+		    "endDate of 2012-03-16 00:00 must include a bill created 2012-03-15 10:30");
+	}
+	
+	@Test
+	public void getBills_shouldFilterByDateRange() {
+		BillSearch search = BillSearch.builder().startDate(date(2012, Calendar.JANUARY, 15))
+		        .endDate(date(2012, Calendar.FEBRUARY, 15)).build();
+		
+		assertEquals(Collections.singletonList(BILL_1_UUID), uuids(billDAO.getBills(search, null)));
 	}
 	
 	@Test
@@ -441,5 +536,9 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 	
 	private List<String> uuids(List<Bill> bills) {
 		return bills.stream().map(Bill::getUuid).sorted().collect(Collectors.toList());
+	}
+	
+	private static Date date(int year, int month, int day) {
+		return new GregorianCalendar(year, month, day).getTime();
 	}
 }

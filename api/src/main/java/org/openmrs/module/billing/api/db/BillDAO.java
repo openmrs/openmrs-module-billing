@@ -74,7 +74,11 @@ public interface BillDAO {
 	 * <p>
 	 * Results are ordered by date created descending (most recent first). By default, voided bills are
 	 * excluded from results unless {@link BillSearch#setIncludeVoided(Boolean)} is set to true. The
-	 * search criteria support filtering by patient, cashier, cash point, and status.
+	 * search criteria support filtering by patient, patient name, cashier, cash point, cash point
+	 * location, visit, status, discount status, refund status and date created. The start and end dates
+	 * are inclusive bounds compared against the exact {@code dateCreated} instant; a date-only value
+	 * means midnight at the start of that day, so callers wanting a whole day must pass the end-of-day
+	 * instant as the end date.
 	 * </p>
 	 *
 	 * @param billSearch the search criteria (must not be null)

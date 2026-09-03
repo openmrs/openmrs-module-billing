@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.billing.api.search;
 
+import java.util.Date;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -51,4 +52,10 @@ public class BillSearch {
 	private Boolean includeVoided = false;
 	
 	private Boolean includeVoidedLineItems = false;
+	
+	private String locationUuid;
+	
+	private Date startDate;
+	
+	private Date endDate;
 }

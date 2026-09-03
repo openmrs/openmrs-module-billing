@@ -21,9 +21,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 
@@ -38,6 +42,7 @@ import org.openmrs.Provider;
 import org.openmrs.Visit;
 import org.openmrs.api.VisitService;
 import org.openmrs.api.context.Context;
+import org.openmrs.messagesource.MessageSourceService;
 import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.model.Bill;
@@ -49,7 +54,9 @@ import org.openmrs.module.billing.api.model.RefundStatus;
 import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.module.billing.api.util.PrivilegeConstants;
 import org.openmrs.module.webservices.rest.web.RequestContext;
+import org.openmrs.module.webservices.rest.web.api.RestService;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
+import org.openmrs.module.webservices.rest.web.resource.api.Converter;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
 
@@ -93,12 +100,12 @@ public class BillResourceTest {
 	
 	private RequestContext buildContext(String discountStatusParam) {
 		HttpServletRequest req = mock(HttpServletRequest.class);
-		org.mockito.Mockito.when(req.getParameter("discountStatus")).thenReturn(discountStatusParam);
+		when(req.getParameter("discountStatus")).thenReturn(discountStatusParam);
 		
 		RequestContext context = mock(RequestContext.class);
-		org.mockito.Mockito.when(context.getRequest()).thenReturn(req);
-		org.mockito.Mockito.when(context.getStartIndex()).thenReturn(0);
-		org.mockito.Mockito.when(context.getLimit()).thenReturn(10);
+		when(context.getRequest()).thenReturn(req);
+		when(context.getStartIndex()).thenReturn(0);
+		when(context.getLimit()).thenReturn(10);
 		
 		return context;
 	}
@@ -112,12 +119,12 @@ public class BillResourceTest {
 	
 	private RequestContext buildRefundContext(String refundStatusParam) {
 		HttpServletRequest req = mock(HttpServletRequest.class);
-		org.mockito.Mockito.when(req.getParameter("refundStatus")).thenReturn(refundStatusParam);
+		when(req.getParameter("refundStatus")).thenReturn(refundStatusParam);
 		
 		RequestContext context = mock(RequestContext.class);
-		org.mockito.Mockito.when(context.getRequest()).thenReturn(req);
-		org.mockito.Mockito.when(context.getStartIndex()).thenReturn(0);
-		org.mockito.Mockito.when(context.getLimit()).thenReturn(10);
+		when(context.getRequest()).thenReturn(req);
+		when(context.getStartIndex()).thenReturn(0);
+		when(context.getLimit()).thenReturn(10);
 		
 		return context;
 	}
@@ -223,6 +230,78 @@ public class BillResourceTest {
 		resource.doSearch(context);
 		
 		assertNull(capturedSearches.get(0).getVisitUuid());
+	}
+	
+	private RequestContext buildContextWithParams(String locationUuid, String startDate, String endDate) {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		when(request.getParameter("locationUuid")).thenReturn(locationUuid);
+		when(request.getParameter("startDate")).thenReturn(startDate);
+		when(request.getParameter("endDate")).thenReturn(endDate);
+		
+		RequestContext context = mock(RequestContext.class);
+		when(context.getRequest()).thenReturn(request);
+		when(context.getStartIndex()).thenReturn(0);
+		when(context.getLimit()).thenReturn(10);
+		return context;
+	}
+	
+	private void stubDateConversion() {
+		contextMock.when(() -> Context.getService(RestService.class)).thenReturn(mock(RestService.class));
+		contextMock.when(() -> Context.getRegisteredComponents(Converter.class)).thenReturn(Collections.emptyList());
+		contextMock.when(Context::getMessageSourceService).thenReturn(mock(MessageSourceService.class));
+	}
+	
+	@Test
+	public void doSearch_shouldPassLocationUuidIntoBillSearch() {
+		RequestContext context = buildContextWithParams("22222222-2222-2222-2222-222222222222", null, null);
+		
+		resource.doSearch(context);
+		
+		assertEquals("22222222-2222-2222-2222-222222222222", capturedSearches.get(0).getLocationUuid());
+	}
+	
+	@Test
+	public void doSearch_shouldLeaveLocationAndDatesNullWhenAbsent() {
+		RequestContext context = buildContextWithParams(null, null, null);
+		
+		resource.doSearch(context);
+		
+		assertNull(capturedSearches.get(0).getLocationUuid());
+		assertNull(capturedSearches.get(0).getStartDate());
+		assertNull(capturedSearches.get(0).getEndDate());
+	}
+	
+	@Test
+	public void doSearch_shouldParseIsoStartAndEndDates() {
+		stubDateConversion();
+		RequestContext context = buildContextWithParams(null, "2026-08-01", "2026-08-31T23:59:59.000+0000");
+		
+		resource.doSearch(context);
+		
+		BillSearch search = capturedSearches.get(0);
+		assertEquals(new GregorianCalendar(2026, Calendar.AUGUST, 1).getTime(), search.getStartDate());
+		assertEquals(Date.from(Instant.parse("2026-08-31T23:59:59Z")), search.getEndDate());
+	}
+	
+	@Test
+	public void doSearch_shouldRejectInvalidDate() {
+		stubDateConversion();
+		RequestContext context = buildContextWithParams(null, "31/08/2026", null);
+		
+		InvalidSearchException ex = assertThrows(InvalidSearchException.class, () -> resource.doSearch(context));
+		assertTrue(ex.getMessage().contains("startDate"));
+		assertTrue(ex.getMessage().contains("31/08/2026"));
+		assertTrue(capturedSearches.isEmpty());
+	}
+	
+	@Test
+	public void doSearch_shouldRejectStartDateAfterEndDate() {
+		stubDateConversion();
+		RequestContext context = buildContextWithParams(null, "2026-09-01", "2026-08-01");
+		
+		InvalidSearchException ex = assertThrows(InvalidSearchException.class, () -> resource.doSearch(context));
+		assertTrue(ex.getMessage().contains("startDate must not be after endDate"));
+		assertTrue(capturedSearches.isEmpty());
 	}
 	
 	@Test
