@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.billing.api.search;
 
+import java.util.Date;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -48,9 +49,9 @@ public class BillSearch {
 	
 	private String patientName;
 	
-	private java.util.Date startDate;
+	private Date startDate;
 	
-	private java.util.Date endDate;
+	private Date endDate;
 	
 	private Boolean includeVoided = false;
 	

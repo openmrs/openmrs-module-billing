@@ -464,7 +464,7 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 		
 		Context.flushSession();
 		
-		BillSearch search = BillSearch.builder().startDate(new Date(now.getTime() + 500000)).build();
+		BillSearch search = BillSearch.builder().startDate(newerBill.getDateCreated()).build();
 		List<Bill> results = billDAO.getBills(search, null);
 		List<String> resultUuids = uuids(results);
 		
@@ -497,7 +497,7 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 		
 		Context.flushSession();
 		
-		BillSearch search = BillSearch.builder().endDate(new Date(now.getTime() - 500000)).build();
+		BillSearch search = BillSearch.builder().endDate(olderBill.getDateCreated()).build();
 		List<Bill> results = billDAO.getBills(search, null);
 		List<String> resultUuids = uuids(results);
 		
