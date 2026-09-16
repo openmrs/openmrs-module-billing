@@ -18,6 +18,7 @@ import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -39,7 +40,7 @@ public class FhirInvoiceDaoImplTest extends BaseModuleContextSensitiveTest {
 	@BeforeEach
 	public void setup() {
 		fhirInvoiceDao = new FhirInvoiceDaoImpl();
-		fhirInvoiceDao.setSessionFactory(sessionFactory);
+		ReflectionTestUtils.invokeMethod(fhirInvoiceDao, "setSessionFactory", sessionFactory);
 		executeDataSet(TEST_DATASET_ROOT + "CoreTest-2.0.xml");
 		executeDataSet(TEST_DATASET_ROOT + "StockOperationType.xml");
 		executeDataSet(TEST_DATASET_ROOT + "PaymentModeTest.xml");
