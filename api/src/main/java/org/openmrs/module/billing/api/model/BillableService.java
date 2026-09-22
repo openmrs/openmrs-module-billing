@@ -9,7 +9,6 @@
  */
 package org.openmrs.module.billing.api.model;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import lombok.AccessLevel;
