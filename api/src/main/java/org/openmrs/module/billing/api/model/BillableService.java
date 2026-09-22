@@ -24,7 +24,6 @@ public class BillableService extends BaseChangeableOpenmrsMetadata {
 	private static final long serialVersionUID = 0L;
 	
 	@Setter(AccessLevel.NONE)
-	@Getter(AccessLevel.NONE)
 	private Integer billableServiceId;
 	
 	private String name;
