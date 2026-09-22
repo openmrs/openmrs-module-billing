@@ -50,5 +50,5 @@ public class BillableService extends BaseChangeableOpenmrsMetadata {
 	public void setId(Integer billableServiceId) {
 		this.billableServiceId = billableServiceId;
 	}
-
+	
 }
