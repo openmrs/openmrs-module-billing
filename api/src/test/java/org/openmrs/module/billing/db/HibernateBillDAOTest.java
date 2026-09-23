@@ -510,6 +510,15 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 		Date now = new Date();
 		Patient patient = patientService.getPatient(0);
 		
+		Bill beforeRangeBill = new Bill();
+		beforeRangeBill.setCashier(providerService.getProvider(0));
+		beforeRangeBill.setPatient(patient);
+		beforeRangeBill.setCashPoint(cashPointService.getCashPoint(0));
+		beforeRangeBill.setReceiptNumber("RANGE-BEFORE-" + UUID.randomUUID());
+		beforeRangeBill.setStatus(BillStatus.PENDING);
+		beforeRangeBill.setDateCreated(new Date(now.getTime() - 20000));
+		billDAO.saveBill(beforeRangeBill);
+		
 		Bill targetBill = new Bill();
 		targetBill.setCashier(providerService.getProvider(0));
 		targetBill.setPatient(patient);
@@ -519,6 +528,15 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 		targetBill.setDateCreated(now);
 		billDAO.saveBill(targetBill);
 		
+		Bill afterRangeBill = new Bill();
+		afterRangeBill.setCashier(providerService.getProvider(0));
+		afterRangeBill.setPatient(patient);
+		afterRangeBill.setCashPoint(cashPointService.getCashPoint(0));
+		afterRangeBill.setReceiptNumber("RANGE-AFTER-" + UUID.randomUUID());
+		afterRangeBill.setStatus(BillStatus.PENDING);
+		afterRangeBill.setDateCreated(new Date(now.getTime() + 20000));
+		billDAO.saveBill(afterRangeBill);
+		
 		Context.flushSession();
 		
 		BillSearch search = BillSearch.builder().startDate(new Date(now.getTime() - 10000))
@@ -527,6 +545,8 @@ public class HibernateBillDAOTest extends BaseModuleContextSensitiveTest {
 		List<String> resultUuids = uuids(results);
 		
 		assertTrue(resultUuids.contains(targetBill.getUuid()));
+		assertFalse(resultUuids.contains(beforeRangeBill.getUuid()));
+		assertFalse(resultUuids.contains(afterRangeBill.getUuid()));
 	}
 	
 	private List<String> uuids(List<Bill> bills) {
