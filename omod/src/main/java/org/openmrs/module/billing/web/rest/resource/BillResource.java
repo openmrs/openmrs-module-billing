@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.openmrs.Provider;
 import org.openmrs.Visit;
 import org.openmrs.api.AdministrationService;
@@ -57,6 +58,7 @@ import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.impl.AlreadyPaged;
 import org.openmrs.module.webservices.rest.web.resource.impl.DataDelegatingCrudResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
+import org.openmrs.module.webservices.rest.web.response.ConversionException;
 import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.springframework.web.client.RestClientException;
@@ -375,12 +377,21 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 		
 		String startDate = context.getRequest().getParameter("startDate");
 		if (StringUtils.isNotBlank(startDate)) {
-			billSearch.setStartDate((Date) ConversionUtil.convert(startDate, Date.class));
+			billSearch.setStartDate(parseDate("startDate", startDate));
 		}
 		
 		String endDate = context.getRequest().getParameter("endDate");
 		if (StringUtils.isNotBlank(endDate)) {
-			billSearch.setEndDate((Date) ConversionUtil.convert(endDate, Date.class));
+			Date parsedEndDate = parseDate("endDate", endDate);
+			if (!endDate.contains("T")) {
+				parsedEndDate = DateUtils.addMilliseconds(DateUtils.addDays(parsedEndDate, 1), -1);
+			}
+			billSearch.setEndDate(parsedEndDate);
+		}
+		
+		if (billSearch.getStartDate() != null && billSearch.getEndDate() != null
+		        && billSearch.getStartDate().after(billSearch.getEndDate())) {
+			throw new InvalidSearchException("startDate must not be after endDate");
 		}
 		
 		return billSearch;
@@ -408,5 +419,14 @@ public class BillResource extends DataDelegatingCrudResource<Bill> {
 				        "Invalid refundStatus '" + s + "'. Allowed values: " + Arrays.toString(RefundStatus.values()));
 			}
 		}).collect(Collectors.toList());
+	}
+	
+	private Date parseDate(String paramName, String value) {
+		try {
+			return (Date) ConversionUtil.convert(value, Date.class);
+		}
+		catch (ConversionException e) {
+			throw new InvalidSearchException("Invalid " + paramName + ": " + value);
+		}
 	}
 }

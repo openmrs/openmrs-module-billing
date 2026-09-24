@@ -23,7 +23,10 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 
@@ -48,9 +51,11 @@ import org.openmrs.module.billing.api.model.DiscountStatus;
 import org.openmrs.module.billing.api.model.RefundStatus;
 import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.module.billing.api.util.PrivilegeConstants;
+import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
+import org.openmrs.module.webservices.rest.web.response.ConversionException;
 import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
 
 /**
@@ -223,6 +228,199 @@ public class BillResourceTest {
 		resource.doSearch(context);
 		
 		assertNull(capturedSearches.get(0).getVisitUuid());
+	}
+	
+	@Test
+	public void doSearch_shouldAdjustDateOnlyEndDateToEndOfDay() {
+		try (MockedStatic<ConversionUtil> convMock = mockStatic(ConversionUtil.class)) {
+			Date baseDate = new GregorianCalendar(2026, Calendar.AUGUST, 31, 0, 0, 0).getTime();
+			convMock.when(() -> ConversionUtil.convert("2026-08-31", Date.class)).thenReturn(baseDate);
+			
+			RequestContext context = mock(RequestContext.class);
+			HttpServletRequest req = mock(HttpServletRequest.class);
+			when(context.getRequest()).thenReturn(req);
+			when(req.getParameter("endDate")).thenReturn("2026-08-31");
+			when(context.getStartIndex()).thenReturn(0);
+			when(context.getLimit()).thenReturn(10);
+			
+			resource.doSearch(context);
+			
+			assertEquals(1, capturedSearches.size());
+			Date resultEndDate = capturedSearches.get(0).getEndDate();
+			Calendar expectedCal = new GregorianCalendar(2026, Calendar.AUGUST, 31, 23, 59, 59);
+			expectedCal.set(Calendar.MILLISECOND, 999);
+			assertEquals(expectedCal.getTime(), resultEndDate);
+		}
+	}
+	
+	@Test
+	public void doSearch_shouldNotShiftEndDateWhenContainsT() {
+		try (MockedStatic<ConversionUtil> convMock = mockStatic(ConversionUtil.class)) {
+			Date isoDate = new GregorianCalendar(2026, Calendar.AUGUST, 31, 14, 30, 0).getTime();
+			convMock.when(() -> ConversionUtil.convert("2026-08-31T14:30:00.000Z", Date.class)).thenReturn(isoDate);
+			
+			RequestContext context = mock(RequestContext.class);
+			HttpServletRequest req = mock(HttpServletRequest.class);
+			when(context.getRequest()).thenReturn(req);
+			when(req.getParameter("endDate")).thenReturn("2026-08-31T14:30:00.000Z");
+			when(context.getStartIndex()).thenReturn(0);
+			when(context.getLimit()).thenReturn(10);
+			
+			resource.doSearch(context);
+			
+			assertEquals(1, capturedSearches.size());
+			assertEquals(isoDate, capturedSearches.get(0).getEndDate());
+		}
+	}
+	
+	@Test
+	public void doSearch_shouldThrowInvalidSearchExceptionWhenStartDateAfterEndDate() {
+		try (MockedStatic<ConversionUtil> convMock = mockStatic(ConversionUtil.class)) {
+			Date startDate = new GregorianCalendar(2026, Calendar.SEPTEMBER, 10, 0, 0, 0).getTime();
+			Date endDate = new GregorianCalendar(2026, Calendar.SEPTEMBER, 1, 0, 0, 0).getTime();
+			convMock.when(() -> ConversionUtil.convert("2026-09-10", Date.class)).thenReturn(startDate);
+			convMock.when(() -> ConversionUtil.convert("2026-09-01", Date.class)).thenReturn(endDate);
+			
+			RequestContext context = mock(RequestContext.class);
+			HttpServletRequest req = mock(HttpServletRequest.class);
+			when(context.getRequest()).thenReturn(req);
+			when(req.getParameter("startDate")).thenReturn("2026-09-10");
+			when(req.getParameter("endDate")).thenReturn("2026-09-01");
+			when(context.getStartIndex()).thenReturn(0);
+			when(context.getLimit()).thenReturn(10);
+			
+			InvalidSearchException ex = assertThrows(InvalidSearchException.class, () -> resource.doSearch(context));
+			assertEquals("startDate must not be after endDate", ex.getMessage());
+		}
+	}
+	
+	@Test
+	public void doSearch_shouldAllowSameDayStartDateAndEndDate() {
+		try (MockedStatic<ConversionUtil> convMock = mockStatic(ConversionUtil.class)) {
+			Date sameDay = new GregorianCalendar(2026, Calendar.AUGUST, 31, 0, 0, 0).getTime();
+			convMock.when(() -> ConversionUtil.convert("2026-08-31", Date.class)).thenReturn(sameDay);
+			
+			RequestContext context = mock(RequestContext.class);
+			HttpServletRequest req = mock(HttpServletRequest.class);
+			when(context.getRequest()).thenReturn(req);
+			when(req.getParameter("startDate")).thenReturn("2026-08-31");
+			when(req.getParameter("endDate")).thenReturn("2026-08-31");
+			when(context.getStartIndex()).thenReturn(0);
+			when(context.getLimit()).thenReturn(10);
+			
+			resource.doSearch(context);
+			
+			assertEquals(1, capturedSearches.size());
+			assertEquals(sameDay, capturedSearches.get(0).getStartDate());
+			Calendar expectedEndCal = new GregorianCalendar(2026, Calendar.AUGUST, 31, 23, 59, 59);
+			expectedEndCal.set(Calendar.MILLISECOND, 999);
+			assertEquals(expectedEndCal.getTime(), capturedSearches.get(0).getEndDate());
+		}
+	}
+	
+	@Test
+	public void doSearch_shouldAllowStartDateLaterInDayThanDateOnlyEndDate() {
+		try (MockedStatic<ConversionUtil> convMock = mockStatic(ConversionUtil.class)) {
+			Date lateStart = new GregorianCalendar(2026, Calendar.AUGUST, 31, 18, 0, 0).getTime();
+			Date dateOnlyEnd = new GregorianCalendar(2026, Calendar.AUGUST, 31, 0, 0, 0).getTime();
+			convMock.when(() -> ConversionUtil.convert("2026-08-31T18:00:00.000Z", Date.class)).thenReturn(lateStart);
+			convMock.when(() -> ConversionUtil.convert("2026-08-31", Date.class)).thenReturn(dateOnlyEnd);
+			
+			RequestContext context = mock(RequestContext.class);
+			HttpServletRequest req = mock(HttpServletRequest.class);
+			when(context.getRequest()).thenReturn(req);
+			when(req.getParameter("startDate")).thenReturn("2026-08-31T18:00:00.000Z");
+			when(req.getParameter("endDate")).thenReturn("2026-08-31");
+			when(context.getStartIndex()).thenReturn(0);
+			when(context.getLimit()).thenReturn(10);
+			
+			// pre-adjustment endDate (00:00) is before an 18:00 startDate — would
+			// wrongly throw if the check ran before the end-of-day bump.
+			resource.doSearch(context);
+			
+			assertEquals(1, capturedSearches.size());
+			assertEquals(lateStart, capturedSearches.get(0).getStartDate());
+			Calendar expectedEndCal = new GregorianCalendar(2026, Calendar.AUGUST, 31, 23, 59, 59);
+			expectedEndCal.set(Calendar.MILLISECOND, 999);
+			assertEquals(expectedEndCal.getTime(), capturedSearches.get(0).getEndDate());
+		}
+	}
+	
+	@Test
+	public void doSearch_shouldThrowInvalidSearchExceptionWhenStartDateIsInvalid() {
+		try (MockedStatic<ConversionUtil> convMock = mockStatic(ConversionUtil.class)) {
+			convMock.when(() -> ConversionUtil.convert("invalid-date", Date.class))
+			        .thenThrow(new ConversionException("Cannot parse date"));
+			
+			RequestContext context = mock(RequestContext.class);
+			HttpServletRequest req = mock(HttpServletRequest.class);
+			when(context.getRequest()).thenReturn(req);
+			when(req.getParameter("startDate")).thenReturn("invalid-date");
+			when(context.getStartIndex()).thenReturn(0);
+			when(context.getLimit()).thenReturn(10);
+			
+			InvalidSearchException ex = assertThrows(InvalidSearchException.class, () -> resource.doSearch(context));
+			assertEquals("Invalid startDate: invalid-date", ex.getMessage());
+		}
+	}
+	
+	@Test
+	public void doSearch_shouldThrowInvalidSearchExceptionWhenEndDateIsInvalid() {
+		try (MockedStatic<ConversionUtil> convMock = mockStatic(ConversionUtil.class)) {
+			convMock.when(() -> ConversionUtil.convert("bad-end-date", Date.class))
+			        .thenThrow(new ConversionException("Cannot parse date"));
+			
+			RequestContext context = mock(RequestContext.class);
+			HttpServletRequest req = mock(HttpServletRequest.class);
+			when(context.getRequest()).thenReturn(req);
+			when(req.getParameter("endDate")).thenReturn("bad-end-date");
+			when(context.getStartIndex()).thenReturn(0);
+			when(context.getLimit()).thenReturn(10);
+			
+			InvalidSearchException ex = assertThrows(InvalidSearchException.class, () -> resource.doSearch(context));
+			assertEquals("Invalid endDate: bad-end-date", ex.getMessage());
+		}
+	}
+	
+	@Test
+	public void doSearch_shouldLeaveDatesNullWhenAbsent() {
+		RequestContext context = mock(RequestContext.class);
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		when(context.getRequest()).thenReturn(request);
+		when(request.getParameter("startDate")).thenReturn(null);
+		when(request.getParameter("endDate")).thenReturn(null);
+		when(context.getLimit()).thenReturn(10);
+		when(context.getStartIndex()).thenReturn(0);
+		
+		resource.doSearch(context);
+		
+		assertEquals(1, capturedSearches.size());
+		assertNull(capturedSearches.get(0).getStartDate());
+		assertNull(capturedSearches.get(0).getEndDate());
+	}
+	
+	@Test
+	public void doSearch_shouldParseStartDateAndEndDate() {
+		try (MockedStatic<ConversionUtil> convMock = mockStatic(ConversionUtil.class)) {
+			Date start = new GregorianCalendar(2026, Calendar.AUGUST, 1, 0, 0, 0).getTime();
+			Date end = new GregorianCalendar(2026, Calendar.AUGUST, 31, 23, 59, 59).getTime();
+			convMock.when(() -> ConversionUtil.convert("2026-08-01T00:00:00.000+0000", Date.class)).thenReturn(start);
+			convMock.when(() -> ConversionUtil.convert("2026-08-31T23:59:59.999+0000", Date.class)).thenReturn(end);
+			
+			RequestContext context = mock(RequestContext.class);
+			HttpServletRequest request = mock(HttpServletRequest.class);
+			when(context.getRequest()).thenReturn(request);
+			when(request.getParameter("startDate")).thenReturn("2026-08-01T00:00:00.000+0000");
+			when(request.getParameter("endDate")).thenReturn("2026-08-31T23:59:59.999+0000");
+			when(context.getLimit()).thenReturn(10);
+			when(context.getStartIndex()).thenReturn(0);
+			
+			resource.doSearch(context);
+			
+			assertEquals(1, capturedSearches.size());
+			assertEquals(start, capturedSearches.get(0).getStartDate());
+			assertEquals(end, capturedSearches.get(0).getEndDate());
+		}
 	}
 	
 	@Test
