@@ -1,0 +1,37 @@
+name: Deploy Snapshots
+
+on:
+  push:
+    branches: ['main']
+
+  repository_dispatch:
+    types: ['deploy-snapshots']
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '8'
+          server-id: openmrs-repo-snapshots
+          server-username: BINTRAY_USERNAME
+          server-password: BINTRAY_PASSWORD
+
+      - name: Deploy to Maven
+        run: mvn -B deploy -DskipTests --file pom.xml
+        env:
+          BINTRAY_USERNAME: ${{ secrets.BINTRAY_USERNAME }}
+          BINTRAY_PASSWORD: ${{ secrets.BINTRAY_PASSWORD }}
