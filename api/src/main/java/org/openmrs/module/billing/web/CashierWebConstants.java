@@ -74,7 +74,7 @@ public class CashierWebConstants extends WebConstants {
 	
 	public static final String RECEIPT_NUMBER_GENERATOR_PAGE_2X = RECEIPT_NUMBER_GENERATOR_ROOT_2X + ".page";
 	
-	public static final String OPENHMIS_CASHIER_MODULE_ID = "openhmis.cashier";
+	public static final String OPENHMIS_CASHIER_MODULE_ID = "billing";
 	
 	public static final String LANDING_PAGE_EXTENSION_POINT_ID = "org.openmrs.module.openhmis.cashier.landing";
 	
