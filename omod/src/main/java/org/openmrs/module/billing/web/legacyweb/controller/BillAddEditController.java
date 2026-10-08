@@ -26,16 +26,13 @@ import org.openmrs.module.billing.api.ICashierOptionsService;
 import org.openmrs.module.billing.api.base.util.UrlUtil;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.CashierOptions;
-import org.openmrs.module.billing.api.model.Timesheet;
 import org.openmrs.module.billing.api.util.PrivilegeConstants;
-import org.openmrs.module.billing.api.util.TimesheetUtil;
 import org.openmrs.module.billing.web.CashierWebConstants;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.util.UriUtils;
 
 /**
  * Controller to manage the Bill page.
@@ -52,21 +49,6 @@ public class BillAddEditController {
 	@RequestMapping(method = RequestMethod.GET)
 	public String bill(ModelMap model, @RequestParam(value = "billUuid", required = false) String billUuid,
 	        @RequestParam(value = "patientUuid", required = false) String patientUuid, HttpServletRequest request) {
-		Timesheet timesheet;
-		try {
-			timesheet = TimesheetUtil.getCurrentTimesheet();
-		}
-		catch (Exception e) {
-			log.error("Error retrieving provider for current user. ", e);
-			return "redirect:/login.htm";
-			
-		}
-		
-		if (timesheet == null && TimesheetUtil.isTimesheetRequired()) {
-			return buildRedirectUrl(request);
-		}
-		
-		model.addAttribute("timesheet", timesheet);
 		model.addAttribute("user", Context.getAuthenticatedUser());
 		model.addAttribute("url", buildUrlModelAttribute(request));
 		
@@ -93,7 +75,6 @@ public class BillAddEditController {
 		} else {
 			addPatientAttributes(model, patientUuid);
 			model.addAttribute("showPrint", true);
-			model.addAttribute("cashPoint", timesheet != null ? timesheet.getCashPoint() : null);
 		}
 		
 		return CashierWebConstants.BILL_PAGE;
@@ -179,22 +160,4 @@ public class BillAddEditController {
 		        + ((request.getQueryString() != null) ? "?" + request.getQueryString() : "");
 	}
 	
-	private String buildRedirectUrl(HttpServletRequest request) {
-		String redirectUrl = "redirect:" + UrlUtil.formUrl(CashierWebConstants.CASHIER_PAGE);
-		String returnUrlParam = "?returnUrl=" + UrlUtil.formUrl(CashierWebConstants.BILL_PAGE);
-		String requestQueryParam = "";
-		
-		if (request.getQueryString() != null) {
-			requestQueryParam = encodeRequestQuery(request);
-		}
-		
-		return redirectUrl + returnUrlParam + requestQueryParam;
-	}
-	
-	private String encodeRequestQuery(HttpServletRequest request) {
-		String requestQueryParam;
-		requestQueryParam = UriUtils.encodeQuery("?" + request.getQueryString(), "UTF-8");
-		
-		return requestQueryParam;
-	}
 }

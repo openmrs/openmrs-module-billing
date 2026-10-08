@@ -24,8 +24,6 @@ public class CashierOptions {
 	
 	private int defaultReceiptReportId;
 	
-	private boolean timesheetRequired = false;
-	
 	public String getRoundingItemUuid() {
 		return roundingItemUuid;
 	}
@@ -57,14 +55,6 @@ public class CashierOptions {
 	
 	public void setDefaultReceiptReportId(int defaultReceiptReportId) {
 		this.defaultReceiptReportId = defaultReceiptReportId;
-	}
-	
-	public boolean isTimesheetRequired() {
-		return timesheetRequired;
-	}
-	
-	public void setTimesheetRequired(boolean timesheetRequired) {
-		this.timesheetRequired = timesheetRequired;
 	}
 	
 	/**
