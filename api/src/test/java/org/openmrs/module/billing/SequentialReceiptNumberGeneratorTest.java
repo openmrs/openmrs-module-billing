@@ -14,11 +14,12 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.openmrs.Provider;
 import org.openmrs.api.context.Context;
@@ -37,7 +38,7 @@ public class SequentialReceiptNumberGeneratorTest {
 	
 	private MockedStatic<Context> contextMock;
 	
-	@Before
+	@BeforeEach
 	public void before() {
 		contextMock = mockStatic(Context.class);
 		service = mock(ISequentialReceiptNumberGeneratorService.class);
@@ -46,7 +47,7 @@ public class SequentialReceiptNumberGeneratorTest {
 		generator = new SequentialReceiptNumberGenerator();
 	}
 	
-	@After
+	@AfterEach
 	public void tearDown() {
 		contextMock.close();
 	}
@@ -73,8 +74,8 @@ public class SequentialReceiptNumberGeneratorTest {
 		// Test no grouping
 		Bill bill = createBill(1, 3);
 		String number = generator.generateNumber(bill);
-		Assert.assertNotNull(number);
-		Assert.assertEquals("0001", number);
+		Assertions.assertNotNull(number);
+		Assertions.assertEquals("0001", number);
 		
 		// Test cashier grouping
 		model.setGroupingType(SequentialReceiptNumberGenerator.GroupingType.CASHIER);
@@ -82,8 +83,8 @@ public class SequentialReceiptNumberGeneratorTest {
 		when(service.reserveNextSequence("P1")).thenReturn(10);
 		
 		number = generator.generateNumber(bill);
-		Assert.assertNotNull(number);
-		Assert.assertEquals("P10010", number);
+		Assertions.assertNotNull(number);
+		Assertions.assertEquals("P10010", number);
 		
 		// Test cash point grouping
 		model.setGroupingType(SequentialReceiptNumberGenerator.GroupingType.CASH_POINT);
@@ -91,8 +92,8 @@ public class SequentialReceiptNumberGeneratorTest {
 		when(service.reserveNextSequence("CP3")).thenReturn(87);
 		
 		number = generator.generateNumber(bill);
-		Assert.assertNotNull(number);
-		Assert.assertEquals("CP30087", number);
+		Assertions.assertNotNull(number);
+		Assertions.assertEquals("CP30087", number);
 		
 		// Test cashier and cash point grouping
 		model.setGroupingType(SequentialReceiptNumberGenerator.GroupingType.CASHIER_AND_CASH_POINT);
@@ -100,8 +101,8 @@ public class SequentialReceiptNumberGeneratorTest {
 		when(service.reserveNextSequence("P1CP3")).thenReturn(3);
 		
 		number = generator.generateNumber(bill);
-		Assert.assertNotNull(number);
-		Assert.assertEquals("P1CP30003", number);
+		Assertions.assertNotNull(number);
+		Assertions.assertEquals("P1CP30003", number);
 	}
 	
 	/**
@@ -126,19 +127,19 @@ public class SequentialReceiptNumberGeneratorTest {
 		// Test no grouping
 		Bill bill = createBill(1, 3);
 		String number = generator.generateNumber(bill);
-		Assert.assertNotNull(number);
-		Assert.assertEquals("0001", number);
+		Assertions.assertNotNull(number);
+		Assertions.assertEquals("0001", number);
 		
 		model.setSequenceType(SequentialReceiptNumberGenerator.SequenceType.DATE_COUNTER);
 		generator.load();
 		when(service.reserveNextSequence("")).thenReturn(52013);
 		
 		number = generator.generateNumber(bill);
-		Assert.assertNotNull(number);
+		Assertions.assertNotNull(number);
 		// Should end with the sequence number
-		Assert.assertTrue(number.endsWith("52013"));
+		Assertions.assertTrue(number.endsWith("52013"));
 		// Should be longer than just the sequence due to date prefix (yyMMdd = 6 chars + 5 digits)
-		Assert.assertEquals(11, number.length());
+		Assertions.assertEquals(11, number.length());
 		
 		// Test DATE_TIME_COUNTER sequence type
 		model.setSequenceType(SequentialReceiptNumberGenerator.SequenceType.DATE_TIME_COUNTER);
@@ -146,11 +147,11 @@ public class SequentialReceiptNumberGeneratorTest {
 		when(service.reserveNextSequence("")).thenReturn(15);
 		
 		number = generator.generateNumber(bill);
-		Assert.assertNotNull(number);
+		Assertions.assertNotNull(number);
 		// Should end with the sequence number
-		Assert.assertTrue(number.endsWith("0015"));
+		Assertions.assertTrue(number.endsWith("0015"));
 		// Should be longer than just the sequence due to date-time prefix (yyMMddHHmmss = 12 chars + 4 digits)
-		Assert.assertEquals(16, number.length());
+		Assertions.assertEquals(16, number.length());
 	}
 	
 	/**
@@ -174,8 +175,8 @@ public class SequentialReceiptNumberGeneratorTest {
 		
 		Bill bill = createBill(1, 3);
 		String number = generator.generateNumber(bill);
-		Assert.assertNotNull(number);
-		Assert.assertEquals("0001", number);
+		Assertions.assertNotNull(number);
+		Assertions.assertEquals("0001", number);
 		
 		// Test separator with DATE_TIME_COUNTER
 		model.setGroupingType(SequentialReceiptNumberGenerator.GroupingType.CASHIER_AND_CASH_POINT);
@@ -184,24 +185,24 @@ public class SequentialReceiptNumberGeneratorTest {
 		when(service.reserveNextSequence("P1CP3")).thenReturn(52013);
 		
 		number = generator.generateNumber(bill);
-		Assert.assertNotNull(number);
+		Assertions.assertNotNull(number);
 		// Should start with grouping and separator
-		Assert.assertTrue(number.startsWith("P1-CP3-"));
+		Assertions.assertTrue(number.startsWith("P1-CP3-"));
 		// Should end with the sequence number
-		Assert.assertTrue(number.endsWith("52013"));
+		Assertions.assertTrue(number.endsWith("52013"));
 		
 		model.setIncludeCheckDigit(true);
 		generator.load();
 		
 		number = generator.generateNumber(bill);
-		Assert.assertNotNull(number);
+		Assertions.assertNotNull(number);
 		// Should start with grouping and separator
-		Assert.assertTrue(number.startsWith("P1-CP3-"));
+		Assertions.assertTrue(number.startsWith("P1-CP3-"));
 		// Should contain the sequence number before the check digit
-		Assert.assertTrue(number.contains("52013"));
+		Assertions.assertTrue(number.contains("52013"));
 		// Should end with a check digit (single digit after final separator)
 		String[] parts = number.split("-");
-		Assert.assertEquals(1, parts[parts.length - 1].length());
+		Assertions.assertEquals(1, parts[parts.length - 1].length());
 	}
 	
 	/**
@@ -226,26 +227,26 @@ public class SequentialReceiptNumberGeneratorTest {
 		Bill bill = createBill(1, 3);
 		
 		String number = generator.generateNumber(bill);
-		Assert.assertNotNull(number);
-		Assert.assertEquals("00018", number);
+		Assertions.assertNotNull(number);
+		Assertions.assertEquals("00018", number);
 		
 		model.setSeparator("-");
 		generator.load();
 		
 		number = generator.generateNumber(bill);
-		Assert.assertNotNull(number);
-		Assert.assertEquals("0001-8", number);
+		Assertions.assertNotNull(number);
+		Assertions.assertEquals("0001-8", number);
 		
 		model.setGroupingType(SequentialReceiptNumberGenerator.GroupingType.CASHIER_AND_CASH_POINT);
 		generator.load();
 		when(service.reserveNextSequence("P1CP3")).thenReturn(25);
 		
 		number = generator.generateNumber(bill);
-		Assert.assertNotNull(number);
+		Assertions.assertNotNull(number);
 		
 		LuhnIdentifierValidator validator = new LuhnIdentifierValidator();
 		String idWithCheckDigit = validator.getValidIdentifier("P1CP30025");
-		Assert.assertEquals("P1-CP3-0025-" + idWithCheckDigit.substring(idWithCheckDigit.length() - 1), number);
+		Assertions.assertEquals("P1-CP3-0025-" + idWithCheckDigit.substring(idWithCheckDigit.length() - 1), number);
 	}
 	
 	/**
@@ -311,9 +312,11 @@ public class SequentialReceiptNumberGeneratorTest {
 	 * @verifies Throw NullPointerException if bill is null.
 	 * @see SequentialReceiptNumberGenerator#generateNumber(Bill)
 	 */
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void generateNumber_shouldThrowNullPointerExceptionIfBillIsNull() {
-		generator.generateNumber(null);
+		assertThrows(NullPointerException.class, () -> {
+			generator.generateNumber(null);
+		});
 	}
 	
 	protected Bill createBill(int cashierId, int cashPointId) {

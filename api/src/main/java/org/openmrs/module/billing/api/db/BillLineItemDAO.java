@@ -12,8 +12,8 @@ package org.openmrs.module.billing.api.db;
 import org.openmrs.Order;
 import org.openmrs.module.billing.api.model.BillLineItem;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import java.util.List;
 
 /**

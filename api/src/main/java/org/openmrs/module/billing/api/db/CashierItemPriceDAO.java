@@ -11,7 +11,7 @@ package org.openmrs.module.billing.api.db;
 
 import org.openmrs.module.billing.api.model.CashierItemPrice;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.List;
 
 /**

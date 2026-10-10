@@ -11,9 +11,9 @@ package org.openmrs.module.billing.base;
 
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.Role;
 import org.openmrs.api.UserService;
 import org.openmrs.api.context.Context;
@@ -24,7 +24,7 @@ public class LazyRoleTest extends BaseModuleContextTest {
 	
 	private UserService userService;
 	
-	@Before
+	@BeforeEach
 	public void before() {
 		super.executeDataSet(TestConstants.CORE_DATASET);
 		
@@ -35,6 +35,6 @@ public class LazyRoleTest extends BaseModuleContextTest {
 	public void selectAll_ShouldReturnAllRoles() {
 		List<Role> roles = userService.getAllRoles();
 		
-		Assert.assertEquals(8, roles.size());
+		Assertions.assertEquals(8, roles.size());
 	}
 }

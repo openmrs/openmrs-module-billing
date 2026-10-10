@@ -9,8 +9,6 @@
  */
 package org.openmrs.module.billing.api.db.hibernate;
 
-import java.io.Serializable;
-
 import org.hibernate.type.Type;
 import org.openmrs.api.db.hibernate.ImmutableEntityInterceptor;
 import org.openmrs.module.billing.api.model.Bill;
@@ -38,7 +36,7 @@ public class ImmutableBillLineItemInterceptor extends ImmutableEntityInterceptor
 	}
 	
 	@Override
-	public boolean onFlushDirty(Object entity, Serializable id, Object[] currentState, Object[] previousState,
+	public boolean onFlushDirty(Object entity, Object id, Object[] currentState, Object[] previousState,
 	        String[] propertyNames, Type[] types) {
 		if (!BillLineItem.class.isAssignableFrom(entity.getClass())) {
 			return false;

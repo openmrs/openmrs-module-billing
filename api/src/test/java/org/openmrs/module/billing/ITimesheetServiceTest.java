@@ -13,8 +13,9 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.Provider;
 import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
@@ -32,6 +33,7 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 	public static final String TIMESHEET_DATASET = TestConstants.BASE_DATASET_DIR + "TimesheetTest.xml";
 	
 	@Override
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 		
@@ -99,15 +101,15 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 	protected void assertEntity(Timesheet expected, Timesheet actual) {
 		super.assertEntity(expected, actual);
 		
-		Assert.assertNotNull(expected.getCashier());
-		Assert.assertNotNull(actual.getCashier());
-		Assert.assertEquals(expected.getCashier().getId(), actual.getCashier().getId());
-		Assert.assertNotNull(expected.getCashPoint());
-		Assert.assertNotNull(actual.getCashPoint());
-		Assert.assertEquals(expected.getCashPoint().getId(), actual.getCashPoint().getId());
+		Assertions.assertNotNull(expected.getCashier());
+		Assertions.assertNotNull(actual.getCashier());
+		Assertions.assertEquals(expected.getCashier().getId(), actual.getCashier().getId());
+		Assertions.assertNotNull(expected.getCashPoint());
+		Assertions.assertNotNull(actual.getCashPoint());
+		Assertions.assertEquals(expected.getCashPoint().getId(), actual.getCashPoint().getId());
 		
-		Assert.assertEquals(expected.getClockIn(), actual.getClockIn());
-		Assert.assertEquals(expected.getClockOut(), actual.getClockOut());
+		Assertions.assertEquals(expected.getClockIn(), actual.getClockIn());
+		Assertions.assertEquals(expected.getClockOut(), actual.getClockOut());
 	}
 	
 	/**
@@ -124,7 +126,7 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 		
 		Timesheet current = service.getCurrentTimesheet(timesheet.getCashier());
 		
-		Assert.assertNotNull(current);
+		Assertions.assertNotNull(current);
 		assertEntity(timesheet, current);
 	}
 	
@@ -135,10 +137,10 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 	@Test
 	public void getCurrentTimesheet_shouldReturnNullIfTheCashierHasNoTimesheets() {
 		Provider cashier = providerService.getProvider(2);
-		Assert.assertNotNull(cashier);
+		Assertions.assertNotNull(cashier);
 		
 		Timesheet timesheet = service.getCurrentTimesheet(cashier);
-		Assert.assertNull(timesheet);
+		Assertions.assertNull(timesheet);
 	}
 	
 	/**
@@ -150,7 +152,7 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 		Provider cashier = providerService.getProvider(0);
 		Timesheet original = service.getCurrentTimesheet(cashier);
 		
-		Assert.assertNotNull(original);
+		Assertions.assertNotNull(original);
 		
 		Timesheet timesheet = createEntity(true);
 		timesheet.setCashier(cashier);
@@ -160,8 +162,8 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 		Context.flushSession();
 		
 		Timesheet current = service.getCurrentTimesheet(cashier);
-		Assert.assertNotNull(current);
-		Assert.assertNotEquals(original.getId(), current.getId());
+		Assertions.assertNotNull(current);
+		Assertions.assertNotEquals(original.getId(), current.getId());
 	}
 	
 	/**
@@ -171,10 +173,10 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 	@Test
 	public void getCurrentTimesheet_shouldReturnNullIfTheTimesheetIsClockedOut() {
 		Provider cashier = providerService.getProvider(1);
-		Assert.assertNotNull(cashier);
+		Assertions.assertNotNull(cashier);
 		
 		Timesheet timesheet = service.getCurrentTimesheet(cashier);
-		Assert.assertNull(timesheet);
+		Assertions.assertNull(timesheet);
 	}
 	
 	/**
@@ -187,8 +189,8 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 		List<Timesheet> results = service.getTimesheetsByDate(cashier,
 		    new GregorianCalendar(2011, Calendar.JANUARY, 1).getTime());
 		
-		Assert.assertNotNull(results);
-		Assert.assertEquals(0, results.size());
+		Assertions.assertNotNull(results);
+		Assertions.assertEquals(0, results.size());
 	}
 	
 	/**
@@ -201,9 +203,9 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 		List<Timesheet> results = service.getTimesheetsByDate(cashier,
 		    new GregorianCalendar(2011, Calendar.FEBRUARY, 10).getTime());
 		
-		Assert.assertNotNull(results);
-		Assert.assertEquals(1, results.size());
-		Assert.assertEquals(3, (int) results.get(0).getId());
+		Assertions.assertNotNull(results);
+		Assertions.assertEquals(1, results.size());
+		Assertions.assertEquals(3, (int) results.get(0).getId());
 	}
 	
 	/**
@@ -216,9 +218,9 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 		List<Timesheet> results = service.getTimesheetsByDate(cashier,
 		    new GregorianCalendar(2011, Calendar.FEBRUARY, 11).getTime());
 		
-		Assert.assertNotNull(results);
-		Assert.assertEquals(1, results.size());
-		Assert.assertEquals(4, (int) results.get(0).getId());
+		Assertions.assertNotNull(results);
+		Assertions.assertEquals(1, results.size());
+		Assertions.assertEquals(4, (int) results.get(0).getId());
 	}
 	
 	/**
@@ -231,9 +233,9 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 		List<Timesheet> results = service.getTimesheetsByDate(cashier,
 		    new GregorianCalendar(2011, Calendar.FEBRUARY, 14).getTime());
 		
-		Assert.assertNotNull(results);
-		Assert.assertEquals(1, results.size());
-		Assert.assertEquals(5, (int) results.get(0).getId());
+		Assertions.assertNotNull(results);
+		Assertions.assertEquals(1, results.size());
+		Assertions.assertEquals(5, (int) results.get(0).getId());
 	}
 	
 	/**
@@ -246,9 +248,9 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 		List<Timesheet> results = service.getTimesheetsByDate(cashier,
 		    new GregorianCalendar(2011, Calendar.FEBRUARY, 16).getTime());
 		
-		Assert.assertNotNull(results);
-		Assert.assertEquals(1, results.size());
-		Assert.assertEquals(6, (int) results.get(0).getId());
+		Assertions.assertNotNull(results);
+		Assertions.assertEquals(1, results.size());
+		Assertions.assertEquals(6, (int) results.get(0).getId());
 	}
 	
 	/**
@@ -261,8 +263,8 @@ public class ITimesheetServiceTest extends IEntityDataServiceTest<ITimesheetServ
 		List<Timesheet> results = service.getTimesheetsByDate(cashier,
 		    new GregorianCalendar(2011, Calendar.FEBRUARY, 20).getTime());
 		
-		Assert.assertNotNull(results);
-		Assert.assertEquals(1, results.size());
-		Assert.assertEquals(7, (int) results.get(0).getId());
+		Assertions.assertNotNull(results);
+		Assertions.assertEquals(1, results.size());
+		Assertions.assertEquals(7, (int) results.get(0).getId());
 	}
 }

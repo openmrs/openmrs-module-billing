@@ -9,26 +9,25 @@
  */
 package org.openmrs.module.billing.api.billing;
 
-import javax.jms.JMSException;
-import javax.jms.MapMessage;
-import javax.jms.Message;
-
 import java.util.List;
 
 import lombok.Setter;
 import org.springframework.core.OrderComparator;
 import lombok.extern.slf4j.Slf4j;
-import org.openmrs.OpenmrsObject;
 import org.openmrs.Order;
+import org.openmrs.api.db.event.SaveDbEvent;
 import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.context.Daemon;
-import org.openmrs.event.Event;
 import org.openmrs.module.DaemonToken;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
- * Listens for Order CREATED events from the OpenMRS Event module and delegates billing to the
- * appropriate {@link OrderBillingStrategy}.
+ * Bills each new {@link Order} once the transaction that saved it commits, by delegating to the
+ * appropriate {@link OrderBillingStrategy} on a daemon thread. Core publishes a {@link SaveDbEvent}
+ * when an entity is persisted and when it is updated, and only a persisted one has no previous
+ * state.
  */
 @Slf4j
 @Setter
@@ -36,26 +35,29 @@ public class OrderBillingEventListener implements BillingEventListener {
 	
 	private DaemonToken daemonToken;
 	
-	@Override
-	public Class<? extends OpenmrsObject> getSubscribedClass() {
-		return Order.class;
-	}
-	
-	@Override
-	public Event.Action getSubscribedAction() {
-		return Event.Action.CREATED;
-	}
-	
-	@Override
-	public void onMessage(Message message) {
+	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+	public void onOrderSaved(SaveDbEvent<? extends Order> event) {
+		// An updated order was billed when it was created. Billing it again would bring back the line
+		// item that discontinuing it voided.
+		if (event.getPreviousState() != null) {
+			return;
+		}
+		
 		if (daemonToken == null) {
 			log.error("Cannot process order billing event: daemon token not set");
 			return;
 		}
 		
-		Daemon.runInDaemonThread(() -> {
+		String uuid = event.getEntity().getUuid();
+		Daemon.runInDaemonThreadWithoutResult(() -> {
 			try {
-				processMessage(message);
+				Order order = Context.getOrderService().getOrderByUuid(uuid);
+				if (order == null) {
+					log.warn("Order not found for UUID: {}", uuid);
+					return;
+				}
+				
+				processOrder(order);
 			}
 			catch (Exception e) {
 				log.error("Error processing order billing event", e);
@@ -63,27 +65,9 @@ public class OrderBillingEventListener implements BillingEventListener {
 		}, daemonToken);
 	}
 	
-	private void processMessage(Message message) throws JMSException {
-		MapMessage mapMessage = (MapMessage) message;
-		String uuid = mapMessage.getString("uuid");
-		String action = mapMessage.getString("action");
-		
-		if (!"CREATED".equals(action)) {
-			return;
-		}
-		
-		Order order = Context.getOrderService().getOrderByUuid(uuid);
-		if (order == null) {
-			log.warn("Order not found for UUID: {}", uuid);
-			return;
-		}
-		
-		processOrder(order);
-	}
-	
 	/**
 	 * Process a single order through the billing strategy chain. Package-visible so that integration
-	 * tests can invoke the billing pipeline directly without requiring a JMS broker.
+	 * tests can invoke the billing pipeline directly, without committing a transaction.
 	 *
 	 * @param order a persisted order
 	 */

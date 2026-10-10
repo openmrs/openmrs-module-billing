@@ -33,7 +33,7 @@ import java.util.List;
  * REST resource representing a {@link BillExemption}.
  */
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
-        + "/billExemption", supportedClass = BillExemption.class, supportedOpenmrsVersions = { "2.0 - 2.*" })
+        + "/billExemption", supportedClass = BillExemption.class, supportedOpenmrsVersions = { "2.0 - 9.*" })
 public class BillExemptionResource extends MetadataDelegatingCrudResource<BillExemption> {
 	
 	@Override

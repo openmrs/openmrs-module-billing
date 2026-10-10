@@ -9,13 +9,9 @@
  */
 package org.openmrs.module.billing;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.openmrs.api.context.Context;
-import org.openmrs.event.Event;
 import org.openmrs.module.BaseModuleActivator;
 import org.openmrs.module.DaemonToken;
 import org.openmrs.module.DaemonTokenAware;
@@ -34,8 +30,6 @@ public class BillingModuleActivator extends BaseModuleActivator implements Daemo
 	
 	private DaemonToken daemonToken;
 	
-	private final List<BillingEventListener> subscribedListeners = new ArrayList<>();
-	
 	/**
 	 * @see BaseModuleActivator#contextRefreshed()
 	 */
@@ -43,7 +37,7 @@ public class BillingModuleActivator extends BaseModuleActivator implements Daemo
 	public void contextRefreshed() {
 		log.info("OpenMRS Billing Module refreshed");
 		
-		subscribeBillingEventListeners();
+		passDaemonTokenToListeners();
 	}
 	
 	/**
@@ -65,42 +59,14 @@ public class BillingModuleActivator extends BaseModuleActivator implements Daemo
 		log.info("OpenMRS Billing Module stopped");
 	}
 	
-	@Override
-	public void willRefreshContext() {
-		unsubscribeBillingEventListeners();
-	}
-	
-	private void subscribeBillingEventListeners() {
+	// Each context refresh creates new listener beans, and the token may differ from the last one passed
+	private void passDaemonTokenToListeners() {
 		if (daemonToken == null) {
-			log.error("Cannot subscribe billing event listeners: daemon token has not been set");
+			log.error("Cannot pass the daemon token to the billing event listeners: it has not been set");
 			return;
 		}
-		List<BillingEventListener> listeners = Context.getRegisteredComponents(BillingEventListener.class);
-		for (BillingEventListener listener : listeners) {
-			try {
-				listener.setDaemonToken(daemonToken);
-				Event.subscribe(listener.getSubscribedClass(), listener.getSubscribedAction().name(), listener);
-				subscribedListeners.add(listener);
-				log.info("Subscribed {} to {} {} events", listener.getClass().getSimpleName(),
-				    listener.getSubscribedClass().getSimpleName(), listener.getSubscribedAction());
-			}
-			catch (Exception e) {
-				log.error("Failed to subscribe {}", listener.getClass().getSimpleName(), e);
-			}
+		for (BillingEventListener listener : Context.getRegisteredComponents(BillingEventListener.class)) {
+			listener.setDaemonToken(daemonToken);
 		}
-	}
-	
-	private void unsubscribeBillingEventListeners() {
-		for (BillingEventListener listener : subscribedListeners) {
-			try {
-				Event.unsubscribe(listener.getSubscribedClass(), listener.getSubscribedAction(), listener);
-				log.info("Unsubscribed {} from {} {} events", listener.getClass().getSimpleName(),
-				    listener.getSubscribedClass().getSimpleName(), listener.getSubscribedAction());
-			}
-			catch (Exception e) {
-				log.error("Failed to unsubscribe {}", listener.getClass().getSimpleName(), e);
-			}
-		}
-		subscribedListeners.clear();
 	}
 }

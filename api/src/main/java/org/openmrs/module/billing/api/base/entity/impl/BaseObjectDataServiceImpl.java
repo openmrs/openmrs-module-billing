@@ -15,13 +15,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.Query;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projection;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.transform.ResultTransformer;
+import org.hibernate.query.Query;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
@@ -29,6 +23,8 @@ import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.base.Utility;
 import org.openmrs.module.billing.api.base.entity.IObjectDataService;
 import org.openmrs.module.billing.api.base.entity.db.hibernate.BaseHibernateRepository;
+import org.openmrs.module.billing.api.base.entity.db.hibernate.EntityCriteria;
+import org.openmrs.module.billing.api.base.entity.db.hibernate.EntityCriteria.SortOrder;
 import org.openmrs.module.billing.api.base.entity.security.IObjectAuthorizationPrivileges;
 import org.openmrs.module.billing.api.base.f.Action1;
 import org.openmrs.module.billing.api.base.util.PrivilegeUtil;
@@ -74,7 +70,7 @@ public abstract class BaseObjectDataServiceImpl<E extends OpenmrsObject, P exten
 		return null;
 	}
 	
-	protected Order[] getDefaultSort() {
+	protected SortOrder[] getDefaultSort() {
 		return null;
 	}
 	
@@ -203,8 +199,8 @@ public abstract class BaseObjectDataServiceImpl<E extends OpenmrsObject, P exten
 			throw new IllegalArgumentException("The UUID must be defined.");
 		}
 		
-		Criteria criteria = repository.createCriteria(getEntityClass());
-		criteria.add(Restrictions.eq("uuid", uuid));
+		EntityCriteria<E> criteria = repository.createCriteria(getEntityClass());
+		criteria.add(EntityCriteria.eq("uuid", uuid));
 		
 		return repository.selectSingle(getEntityClass(), criteria);
 	}
@@ -227,30 +223,30 @@ public abstract class BaseObjectDataServiceImpl<E extends OpenmrsObject, P exten
 	}
 	
 	/**
-	 * Functional method to create, prepare, and execute a query with {@link Criteria}.
+	 * Functional method to create, prepare, and execute a query with {@link EntityCriteria}.
 	 *
-	 * @param action The {@link Action1} to prepare the {@link Criteria} predicates.
+	 * @param action The {@link Action1} to prepare the {@link EntityCriteria} predicates.
 	 * @return The result of the query.
 	 */
-	protected <T extends OpenmrsObject> List<T> executeCriteria(Class<T> clazz, Action1<Criteria> action) {
-		return executeCriteria(clazz, null, action, (Order[]) null);
+	protected <T extends OpenmrsObject> List<T> executeCriteria(Class<T> clazz, Action1<EntityCriteria<T>> action) {
+		return executeCriteria(clazz, null, action, (SortOrder[]) null);
 	}
 	
 	/**
-	 * Functional method to create, prepare, and execute a paged query with {@link Criteria}.
+	 * Functional method to create, prepare, and execute a paged query with {@link EntityCriteria}.
 	 *
 	 * @param pagingInfo The paging information.
-	 * @param action The {@link Action1} to prepare the {@link Criteria} predicates.
+	 * @param action The {@link Action1} to prepare the {@link EntityCriteria} predicates.
 	 * @return
 	 */
 	protected <T extends OpenmrsObject> List<T> executeCriteria(Class<T> clazz, PagingInfo pagingInfo,
-	        Action1<Criteria> action) {
-		return executeCriteria(clazz, pagingInfo, action, (Order[]) null);
+	        Action1<EntityCriteria<T>> action) {
+		return executeCriteria(clazz, pagingInfo, action, (SortOrder[]) null);
 	}
 	
 	protected <T extends OpenmrsObject> List<T> executeCriteria(Class<T> clazz, PagingInfo pagingInfo,
-	        Action1<Criteria> action, Order... orderBy) {
-		Criteria criteria = repository.createCriteria(clazz);
+	        Action1<EntityCriteria<T>> action, SortOrder... orderBy) {
+		EntityCriteria<T> criteria = repository.createCriteria(clazz);
 		
 		if (action != null) {
 			action.apply(criteria);
@@ -259,7 +255,7 @@ public abstract class BaseObjectDataServiceImpl<E extends OpenmrsObject, P exten
 		loadPagingTotal(pagingInfo, criteria);
 		
 		if (orderBy != null) {
-			for (Order order : orderBy) {
+			for (SortOrder order : orderBy) {
 				criteria.addOrder(order);
 			}
 		}
@@ -307,65 +303,48 @@ public abstract class BaseObjectDataServiceImpl<E extends OpenmrsObject, P exten
 	 * Loads the record count for the specified criteria into the specified paging object.
 	 *
 	 * @param pagingInfo The {@link PagingInfo} object to load with the record count.
-	 * @param criteria The {@link Criteria} to execute against the hibernate data source or {@code null}
-	 *            to create a new one.
+	 * @param criteria The {@link EntityCriteria} to execute against the hibernate data source or
+	 *            {@code null} to create a new one.
 	 */
-	protected void loadPagingTotal(PagingInfo pagingInfo, Criteria criteria) {
+	protected void loadPagingTotal(PagingInfo pagingInfo, EntityCriteria<?> criteria) {
 		if (pagingInfo != null && pagingInfo.getPage() > 0 && pagingInfo.getPageSize() > 0) {
 			if (criteria == null) {
 				criteria = repository.createCriteria(getEntityClass());
 			}
 			
 			if (pagingInfo.getLoadRecordCount()) {
-				// Copy the current projection and transformer which requires getting access to the underlying criteria
-				// implementation
-				Projection projection = null;
-				ResultTransformer transformer = null;
-				
-				CriteriaImplWrapper impl = new CriteriaImplWrapper(criteria);
-				//CriteriaImpl impl = Utility.as(CriteriaImpl.class, criteria);
-				projection = impl.getProjection();
-				transformer = impl.getResultTransformer();
-				
-				try {
-					criteria.setProjection(Projections.rowCount());
-					
-					Long count = repository.<Long> selectValue(criteria);
-					pagingInfo.setTotalRecordCount(count == null ? 0 : count);
-					pagingInfo.setLoadRecordCount(false);
-				}
-				finally {
-					// Reset the criteria projection and transformer to return the result rather than the row count
-					criteria.setProjection(projection);
-					criteria.setResultTransformer(transformer);
-				}
+				// The row count is a separate query built from the same restrictions, so the criteria is left untouched
+				pagingInfo.setTotalRecordCount(repository.selectCount(criteria));
+				pagingInfo.setLoadRecordCount(false);
 			}
 		}
 	}
 	
 	/**
-	 * Creates a new {@link Criteria} to retrieve the data specified by the {@link PagingInfo} object.
+	 * Creates a new {@link EntityCriteria} to retrieve the data specified by the {@link PagingInfo}
+	 * object.
 	 *
 	 * @param pagingInfo The {@link PagingInfo} object that specifies which data should be retrieved.
-	 * @return A new {@link Criteria} with the paging settings.
+	 * @return A new {@link EntityCriteria} with the paging settings.
 	 */
-	protected Criteria createPagingCriteria(PagingInfo pagingInfo) {
+	protected EntityCriteria<E> createPagingCriteria(PagingInfo pagingInfo) {
 		return createPagingCriteria(pagingInfo, null);
 	}
 	
 	/**
-	 * Updates the specified {@link Criteria} object to retrieve the data specified by the
+	 * Updates the specified {@link EntityCriteria} object to retrieve the data specified by the
 	 * {@link PagingInfo} object.
 	 *
 	 * @param pagingInfo The {@link PagingInfo} object that specifies which data should be retrieved.
-	 * @param criteria The {@link Criteria} to add the paging settings to, or {@code null} to create a
-	 *            new one.
-	 * @return The {@link Criteria} object with the paging settings applied.
+	 * @param criteria The {@link EntityCriteria} to add the paging settings to, or {@code null} to
+	 *            create a new one for the service entity class.
+	 * @return The {@link EntityCriteria} object with the paging settings applied.
 	 */
-	protected Criteria createPagingCriteria(PagingInfo pagingInfo, Criteria criteria) {
+	@SuppressWarnings("unchecked")
+	protected <T> EntityCriteria<T> createPagingCriteria(PagingInfo pagingInfo, EntityCriteria<T> criteria) {
 		if (pagingInfo != null && pagingInfo.getPage() > 0 && pagingInfo.getPageSize() > 0) {
 			if (criteria == null) {
-				criteria = repository.createCriteria(getEntityClass());
+				criteria = (EntityCriteria<T>) repository.createCriteria(getEntityClass());
 			}
 			
 			criteria.setFirstResult((pagingInfo.getPage() - 1) * pagingInfo.getPageSize());

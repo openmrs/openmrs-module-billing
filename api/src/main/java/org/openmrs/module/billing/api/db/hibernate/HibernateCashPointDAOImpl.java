@@ -12,17 +12,18 @@ package org.openmrs.module.billing.api.db.hibernate;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.db.CashPointDAO;
 import org.openmrs.module.billing.api.model.CashPoint;
@@ -94,8 +95,7 @@ public class HibernateCashPointDAOImpl implements CashPointDAO {
 	 */
 	@Override
 	public CashPoint saveCashPoint(@Nonnull CashPoint cashPoint) {
-		sessionFactory.getCurrentSession().saveOrUpdate(cashPoint);
-		return cashPoint;
+		return HibernateUtil.saveOrUpdate(sessionFactory.getCurrentSession(), cashPoint);
 	}
 	
 	/**
@@ -103,6 +103,6 @@ public class HibernateCashPointDAOImpl implements CashPointDAO {
 	 */
 	@Override
 	public void purgeCashPoint(@Nonnull CashPoint cashPoint) {
-		sessionFactory.getCurrentSession().delete(cashPoint);
+		sessionFactory.getCurrentSession().remove(cashPoint);
 	}
 }

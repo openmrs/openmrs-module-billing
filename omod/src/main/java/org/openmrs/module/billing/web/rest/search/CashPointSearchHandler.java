@@ -12,7 +12,7 @@ package org.openmrs.module.billing.web.rest.search;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.CashPointService;

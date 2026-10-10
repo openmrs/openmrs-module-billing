@@ -10,12 +10,12 @@
 package org.openmrs.module.billing.impl;
 
 import org.hl7.fhir.r4.model.Invoice;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.dao.FhirInvoiceDao;
@@ -26,7 +26,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FhirInvoiceServiceImplTest {
 	
 	private static final String BILL_UUID = "4028814B39B565A20139B95D74360004";
@@ -46,7 +46,7 @@ public class FhirInvoiceServiceImplTest {
 	
 	private Invoice invoice;
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		bill = new Bill();
 		bill.setUuid(BILL_UUID);

@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.billing.web.base.resource.search;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.module.billing.api.base.entity.IObjectDataService;
 import org.openmrs.module.webservices.rest.web.resource.api.SearchHandler;

@@ -10,7 +10,7 @@
 package org.openmrs.module.billing.web.legacyweb.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Provider;
 import org.openmrs.api.APIException;
 import org.openmrs.api.ProviderService;
@@ -33,7 +33,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.request.WebRequest;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;

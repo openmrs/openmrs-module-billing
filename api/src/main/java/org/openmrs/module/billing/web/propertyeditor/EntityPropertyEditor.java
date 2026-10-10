@@ -12,8 +12,8 @@ package org.openmrs.module.billing.web.propertyeditor;
 import java.beans.PropertyEditorSupport;
 import java.lang.reflect.ParameterizedType;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.base.entity.IObjectDataService;

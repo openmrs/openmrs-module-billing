@@ -13,12 +13,14 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
-import org.hibernate.Criteria;
-import org.hibernate.Query;
+import jakarta.persistence.TypedQuery;
+import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.openmrs.OpenmrsObject;
 import org.openmrs.api.APIException;
 import org.openmrs.api.db.hibernate.DbSession;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
+import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -42,40 +44,36 @@ public class BaseHibernateRepositoryImpl implements BaseHibernateRepository {
 	
 	@Override
 	public Query createQuery(String query) {
-		DbSession session = sessionFactory.getCurrentSession();
-		return session.createQuery(query);
+		return getHibernateSession().createQuery(query);
 	}
 	
 	@Override
-	public <E extends OpenmrsObject> Criteria createCriteria(Class<E> cls) {
-		DbSession session = sessionFactory.getCurrentSession();
-		return session.createCriteria(cls);
+	public <E extends OpenmrsObject> EntityCriteria<E> createCriteria(Class<E> cls) {
+		return new EntityCriteria<E>(cls);
 	}
 	
 	@Override
 	public <E extends OpenmrsObject> E save(E entity) {
-		DbSession session = sessionFactory.getCurrentSession();
+		Session session = getHibernateSession();
 		
 		try {
-			session.saveOrUpdate(entity);
+			return HibernateUtil.saveOrUpdate(session, entity);
 		}
 		catch (Exception ex) {
 			throw new APIException(
 			        "An exception occurred while attempting to add a " + entity.getClass().getSimpleName() + " entity.", ex);
 		}
-		
-		return entity;
 	}
 	
 	@Override
 	@Transactional
 	public void saveAll(Collection<? extends OpenmrsObject> collection) {
-		DbSession session = sessionFactory.getCurrentSession();
+		Session session = getHibernateSession();
 		try {
 			
 			if (collection != null && !collection.isEmpty()) {
 				for (OpenmrsObject obj : collection) {
-					session.saveOrUpdate(obj);
+					HibernateUtil.saveOrUpdate(session, obj);
 				}
 			}
 		}
@@ -98,10 +96,11 @@ public class BaseHibernateRepositoryImpl implements BaseHibernateRepository {
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
-	public <T> T selectValue(Criteria criteria) {
+	public long selectCount(EntityCriteria<?> criteria) {
 		try {
-			return (T) criteria.uniqueResult();
+			Session session = getHibernateSession();
+			Long count = session.createQuery(criteria.toCountQuery(session.getCriteriaBuilder())).uniqueResult();
+			return count == null ? 0 : count;
 		}
 		catch (Exception ex) {
 			throw new APIException("An exception occurred while attempting to selecting a value.", ex);
@@ -134,11 +133,10 @@ public class BaseHibernateRepositoryImpl implements BaseHibernateRepository {
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
-	public <E extends OpenmrsObject> E selectSingle(Class<E> cls, Criteria criteria) {
+	public <E extends OpenmrsObject> E selectSingle(Class<E> cls, EntityCriteria<E> criteria) {
 		E result = null;
 		try {
-			List<E> results = criteria.list();
+			List<E> results = list(criteria);
 			
 			if (!results.isEmpty()) {
 				result = results.get(0);
@@ -152,14 +150,9 @@ public class BaseHibernateRepositoryImpl implements BaseHibernateRepository {
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public <E extends OpenmrsObject> List<E> select(Class<E> cls) {
-		DbSession session = sessionFactory.getCurrentSession();
-		
 		try {
-			Criteria search = session.createCriteria(cls);
-			
-			return search.list();
+			return list(createCriteria(cls));
 		}
 		catch (Exception ex) {
 			throw new APIException("An exception occurred while attempting to get " + cls.getSimpleName() + " entities.", //
@@ -168,8 +161,7 @@ public class BaseHibernateRepositoryImpl implements BaseHibernateRepository {
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
-	public <E extends OpenmrsObject> List<E> select(Class<E> cls, Criteria criteria) {
+	public <E extends OpenmrsObject> List<E> select(Class<E> cls, EntityCriteria<E> criteria) {
 		// If the criteria is not defined just use the default select method
 		if (criteria == null) {
 			return select(cls);
@@ -178,7 +170,7 @@ public class BaseHibernateRepositoryImpl implements BaseHibernateRepository {
 		List<E> results;
 		
 		try {
-			results = criteria.list();
+			results = list(criteria);
 		}
 		catch (Exception ex) {
 			throw new APIException("An exception occurred while attempting to select " + cls.getSimpleName() + " entities.",
@@ -186,5 +178,31 @@ public class BaseHibernateRepositoryImpl implements BaseHibernateRepository {
 		}
 		
 		return results;
+	}
+	
+	private Session getHibernateSession() {
+		return sessionFactory.getHibernateSessionFactory().getCurrentSession();
+	}
+	
+	private <E> List<E> list(EntityCriteria<E> criteria) {
+		return createTypedQuery(criteria).getResultList();
+	}
+	
+	private <E> TypedQuery<E> createTypedQuery(EntityCriteria<E> criteria) {
+		Session session = getHibernateSession();
+		TypedQuery<E> query = session.createQuery(criteria.toQuery(session.getCriteriaBuilder()));
+		if (criteria.getFirstResult() != null) {
+			query.setFirstResult(criteria.getFirstResult());
+		}
+		if (criteria.getMaxResults() != null) {
+			query.setMaxResults(criteria.getMaxResults());
+		}
+		if (criteria.getFetchSize() != null) {
+			query.setHint("org.hibernate.fetchSize", criteria.getFetchSize());
+		}
+		if (criteria.getLockMode() != null) {
+			query.setLockMode(criteria.getLockMode());
+		}
+		return query;
 	}
 }

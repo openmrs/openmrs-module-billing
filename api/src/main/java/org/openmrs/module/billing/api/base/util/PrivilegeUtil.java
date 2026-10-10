@@ -10,7 +10,7 @@
 package org.openmrs.module.billing.api.base.util;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.User;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.base.exception.PrivilegeException;

@@ -19,22 +19,20 @@
 		<cache usage="read-write"/>
 
 		<id name="id" type="int" column="seq_receipt_number_generator_id">
-			<generator class="native">
+			<generator class="identity">
 				<param name="sequence">cashier_seq_receipt_number_generator_seq_receipt_number_generator_id_seq</param>
 			</generator>
 		</id>
 		<discriminator column="seq_receipt_number_generator_id" insert="false"/>
 
 		<property name="groupingType" column="grouping_type" not-null="true">
-			<type name="org.hibernate.type.EnumType">
+			<type name="org.openmrs.api.db.hibernate.type.StringEnumType">
 				<param name="enumClass">org.openmrs.module.billing.api.SequentialReceiptNumberGenerator$GroupingType</param>
-				<param name="type">12</param>
 			</type>
 		</property>
 		<property name="sequenceType" column="sequence_type" not-null="true">
-			<type name="org.hibernate.type.EnumType">
+			<type name="org.openmrs.api.db.hibernate.type.StringEnumType">
 				<param name="enumClass">org.openmrs.module.billing.api.SequentialReceiptNumberGenerator$SequenceType</param>
-				<param name="type">12</param>
 			</type>
 		</property>
 
@@ -49,7 +47,7 @@
 
 	<class name="org.openmrs.module.billing.api.model.GroupSequence" table="cashier_seq_group_sequence">
 		<id name="id" type="int" column="seq_group_sequence_id">
-			<generator class="native">
+			<generator class="identity">
 				<param name="sequence">cashier_seq_group_sequence_seq_group_sequence_id_seq</param>
 			</generator>
 		</id>

@@ -9,16 +9,18 @@
  */
 package org.openmrs.module.billing;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.ISequentialReceiptNumberGeneratorService;
 import org.openmrs.module.billing.api.impl.SequentialReceiptNumberGeneratorServiceImpl;
@@ -43,12 +45,12 @@ public class SequentialReceiptNumberGeneratorReserveTest extends BaseModuleConte
 	
 	private ISequentialReceiptNumberGeneratorService service;
 	
-	@Before
+	@BeforeEach
 	public void before() {
 		service = Context.getService(ISequentialReceiptNumberGeneratorService.class);
 	}
 	
-	@After
+	@AfterEach
 	public void purgeAllSequences() {
 		Context.clearSession();
 		for (GroupSequence sequence : service.getSequences()) {
@@ -68,7 +70,7 @@ public class SequentialReceiptNumberGeneratorReserveTest extends BaseModuleConte
 	private int persistedValue(String group) {
 		Context.clearSession();
 		GroupSequence sequence = service.getSequence(group);
-		Assert.assertNotNull("Expected a persisted sequence for group '" + group + "'", sequence);
+		Assertions.assertNotNull(sequence, "Expected a persisted sequence for group '" + group + "'");
 		
 		return sequence.getValue();
 	}
@@ -77,17 +79,17 @@ public class SequentialReceiptNumberGeneratorReserveTest extends BaseModuleConte
 	public void reserveNextSequence_shouldReturnOneAndPersistAFullBlockForANewGroup() {
 		int result = service.reserveNextSequence("reserve-new-group");
 		
-		Assert.assertEquals(1, result);
-		Assert.assertEquals(BLOCK_SIZE, persistedValue("reserve-new-group"));
+		Assertions.assertEquals(1, result);
+		Assertions.assertEquals(BLOCK_SIZE, persistedValue("reserve-new-group"));
 	}
 	
 	@Test
 	public void reserveNextSequence_shouldHandOutConsecutiveValuesFromThePool() {
-		Assert.assertEquals(1, service.reserveNextSequence("reserve-consecutive"));
-		Assert.assertEquals(2, service.reserveNextSequence("reserve-consecutive"));
-		Assert.assertEquals(3, service.reserveNextSequence("reserve-consecutive"));
+		Assertions.assertEquals(1, service.reserveNextSequence("reserve-consecutive"));
+		Assertions.assertEquals(2, service.reserveNextSequence("reserve-consecutive"));
+		Assertions.assertEquals(3, service.reserveNextSequence("reserve-consecutive"));
 		
-		Assert.assertEquals(BLOCK_SIZE, persistedValue("reserve-consecutive"));
+		Assertions.assertEquals(BLOCK_SIZE, persistedValue("reserve-consecutive"));
 	}
 	
 	@Test
@@ -96,63 +98,63 @@ public class SequentialReceiptNumberGeneratorReserveTest extends BaseModuleConte
 		
 		int result = service.reserveNextSequence("reserve-existing");
 		
-		Assert.assertEquals(11, result);
-		Assert.assertEquals(10 + BLOCK_SIZE, persistedValue("reserve-existing"));
+		Assertions.assertEquals(11, result);
+		Assertions.assertEquals(10 + BLOCK_SIZE, persistedValue("reserve-existing"));
 	}
 	
 	@Test
 	public void reserveNextSequence_shouldReserveANewBlockWhenThePoolIsDrained() {
 		for (int i = 1; i <= BLOCK_SIZE; i++) {
-			Assert.assertEquals(i, service.reserveNextSequence("reserve-drain"));
+			Assertions.assertEquals(i, service.reserveNextSequence("reserve-drain"));
 		}
-		Assert.assertEquals(BLOCK_SIZE, persistedValue("reserve-drain"));
+		Assertions.assertEquals(BLOCK_SIZE, persistedValue("reserve-drain"));
 		
-		Assert.assertEquals(BLOCK_SIZE + 1, service.reserveNextSequence("reserve-drain"));
-		Assert.assertEquals(2 * BLOCK_SIZE, persistedValue("reserve-drain"));
+		Assertions.assertEquals(BLOCK_SIZE + 1, service.reserveNextSequence("reserve-drain"));
+		Assertions.assertEquals(2 * BLOCK_SIZE, persistedValue("reserve-drain"));
 	}
 	
 	@Test
 	public void saveSequence_shouldInvalidateThePoolForTheGroup() {
-		Assert.assertEquals(1, service.reserveNextSequence("reserve-save-invalidate"));
+		Assertions.assertEquals(1, service.reserveNextSequence("reserve-save-invalidate"));
 		
 		Context.clearSession();
 		GroupSequence sequence = service.getSequence("reserve-save-invalidate");
 		sequence.setValue(500);
 		service.saveSequence(sequence);
 		
-		Assert.assertEquals(501, service.reserveNextSequence("reserve-save-invalidate"));
-		Assert.assertEquals(500 + BLOCK_SIZE, persistedValue("reserve-save-invalidate"));
+		Assertions.assertEquals(501, service.reserveNextSequence("reserve-save-invalidate"));
+		Assertions.assertEquals(500 + BLOCK_SIZE, persistedValue("reserve-save-invalidate"));
 	}
 	
 	@Test
 	public void purgeSequence_shouldInvalidateThePoolForTheGroup() {
-		Assert.assertEquals(1, service.reserveNextSequence("reserve-purge-invalidate"));
+		Assertions.assertEquals(1, service.reserveNextSequence("reserve-purge-invalidate"));
 		
 		Context.clearSession();
 		service.purgeSequence(service.getSequence("reserve-purge-invalidate"));
 		
-		Assert.assertEquals(1, service.reserveNextSequence("reserve-purge-invalidate"));
-		Assert.assertEquals(BLOCK_SIZE, persistedValue("reserve-purge-invalidate"));
+		Assertions.assertEquals(1, service.reserveNextSequence("reserve-purge-invalidate"));
+		Assertions.assertEquals(BLOCK_SIZE, persistedValue("reserve-purge-invalidate"));
 	}
 	
 	@Test
 	public void reserveSequenceBlock_shouldReserveNonOverlappingBlocks() {
-		Assert.assertEquals(1, service.reserveSequenceBlock("reserve-block", BLOCK_SIZE));
-		Assert.assertEquals(BLOCK_SIZE, persistedValue("reserve-block"));
+		Assertions.assertEquals(1, service.reserveSequenceBlock("reserve-block", BLOCK_SIZE));
+		Assertions.assertEquals(BLOCK_SIZE, persistedValue("reserve-block"));
 		
-		Assert.assertEquals(BLOCK_SIZE + 1, service.reserveSequenceBlock("reserve-block", BLOCK_SIZE));
-		Assert.assertEquals(2 * BLOCK_SIZE, persistedValue("reserve-block"));
+		Assertions.assertEquals(BLOCK_SIZE + 1, service.reserveSequenceBlock("reserve-block", BLOCK_SIZE));
+		Assertions.assertEquals(2 * BLOCK_SIZE, persistedValue("reserve-block"));
 		
-		Assert.assertEquals(2 * BLOCK_SIZE + 1, service.reserveSequenceBlock("reserve-block", 5));
-		Assert.assertEquals(2 * BLOCK_SIZE + 5, persistedValue("reserve-block"));
+		Assertions.assertEquals(2 * BLOCK_SIZE + 1, service.reserveSequenceBlock("reserve-block", 5));
+		Assertions.assertEquals(2 * BLOCK_SIZE + 5, persistedValue("reserve-block"));
 	}
 	
 	@Test
 	public void reserveNextSequence_shouldUseTheBlockSizeFromTheGlobalProperty() {
 		Context.getAdministrationService().setGlobalProperty(ModuleSettings.SEQUENCE_BLOCK_SIZE_PROPERTY, "10");
 		
-		Assert.assertEquals(1, service.reserveNextSequence("reserve-gp-block-size"));
-		Assert.assertEquals(10, persistedValue("reserve-gp-block-size"));
+		Assertions.assertEquals(1, service.reserveNextSequence("reserve-gp-block-size"));
+		Assertions.assertEquals(10, persistedValue("reserve-gp-block-size"));
 	}
 	
 	@Test
@@ -163,13 +165,13 @@ public class SequentialReceiptNumberGeneratorReserveTest extends BaseModuleConte
 			return result;
 		});
 		
-		Assert.assertEquals((Integer) 1, first);
-		Assert.assertEquals(BLOCK_SIZE, persistedValue("reserve-outer-rollback"));
+		Assertions.assertEquals((Integer) 1, first);
+		Assertions.assertEquals(BLOCK_SIZE, persistedValue("reserve-outer-rollback"));
 	}
 	
 	@Test
 	public void saveSequence_shouldNotInvalidateThePoolWhenTheTransactionRollsBack() {
-		Assert.assertEquals(1, service.reserveNextSequence("reserve-rollback-save"));
+		Assertions.assertEquals(1, service.reserveNextSequence("reserve-rollback-save"));
 		
 		newTransactionTemplate().execute(status -> {
 			Context.clearSession();
@@ -180,8 +182,8 @@ public class SequentialReceiptNumberGeneratorReserveTest extends BaseModuleConte
 			return null;
 		});
 		
-		Assert.assertEquals(2, service.reserveNextSequence("reserve-rollback-save"));
-		Assert.assertEquals(BLOCK_SIZE, persistedValue("reserve-rollback-save"));
+		Assertions.assertEquals(2, service.reserveNextSequence("reserve-rollback-save"));
+		Assertions.assertEquals(BLOCK_SIZE, persistedValue("reserve-rollback-save"));
 	}
 	
 	private TransactionTemplate newTransactionTemplate() {
@@ -224,18 +226,22 @@ public class SequentialReceiptNumberGeneratorReserveTest extends BaseModuleConte
 			thread.join(180000);
 		}
 		
-		Assert.assertTrue("Worker threads failed: " + failures, failures.isEmpty());
-		Assert.assertEquals(100, firsts.size());
-		Assert.assertEquals("Overlapping blocks were handed out", 100, new HashSet<>(firsts).size());
+		Assertions.assertTrue(failures.isEmpty(), "Worker threads failed: " + failures);
+		Assertions.assertEquals(100, firsts.size());
+		Assertions.assertEquals(100, new HashSet<>(firsts).size(), "Overlapping blocks were handed out");
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void reserveSequenceBlock_shouldThrowIllegalArgumentExceptionIfTheGroupIsNull() {
-		service.reserveSequenceBlock(null, BLOCK_SIZE);
+		assertThrows(IllegalArgumentException.class, () -> {
+			service.reserveSequenceBlock(null, BLOCK_SIZE);
+		});
 	}
 	
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void reserveSequenceBlock_shouldThrowIllegalArgumentExceptionIfBlockSizeIsLessThanOne() {
-		service.reserveSequenceBlock("reserve-block-invalid", 0);
+		assertThrows(IllegalArgumentException.class, () -> {
+			service.reserveSequenceBlock("reserve-block-invalid", 0);
+		});
 	}
 }

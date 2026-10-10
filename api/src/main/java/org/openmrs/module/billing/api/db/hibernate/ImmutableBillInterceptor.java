@@ -17,8 +17,6 @@ import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillStatus;
 import org.springframework.stereotype.Component;
 
-import java.io.Serializable;
-
 /**
  * <p>
  * This implements the semi-immutable rules for a Bill.
@@ -51,7 +49,7 @@ public class ImmutableBillInterceptor extends ImmutableEntityInterceptor {
 	}
 	
 	@Override
-	public boolean onFlushDirty(Object entity, Serializable id, Object[] currentState, Object[] previousState,
+	public boolean onFlushDirty(Object entity, Object id, Object[] currentState, Object[] previousState,
 	        String[] propertyNames, Type[] types) {
 		boolean isBill = Bill.class.isAssignableFrom(entity.getClass());
 		if (isBill) {

@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.openmrs.module</groupId>
 		<artifactId>billing</artifactId>
-		<version>2.5.1-SNAPSHOT</version>
+		<version>3.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>billing-api</artifactId>
@@ -49,16 +49,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.openmrs</groupId>
-			<artifactId>event-api</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.openmrs.module</groupId>
-			<artifactId>uiframework-api</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>org.openmrs.module</groupId>
 			<artifactId>idgen-api</artifactId>
 		</dependency>
@@ -66,6 +56,7 @@
 		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- always needed -->
@@ -95,7 +86,7 @@
 
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-inline</artifactId>
+            <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -131,6 +122,16 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<!-- openmrs-web is only needed to compile the activator; on the test classpath its web config needs a ServletContext -->
+					<classpathDependencyExcludes>
+						<classpathDependencyExclude>org.openmrs.web:openmrs-web</classpathDependencyExclude>
+					</classpathDependencyExcludes>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

@@ -9,13 +9,15 @@
  */
 package org.openmrs.module.billing;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.util.List;
 import java.util.Properties;
 
 import org.hibernate.cfg.Environment;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.ISequentialReceiptNumberGeneratorService;
 import org.openmrs.module.billing.api.SequentialReceiptNumberGenerator;
@@ -38,7 +40,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 		return properties;
 	}
 	
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 		
@@ -84,22 +86,24 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	@Override
 	protected void assertEntity(SequentialReceiptNumberGeneratorModel expected,
 	        SequentialReceiptNumberGeneratorModel actual) {
-		Assert.assertEquals(expected.getCashierPrefix(), actual.getCashierPrefix());
-		Assert.assertEquals(expected.getCashPointPrefix(), actual.getCashPointPrefix());
-		Assert.assertEquals(expected.getGroupingType(), actual.getGroupingType());
-		Assert.assertEquals(expected.getSeparator(), actual.getSeparator());
-		Assert.assertEquals(expected.getSequencePadding(), actual.getSequencePadding());
-		Assert.assertEquals(expected.getSequenceType(), actual.getSequenceType());
-		Assert.assertEquals(expected.getIncludeCheckDigit(), actual.getIncludeCheckDigit());
+		Assertions.assertEquals(expected.getCashierPrefix(), actual.getCashierPrefix());
+		Assertions.assertEquals(expected.getCashPointPrefix(), actual.getCashPointPrefix());
+		Assertions.assertEquals(expected.getGroupingType(), actual.getGroupingType());
+		Assertions.assertEquals(expected.getSeparator(), actual.getSeparator());
+		Assertions.assertEquals(expected.getSequencePadding(), actual.getSequencePadding());
+		Assertions.assertEquals(expected.getSequenceType(), actual.getSequenceType());
+		Assertions.assertEquals(expected.getIncludeCheckDigit(), actual.getIncludeCheckDigit());
 	}
 	
 	/**
 	 * @verifies Throw IllegalArgumentException if the group is null
 	 * @see ISequentialReceiptNumberGeneratorService#reserveNextSequence(String)
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void reserveNextSequence_shouldThrowIllegalArgumentExceptionIfTheGroupIsNull() {
-		service.reserveNextSequence(null);
+		assertThrows(IllegalArgumentException.class, () -> {
+			service.reserveNextSequence(null);
+		});
 	}
 	
 	/**
@@ -110,8 +114,8 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	public void getSequences_shouldReturnAllSequences() {
 		List<GroupSequence> sequences = service.getSequences();
 		
-		Assert.assertNotNull(sequences);
-		Assert.assertEquals(4, sequences.size());
+		Assertions.assertNotNull(sequences);
+		Assertions.assertEquals(4, sequences.size());
 	}
 	
 	/**
@@ -128,17 +132,19 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 		Context.flushSession();
 		
 		sequences = service.getSequences();
-		Assert.assertNotNull(sequences);
-		Assert.assertEquals(0, sequences.size());
+		Assertions.assertNotNull(sequences);
+		Assertions.assertEquals(0, sequences.size());
 	}
 	
 	/**
 	 * @verifies Throw a NullPointerException if sequence is null
 	 * @see ISequentialReceiptNumberGeneratorService#saveSequence(GroupSequence)
 	 */
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void saveSequence_shouldThrowANullPointerExceptionIfSequenceIsNull() {
-		service.saveSequence(null);
+		assertThrows(NullPointerException.class, () -> {
+			service.saveSequence(null);
+		});
 	}
 	
 	/**
@@ -153,10 +159,10 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 		
 		sequence = service.saveSequence(sequence);
 		
-		Assert.assertNotNull(sequence);
-		Assert.assertNotNull(sequence.getId());
-		Assert.assertEquals("New Group", sequence.getGroup());
-		Assert.assertEquals(50, sequence.getValue());
+		Assertions.assertNotNull(sequence);
+		Assertions.assertNotNull(sequence.getId());
+		Assertions.assertEquals("New Group", sequence.getGroup());
+		Assertions.assertEquals(50, sequence.getValue());
 	}
 	
 	/**
@@ -174,8 +180,8 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 		Context.flushSession();
 		
 		sequence = service.getSequence(sequence.getGroup());
-		Assert.assertNotNull(sequence);
-		Assert.assertEquals(oldValue + 10, sequence.getValue());
+		Assertions.assertNotNull(sequence);
+		Assertions.assertEquals(oldValue + 10, sequence.getValue());
 	}
 	
 	/**
@@ -188,21 +194,23 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 		sequence.setGroup("New Group");
 		sequence.setValue(50);
 		
-		Assert.assertNull(sequence.getId());
+		Assertions.assertNull(sequence.getId());
 		
 		sequence = service.saveSequence(sequence);
 		
-		Assert.assertNotNull(sequence);
-		Assert.assertNotNull(sequence.getId());
+		Assertions.assertNotNull(sequence);
+		Assertions.assertNotNull(sequence.getId());
 	}
 	
 	/**
 	 * @verifies Throw a NullPointerException if the sequence is null
 	 * @see ISequentialReceiptNumberGeneratorService#purgeSequence(GroupSequence)
 	 */
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void purgeSequence_shouldThrowANullPointerExceptionIfTheSequenceIsNull() {
-		service.purgeSequence(null);
+		assertThrows(NullPointerException.class, () -> {
+			service.purgeSequence(null);
+		});
 	}
 	
 	/**
@@ -217,7 +225,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 		Context.flushSession();
 		
 		sequence = service.getSequence("Test Seq 1");
-		Assert.assertNull(sequence);
+		Assertions.assertNull(sequence);
 	}
 	
 	/**
@@ -238,9 +246,11 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	 * @verifies Throw an IllegalArgumentException if group is null
 	 * @see ISequentialReceiptNumberGeneratorService#getSequence(String)
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void getSequence_shouldThrowAnIllegalArgumentExceptionIfGroupIsNull() {
-		service.getSequence(null);
+		assertThrows(IllegalArgumentException.class, () -> {
+			service.getSequence(null);
+		});
 	}
 	
 	/**
@@ -250,9 +260,9 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	@Test
 	public void getSequence_shouldReturnTheSequenceIfGroupIsEmpty() {
 		GroupSequence sequence = service.getSequence("");
-		Assert.assertNotNull(sequence);
-		Assert.assertEquals("", sequence.getGroup());
-		Assert.assertEquals(18, sequence.getValue());
+		Assertions.assertNotNull(sequence);
+		Assertions.assertEquals("", sequence.getGroup());
+		Assertions.assertEquals(18, sequence.getValue());
 	}
 	
 	/**
@@ -263,9 +273,9 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	public void getSequence_shouldReturnTheSpecifiedSequence() {
 		GroupSequence sequence = service.getSequence("Test Seq 1");
 		
-		Assert.assertNotNull(sequence);
-		Assert.assertEquals("Test Seq 1", sequence.getGroup());
-		Assert.assertEquals(10, sequence.getValue());
+		Assertions.assertNotNull(sequence);
+		Assertions.assertEquals("Test Seq 1", sequence.getGroup());
+		Assertions.assertEquals(10, sequence.getValue());
 	}
 	
 	/**
@@ -276,7 +286,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	public void getSequence_shouldReturnNullIfTheSequenceCannotBeFound() {
 		GroupSequence sequence = service.getSequence("Not A Valid Sequence");
 		
-		Assert.assertNull(sequence);
+		Assertions.assertNull(sequence);
 	}
 	
 	/**
@@ -287,8 +297,8 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 	public void getOnly_shouldReturnTheFirstModel() {
 		SequentialReceiptNumberGeneratorModel model = service.getOnly();
 		
-		Assert.assertNotNull(model);
-		Assert.assertEquals((Integer) 0, model.getId());
+		Assertions.assertNotNull(model);
+		Assertions.assertEquals((Integer) 0, model.getId());
 	}
 	
 	/**
@@ -301,7 +311,7 @@ public class ISequentialReceiptNumberGeneratorServiceTest extends IObjectDataSer
 		service.purge(model);
 		
 		model = service.getOnly();
-		Assert.assertNotNull(model);
-		Assert.assertNull(model.getId());
+		Assertions.assertNotNull(model);
+		Assertions.assertNull(model.getId());
 	}
 }

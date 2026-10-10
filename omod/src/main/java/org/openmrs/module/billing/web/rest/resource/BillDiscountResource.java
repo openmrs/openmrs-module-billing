@@ -45,7 +45,7 @@ import org.openmrs.module.webservices.rest.web.response.ResponseException;
  * REST resource representing a {@link BillDiscount}.
  */
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
-        + "/billDiscount", supportedClass = BillDiscount.class, supportedOpenmrsVersions = { "2.0 - 2.*" })
+        + "/billDiscount", supportedClass = BillDiscount.class, supportedOpenmrsVersions = { "2.0 - 9.*" })
 public class BillDiscountResource extends DataDelegatingCrudResource<BillDiscount> {
 	
 	@Override

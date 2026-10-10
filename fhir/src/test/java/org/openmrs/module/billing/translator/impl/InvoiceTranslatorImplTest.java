@@ -11,11 +11,11 @@ package org.openmrs.module.billing.translator.impl;
 
 import org.hl7.fhir.r4.model.Invoice;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.module.billing.api.model.Bill;
@@ -29,7 +29,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class InvoiceTranslatorImplTest {
 	
 	@Mock
@@ -48,7 +48,7 @@ public class InvoiceTranslatorImplTest {
 	
 	private static final String BILL_UUID = "4028814B39B565A20139B95D74360004";
 	
-	@Before
+	@BeforeEach
 	public void setUp() {
 		translator = new InvoiceTranslatorImpl(practitionerTranslator, patientReferenceTranslator);
 		provider = new Provider();

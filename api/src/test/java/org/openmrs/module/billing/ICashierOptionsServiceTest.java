@@ -9,9 +9,9 @@
  */
 package org.openmrs.module.billing;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.ICashierOptionsService;
 import org.openmrs.module.billing.api.model.CashierOptions;
@@ -25,7 +25,7 @@ public class ICashierOptionsServiceTest extends BaseModuleContextTest {
 	
 	private ICashierOptionsService cashierOptionsService;
 	
-	@Before
+	@BeforeEach
 	public void before() {
 		cashierOptionsService = Context.getService(ICashierOptionsService.class);
 	}
@@ -41,11 +41,11 @@ public class ICashierOptionsServiceTest extends BaseModuleContextTest {
 		//		executeDataSet(IItemDataServiceTest.ITEM_DATASET);
 		
 		CashierOptions options = cashierOptionsService.getOptions();
-		Assert.assertNull(options.getRoundingItemUuid());
-		Assert.assertEquals(3, options.getDefaultReceiptReportId());
-		Assert.assertEquals(CashierOptions.RoundingMode.MID, options.getRoundingMode());
-		Assert.assertEquals(0, (int) options.getRoundToNearest());
-		Assert.assertTrue(options.isTimesheetRequired());
+		Assertions.assertNull(options.getRoundingItemUuid());
+		Assertions.assertEquals(3, options.getDefaultReceiptReportId());
+		Assertions.assertEquals(CashierOptions.RoundingMode.MID, options.getRoundingMode());
+		Assertions.assertEquals(0, (int) options.getRoundToNearest());
+		Assertions.assertTrue(options.isTimesheetRequired());
 	}
 	
 	/**
@@ -57,11 +57,11 @@ public class ICashierOptionsServiceTest extends BaseModuleContextTest {
 		executeDataSet(OPTIONS_DATASET_INVALID);
 		CashierOptions reference = new CashierOptions();
 		CashierOptions options = cashierOptionsService.getOptions();
-		Assert.assertEquals(reference.getRoundingItemUuid(), options.getRoundingItemUuid());
-		Assert.assertEquals(reference.getDefaultReceiptReportId(), options.getDefaultReceiptReportId());
-		Assert.assertEquals(reference.getRoundingMode(), options.getRoundingMode());
-		Assert.assertEquals(reference.getRoundToNearest(), options.getRoundToNearest());
-		Assert.assertEquals(reference.isTimesheetRequired(), options.isTimesheetRequired());
+		Assertions.assertEquals(reference.getRoundingItemUuid(), options.getRoundingItemUuid());
+		Assertions.assertEquals(reference.getDefaultReceiptReportId(), options.getDefaultReceiptReportId());
+		Assertions.assertEquals(reference.getRoundingMode(), options.getRoundingMode());
+		Assertions.assertEquals(reference.getRoundToNearest(), options.getRoundToNearest());
+		Assertions.assertEquals(reference.isTimesheetRequired(), options.isTimesheetRequired());
 	}
 	
 }

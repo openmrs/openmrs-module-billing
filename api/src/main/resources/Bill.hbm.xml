@@ -18,7 +18,7 @@
 	<class name="org.openmrs.module.billing.api.model.CashierItemPrice" table="cashier_item_price">
 		<cache usage="read-write"/>
 		<id name="id" type="int" column="item_price_id">
-			<generator class="native">
+			<generator class="identity">
 				<param name="sequence">inv_item_price_item_price_id_seq</param>
 			</generator>
 		</id>
@@ -52,7 +52,7 @@
 		<cache usage="read-write"/>
 
 		<id name="id" type="int" column="service_id">
-			<generator class="native">
+			<generator class="identity">
 				<param name="sequence">cashier_billable_service_id_seq</param>
 			</generator>
 		</id>
@@ -72,9 +72,8 @@
 		</bag>
 
 		<property name="serviceStatus" column="service_status" not-null="true">
-			<type name="org.hibernate.type.EnumType">
+			<type name="org.openmrs.api.db.hibernate.type.StringEnumType">
 				<param name="enumClass">org.openmrs.module.billing.api.model.BillableServiceStatus</param>
-				<param name="type">12</param>
 			</type>
 		</property>
 		<!-- bi-directional many-to-one association to User -->
@@ -96,7 +95,7 @@
 		<cache usage="read-write"/>
 
 		<id name="id" type="int" column="bill_id">
-			<generator class="native">
+			<generator class="identity">
 				<param name="sequence">cashier_bill_bill_id_seq</param>
 			</generator>
 		</id>
@@ -120,9 +119,8 @@
 		<many-to-one name="billAdjusted" class="org.openmrs.module.billing.api.model.Bill" column="adjusted_bill_id"/>
 
 		<property name="status" column="status" not-null="true">
-			<type name="org.hibernate.type.EnumType">
+			<type name="org.openmrs.api.db.hibernate.type.StringEnumType">
 				<param name="enumClass">org.openmrs.module.billing.api.model.BillStatus</param>
-				<param name="type">12</param>
 			</type>
 		</property>
 
@@ -166,7 +164,7 @@
 		<cache usage="read-write"/>
 
 		<id name="id" type="int" column="bill_line_item_id">
-			<generator class="native">
+			<generator class="identity">
 				<param name="sequence">cashier_bill_line_item_bill_line_item_id_seq</param>
 			</generator>
 		</id>
@@ -184,9 +182,8 @@
 		<property name="quantity" type="int" column="quantity" not-null="true"/>
 		<property name="lineItemOrder" type="int" column="line_item_order"/>
 		<property name="status" column="status" not-null="true">
-			<type name="org.hibernate.type.EnumType">
+			<type name="org.openmrs.api.db.hibernate.type.StringEnumType">
 				<param name="enumClass">org.openmrs.module.billing.api.model.BillLineItemStatus</param>
-				<param name="type">12</param>
 			</type>
 		</property>
 		<!-- bi-directional many-to-one association to User -->
@@ -209,7 +206,7 @@
 		<cache usage="read-write"/>
 
 		<id name="id" type="int" column="bill_payment_id">
-			<generator class="native">
+			<generator class="identity">
 				<param name="sequence">cashier_bill_payment_bill_payment_id_seq</param>
 			</generator>
 		</id>
@@ -244,7 +241,7 @@
 		<cache usage="read-write"/>
 
 		<id name="id" type="int" column="bill_payment_attribute_id">
-			<generator class="native">
+			<generator class="identity">
 				<param name="sequence">cashier_bill_payment_attribute_bill_payment_attribute_id_seq</param>
 			</generator>
 		</id>
@@ -263,7 +260,7 @@
 		<cache usage="read-write"/>
 
 		<id name="id" type="int" column="payment_mode_id">
-			<generator class="native">
+			<generator class="identity">
 				<param name="sequence">cashier_payment_mode_payment_mode_id_seq</param>
 			</generator>
 		</id>
@@ -296,7 +293,7 @@
 		<cache usage="read-write"/>
 
 		<id name="id" type="int" column="payment_mode_attribute_type_id">
-			<generator class="native">
+			<generator class="identity">
 				<param name="sequence">cashier_payment_mode_attribute_type_payment_mode_attribute_type_id_seq</param>
 			</generator>
 		</id>

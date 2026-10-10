@@ -13,8 +13,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
-import org.hibernate.Criteria;
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.openmrs.OpenmrsObject;
 
 /**
@@ -29,13 +28,13 @@ public interface BaseHibernateRepository {
 	Query createQuery(String query);
 	
 	/**
-	 * Creates a new {@link org.hibernate.Criteria}.
+	 * Creates a new {@link EntityCriteria}.
 	 *
 	 * @param cls The entity class.
-	 * @return The newly created {@link org.hibernate.Criteria}
+	 * @return The newly created {@link EntityCriteria}
 	 * @should return a new criteria for the entity class
 	 */
-	<E extends OpenmrsObject> Criteria createCriteria(Class<E> cls);
+	<E extends OpenmrsObject> EntityCriteria<E> createCriteria(Class<E> cls);
 	
 	/**
 	 * Saves an entity to the database, performing either an update or insert depending on the entity
@@ -68,16 +67,15 @@ public interface BaseHibernateRepository {
 	<E extends OpenmrsObject> void delete(E entity);
 	
 	/**
-	 * Executes the specified {@link org.hibernate.Criteria} and returns the resulting value.
+	 * Executes a row count query using the restrictions of the specified {@link EntityCriteria}.
 	 *
-	 * @param criteria The criteria to execute which must result in a single value.
-	 * @param <T> The expected value type.
-	 * @return The result of the criteria.
+	 * @param criteria The criteria whose restrictions should be counted.
+	 * @return The number of matching rows.
 	 */
-	<T> T selectValue(Criteria criteria);
+	long selectCount(EntityCriteria<?> criteria);
 	
 	/**
-	 * Executes the specified {@link org.hibernate.Query} and returns the resulting value.
+	 * Executes the specified {@link org.hibernate.query.Query} and returns the resulting value.
 	 *
 	 * @param query The criteria to execute which must result in a single value.
 	 * @param <T> The expected value type.
@@ -98,18 +96,18 @@ public interface BaseHibernateRepository {
 	<E extends OpenmrsObject> E selectSingle(Class<E> cls, Serializable id);
 	
 	/**
-	 * Selects a single entity from the database using the specified {@link org.hibernate.Criteria}. If
-	 * more than one entity is found only the first is returned.
+	 * Selects a single entity from the database using the specified {@link EntityCriteria}. If more
+	 * than one entity is found only the first is returned.
 	 *
 	 * @param cls The entity class.
-	 * @param criteria The search {@link org.hibernate.Criteria}.
+	 * @param criteria The search {@link EntityCriteria}.
 	 * @return The entity or {@code null} if not found.
 	 * @should throw an IllegalArgumentException if the criteria is null
 	 * @should return the entity that meets the criteria
 	 * @should return null if no entity can be found
 	 * @should return the first entity if multiple entities are found
 	 */
-	<E extends OpenmrsObject> E selectSingle(Class<E> cls, Criteria criteria);
+	<E extends OpenmrsObject> E selectSingle(Class<E> cls, EntityCriteria<E> criteria);
 	
 	/**
 	 * Selects all entities from the database.
@@ -122,14 +120,14 @@ public interface BaseHibernateRepository {
 	<E extends OpenmrsObject> List<E> select(Class<E> cls);
 	
 	/**
-	 * Selects the entities from the database that meet the specified {@link org.hibernate.Criteria} .
+	 * Selects the entities from the database that meet the specified {@link EntityCriteria} .
 	 *
 	 * @param cls The entity class.
-	 * @param criteria The search {@link org.hibernate.Criteria}.
+	 * @param criteria The search {@link EntityCriteria}.
 	 * @return A list of the entities that were found.
 	 * @should throw an IllegalArgumentException if the criteria is null
 	 * @should return a list of all entities that meet the criteria
 	 * @should return an empty list when no entities are found
 	 */
-	<E extends OpenmrsObject> List<E> select(Class<E> cls, Criteria criteria);
+	<E extends OpenmrsObject> List<E> select(Class<E> cls, EntityCriteria<E> criteria);
 }

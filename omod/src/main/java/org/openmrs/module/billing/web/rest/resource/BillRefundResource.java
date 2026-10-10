@@ -43,7 +43,7 @@ import org.openmrs.module.webservices.rest.web.response.ResponseException;
 
 /** REST resource for {@link BillRefund}. */
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
-        + "/billRefund", supportedClass = BillRefund.class, supportedOpenmrsVersions = { "2.0 - 2.*" })
+        + "/billRefund", supportedClass = BillRefund.class, supportedOpenmrsVersions = { "2.0 - 9.*" })
 public class BillRefundResource extends DataDelegatingCrudResource<BillRefund> {
 	
 	@Override

@@ -18,7 +18,7 @@ import static org.openmrs.module.billing.base.entity.IMetadataDataServiceTest.as
 import java.util.List;
 
 import com.google.common.collect.Iterators;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openmrs.Location;

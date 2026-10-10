@@ -12,12 +12,13 @@ package org.openmrs.module.billing.api.db.hibernate;
 import lombok.AllArgsConstructor;
 import org.hibernate.SessionFactory;
 import org.openmrs.Order;
+import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.billing.api.db.BillLineItemDAO;
 import org.openmrs.module.billing.api.model.BillLineItem;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.persistence.TypedQuery;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.TypedQuery;
 import java.util.List;
 
 /**
@@ -56,8 +57,7 @@ public class HibernateBillLineItemDAO implements BillLineItemDAO {
 	
 	@Override
 	public BillLineItem saveBillLineItem(@Nonnull BillLineItem lineItem) {
-		sessionFactory.getCurrentSession().saveOrUpdate(lineItem);
-		return lineItem;
+		return HibernateUtil.saveOrUpdate(sessionFactory.getCurrentSession(), lineItem);
 	}
 	
 }

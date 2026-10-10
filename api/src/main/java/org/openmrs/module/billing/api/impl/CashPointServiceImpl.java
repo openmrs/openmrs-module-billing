@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.List;
 
 import lombok.Setter;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Location;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.billing.api.CashPointService;

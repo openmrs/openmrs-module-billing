@@ -10,7 +10,7 @@
 
 	<groupId>org.openmrs.module</groupId>
 	<artifactId>billing</artifactId>
-	<version>2.5.1-SNAPSHOT</version>
+	<version>3.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>OpenMRS Billing Module</name>
 	<description>Module to provide basic billing functionality</description>
@@ -36,19 +36,27 @@
 	</modules>
 
 	<properties>
-		<openmrsPlatformVersion>2.7.8</openmrsPlatformVersion>
-		<maven.compiler.source>8</maven.compiler.source>
-		<maven.compiler.target>8</maven.compiler.target>
+		<openmrsPlatformVersion>3.0.0-SNAPSHOT</openmrsPlatformVersion>
+		<maven.compiler.release>21</maven.compiler.release>
+		<maven.compiler.parameters>true</maven.compiler.parameters>
+		<openmrsPlatformToolsVersion>2.7.8</openmrsPlatformToolsVersion>
 		<itextPdfVersion>8.0.5</itextPdfVersion>
-		<stockmanagementVersion>1.4.0</stockmanagementVersion>
-		<fhir2Version>2.4.0</fhir2Version>
-		<eventVersion>4.0.0</eventVersion>
+		<stockmanagementVersion>4.0.0-SNAPSHOT</stockmanagementVersion>
+		<fhir2Version>6.0.0-SNAPSHOT</fhir2Version>
 		<lombokVersion>1.18.38</lombokVersion>
 		<byteBuddyVersion>1.17.6</byteBuddyVersion>
 	</properties>
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>org.openmrs</groupId>
+				<artifactId>openmrs-bom</artifactId>
+				<version>${openmrsPlatformVersion}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
 			<dependency>
 				<groupId>org.openmrs.api</groupId>
 				<artifactId>openmrs-api</artifactId>
@@ -59,20 +67,20 @@
 			<dependency>
 				<groupId>org.openmrs.module</groupId>
 				<artifactId>idgen-api</artifactId>
-				<version>4.7.0</version>
+				<version>7.0.0-SNAPSHOT</version>
 				<scope>provided</scope>
 			</dependency>
 
 			<dependency>
 				<groupId>org.openmrs.module</groupId>
 				<artifactId>webservices.rest-omod</artifactId>
-				<version>2.49.0</version>
+				<version>5.0.0-SNAPSHOT</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.openmrs.module</groupId>
 				<artifactId>webservices.rest-omod-common</artifactId>
-				<version>2.49.0</version>
+				<version>5.0.0-SNAPSHOT</version>
 				<scope>provided</scope>
 			</dependency>
 
@@ -100,27 +108,6 @@
 
 			<dependency>
 				<groupId>org.openmrs.module</groupId>
-				<artifactId>fhir2-api-2.5</artifactId>
-				<version>${fhir2Version}</version>
-				<scope>provided</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>org.openmrs.module</groupId>
-				<artifactId>fhir2-api-2.6</artifactId>
-				<version>${fhir2Version}</version>
-				<scope>provided</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>org.openmrs.module</groupId>
-				<artifactId>fhir2-api-2.7</artifactId>
-				<version>${fhir2Version}</version>
-				<scope>provided</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>org.openmrs.module</groupId>
 				<artifactId>fhir2-api</artifactId>
 				<version>${fhir2Version}</version>
 				<type>test-jar</type>
@@ -135,61 +122,9 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.openmrs</groupId>
-				<artifactId>event-api</artifactId>
-				<version>${eventVersion}</version>
-				<scope>provided</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>org.reflections</groupId>
-				<artifactId>reflections</artifactId>
-				<version>0.9.8</version>
-				<scope>provided</scope>
-				<exclusions>
-					<exclusion>
-						<groupId>javassist</groupId>
-						<artifactId>javassist</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-
-			<dependency>
-				<groupId>org.openmrs.module</groupId>
-				<artifactId>appframework-api</artifactId>
-				<version>2.0</version>
-				<type>jar</type>
-				<scope>provided</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>org.openmrs.module</groupId>
-				<artifactId>appframework-api</artifactId>
-				<version>2.0</version>
-				<type>test-jar</type>
-				<scope>test</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>org.openmrs.module</groupId>
-				<artifactId>providermanagement-api</artifactId>
-				<version>2.0</version>
-				<type>jar</type>
-				<scope>provided</scope>
-			</dependency>
-
-			<dependency>
 				<groupId>org.openmrs.module</groupId>
 				<artifactId>legacyui-omod</artifactId>
 				<version>0.2.1</version>
-				<scope>provided</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>org.openmrs.module</groupId>
-				<artifactId>uiframework-api</artifactId>
-				<version>3.4</version>
-				<type>jar</type>
 				<scope>provided</scope>
 			</dependency>
 
@@ -298,13 +233,6 @@
 				<artifactId>lombok</artifactId>
 				<version>${lombokVersion}</version>
 				<scope>provided</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>org.mockito</groupId>
-				<artifactId>mockito-inline</artifactId>
-				<version>3.12.4</version>
-				<scope>test</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

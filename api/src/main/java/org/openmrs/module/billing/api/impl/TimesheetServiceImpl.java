@@ -13,12 +13,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.openmrs.Provider;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.ITimesheetService;
+import org.openmrs.module.billing.api.base.entity.db.hibernate.EntityCriteria;
 import org.openmrs.module.billing.api.base.entity.impl.BaseEntityDataServiceImpl;
 import org.openmrs.module.billing.api.base.entity.security.IEntityAuthorizationPrivileges;
 import org.openmrs.module.billing.api.model.Timesheet;
@@ -74,18 +72,18 @@ public class TimesheetServiceImpl extends BaseEntityDataServiceImpl<Timesheet> i
 	
 	@Override
 	public Timesheet getCurrentTimesheet(Provider cashier) {
-		Criteria criteria = getRepository().createCriteria(Timesheet.class);
-		criteria.add(Restrictions.and(Restrictions.eq("cashier", cashier), Restrictions.isNull(CLOCK_OUT)));
-		criteria.addOrder(Order.desc(CLOCK_IN));
+		EntityCriteria<Timesheet> criteria = getRepository().createCriteria(Timesheet.class);
+		criteria.add(EntityCriteria.and(EntityCriteria.eq("cashier", cashier), EntityCriteria.isNull(CLOCK_OUT)));
+		criteria.addOrder(EntityCriteria.desc(CLOCK_IN));
 		
 		return getRepository().selectSingle(Timesheet.class, criteria);
 	}
 	
 	@Override
 	public void closeOpenTimesheets() {
-		Criteria criteria = getRepository().createCriteria(Timesheet.class);
-		criteria.add(Restrictions.isNull("clockOut"));
-		criteria.addOrder(Order.desc("clockIn"));
+		EntityCriteria<Timesheet> criteria = getRepository().createCriteria(Timesheet.class);
+		criteria.add(EntityCriteria.isNull("clockOut"));
+		criteria.addOrder(EntityCriteria.desc("clockIn"));
 		
 		List<Timesheet> timesheets = getRepository().select(Timesheet.class, criteria);
 		
@@ -117,17 +115,17 @@ public class TimesheetServiceImpl extends BaseEntityDataServiceImpl<Timesheet> i
 		calendar.set(Calendar.SECOND, END_DATE_SECOND);
 		Date endDate = calendar.getTime();
 		
-		Criteria criteria = getRepository().createCriteria(Timesheet.class);
-		criteria.add(Restrictions.and(Restrictions.eq("cashier", cashier), Restrictions.or(
+		EntityCriteria<Timesheet> criteria = getRepository().createCriteria(Timesheet.class);
+		criteria.add(EntityCriteria.and(EntityCriteria.eq("cashier", cashier), EntityCriteria.or(
 		    // Start or end on date
-		    Restrictions.or(Restrictions.between(CLOCK_IN, startDate, endDate),
-		        Restrictions.between(CLOCK_OUT, startDate, endDate)),
-		    Restrictions.or(
+		    EntityCriteria.or(EntityCriteria.between(CLOCK_IN, startDate, endDate),
+		        EntityCriteria.between(CLOCK_OUT, startDate, endDate)),
+		    EntityCriteria.or(
 		        // Start on or before date and have not ended
-		        Restrictions.and(Restrictions.le(CLOCK_IN, endDate), Restrictions.isNull(CLOCK_OUT)),
+		        EntityCriteria.and(EntityCriteria.le(CLOCK_IN, endDate), EntityCriteria.isNull(CLOCK_OUT)),
 		        // Start before and end after date
-		        Restrictions.and(Restrictions.le(CLOCK_IN, startDate), Restrictions.ge(CLOCK_OUT, endDate))))));
-		criteria.addOrder(Order.desc(CLOCK_IN));
+		        EntityCriteria.and(EntityCriteria.le(CLOCK_IN, startDate), EntityCriteria.ge(CLOCK_OUT, endDate))))));
+		criteria.addOrder(EntityCriteria.desc(CLOCK_IN));
 		
 		return getRepository().select(Timesheet.class, criteria);
 	}

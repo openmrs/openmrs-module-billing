@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 import java.util.EnumSet;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.annotation.Handler;

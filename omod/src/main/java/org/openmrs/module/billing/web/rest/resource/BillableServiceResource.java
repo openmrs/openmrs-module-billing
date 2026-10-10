@@ -40,7 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
-        + "/billableService", supportedClass = BillableService.class, supportedOpenmrsVersions = { "2.0 - 2.*" })
+        + "/billableService", supportedClass = BillableService.class, supportedOpenmrsVersions = { "2.0 - 9.*" })
 public class BillableServiceResource extends MetadataDelegatingCrudResource<BillableService> {
 	
 	@Override

@@ -22,7 +22,7 @@ import org.openmrs.module.webservices.rest.web.annotation.Resource;
  */
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
         + "/paymentModeAttributeType", supportedClass = PaymentModeAttributeType.class, supportedOpenmrsVersions = {
-                "2.0 - 2.*" })
+                "2.0 - 9.*" })
 public class PaymentModeAttributeTypeResource extends BaseRestAttributeTypeResource<PaymentModeAttributeType> {
 	
 	@Override

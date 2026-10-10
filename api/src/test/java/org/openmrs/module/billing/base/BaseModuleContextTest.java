@@ -12,7 +12,7 @@ package org.openmrs.module.billing.base;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 
 /**
  * Base class for OpenHMIS tests

@@ -11,11 +11,12 @@ package org.openmrs.module.billing.api.db.hibernate;
 
 import lombok.RequiredArgsConstructor;
 import org.hibernate.SessionFactory;
+import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.billing.api.db.PaymentModeDAO;
 import org.openmrs.module.billing.api.model.PaymentMode;
 
-import javax.annotation.Nonnull;
-import javax.persistence.TypedQuery;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.TypedQuery;
 import java.util.List;
 
 /**
@@ -59,8 +60,7 @@ public class HibernatePaymentModeDAOImpl implements PaymentModeDAO {
 	 */
 	@Override
 	public PaymentMode savePaymentMode(@Nonnull PaymentMode paymentMode) {
-		sessionFactory.getCurrentSession().saveOrUpdate(paymentMode);
-		return paymentMode;
+		return HibernateUtil.saveOrUpdate(sessionFactory.getCurrentSession(), paymentMode);
 	}
 	
 	/**
@@ -68,6 +68,6 @@ public class HibernatePaymentModeDAOImpl implements PaymentModeDAO {
 	 */
 	@Override
 	public void purgePaymentMode(@Nonnull PaymentMode paymentMode) {
-		sessionFactory.getCurrentSession().delete(paymentMode);
+		sessionFactory.getCurrentSession().remove(paymentMode);
 	}
 }

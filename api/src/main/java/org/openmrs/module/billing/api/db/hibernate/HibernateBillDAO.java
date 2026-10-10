@@ -18,20 +18,22 @@ import org.hibernate.SessionFactory;
 import org.openmrs.Patient;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.db.hibernate.HibernatePatientDAO;
+import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.db.BillDAO;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillDiscount;
+import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillRefund;
 import org.openmrs.module.billing.api.search.BillSearch;
 
-import javax.annotation.Nonnull;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -139,8 +141,19 @@ public class HibernateBillDAO implements BillDAO {
 	 */
 	@Override
 	public Bill saveBill(@Nonnull Bill bill) {
-		sessionFactory.getCurrentSession().saveOrUpdate(bill);
-		return bill;
+		// Hibernate 6+ no longer writes the list index of the inverse lineItems collection because BillLineItem maps the
+		// index column itself (lineItemOrder), so keep that property in step with the list position as Hibernate 5 did
+		List<BillLineItem> lineItems = bill.getLineItems();
+		if (lineItems != null) {
+			for (int i = 0; i < lineItems.size(); i++) {
+				BillLineItem lineItem = lineItems.get(i);
+				if (lineItem != null && (bill.editable() || lineItem.getLineItemOrder() == null)) {
+					lineItem.setLineItemOrder(i);
+				}
+			}
+		}
+		
+		return HibernateUtil.saveOrUpdate(sessionFactory.getCurrentSession(), bill);
 	}
 	
 	/**

@@ -12,10 +12,8 @@ package org.openmrs.module.billing.api.impl;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.openmrs.module.billing.api.ItemPriceService;
+import org.openmrs.module.billing.api.base.entity.db.hibernate.EntityCriteria;
 import org.openmrs.module.billing.api.base.entity.impl.BaseMetadataDataServiceImpl;
 import org.openmrs.module.billing.api.base.entity.security.IMetadataAuthorizationPrivileges;
 import org.openmrs.module.billing.api.model.BillableService;
@@ -66,22 +64,22 @@ public class ItemPriceServiceImpl extends BaseMetadataDataServiceImpl<CashierIte
 	@Override
 	public List<CashierItemPrice> getItemPrice(StockItem stockItem) {
 		// Criteria criteria = getRepository().createCriteria(getEntityClass());
-		Criteria criteria = getRepository().createCriteria(CashierItemPrice.class);
+		EntityCriteria<CashierItemPrice> criteria = getRepository().createCriteria(CashierItemPrice.class);
 		
-		criteria.add(Restrictions.eq("item", stockItem));
-		criteria.addOrder(Order.desc("id"));
+		criteria.add(EntityCriteria.eq("item", stockItem));
+		criteria.addOrder(EntityCriteria.desc("id"));
 		
 		// List<ItemPrice> results = getRepository().select(getEntityClass(), criteria);
 		// return(results);
-		return criteria.list();
+		return getRepository().select(CashierItemPrice.class, criteria);
 	}
 	
 	@Override
 	public List<CashierItemPrice> getServicePrice(BillableService billableService) {
-		Criteria criteria = getRepository().createCriteria(CashierItemPrice.class);
+		EntityCriteria<CashierItemPrice> criteria = getRepository().createCriteria(CashierItemPrice.class);
 		
-		criteria.add(Restrictions.eq("billableService", billableService));
-		criteria.addOrder(Order.desc("id"));
-		return criteria.list();
+		criteria.add(EntityCriteria.eq("billableService", billableService));
+		criteria.addOrder(EntityCriteria.desc("id"));
+		return getRepository().select(CashierItemPrice.class, criteria);
 	}
 }

@@ -10,20 +10,21 @@
 package org.openmrs.module.billing.api.db.hibernate;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.db.BillableServiceDAO;
 import org.openmrs.module.billing.api.model.BillableService;
 import org.openmrs.module.billing.api.search.BillableServiceSearch;
 
-import javax.annotation.Nonnull;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -115,8 +116,7 @@ public class HibernateBillableServiceDAOImpl implements BillableServiceDAO {
 	 */
 	@Override
 	public BillableService saveBillableService(@Nonnull BillableService billableService) {
-		sessionFactory.getCurrentSession().saveOrUpdate(billableService);
-		return billableService;
+		return HibernateUtil.saveOrUpdate(sessionFactory.getCurrentSession(), billableService);
 	}
 	
 	/**
@@ -124,6 +124,6 @@ public class HibernateBillableServiceDAOImpl implements BillableServiceDAO {
 	 */
 	@Override
 	public void purgeBillableService(BillableService billableService) {
-		sessionFactory.getCurrentSession().delete(billableService);
+		sessionFactory.getCurrentSession().remove(billableService);
 	}
 }

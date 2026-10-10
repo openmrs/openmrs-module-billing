@@ -36,7 +36,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
-        + "/cashierItemPrice", supportedClass = CashierItemPrice.class, supportedOpenmrsVersions = { "2.0 - 2.*" })
+        + "/cashierItemPrice", supportedClass = CashierItemPrice.class, supportedOpenmrsVersions = { "2.0 - 9.*" })
 public class CashierItemPriceResource extends MetadataDelegatingCrudResource<CashierItemPrice> {
 	
 	private final CashierItemPriceService cashierItemPriceService = Context.getService(CashierItemPriceService.class);

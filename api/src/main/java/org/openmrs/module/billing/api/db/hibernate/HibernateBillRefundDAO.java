@@ -15,13 +15,14 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.billing.api.db.BillRefundDAO;
 import org.openmrs.module.billing.api.model.BillRefund;
 import org.openmrs.module.billing.api.model.RefundStatus;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 @RequiredArgsConstructor
 public class HibernateBillRefundDAO implements BillRefundDAO {
@@ -106,7 +107,6 @@ public class HibernateBillRefundDAO implements BillRefundDAO {
 	
 	@Override
 	public BillRefund saveBillRefund(BillRefund billRefund) {
-		sessionFactory.getCurrentSession().saveOrUpdate(billRefund);
-		return billRefund;
+		return HibernateUtil.saveOrUpdate(sessionFactory.getCurrentSession(), billRefund);
 	}
 }

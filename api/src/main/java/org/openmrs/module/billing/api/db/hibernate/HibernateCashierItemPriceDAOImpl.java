@@ -11,10 +11,11 @@ package org.openmrs.module.billing.api.db.hibernate;
 
 import lombok.RequiredArgsConstructor;
 import org.hibernate.SessionFactory;
+import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.billing.api.db.CashierItemPriceDAO;
 import org.openmrs.module.billing.api.model.CashierItemPrice;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -46,13 +47,12 @@ public class HibernateCashierItemPriceDAOImpl implements CashierItemPriceDAO {
 	/** {@inheritDoc} */
 	@Override
 	public CashierItemPrice saveCashierItemPrice(@Nonnull CashierItemPrice cashierItemPrice) {
-		sessionFactory.getCurrentSession().saveOrUpdate(cashierItemPrice);
-		return cashierItemPrice;
+		return HibernateUtil.saveOrUpdate(sessionFactory.getCurrentSession(), cashierItemPrice);
 	}
 	
 	/** {@inheritDoc} */
 	@Override
 	public void purgeCashierItemPrice(@Nonnull CashierItemPrice cashierItemPrice) {
-		sessionFactory.getCurrentSession().delete(cashierItemPrice);
+		sessionFactory.getCurrentSession().remove(cashierItemPrice);
 	}
 }

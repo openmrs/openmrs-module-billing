@@ -11,7 +11,7 @@ package org.openmrs.module.billing.web.base.resource;
 
 import java.lang.reflect.ParameterizedType;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.OpenmrsMetadata;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.base.PagingInfo;

@@ -43,7 +43,7 @@ import java.util.Set;
  * REST resource representing a {@link Payment}.
  */
 @SubResource(parent = BillResource.class, path = "payment", supportedClass = Payment.class, supportedOpenmrsVersions = {
-        "2.0 - 2.*" })
+        "2.0 - 9.*" })
 public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillResource> {
 	
 	@Override

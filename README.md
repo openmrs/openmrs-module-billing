@@ -58,19 +58,18 @@ Provides REST API endpoints at `/rest/v1/billing/*` for bills, payments, payment
 
 ### FHIR Invoice Support
 
-Exposes bills as FHIR `Invoice` resources via the `fhir` submodule, built against the `fhir2` module. Supports OpenMRS Platform 2.5, 2.6, and 2.7 FHIR variants.
+Exposes bills as FHIR `Invoice` resources via the `fhir` submodule, built against the `fhir2` module 6.x.
 
 ## Requirements
 
-- **OpenMRS Platform**: 2.7.8 (built and tested against; module `require_version` follows the build property)
-- **Java Version**: 1.8 or higher
+- **OpenMRS Platform**: 3.0.0 (built and tested against 3.0.0-SNAPSHOT; module `require_version` follows the build property)
+- **Java Version**: 21 or higher
 - **Required Modules**:
-  - Web Services REST Module 2.9+
-  - Stock Management Module 1.4.0+
-  - FHIR2 Module 2.4.0+
-  - Event Module 4.0.0+
+  - Web Services REST Module 5.0.0+
+  - Stock Management Module 4.0.0+
+  - FHIR2 Module 6.0.0+
 - **Optional Modules**:
-  - IDGen Module 2.8+
+  - IDGen Module 7.0.0+
   - UI Framework Module
   - App Framework Module
   - Provider Management Module
@@ -79,7 +78,7 @@ Exposes bills as FHIR `Invoice` resources via the `fhir` submodule, built agains
 ## Installation
 
 1. Download the latest release from the [releases page](https://github.com/openmrs/openmrs-module-billing/releases) or the [OpenMRS Add Ons](https://addons.openmrs.org/) directory
-2. Install the required dependency modules (webservices.rest, stockmanagement, fhir2, event)
+2. Install the required dependency modules (webservices.rest, stockmanagement, fhir2)
 3. Upload and start the Billing module via the OpenMRS Module Management interface
 4. Configure global properties and module settings
 5. Set up payment modes, cash points, and billable items
@@ -187,9 +186,9 @@ For the full header-by-header documentation of each domain, see the Initializer 
 
 #### Automatic billing for orders
 
-Test and drug orders are billed automatically — nobody has to raise the bill in the cashier app. Saving an order
-publishes a `CREATED` event through the Event module, and the billing module reacts to it in a daemon thread: it picks
-the first registered billing strategy that supports the order, works out the price, and saves a pending bill with a
+Test and drug orders are billed automatically — nobody has to raise the bill in the cashier app. Once the transaction
+that saves an order commits, the billing module hears of it through core's entity events and, in a daemon thread,
+picks the first registered billing strategy that supports the order, works out the price, and saves a pending bill with a
 single line item for that order.
 
 Two strategies ship with the module, matched on the order's Java class: `org.openmrs.TestOrder` and

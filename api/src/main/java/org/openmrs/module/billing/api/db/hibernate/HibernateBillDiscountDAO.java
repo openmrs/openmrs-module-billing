@@ -14,13 +14,14 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.billing.api.db.BillDiscountDAO;
 import org.openmrs.module.billing.api.model.BillDiscount;
 import org.openmrs.module.billing.api.model.DiscountStatus;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 
 @RequiredArgsConstructor
 public class HibernateBillDiscountDAO implements BillDiscountDAO {
@@ -90,7 +91,6 @@ public class HibernateBillDiscountDAO implements BillDiscountDAO {
 	
 	@Override
 	public BillDiscount saveBillDiscount(BillDiscount billDiscount) {
-		sessionFactory.getCurrentSession().saveOrUpdate(billDiscount);
-		return billDiscount;
+		return HibernateUtil.saveOrUpdate(sessionFactory.getCurrentSession(), billDiscount);
 	}
 }

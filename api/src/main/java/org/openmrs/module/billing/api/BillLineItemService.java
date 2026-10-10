@@ -13,7 +13,7 @@ import org.openmrs.Order;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.billing.api.model.BillLineItem;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 import java.util.List;
 
 public interface BillLineItemService extends OpenmrsService {

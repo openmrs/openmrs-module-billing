@@ -13,15 +13,14 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import jakarta.persistence.LockModeType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.LockMode;
-import org.hibernate.criterion.Restrictions;
 import org.hibernate.exception.LockAcquisitionException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.ModuleSettings;
 import org.openmrs.module.billing.api.ISequentialReceiptNumberGeneratorService;
+import org.openmrs.module.billing.api.base.entity.db.hibernate.EntityCriteria;
 import org.openmrs.module.billing.api.base.entity.impl.BaseObjectDataServiceImpl;
 import org.openmrs.module.billing.api.model.GroupSequence;
 import org.openmrs.module.billing.api.model.SequentialReceiptNumberGeneratorModel;
@@ -134,9 +133,9 @@ public class SequentialReceiptNumberGeneratorServiceImpl extends BaseObjectDataS
 			throw new IllegalArgumentException("The block size must be at least one.");
 		}
 		
-		Criteria criteria = getRepository().createCriteria(GroupSequence.class);
-		criteria.add(Restrictions.eq("group", group));
-		criteria.setLockMode(LockMode.PESSIMISTIC_WRITE);
+		EntityCriteria<GroupSequence> criteria = getRepository().createCriteria(GroupSequence.class);
+		criteria.add(EntityCriteria.eq("group", group));
+		criteria.setLockMode(LockModeType.PESSIMISTIC_WRITE);
 		GroupSequence sequence = getRepository().selectSingle(GroupSequence.class, criteria);
 		
 		int first;
@@ -168,8 +167,8 @@ public class SequentialReceiptNumberGeneratorServiceImpl extends BaseObjectDataS
 			throw new IllegalArgumentException("The group must be defined.");
 		}
 		
-		Criteria criteria = getRepository().createCriteria(GroupSequence.class);
-		criteria.add(Restrictions.eq("group", group));
+		EntityCriteria<GroupSequence> criteria = getRepository().createCriteria(GroupSequence.class);
+		criteria.add(EntityCriteria.eq("group", group));
 		
 		return getRepository().selectSingle(GroupSequence.class, criteria);
 	}

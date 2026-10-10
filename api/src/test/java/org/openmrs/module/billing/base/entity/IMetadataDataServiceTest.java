@@ -9,12 +9,14 @@
  */
 package org.openmrs.module.billing.base.entity;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.openmrs.OpenmrsMetadata;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.base.PagingInfo;
@@ -25,16 +27,16 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	public static void assertOpenmrsMetadata(OpenmrsMetadata expected, OpenmrsMetadata actual) {
 		assertOpenmrsObject(expected, actual);
 		
-		Assert.assertEquals(expected.getChangedBy(), actual.getChangedBy());
-		Assert.assertEquals(expected.getCreator(), actual.getCreator());
-		Assert.assertEquals(expected.getDateChanged(), actual.getDateChanged());
-		Assert.assertEquals(expected.getDateCreated(), actual.getDateCreated());
-		Assert.assertEquals(expected.getDateRetired(), actual.getDateRetired());
-		Assert.assertEquals(expected.getDescription(), actual.getDescription());
-		Assert.assertEquals(expected.getName(), actual.getName());
-		Assert.assertEquals(expected.getRetired(), actual.getRetired());
-		Assert.assertEquals(expected.getRetiredBy(), actual.getRetiredBy());
-		Assert.assertEquals(expected.getRetireReason(), actual.getRetireReason());
+		Assertions.assertEquals(expected.getChangedBy(), actual.getChangedBy());
+		Assertions.assertEquals(expected.getCreator(), actual.getCreator());
+		Assertions.assertEquals(expected.getDateChanged(), actual.getDateChanged());
+		Assertions.assertEquals(expected.getDateCreated(), actual.getDateCreated());
+		Assertions.assertEquals(expected.getDateRetired(), actual.getDateRetired());
+		Assertions.assertEquals(expected.getDescription(), actual.getDescription());
+		Assertions.assertEquals(expected.getName(), actual.getName());
+		Assertions.assertEquals(expected.getRetired(), actual.getRetired());
+		Assertions.assertEquals(expected.getRetiredBy(), actual.getRetiredBy());
+		Assertions.assertEquals(expected.getRetireReason(), actual.getRetireReason());
 	}
 	
 	@Override
@@ -58,11 +60,11 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 		
 		entity = service.getById(entity.getId());
 		
-		Assert.assertTrue(entity.getRetired());
-		Assert.assertEquals(Context.getAuthenticatedUser(), entity.getRetiredBy());
-		Assert.assertEquals(reason, entity.getRetireReason());
+		Assertions.assertTrue(entity.getRetired());
+		Assertions.assertEquals(Context.getAuthenticatedUser(), entity.getRetiredBy());
+		Assertions.assertEquals(reason, entity.getRetireReason());
 		Date now = new Date();
-		Assert.assertTrue(entity.getDateRetired().before(now) || entity.getDateRetired().equals(now));
+		Assertions.assertTrue(entity.getDateRetired().before(now) || entity.getDateRetired().equals(now));
 	}
 	
 	/**
@@ -70,9 +72,11 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IMetadataDataService#retire(OpenmrsMetadata,
 	 *      String)
 	 */
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void retire_shouldThrowNullPointerExceptionWhenTheMetadataIsNull() {
-		service.retire(null, "something");
+		assertThrows(NullPointerException.class, () -> {
+			service.retire(null, "something");
+		});
 	}
 	
 	/**
@@ -80,20 +84,24 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IMetadataDataService#retire(OpenmrsMetadata,
 	 *      String)
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void retire_shouldThrowIllegalArgumentExceptionWhenNoReasonIsGiven() {
-		E entity = service.getById(0);
-		
-		service.retire(entity, null);
+		assertThrows(IllegalArgumentException.class, () -> {
+			E entity = service.getById(0);
+			
+			service.retire(entity, null);
+		});
 	}
 	
 	/**
 	 * @verifies throw NullPointerException if the metadata is null
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IMetadataDataService#unretire(OpenmrsMetadata)
 	 */
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void unretire_shouldThrowNullPointerExceptionIfTheMetadataIsNull() {
-		service.unretire(null);
+		assertThrows(NullPointerException.class, () -> {
+			service.unretire(null);
+		});
 	}
 	
 	/**
@@ -110,16 +118,16 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 		
 		entity = service.getById(entity.getId());
 		Date dateRetired = entity.getDateRetired();
-		Assert.assertTrue(entity.getRetired());
+		Assertions.assertTrue(entity.getRetired());
 		service.unretire(entity);
 		
 		Context.flushSession();
 		
 		entity = service.getById(entity.getId());
-		Assert.assertFalse(entity.getRetired());
-		Assert.assertNull(entity.getRetiredBy());
-		Assert.assertNull(entity.getRetireReason());
-		Assert.assertEquals(dateRetired, entity.getDateRetired());
+		Assertions.assertFalse(entity.getRetired());
+		Assertions.assertNull(entity.getRetiredBy());
+		Assertions.assertNull(entity.getRetireReason());
+		Assertions.assertEquals(dateRetired, entity.getDateRetired());
 	}
 	
 	/**
@@ -135,8 +143,8 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 		Context.flushSession();
 		
 		List<E> entities = service.getAll(true);
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(getTestEntityCount(), entities.size());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(getTestEntityCount(), entities.size());
 	}
 	
 	/**
@@ -152,8 +160,8 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 		Context.flushSession();
 		
 		List<E> entities = service.getAll(false);
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(getTestEntityCount() - 1, entities.size());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(getTestEntityCount() - 1, entities.size());
 	}
 	
 	/**
@@ -169,8 +177,8 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 		Context.flushSession();
 		
 		List<E> entities = service.getAll();
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(getTestEntityCount() - 1, entities.size());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(getTestEntityCount() - 1, entities.size());
 	}
 	
 	@Test
@@ -184,8 +192,8 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 		Context.flushSession();
 		
 		entities = service.getAll(false);
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(0, entities.size());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(0, entities.size());
 	}
 	
 	/**
@@ -193,9 +201,11 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IMetadataDataService#getByNameFragment(String,
 	 *      boolean)
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void getByNameFragment_shouldThrowIllegalArgumentExceptionIfTheNameIsNull() {
-		service.getByNameFragment(null, true);
+		assertThrows(IllegalArgumentException.class, () -> {
+			service.getByNameFragment(null, true);
+		});
 	}
 	
 	/**
@@ -203,9 +213,11 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IMetadataDataService#getByNameFragment(String,
 	 *      boolean)
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void getByNameFragment_shouldThrowIllegalArgumentExceptionIfTheNameIsEmpty() {
-		service.getByNameFragment("", true);
+		assertThrows(IllegalArgumentException.class, () -> {
+			service.getByNameFragment("", true);
+		});
 	}
 	
 	/**
@@ -213,9 +225,11 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IMetadataDataService#getByNameFragment(String,
 	 *      boolean)
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void getByNameFragment_shouldThrowIllegalArgumentExceptionIfTheNameIsLongerThan255Characters() {
-		service.getByNameFragment(StringUtils.repeat("A", 256), true);
+		assertThrows(IllegalArgumentException.class, () -> {
+			service.getByNameFragment(StringUtils.repeat("A", 256), true);
+		});
 	}
 	
 	/**
@@ -227,8 +241,8 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 	public void getByNameFragment_shouldReturnAnEmptyListIfNoMetadataAreFound() {
 		List<E> entities = service.getByNameFragment("NotAValidName", true);
 		
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(0, entities.size());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(0, entities.size());
 	}
 	
 	/**
@@ -243,12 +257,12 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 		Context.flushSession();
 		
 		List<E> entities = service.getByNameFragment("t", false);
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(getTestEntityCount() - 1, entities.size());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(getTestEntityCount() - 1, entities.size());
 		
 		entities = service.getByNameFragment("t", true);
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(getTestEntityCount(), entities.size());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(getTestEntityCount(), entities.size());
 	}
 	
 	/**
@@ -262,7 +276,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 		
 		// Search using the first four characters in the name
 		List<E> entities = service.getByNameFragment(entity.getName(), false);
-		Assert.assertFalse(entities.isEmpty());
+		Assertions.assertFalse(entities.isEmpty());
 		
 		// Make sure the entity is in the results
 		E found = null;
@@ -273,7 +287,7 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 			}
 		}
 		
-		Assert.assertNotNull("Could not find entity in search results", found);
+		Assertions.assertNotNull(found, "Could not find entity in search results");
 	}
 	
 	/**
@@ -287,8 +301,8 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 		// This assumes that the entity name is unique
 		List<E> entities = service.getByNameFragment(entity.getName(), false, null);
 		
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(1, entities.size());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(1, entities.size());
 		assertEntity(entity, entities.get(0));
 	}
 	
@@ -304,15 +318,15 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 		// This assumes that the entity name is unique
 		List<E> entities = service.getByNameFragment(entity.getName(), false, paging);
 		
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(1, entities.size());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(1, entities.size());
 		assertEntity(entity, entities.get(0));
 		
 		paging = new PagingInfo(1, 0);
 		entities = service.getByNameFragment(entity.getName(), false, paging);
 		
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(1, entities.size());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(1, entities.size());
 		assertEntity(entity, entities.get(0));
 	}
 	
@@ -326,9 +340,9 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 		PagingInfo paging = new PagingInfo(1, 1);
 		List<E> entities = service.getByNameFragment("T", false, paging);
 		
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(1, entities.size());
-		Assert.assertEquals(Long.valueOf(getTestEntityCount()), paging.getTotalRecordCount());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(1, entities.size());
+		Assertions.assertEquals(Long.valueOf(getTestEntityCount()), paging.getTotalRecordCount());
 	}
 	
 	/**
@@ -343,27 +357,27 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 		
 		// First check that the full total is set
 		List<E> entities = service.getByNameFragment(entity.getName(), false, paging);
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(1, entities.size());
-		Assert.assertEquals((Long) 1L, paging.getTotalRecordCount());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(1, entities.size());
+		Assertions.assertEquals((Long) 1L, paging.getTotalRecordCount());
 		
 		// Now manually set the total and check that it is not reset
 		paging = new PagingInfo(1, 1);
 		paging.setTotalRecordCount(10L);
 		
 		entities = service.getByNameFragment(entity.getName(), false, paging);
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(1, entities.size());
-		Assert.assertEquals((Long) 10L, paging.getTotalRecordCount());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(1, entities.size());
+		Assertions.assertEquals((Long) 10L, paging.getTotalRecordCount());
 		
 		// Finally, explicitly set the paging to not load the total and make sure it is not counted
 		paging = new PagingInfo(1, 1);
 		paging.setLoadRecordCount(false);
 		
 		entities = service.getByNameFragment(entity.getName(), false, paging);
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(1, entities.size());
-		Assert.assertNull(paging.getTotalRecordCount());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(1, entities.size());
+		Assertions.assertNull(paging.getTotalRecordCount());
 	}
 	
 	/**
@@ -382,9 +396,9 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 			paging.setPage(i + 1);
 			entities = service.getByNameFragment("T", false, paging);
 			
-			Assert.assertNotNull(entities);
-			Assert.assertEquals(1, entities.size());
-			Assert.assertEquals(Long.valueOf(getTestEntityCount()), paging.getTotalRecordCount());
+			Assertions.assertNotNull(entities);
+			Assertions.assertEquals(1, entities.size());
+			Assertions.assertEquals(Long.valueOf(getTestEntityCount()), paging.getTotalRecordCount());
 			
 			assertEntity(allEntities.get(i), entities.get(0));
 		}
@@ -405,8 +419,8 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 		
 		List<E> entities = service.getAll(true, null);
 		
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(getTestEntityCount(), entities.size());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(getTestEntityCount(), entities.size());
 	}
 	
 	/**
@@ -425,14 +439,14 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 		PagingInfo paging = new PagingInfo(0, 1);
 		List<E> entities = service.getAll(true, paging);
 		
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(getTestEntityCount(), entities.size());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(getTestEntityCount(), entities.size());
 		
 		paging = new PagingInfo(1, 0);
 		entities = service.getAll(true, paging);
 		
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(getTestEntityCount(), entities.size());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(getTestEntityCount(), entities.size());
 	}
 	
 	/**
@@ -445,9 +459,9 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 		PagingInfo paging = new PagingInfo(1, 1);
 		List<E> entities = service.getAll(false, paging);
 		
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(1, entities.size());
-		Assert.assertEquals(Long.valueOf(getTestEntityCount()), paging.getTotalRecordCount());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(1, entities.size());
+		Assertions.assertEquals(Long.valueOf(getTestEntityCount()), paging.getTotalRecordCount());
 	}
 	
 	/**
@@ -461,27 +475,27 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 		
 		// First check that the full total is set
 		List<E> entities = service.getAll(false, paging);
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(1, entities.size());
-		Assert.assertEquals(Long.valueOf(getTestEntityCount()), paging.getTotalRecordCount());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(1, entities.size());
+		Assertions.assertEquals(Long.valueOf(getTestEntityCount()), paging.getTotalRecordCount());
 		
 		// Now manually set the total and check that it is not reset
 		paging = new PagingInfo(1, 1);
 		paging.setTotalRecordCount(10L);
 		
 		entities = service.getAll(false, paging);
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(1, entities.size());
-		Assert.assertEquals((Long) 10L, paging.getTotalRecordCount());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(1, entities.size());
+		Assertions.assertEquals((Long) 10L, paging.getTotalRecordCount());
 		
 		// Finally, explicitly set the paging to not load the total and make sure it is not counted
 		paging = new PagingInfo(1, 1);
 		paging.setLoadRecordCount(false);
 		
 		entities = service.getAll(false, paging);
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(1, entities.size());
-		Assert.assertNull(paging.getTotalRecordCount());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(1, entities.size());
+		Assertions.assertNull(paging.getTotalRecordCount());
 	}
 	
 	/**
@@ -499,8 +513,8 @@ public abstract class IMetadataDataServiceTest<S extends IMetadataDataService<E>
 			paging.setPage(i + 1);
 			entities = service.getAll(paging);
 			
-			Assert.assertNotNull(entities);
-			Assert.assertEquals(1, entities.size());
+			Assertions.assertNotNull(entities);
+			Assertions.assertEquals(1, entities.size());
 			assertEntity(allEntities.get(i), entities.get(0));
 		}
 	}

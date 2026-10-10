@@ -9,7 +9,7 @@
  */
 package org.openmrs.module.billing.web.legacyweb.controller;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.openmrs.module.billing.web.base.controller.HeaderController;
 import org.openmrs.module.billing.ModuleSettings;

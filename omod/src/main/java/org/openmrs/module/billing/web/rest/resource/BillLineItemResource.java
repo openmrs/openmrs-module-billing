@@ -40,7 +40,7 @@ import java.math.BigDecimal;
  * REST resource representing a {@link BillLineItem}.
  */
 @Resource(name = RestConstants.VERSION_1 + CashierResourceController.BILLING_NAMESPACE
-        + "/billLineItem", supportedClass = BillLineItem.class, supportedOpenmrsVersions = { "2.0 - 2.*" })
+        + "/billLineItem", supportedClass = BillLineItem.class, supportedOpenmrsVersions = { "2.0 - 9.*" })
 @Slf4j
 public class BillLineItemResource extends BaseRestDataResource<BillLineItem> {
 	

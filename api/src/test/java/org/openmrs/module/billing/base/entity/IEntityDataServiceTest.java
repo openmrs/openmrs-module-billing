@@ -9,11 +9,13 @@
  */
 package org.openmrs.module.billing.base.entity;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.util.Date;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.openmrs.OpenmrsData;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.base.PagingInfo;
@@ -28,14 +30,14 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 	public static void assertOpenmrsData(OpenmrsData expected, OpenmrsData actual) {
 		assertOpenmrsObject(expected, actual);
 		
-		Assert.assertEquals(expected.getChangedBy(), actual.getChangedBy());
-		Assert.assertEquals(expected.getCreator(), actual.getCreator());
-		Assert.assertEquals(expected.getDateChanged(), actual.getDateChanged());
-		Assert.assertEquals(expected.getDateCreated(), actual.getDateCreated());
-		Assert.assertEquals(expected.getVoided(), actual.getVoided());
-		Assert.assertEquals(expected.getVoidedBy(), actual.getVoidedBy());
-		Assert.assertEquals(expected.getVoidReason(), actual.getVoidReason());
-		Assert.assertEquals(expected.getDateVoided(), actual.getDateVoided());
+		Assertions.assertEquals(expected.getChangedBy(), actual.getChangedBy());
+		Assertions.assertEquals(expected.getCreator(), actual.getCreator());
+		Assertions.assertEquals(expected.getDateChanged(), actual.getDateChanged());
+		Assertions.assertEquals(expected.getDateCreated(), actual.getDateCreated());
+		Assertions.assertEquals(expected.getVoided(), actual.getVoided());
+		Assertions.assertEquals(expected.getVoidedBy(), actual.getVoidedBy());
+		Assertions.assertEquals(expected.getVoidReason(), actual.getVoidReason());
+		Assertions.assertEquals(expected.getDateVoided(), actual.getDateVoided());
 	}
 	
 	@Override
@@ -57,11 +59,11 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 		Context.flushSession();
 		
 		entity = service.getById(0);
-		Assert.assertTrue(entity.getVoided());
-		Assert.assertEquals(Context.getAuthenticatedUser(), entity.getVoidedBy());
-		Assert.assertEquals(reason, entity.getVoidReason());
+		Assertions.assertTrue(entity.getVoided());
+		Assertions.assertEquals(Context.getAuthenticatedUser(), entity.getVoidedBy());
+		Assertions.assertEquals(reason, entity.getVoidReason());
 		Date now = new Date();
-		Assert.assertTrue(entity.getDateVoided().before(now) || entity.getDateVoided().equals(now));
+		Assertions.assertTrue(entity.getDateVoided().before(now) || entity.getDateVoided().equals(now));
 	}
 	
 	/**
@@ -69,11 +71,13 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IEntityDataService#voidEntity(OpenmrsData,
 	 *      String)
 	 */
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void voidEntity_shouldThrowIllegalArgumentExceptionWithNullReasonParameter() {
-		E entity = service.getById(0);
-		
-		service.voidEntity(entity, null);
+		assertThrows(IllegalArgumentException.class, () -> {
+			E entity = service.getById(0);
+			
+			service.voidEntity(entity, null);
+		});
 	}
 	
 	/**
@@ -81,9 +85,11 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IEntityDataService#voidEntity(OpenmrsData,
 	 *      String)
 	 */
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void voidEntity_shouldThrowNullPointerExceptionWithNullEntity() {
-		service.voidEntity(null, "something");
+		assertThrows(NullPointerException.class, () -> {
+			service.voidEntity(null, "something");
+		});
 	}
 	
 	/**
@@ -99,7 +105,7 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 		Context.flushSession();
 		
 		entity = service.getById(0);
-		Assert.assertTrue(entity.getVoided());
+		Assertions.assertTrue(entity.getVoided());
 		
 		service.unvoidEntity(entity);
 		
@@ -107,19 +113,21 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 		
 		entity = service.getById(0);
 		
-		Assert.assertFalse(entity.getVoided());
-		Assert.assertNull(entity.getVoidedBy());
-		Assert.assertNull(entity.getVoidReason());
-		Assert.assertNotNull(entity.getDateVoided());
+		Assertions.assertFalse(entity.getVoided());
+		Assertions.assertNull(entity.getVoidedBy());
+		Assertions.assertNull(entity.getVoidReason());
+		Assertions.assertNotNull(entity.getDateVoided());
 	}
 	
 	/**
 	 * @verifies throw NullPointerException with null entity
 	 * @see org.openmrs.module.openhmis.commons.api.entity.IEntityDataService#unvoidEntity(OpenmrsData)
 	 */
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void unvoidEntity_shouldThrowNullPointerExceptionWithNullEntity() {
-		service.unvoidEntity(null);
+		assertThrows(NullPointerException.class, () -> {
+			service.unvoidEntity(null);
+		});
 	}
 	
 	/**
@@ -135,8 +143,8 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 		Context.flushSession();
 		
 		List<E> entities = service.getAll(true);
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(getTestEntityCount(), entities.size());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(getTestEntityCount(), entities.size());
 	}
 	
 	/**
@@ -152,8 +160,8 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 		Context.flushSession();
 		
 		List<E> entities = service.getAll(false);
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(getTestEntityCount() - 1, entities.size());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(getTestEntityCount() - 1, entities.size());
 	}
 	
 	/**
@@ -169,8 +177,8 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 		Context.flushSession();
 		
 		List<E> entities = service.getAll();
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(getTestEntityCount() - 1, entities.size());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(getTestEntityCount() - 1, entities.size());
 	}
 	
 	/**
@@ -188,20 +196,20 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 		
 		// Test that empty result is as expected
 		entities = service.getAll();
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(0, entities.size());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(0, entities.size());
 		
 		entities = service.getAll(true);
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(0, entities.size());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(0, entities.size());
 		
 		entities = service.getAll(false);
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(0, entities.size());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(0, entities.size());
 		
 		entities = service.getAll(true, new PagingInfo(1, 1));
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(0, entities.size());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(0, entities.size());
 	}
 	
 	/**
@@ -216,12 +224,12 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 		Context.flushSession();
 		
 		List<E> entities = service.getAll(false);
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(getTestEntityCount() - 1, entities.size());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(getTestEntityCount() - 1, entities.size());
 		
 		entities = service.getAll(true);
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(getTestEntityCount(), entities.size());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(getTestEntityCount(), entities.size());
 	}
 	
 	/**
@@ -232,8 +240,8 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 	@Test
 	public void getAll_shouldReturnAllSpecifiedMetadataRecordsIfPagingIsNull() {
 		List<E> entities = service.getAll(true, null);
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(getTestEntityCount(), entities.size());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(getTestEntityCount(), entities.size());
 	}
 	
 	/**
@@ -244,16 +252,16 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 	@Test
 	public void getAll_shouldReturnAllSpecifiedEntityRecordsIfPagingPageOrSizeIsLessThanOne() {
 		List<E> entities = service.getAll(true, new PagingInfo(0, 1));
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(getTestEntityCount(), entities.size());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(getTestEntityCount(), entities.size());
 		
 		entities = service.getAll(true, new PagingInfo(1, 0));
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(getTestEntityCount(), entities.size());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(getTestEntityCount(), entities.size());
 		
 		entities = service.getAll(true, new PagingInfo(0, 0));
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(getTestEntityCount(), entities.size());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(getTestEntityCount(), entities.size());
 	}
 	
 	/**
@@ -266,9 +274,9 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 		PagingInfo paging = new PagingInfo(1, 1);
 		List<E> entities = service.getAll(false, paging);
 		
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(1, entities.size());
-		Assert.assertEquals(Long.valueOf(getTestEntityCount()), paging.getTotalRecordCount());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(1, entities.size());
+		Assertions.assertEquals(Long.valueOf(getTestEntityCount()), paging.getTotalRecordCount());
 	}
 	
 	/**
@@ -282,27 +290,27 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 		
 		// First check that the full total is set
 		List<E> entities = service.getAll(false, paging);
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(1, entities.size());
-		Assert.assertEquals(Long.valueOf(getTestEntityCount()), paging.getTotalRecordCount());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(1, entities.size());
+		Assertions.assertEquals(Long.valueOf(getTestEntityCount()), paging.getTotalRecordCount());
 		
 		// Now manually set the total and check that it is not reset
 		paging = new PagingInfo(1, 1);
 		paging.setTotalRecordCount(10L);
 		
 		entities = service.getAll(false, paging);
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(1, entities.size());
-		Assert.assertEquals((Long) 10L, paging.getTotalRecordCount());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(1, entities.size());
+		Assertions.assertEquals((Long) 10L, paging.getTotalRecordCount());
 		
 		// Finally, explicitly set the paging to not load the total and make sure it is not counted
 		paging = new PagingInfo(1, 1);
 		paging.setLoadRecordCount(false);
 		
 		entities = service.getAll(false, paging);
-		Assert.assertNotNull(entities);
-		Assert.assertEquals(1, entities.size());
-		Assert.assertNull(paging.getTotalRecordCount());
+		Assertions.assertNotNull(entities);
+		Assertions.assertEquals(1, entities.size());
+		Assertions.assertNull(paging.getTotalRecordCount());
 	}
 	
 	/**
@@ -318,8 +326,8 @@ public abstract class IEntityDataServiceTest<S extends IEntityDataService<E>, E 
 			paging.setPage(i + 1);
 			entities = service.getAll(paging);
 			
-			Assert.assertNotNull(entities);
-			Assert.assertEquals(1, entities.size());
+			Assertions.assertNotNull(entities);
+			Assertions.assertEquals(1, entities.size());
 			assertEntity(service.getById(i), entities.get(0));
 		}
 	}

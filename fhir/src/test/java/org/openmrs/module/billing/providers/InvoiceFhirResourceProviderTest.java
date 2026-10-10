@@ -12,11 +12,11 @@ package org.openmrs.module.billing.providers;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Invoice;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openmrs.module.billing.FhirInvoiceService;
 import org.openmrs.module.fhir2.providers.BaseFhirProvenanceResourceTest;
 
@@ -24,8 +24,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class InvoiceFhirResourceProviderTest extends BaseFhirProvenanceResourceTest<Invoice> {
 	
 	private static final String INVOICE_UUID = "4028814B39B565A20139B95D74360004";
@@ -37,7 +38,7 @@ public class InvoiceFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 	
 	private Invoice invoice;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		invoiceFhirResourceProvider = new InvoiceFhirResourceProvider(fhirInvoiceService);
 		invoice = new Invoice();
@@ -62,13 +63,15 @@ public class InvoiceFhirResourceProviderTest extends BaseFhirProvenanceResourceT
 		assertThat(result.getId(), equalTo(INVOICE_UUID));
 	}
 	
-	@Test(expected = ResourceNotFoundException.class)
+	@Test
 	public void getInvoiceByUuid_shouldThrowResourceNotFoundExceptionIfNotFound() {
-		IdType idType = new IdType();
-		idType.setValue(INVOICE_UUID);
-		
-		when(fhirInvoiceService.get(idType.getIdPart())).thenReturn(null);
-		
-		invoiceFhirResourceProvider.getInvoiceByUuid(idType);
+		assertThrows(ResourceNotFoundException.class, () -> {
+			IdType idType = new IdType();
+			idType.setValue(INVOICE_UUID);
+			
+			when(fhirInvoiceService.get(idType.getIdPart())).thenReturn(null);
+			
+			invoiceFhirResourceProvider.getInvoiceByUuid(idType);
+		});
 	}
 }

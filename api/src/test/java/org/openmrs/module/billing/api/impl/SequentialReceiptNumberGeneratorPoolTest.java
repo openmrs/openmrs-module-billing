@@ -30,9 +30,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.LockAcquisitionException;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.billing.api.ISequentialReceiptNumberGeneratorService;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -50,7 +50,7 @@ public class SequentialReceiptNumberGeneratorPoolTest {
 	
 	private SequentialReceiptNumberGeneratorServiceImpl service;
 	
-	@Before
+	@BeforeEach
 	public void before() {
 		blockReserver = mock(ISequentialReceiptNumberGeneratorService.class);
 		
@@ -109,13 +109,13 @@ public class SequentialReceiptNumberGeneratorPoolTest {
 			thread.join(60000);
 		}
 		
-		Assert.assertTrue("Worker threads failed: " + failures, failures.isEmpty());
-		Assert.assertEquals(total, results.size());
+		Assertions.assertTrue(failures.isEmpty(), "Worker threads failed: " + failures);
+		Assertions.assertEquals(total, results.size());
 		
 		Set<Integer> unique = new HashSet<>(results);
-		Assert.assertEquals("Duplicate sequence values were handed out", total, unique.size());
-		Assert.assertTrue(unique.contains(1));
-		Assert.assertTrue(unique.contains(total));
+		Assertions.assertEquals(total, unique.size(), "Duplicate sequence values were handed out");
+		Assertions.assertTrue(unique.contains(1));
+		Assertions.assertTrue(unique.contains(total));
 		
 		verify(blockReserver, times(total / BLOCK_SIZE)).reserveSequenceBlock("main", BLOCK_SIZE);
 	}
@@ -127,7 +127,7 @@ public class SequentialReceiptNumberGeneratorPoolTest {
 		                new SQLIntegrityConstraintViolationException(), "cashier_seq_group_sequence")))
 		        .thenReturn(1);
 		
-		Assert.assertEquals(1, service.reserveNextSequence("race"));
+		Assertions.assertEquals(1, service.reserveNextSequence("race"));
 		
 		verify(blockReserver, times(2)).reserveSequenceBlock("race", BLOCK_SIZE);
 	}
@@ -139,7 +139,7 @@ public class SequentialReceiptNumberGeneratorPoolTest {
 		                new LockAcquisitionException("deadlock", new SQLException("Deadlock found", "40001", 1213))))
 		        .thenReturn(1);
 		
-		Assert.assertEquals(1, service.reserveNextSequence("deadlock"));
+		Assertions.assertEquals(1, service.reserveNextSequence("deadlock"));
 		
 		verify(blockReserver, times(2)).reserveSequenceBlock("deadlock", BLOCK_SIZE);
 	}
@@ -150,7 +150,7 @@ public class SequentialReceiptNumberGeneratorPoolTest {
 		
 		try {
 			service.reserveNextSequence("failing");
-			Assert.fail("Expected IllegalStateException");
+			Assertions.fail("Expected IllegalStateException");
 		}
 		catch (IllegalStateException expected) {}
 		
@@ -168,7 +168,7 @@ public class SequentialReceiptNumberGeneratorPoolTest {
 			return 501;
 		});
 		
-		Assert.assertEquals(501, service.reserveNextSequence("invalidated"));
+		Assertions.assertEquals(501, service.reserveNextSequence("invalidated"));
 		
 		verify(blockReserver, times(2)).reserveSequenceBlock("invalidated", BLOCK_SIZE);
 	}
@@ -177,7 +177,7 @@ public class SequentialReceiptNumberGeneratorPoolTest {
 	public void reserveNextSequence_shouldThrowIllegalArgumentExceptionIfTheGroupIsNull() {
 		try {
 			service.reserveNextSequence(null);
-			Assert.fail("Expected IllegalArgumentException");
+			Assertions.fail("Expected IllegalArgumentException");
 		}
 		catch (IllegalArgumentException expected) {}
 		
