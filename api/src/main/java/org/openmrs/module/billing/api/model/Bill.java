@@ -257,6 +257,11 @@ public class Bill extends BaseOpenmrsData {
 		        || current == BillStatus.PARTIALLY_REFUNDED) {
 			return;
 		}
+		// An adjusted bill has been replaced by another bill and a cancelled bill is closed, so a
+		// change to their payments must not make them payable again.
+		if (current == BillStatus.ADJUSTED || current == BillStatus.CANCELLED) {
+			return;
+		}
 		if (this.getPayments() != null && !this.getPayments().isEmpty()
 		        && getTotalPayments().compareTo(BigDecimal.ZERO) > 0) {
 			// Approved discount exceeds the current bill total — likely a line item was voided

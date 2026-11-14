@@ -279,6 +279,38 @@ public class BillTest {
 	}
 	
 	@Test
+	public void synchronizeBillStatus_shouldNotReopenAdjustedOrCancelledBillsWhenAPaymentIsVoided() {
+		for (BillStatus closed : new BillStatus[] { BillStatus.ADJUSTED, BillStatus.CANCELLED }) {
+			Bill bill = new Bill();
+			bill.setLineItems(new ArrayList<>());
+			bill.setPayments(new HashSet<>());
+			
+			BillLineItem lineItem = new BillLineItem();
+			lineItem.setPrice(BigDecimal.valueOf(100));
+			lineItem.setQuantity(1);
+			lineItem.setVoided(false);
+			bill.getLineItems().add(lineItem);
+			
+			Payment first = new Payment();
+			first.setAmountTendered(BigDecimal.valueOf(60));
+			first.setVoided(false);
+			bill.addPayment(first);
+			Payment second = new Payment();
+			second.setAmountTendered(BigDecimal.valueOf(40));
+			second.setVoided(false);
+			bill.addPayment(second);
+			bill.setStatus(closed);
+			
+			first.setVoided(true);
+			bill.synchronizeBillStatus();
+			assertEquals(closed, bill.getStatus());
+			
+			bill.removePayment(second);
+			assertEquals(closed, bill.getStatus());
+		}
+	}
+	
+	@Test
 	public void removePayment_shouldReopenPaidBillWhenThePaymentThatSettledItIsRemoved() {
 		Bill bill = new Bill();
 		bill.setLineItems(new ArrayList<>());
