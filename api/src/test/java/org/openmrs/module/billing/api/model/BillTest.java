@@ -156,6 +156,154 @@ public class BillTest {
 	}
 	
 	@Test
+	public void synchronizeBillStatus_shouldReopenPaidBillWhenItsOnlyPaymentIsVoided() {
+		Bill bill = new Bill();
+		bill.setLineItems(new ArrayList<>());
+		bill.setPayments(new HashSet<>());
+		
+		BillLineItem lineItem = new BillLineItem();
+		lineItem.setPrice(BigDecimal.valueOf(100));
+		lineItem.setQuantity(1);
+		lineItem.setVoided(false);
+		lineItem.setStatus(BillLineItemStatus.PENDING);
+		bill.getLineItems().add(lineItem);
+		
+		Payment payment = new Payment();
+		payment.setAmountTendered(BigDecimal.valueOf(100));
+		payment.setVoided(false);
+		bill.addPayment(payment);
+		assertEquals(BillStatus.PAID, bill.getStatus());
+		assertEquals(BillLineItemStatus.PAID, lineItem.getStatus());
+		
+		payment.setVoided(true);
+		bill.synchronizeBillStatus();
+		
+		assertEquals(BillStatus.POSTED, bill.getStatus());
+		assertEquals(BillLineItemStatus.PENDING, lineItem.getStatus());
+	}
+	
+	@Test
+	public void synchronizeBillStatus_shouldReopenPaidBillWhenRemainingPaymentsNoLongerCoverIt() {
+		Bill bill = new Bill();
+		bill.setLineItems(new ArrayList<>());
+		bill.setPayments(new HashSet<>());
+		
+		BillLineItem lineItem = new BillLineItem();
+		lineItem.setPrice(BigDecimal.valueOf(100));
+		lineItem.setQuantity(1);
+		lineItem.setVoided(false);
+		bill.getLineItems().add(lineItem);
+		
+		Payment first = new Payment();
+		first.setAmountTendered(BigDecimal.valueOf(60));
+		first.setVoided(false);
+		bill.addPayment(first);
+		Payment second = new Payment();
+		second.setAmountTendered(BigDecimal.valueOf(40));
+		second.setVoided(false);
+		bill.addPayment(second);
+		assertEquals(BillStatus.PAID, bill.getStatus());
+		
+		first.setVoided(true);
+		bill.synchronizeBillStatus();
+		
+		assertEquals(BillStatus.POSTED, bill.getStatus());
+	}
+	
+	@Test
+	public void synchronizeBillStatus_shouldLeaveVoidedAndRefundedLineItemsAloneWhenReopeningBill() {
+		Bill bill = new Bill();
+		bill.setLineItems(new ArrayList<>());
+		bill.setPayments(new HashSet<>());
+		
+		BillLineItem paidLineItem = new BillLineItem();
+		paidLineItem.setPrice(BigDecimal.valueOf(100));
+		paidLineItem.setQuantity(1);
+		paidLineItem.setVoided(false);
+		bill.getLineItems().add(paidLineItem);
+		
+		BillLineItem voidedLineItem = new BillLineItem();
+		voidedLineItem.setPrice(BigDecimal.valueOf(50));
+		voidedLineItem.setQuantity(1);
+		voidedLineItem.setVoided(true);
+		voidedLineItem.setStatus(BillLineItemStatus.PAID);
+		bill.getLineItems().add(voidedLineItem);
+		
+		Payment payment = new Payment();
+		payment.setAmountTendered(BigDecimal.valueOf(100));
+		payment.setVoided(false);
+		bill.addPayment(payment);
+		assertEquals(BillStatus.PAID, bill.getStatus());
+		
+		BillLineItem refundedLineItem = new BillLineItem();
+		refundedLineItem.setPrice(BigDecimal.ZERO);
+		refundedLineItem.setQuantity(1);
+		refundedLineItem.setVoided(false);
+		refundedLineItem.setStatus(BillLineItemStatus.REFUNDED);
+		bill.getLineItems().add(refundedLineItem);
+		
+		payment.setVoided(true);
+		bill.synchronizeBillStatus();
+		
+		assertEquals(BillStatus.POSTED, bill.getStatus());
+		assertEquals(BillLineItemStatus.PENDING, paidLineItem.getStatus());
+		assertEquals(BillLineItemStatus.PAID, voidedLineItem.getStatus());
+		assertEquals(BillLineItemStatus.REFUNDED, refundedLineItem.getStatus());
+	}
+	
+	@Test
+	public void synchronizeBillStatus_shouldNotReopenBillsThatWereNeverPaid() {
+		Bill bill = new Bill();
+		bill.setLineItems(new ArrayList<>());
+		bill.setPayments(new HashSet<>());
+		
+		BillLineItem lineItem = new BillLineItem();
+		lineItem.setPrice(BigDecimal.valueOf(100));
+		lineItem.setQuantity(1);
+		lineItem.setVoided(false);
+		lineItem.setStatus(BillLineItemStatus.PENDING);
+		bill.getLineItems().add(lineItem);
+		
+		bill.setStatus(BillStatus.PENDING);
+		bill.synchronizeBillStatus();
+		assertEquals(BillStatus.PENDING, bill.getStatus());
+		
+		bill.setStatus(BillStatus.CANCELLED);
+		bill.synchronizeBillStatus();
+		assertEquals(BillStatus.CANCELLED, bill.getStatus());
+		
+		bill.setStatus(BillStatus.REFUNDED);
+		bill.synchronizeBillStatus();
+		assertEquals(BillStatus.REFUNDED, bill.getStatus());
+		assertEquals(BillLineItemStatus.PENDING, lineItem.getStatus());
+	}
+	
+	@Test
+	public void removePayment_shouldReopenPaidBillWhenThePaymentThatSettledItIsRemoved() {
+		Bill bill = new Bill();
+		bill.setLineItems(new ArrayList<>());
+		bill.setPayments(new HashSet<>());
+		
+		BillLineItem lineItem = new BillLineItem();
+		lineItem.setPrice(BigDecimal.valueOf(100));
+		lineItem.setQuantity(1);
+		lineItem.setVoided(false);
+		bill.getLineItems().add(lineItem);
+		
+		Payment payment = new Payment();
+		payment.setAmountTendered(BigDecimal.valueOf(100));
+		payment.setVoided(false);
+		bill.addPayment(payment);
+		assertEquals(BillStatus.PAID, bill.getStatus());
+		
+		bill.removePayment(payment);
+		
+		assertEquals(0, bill.getPayments().size());
+		assertEquals(BillStatus.POSTED, bill.getStatus());
+		assertEquals(BillLineItemStatus.PENDING, lineItem.getStatus());
+	}
+	
+	@Test
 	public void synchronizeBillStatus_shouldUpdateStatusToPaidAfterVoidingLineItems() {
 		Bill bill = new Bill();
 		bill.setLineItems(new ArrayList<>());

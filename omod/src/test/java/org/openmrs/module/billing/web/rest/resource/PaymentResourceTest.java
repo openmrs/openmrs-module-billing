@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.billing.web.rest.resource;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -19,6 +20,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashSet;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +33,8 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.base.ProviderUtil;
 import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.module.billing.api.model.BillLineItem;
+import org.openmrs.module.billing.api.model.BillStatus;
 import org.openmrs.module.billing.api.model.Payment;
 
 /**
@@ -163,5 +168,54 @@ public class PaymentResourceTest {
 		
 		assertNotNull(payment.getCashier());
 		assertTrue(bill.getPayments().contains(payment));
+	}
+	
+	@Test
+	public void delete_shouldReopenPaidBillWhenThePaymentThatSettledItIsVoided() {
+		Bill bill = paidBill();
+		Payment payment = bill.getPayments().iterator().next();
+		when(billService.getBillByUuid(bill.getUuid())).thenReturn(bill);
+		
+		resource.delete(bill.getUuid(), payment.getUuid(), "Entered against the wrong patient", null);
+		
+		assertTrue(payment.getVoided());
+		assertEquals("Entered against the wrong patient", payment.getVoidReason());
+		assertEquals(BillStatus.POSTED, bill.getStatus());
+		verify(billService).saveBill(bill);
+	}
+	
+	@Test
+	public void purge_shouldReopenPaidBillWhenThePaymentThatSettledItIsRemoved() {
+		Bill bill = paidBill();
+		Payment payment = bill.getPayments().iterator().next();
+		when(billService.getBillByUuid(bill.getUuid())).thenReturn(bill);
+		
+		resource.purge(bill.getUuid(), payment.getUuid(), null);
+		
+		assertTrue(bill.getPayments().isEmpty());
+		assertEquals(BillStatus.POSTED, bill.getStatus());
+		verify(billService).saveBill(bill);
+	}
+	
+	private Bill paidBill() {
+		Bill bill = new Bill();
+		bill.setId(1);
+		bill.setLineItems(new ArrayList<>());
+		bill.setPayments(new HashSet<>());
+		
+		BillLineItem lineItem = new BillLineItem();
+		lineItem.setPrice(BigDecimal.valueOf(100));
+		lineItem.setQuantity(1);
+		lineItem.setVoided(false);
+		bill.getLineItems().add(lineItem);
+		
+		Payment payment = new Payment();
+		payment.setAmount(BigDecimal.valueOf(100));
+		payment.setAmountTendered(BigDecimal.valueOf(100));
+		payment.setVoided(false);
+		bill.addPayment(payment);
+		assertEquals(BillStatus.PAID, bill.getStatus());
+		
+		return bill;
 	}
 }

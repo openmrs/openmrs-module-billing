@@ -282,12 +282,28 @@ public class Bill extends BaseOpenmrsData {
 			} else {
 				this.setStatus(BillStatus.POSTED);
 			}
+		} else if (current == BillStatus.PAID && getAmountAfterDiscount().compareTo(BigDecimal.ZERO) > 0) {
+			// Every payment that settled this bill has since been voided or removed, so nothing is
+			// paid any more. Reopen the bill and the line items the settlement had marked as paid.
+			this.setStatus(BillStatus.POSTED);
+			if (this.lineItems != null) {
+				for (BillLineItem lineItem : this.lineItems) {
+					if (lineItem != null && !lineItem.getVoided() && lineItem.getStatus() == BillLineItemStatus.PAID) {
+						lineItem.setStatus(BillLineItemStatus.PENDING);
+					}
+				}
+			}
 		}
 	}
 	
+	/**
+	 * Removes a payment from the bill and brings the bill status back in line with the payments that
+	 * remain.
+	 */
 	public void removePayment(Payment payment) {
 		if (payment != null && this.payments != null) {
 			this.payments.remove(payment);
+			this.synchronizeBillStatus();
 		}
 	}
 	
