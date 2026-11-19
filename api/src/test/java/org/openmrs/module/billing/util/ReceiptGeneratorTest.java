@@ -9,6 +9,7 @@
  */
 package org.openmrs.module.billing.util;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -33,6 +34,8 @@ import org.openmrs.module.billing.TestConstants;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillLineItem;
 import org.openmrs.module.billing.api.model.BillableService;
+import org.openmrs.module.billing.api.model.Payment;
+import org.openmrs.module.billing.api.model.PaymentMode;
 import org.openmrs.module.billing.api.util.CashierModuleConstants;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 import org.openmrs.util.LocaleUtility;
@@ -93,6 +96,30 @@ public class ReceiptGeneratorTest extends BaseModuleContextSensitiveTest {
 		assertNotNull(pdfBytes);
 		String pdfText = extractTextFromPdf(pdfBytes);
 		assertTrue(pdfText.contains("KES"), "PDF should contain configured currency symbol KES but was: " + pdfText);
+	}
+	
+	@Test
+	public void createBillReceipt_shouldNotIncludeVoidedPayments() throws Exception {
+		Bill bill = createTestBill();
+		bill.addPayment(createPayment("Cash", new BigDecimal("40.00"), false));
+		bill.addPayment(createPayment("VoidedMode", new BigDecimal("60.00"), true));
+		
+		String pdfText = extractTextFromPdf(ReceiptGenerator.createBillReceipt(bill));
+		
+		assertTrue(pdfText.contains("Cash"), "PDF should contain the non-voided payment but was: " + pdfText);
+		assertFalse(pdfText.contains("VoidedMode"), "PDF should not contain the voided payment but was: " + pdfText);
+	}
+	
+	private Payment createPayment(String modeName, BigDecimal amount, boolean voided) {
+		PaymentMode paymentMode = new PaymentMode();
+		paymentMode.setName(modeName);
+		
+		Payment payment = new Payment();
+		payment.setInstanceType(paymentMode);
+		payment.setAmount(amount);
+		payment.setAmountTendered(amount);
+		payment.setVoided(voided);
+		return payment;
 	}
 	
 	private Bill createTestBill() {
