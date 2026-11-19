@@ -178,6 +178,8 @@ public class PaymentResource extends DelegatingSubResource<Payment, Bill, BillRe
 		payment.setVoidReason(reason);
 		payment.setVoidedBy(Context.getAuthenticatedUser());
 		
+		// The voided payment no longer counts towards the bill, so it may not be settled any more.
+		bill.synchronizeBillStatus();
 		service.saveBill(bill);
 	}
 	

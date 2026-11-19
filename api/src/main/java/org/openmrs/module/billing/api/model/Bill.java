@@ -257,6 +257,11 @@ public class Bill extends BaseOpenmrsData {
 		        || current == BillStatus.PARTIALLY_REFUNDED) {
 			return;
 		}
+		// An adjusted bill has been replaced by another bill and a cancelled bill is closed, so a
+		// change to their payments must not make them payable again.
+		if (current == BillStatus.ADJUSTED || current == BillStatus.CANCELLED) {
+			return;
+		}
 		if (this.getPayments() != null && !this.getPayments().isEmpty()
 		        && getTotalPayments().compareTo(BigDecimal.ZERO) > 0) {
 			// Approved discount exceeds the current bill total — likely a line item was voided
@@ -282,12 +287,28 @@ public class Bill extends BaseOpenmrsData {
 			} else {
 				this.setStatus(BillStatus.POSTED);
 			}
+		} else if (current == BillStatus.PAID && getAmountAfterDiscount().compareTo(BigDecimal.ZERO) > 0) {
+			// Every payment that settled this bill has since been voided or removed, so nothing is
+			// paid any more. Reopen the bill and the line items the settlement had marked as paid.
+			this.setStatus(BillStatus.POSTED);
+			if (this.lineItems != null) {
+				for (BillLineItem lineItem : this.lineItems) {
+					if (lineItem != null && !lineItem.getVoided() && lineItem.getStatus() == BillLineItemStatus.PAID) {
+						lineItem.setStatus(BillLineItemStatus.PENDING);
+					}
+				}
+			}
 		}
 	}
 	
+	/**
+	 * Removes a payment from the bill and brings the bill status back in line with the payments that
+	 * remain.
+	 */
 	public void removePayment(Payment payment) {
 		if (payment != null && this.payments != null) {
 			this.payments.remove(payment);
+			this.synchronizeBillStatus();
 		}
 	}
 	
