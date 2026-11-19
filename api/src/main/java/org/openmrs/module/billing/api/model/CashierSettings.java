@@ -24,25 +24,17 @@ public class CashierSettings {
 	
 	private Integer defaultReceiptReportId;
 	
-	private Integer defaultShiftReportId;
-	
 	private Boolean cashierMandatory;
 	
 	private Integer cashierRoundingToNearest;
 	
 	private String cashierRoundingMode;
 	
-	private Boolean cashierTimesheetRequired;
-	
 	private Integer patientDashboard2BillCount;
 	
 	private Integer departmentCollectionsReportId;
 	
 	private Integer departmentRevenueReportId;
-	
-	private Integer shiftSummaryReportId;
-	
-	private Integer dailyShiftSummaryReportId;
 	
 	private Integer paymentsByPaymentModeReportId;
 	
@@ -78,14 +70,6 @@ public class CashierSettings {
 		this.defaultReceiptReportId = defaultReceiptReportId;
 	}
 	
-	public Integer getDefaultShiftReportId() {
-		return defaultShiftReportId;
-	}
-	
-	public void setDefaultShiftReportId(Integer defaultShiftReportId) {
-		this.defaultShiftReportId = defaultShiftReportId;
-	}
-	
 	public Boolean getCashierMandatory() {
 		return cashierMandatory;
 	}
@@ -110,14 +94,6 @@ public class CashierSettings {
 		this.cashierRoundingMode = cashierRoundingMode;
 	}
 	
-	public Boolean getCashierTimesheetRequired() {
-		return cashierTimesheetRequired;
-	}
-	
-	public void setCashierTimesheetRequired(Boolean cashierTimesheetRequired) {
-		this.cashierTimesheetRequired = cashierTimesheetRequired;
-	}
-	
 	public Integer getPatientDashboard2BillCount() {
 		return patientDashboard2BillCount;
 	}
@@ -140,22 +116,6 @@ public class CashierSettings {
 	
 	public void setDepartmentRevenueReportId(Integer departmentRevenueReportId) {
 		this.departmentRevenueReportId = departmentRevenueReportId;
-	}
-	
-	public Integer getShiftSummaryReportId() {
-		return shiftSummaryReportId;
-	}
-	
-	public void setShiftSummaryReportId(Integer shiftSummaryReportId) {
-		this.shiftSummaryReportId = shiftSummaryReportId;
-	}
-	
-	public Integer getDailyShiftSummaryReportId() {
-		return dailyShiftSummaryReportId;
-	}
-	
-	public void setDailyShiftSummaryReportId(Integer dailyShiftSummaryReportId) {
-		this.dailyShiftSummaryReportId = dailyShiftSummaryReportId;
 	}
 	
 	public Integer getPaymentsByPaymentModeReportId() {
