@@ -303,6 +303,9 @@ public class ReceiptGenerator {
 		paymentSection.addCell(new Paragraph(""));
 		// append payment rows
 		for (Payment payment : bill.getPayments()) {
+			if (payment == null || payment.getVoided()) {
+				continue;
+			}
 			paymentSection.addCell(new Paragraph(" "));
 			paymentSection.addCell(new Paragraph(" "));
 			paymentSection.addCell(new Paragraph(payment.getInstanceType().getName()).setTextAlignment(TextAlignment.RIGHT))
