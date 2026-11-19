@@ -72,6 +72,8 @@ public class BillServiceImplTest extends BaseModuleContextSensitiveTest {
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "PaymentModeTest.xml");
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "CashPointTest.xml");
 		executeDataSet(TestConstants.BASE_DATASET_DIR + "BillTest.xml");
+		Context.clearSession();
+		Context.getRegisteredComponent("sessionFactory", org.hibernate.SessionFactory.class).getCache().evictAllRegions();
 	}
 	
 	/**
