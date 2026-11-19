@@ -13,6 +13,7 @@ import org.openmrs.annotation.Authorized;
 import org.openmrs.api.OpenmrsService;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.module.billing.api.model.PatientBillSummary;
 import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.module.billing.api.util.PrivilegeConstants;
 
@@ -82,6 +83,25 @@ public interface BillService extends OpenmrsService {
 	 */
 	@Authorized(PrivilegeConstants.VIEW_BILLS)
 	List<Bill> getBills(BillSearch billSearch, PagingInfo pagingInfo);
+	
+	/**
+	 * Returns one summary row per patient that has at least one non-voided bill. Voided patients are
+	 * never returned. Rows are ordered by the latest bill date descending, then patient id ascending,
+	 * and paging counts patients.
+	 * <p>
+	 * {@link PatientBillSummary#getTotalUnpaid()} is the sum over the patient's non-voided
+	 * {@code PENDING} and {@code POSTED} bills of {@code max(amountAfterDiscount - totalPayments, 0)},
+	 * the same per-bill amount as the receipt "Due Amount". Bills in any other status contribute 0.
+	 * </p>
+	 *
+	 * @param patientName optional patient name query; null or blank means no name filter
+	 * @param pagingInfo optional paging information (can be null for no paging). When provided, the
+	 *            total number of matching patients is set on it.
+	 * @return the summary rows for the requested page, or an empty list if none found
+	 * @throws org.openmrs.api.APIAuthenticationException if the user lacks VIEW_BILLS privilege
+	 */
+	@Authorized(PrivilegeConstants.VIEW_BILLS)
+	List<PatientBillSummary> getPatientBillSummaries(String patientName, PagingInfo pagingInfo);
 	
 	/**
 	 * Generates and downloads a receipt for the specified bill.

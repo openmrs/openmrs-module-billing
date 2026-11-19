@@ -1,0 +1,194 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+
+-->
+<dataset>
+	<!-- Patients. All share the family name "Summary". -->
+	<person person_id="9001" gender="F" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"
+	        uuid="pbs-person-0000-0000-000000009001"/>
+	<person person_id="9002" gender="M" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"
+	        uuid="pbs-person-0000-0000-000000009002"/>
+	<person person_id="9003" gender="F" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"
+	        uuid="pbs-person-0000-0000-000000009003"/>
+	<!-- Voided on both the person and the patient row -->
+	<person person_id="9004" gender="F" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="true"
+	        uuid="pbs-person-0000-0000-000000009004"/>
+	<!-- Has only a voided bill -->
+	<person person_id="9005" gender="M" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"
+	        uuid="pbs-person-0000-0000-000000009005"/>
+	<!-- Has no bills -->
+	<person person_id="9006" gender="F" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"
+	        uuid="pbs-person-0000-0000-000000009006"/>
+	<!-- Voided only on the patient row -->
+	<person person_id="9007" gender="F" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"
+	        uuid="pbs-person-0000-0000-000000009007"/>
+
+	<person_name person_name_id="9001" preferred="true" person_id="9001" given_name="Alice" family_name="Summary"
+	             creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="pbs-name-00000-0000-000000009001"/>
+	<person_name person_name_id="9002" preferred="true" person_id="9002" given_name="Bob" family_name="Summary"
+	             creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="pbs-name-00000-0000-000000009002"/>
+	<person_name person_name_id="9003" preferred="true" person_id="9003" given_name="Carol" family_name="Summary"
+	             creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="pbs-name-00000-0000-000000009003"/>
+	<person_name person_name_id="9004" preferred="true" person_id="9004" given_name="Vera" family_name="Summary"
+	             creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="pbs-name-00000-0000-000000009004"/>
+	<person_name person_name_id="9005" preferred="true" person_id="9005" given_name="Dan" family_name="Summary"
+	             creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="pbs-name-00000-0000-000000009005"/>
+	<person_name person_name_id="9006" preferred="true" person_id="9006" given_name="Erin" family_name="Summary"
+	             creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="pbs-name-00000-0000-000000009006"/>
+	<person_name person_name_id="9007" preferred="true" person_id="9007" given_name="Gina" family_name="Summary"
+	             creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="pbs-name-00000-0000-000000009007"/>
+
+	<patient patient_id="9001" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
+	<patient patient_id="9002" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
+	<patient patient_id="9003" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
+	<patient patient_id="9004" creator="1" date_created="2005-01-01 00:00:00.0" voided="true"/>
+	<patient patient_id="9005" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
+	<patient patient_id="9006" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
+	<patient patient_id="9007" creator="1" date_created="2005-01-01 00:00:00.0" voided="true"/>
+
+	<stockmgmt_stock_item stock_item_id="900" concept_id="1067" has_expiration="false" is_drug="false"
+	                      creator="1" date_created="2012-01-01 00:00:00.0" voided="false"
+	                      uuid="pbs-stock-item-0000-0000-000000000900"/>
+
+	<!-- Alice (9001): unpaid 150.00 + 75.00 = 225.00, 3 bills, latest 2026-01-20 -->
+	<!-- 9101 POSTED: lines 200 + 30 (exempted, counted) = 230, voided 50 ignored; paid 80, voided 40 ignored -> 150.00 -->
+	<cashier_bill bill_id="9101" receipt_number="pbs-9101" provider_id="0" patient_id="9001" cash_point_id="0"
+	              status="POSTED" creator="1" date_created="2026-01-10 00:00:00.0" voided="false"
+	              uuid="pbs-bill-00000-0000-000000009101" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="91011" bill_id="9101" item_id="900" price="100.00" price_name="default"
+	                        quantity="2" line_item_order="0" status="PENDING"
+	                        creator="1" date_created="2026-01-10 00:00:00.0" voided="false"
+	                        uuid="pbs-line-00000-0000-000000091011"/>
+	<cashier_bill_line_item bill_line_item_id="91012" bill_id="9101" item_id="900" price="50.00" price_name="default"
+	                        quantity="1" line_item_order="1" status="PENDING"
+	                        creator="1" date_created="2026-01-10 00:00:00.0" voided="true"
+	                        uuid="pbs-line-00000-0000-000000091012"/>
+	<cashier_bill_line_item bill_line_item_id="91013" bill_id="9101" item_id="900" price="30.00" price_name="default"
+	                        quantity="1" line_item_order="2" status="EXEMPTED"
+	                        creator="1" date_created="2026-01-10 00:00:00.0" voided="false"
+	                        uuid="pbs-line-00000-0000-000000091013"/>
+	<cashier_bill_payment bill_payment_id="91011" bill_id="9101" payment_mode_id="0" amount="80.00"
+	                      amount_tendered="80.00" creator="1" date_created="2026-01-10 00:00:00.0" voided="false"
+	                      uuid="pbs-payment-0000-0000-000000091011"/>
+	<cashier_bill_payment bill_payment_id="91012" bill_id="9101" payment_mode_id="0" amount="40.00"
+	                      amount_tendered="40.00" creator="1" date_created="2026-01-10 00:00:00.0" voided="true"
+	                      uuid="pbs-payment-0000-0000-000000091012"/>
+
+	<!-- 9102 PENDING: 100 - approved fixed discount 25 -> 75.00 -->
+	<cashier_bill bill_id="9102" receipt_number="pbs-9102" provider_id="0" patient_id="9001" cash_point_id="0"
+	              status="PENDING" creator="1" date_created="2026-01-20 00:00:00.0" voided="false"
+	              uuid="pbs-bill-00000-0000-000000009102" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="91021" bill_id="9102" item_id="900" price="100.00" price_name="default"
+	                        quantity="1" line_item_order="0" status="PENDING"
+	                        creator="1" date_created="2026-01-20 00:00:00.0" voided="false"
+	                        uuid="pbs-line-00000-0000-000000091021"/>
+	<bill_discount bill_discount_id="9102" bill_id="9102" discount_type="FIXED_AMOUNT" discount_value="25.00"
+	               discount_status="APPROVED" justification="Loyal patient"
+	               initiator_id="1" approver_id="5506" creator="1" date_created="2026-01-20 00:00:00.0" voided="false"
+	               uuid="pbs-discount-0000-0000-000000009102"/>
+
+	<!-- 9103 PAID: contributes 0 -->
+	<cashier_bill bill_id="9103" receipt_number="pbs-9103" provider_id="0" patient_id="9001" cash_point_id="0"
+	              status="PAID" creator="1" date_created="2026-01-05 00:00:00.0" voided="false"
+	              uuid="pbs-bill-00000-0000-000000009103" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="91031" bill_id="9103" item_id="900" price="60.00" price_name="default"
+	                        quantity="1" line_item_order="0" status="PAID"
+	                        creator="1" date_created="2026-01-05 00:00:00.0" voided="false"
+	                        uuid="pbs-line-00000-0000-000000091031"/>
+	<cashier_bill_payment bill_payment_id="91031" bill_id="9103" payment_mode_id="0" amount="60.00"
+	                      amount_tendered="60.00" creator="1" date_created="2026-01-05 00:00:00.0" voided="false"
+	                      uuid="pbs-payment-0000-0000-000000091031"/>
+
+	<!-- 9104 voided bill: ignored for every field (would otherwise move the latest date to 2026-03-01) -->
+	<cashier_bill bill_id="9104" receipt_number="pbs-9104" provider_id="0" patient_id="9001" cash_point_id="0"
+	              status="PENDING" creator="1" date_created="2026-03-01 00:00:00.0" voided="true"
+	              uuid="pbs-bill-00000-0000-000000009104" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="91041" bill_id="9104" item_id="900" price="999.00" price_name="default"
+	                        quantity="1" line_item_order="0" status="PENDING"
+	                        creator="1" date_created="2026-03-01 00:00:00.0" voided="false"
+	                        uuid="pbs-line-00000-0000-000000091041"/>
+
+	<!-- Bob (9002): unpaid 100.00 (only from 9112), 4 bills, latest 2026-02-01 -->
+	<cashier_bill bill_id="9105" receipt_number="pbs-9105" provider_id="0" patient_id="9002" cash_point_id="0"
+	              status="ADJUSTED" creator="1" date_created="2026-02-01 00:00:00.0" voided="false"
+	              uuid="pbs-bill-00000-0000-000000009105" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="91051" bill_id="9105" item_id="900" price="300.00" price_name="default"
+	                        quantity="1" line_item_order="0" status="PENDING"
+	                        creator="1" date_created="2026-02-01 00:00:00.0" voided="false"
+	                        uuid="pbs-line-00000-0000-000000091051"/>
+	<!-- 9106 POSTED but overpaid: 300 - 400 clamped to 0 -->
+	<cashier_bill bill_id="9106" receipt_number="pbs-9106" provider_id="0" patient_id="9002" cash_point_id="0"
+	              status="POSTED" creator="1" date_created="2026-02-01 00:00:00.0" voided="false"
+	              uuid="pbs-bill-00000-0000-000000009106" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="91061" bill_id="9106" item_id="900" price="300.00" price_name="default"
+	                        quantity="1" line_item_order="0" status="PENDING"
+	                        creator="1" date_created="2026-02-01 00:00:00.0" voided="false"
+	                        uuid="pbs-line-00000-0000-000000091061"/>
+	<cashier_bill_payment bill_payment_id="91061" bill_id="9106" payment_mode_id="0" amount="400.00"
+	                      amount_tendered="400.00" creator="1" date_created="2026-02-01 00:00:00.0" voided="false"
+	                      uuid="pbs-payment-0000-0000-000000091061"/>
+	<cashier_bill bill_id="9107" receipt_number="pbs-9107" provider_id="0" patient_id="9002" cash_point_id="0"
+	              status="REFUNDED" creator="1" date_created="2026-01-15 00:00:00.0" voided="false"
+	              uuid="pbs-bill-00000-0000-000000009107" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="91071" bill_id="9107" item_id="900" price="50.00" price_name="default"
+	                        quantity="1" line_item_order="0" status="PENDING"
+	                        creator="1" date_created="2026-01-15 00:00:00.0" voided="false"
+	                        uuid="pbs-line-00000-0000-000000091071"/>
+
+	<!-- 9112 PENDING, nothing paid: 100 due. The overpayment on 9106 must not reduce it, because each
+	     bill is clamped at 0 on its own (a clamp on the patient total would give -100 + 100 = 0). -->
+	<cashier_bill bill_id="9112" receipt_number="pbs-9112" provider_id="0" patient_id="9002" cash_point_id="0"
+	              status="PENDING" creator="1" date_created="2026-01-25 00:00:00.0" voided="false"
+	              uuid="pbs-bill-00000-0000-000000009112" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="91121" bill_id="9112" item_id="900" price="100.00" price_name="default"
+	                        quantity="1" line_item_order="0" status="PENDING"
+	                        creator="1" date_created="2026-01-25 00:00:00.0" voided="false"
+	                        uuid="pbs-line-00000-0000-000000091121"/>
+
+	<!-- Carol (9003): unpaid 0, 1 bill, latest 2026-01-20 (ties with Alice) -->
+	<cashier_bill bill_id="9108" receipt_number="pbs-9108" provider_id="0" patient_id="9003" cash_point_id="0"
+	              status="PAID" creator="1" date_created="2026-01-20 00:00:00.0" voided="false"
+	              uuid="pbs-bill-00000-0000-000000009108" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="91081" bill_id="9108" item_id="900" price="40.00" price_name="default"
+	                        quantity="1" line_item_order="0" status="PAID"
+	                        creator="1" date_created="2026-01-20 00:00:00.0" voided="false"
+	                        uuid="pbs-line-00000-0000-000000091081"/>
+	<cashier_bill_payment bill_payment_id="91081" bill_id="9108" payment_mode_id="0" amount="40.00"
+	                      amount_tendered="40.00" creator="1" date_created="2026-01-20 00:00:00.0" voided="false"
+	                      uuid="pbs-payment-0000-0000-000000091081"/>
+
+	<!-- Vera (9004, voided patient): never listed -->
+	<cashier_bill bill_id="9109" receipt_number="pbs-9109" provider_id="0" patient_id="9004" cash_point_id="0"
+	              status="PENDING" creator="1" date_created="2026-04-01 00:00:00.0" voided="false"
+	              uuid="pbs-bill-00000-0000-000000009109" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="91091" bill_id="9109" item_id="900" price="10.00" price_name="default"
+	                        quantity="1" line_item_order="0" status="PENDING"
+	                        creator="1" date_created="2026-04-01 00:00:00.0" voided="false"
+	                        uuid="pbs-line-00000-0000-000000091091"/>
+
+	<!-- Dan (9005, only a voided bill): never listed -->
+	<cashier_bill bill_id="9110" receipt_number="pbs-9110" provider_id="0" patient_id="9005" cash_point_id="0"
+	              status="PENDING" creator="1" date_created="2026-05-01 00:00:00.0" voided="true"
+	              uuid="pbs-bill-00000-0000-000000009110" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="91101" bill_id="9110" item_id="900" price="10.00" price_name="default"
+	                        quantity="1" line_item_order="0" status="PENDING"
+	                        creator="1" date_created="2026-05-01 00:00:00.0" voided="false"
+	                        uuid="pbs-line-00000-0000-000000091101"/>
+
+	<!-- Gina (9007, patient row voided, person row not voided): never listed -->
+	<cashier_bill bill_id="9111" receipt_number="pbs-9111" provider_id="0" patient_id="9007" cash_point_id="0"
+	              status="PENDING" creator="1" date_created="2026-06-01 00:00:00.0" voided="false"
+	              uuid="pbs-bill-00000-0000-000000009111" receipt_printed="0"/>
+	<cashier_bill_line_item bill_line_item_id="91111" bill_id="9111" item_id="900" price="10.00" price_name="default"
+	                        quantity="1" line_item_order="0" status="PENDING"
+	                        creator="1" date_created="2026-06-01 00:00:00.0" voided="false"
+	                        uuid="pbs-line-00000-0000-000000091111"/>
+</dataset>
