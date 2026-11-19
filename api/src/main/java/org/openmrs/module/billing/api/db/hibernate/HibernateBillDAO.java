@@ -23,17 +23,27 @@ import org.openmrs.module.billing.api.db.BillDAO;
 import org.openmrs.module.billing.api.model.Bill;
 import org.openmrs.module.billing.api.model.BillDiscount;
 import org.openmrs.module.billing.api.model.BillRefund;
+import org.openmrs.module.billing.api.model.BillStatus;
+import org.openmrs.module.billing.api.model.PatientBillSummary;
 import org.openmrs.module.billing.api.search.BillSearch;
 
 import javax.annotation.Nonnull;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.openmrs.module.billing.api.db.hibernate.PagingUtil.applyPaging;
 
@@ -51,6 +61,16 @@ public class HibernateBillDAO implements BillDAO {
 	private static final String FIELD_VOIDED = "voided";
 	
 	private static final String FIELD_DATE_CREATED = "dateCreated";
+	
+	private static final String FIELD_PATIENT = "patient";
+	
+	private static final String FIELD_PATIENT_ID = "patientId";
+	
+	/**
+	 * Bill statuses that can still have an unpaid amount. Keep this list the same as the unpaid check
+	 * in DefaultPatientPaymentStatusResolver.
+	 */
+	private static final List<BillStatus> UNPAID_BILL_STATUSES = Arrays.asList(BillStatus.PENDING, BillStatus.POSTED);
 	
 	@Setter(AccessLevel.PROTECTED)
 	private SessionFactory sessionFactory;
@@ -132,6 +152,111 @@ public class HibernateBillDAO implements BillDAO {
 		applyPaging(query, pagingInfo, predicates, sessionFactory, Bill.class);
 		
 		return query.getResultList();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public List<PatientBillSummary> getPatientBillSummaries(String patientName, PagingInfo pagingInfo) {
+		List<Patient> matchedPatients = null;
+		if (StringUtils.isNotBlank(patientName)) {
+			matchedPatients = findPatientsByName(patientName);
+			if (matchedPatients.isEmpty()) {
+				if (pagingInfo != null) {
+					pagingInfo.setTotalRecordCount(0L);
+				}
+				return new ArrayList<>();
+			}
+		}
+		
+		Session session = sessionFactory.getCurrentSession();
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		
+		// One page of patients with their bill count and latest bill date. The same patient id
+		// expression is used in SELECT, GROUP BY and ORDER BY so the query is valid on PostgreSQL.
+		CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
+		Root<Bill> root = cq.from(Bill.class);
+		Join<Bill, Patient> patient = root.join(FIELD_PATIENT);
+		Expression<Integer> patientId = patient.get(FIELD_PATIENT_ID);
+		Expression<Date> latestBillDate = cb.greatest(root.<Date> get(FIELD_DATE_CREATED));
+		cq.multiselect(patientId, cb.count(root), latestBillDate)
+		        .where(buildPatientBillSummaryPredicates(cb, root, patient, matchedPatients)).groupBy(patientId)
+		        .orderBy(cb.desc(latestBillDate), cb.asc(patientId));
+		
+		TypedQuery<Object[]> pageQuery = session.createQuery(cq);
+		if (pagingInfo != null && pagingInfo.getPage() > 0 && pagingInfo.getPageSize() > 0) {
+			pageQuery.setFirstResult((pagingInfo.getPage() - 1) * pagingInfo.getPageSize());
+			pageQuery.setMaxResults(pagingInfo.getPageSize());
+		}
+		List<Object[]> page = pageQuery.getResultList();
+		
+		if (pagingInfo != null) {
+			pagingInfo.setTotalRecordCount(countPatientsWithBills(session, cb, matchedPatients));
+		}
+		if (page.isEmpty()) {
+			return new ArrayList<>();
+		}
+		
+		List<Integer> patientIds = page.stream().map(row -> (Integer) row[0]).collect(Collectors.toList());
+		
+		// Load the page's patients for the result rows, with their identifiers, because the REST ref
+		// representation builds the patient display from them. They are loaded before the bills, so
+		// bill.getPatient() below returns these same instances and runs no extra query.
+		Map<Integer, Patient> patientsById = session
+		        .createQuery("select distinct p from Patient p left join fetch p.identifiers where p.patientId in (:ids)",
+		            Patient.class)
+		        .setParameter("ids", patientIds).getResultList().stream()
+		        .collect(Collectors.toMap(Patient::getPatientId, p -> p));
+		
+		// Unpaid amounts from the open bills of these patients, computed with the Bill rules.
+		List<Bill> openBills = session
+		        .createQuery(
+		            "select distinct b from Bill b left join fetch b.lineItems"
+		                    + " left join fetch b.payments pay left join fetch pay.attributes left join fetch b.discounts"
+		                    + " where b.patient.patientId in (:ids) and b.voided = false and b.status in (:statuses)",
+		            Bill.class)
+		        .setParameter("ids", patientIds).setParameter("statuses", UNPAID_BILL_STATUSES).getResultList();
+		
+		Map<Integer, BigDecimal> unpaidByPatientId = new HashMap<>();
+		for (Bill bill : openBills) {
+			BigDecimal unpaid = bill.getAmountAfterDiscount().subtract(bill.getTotalPayments()).max(BigDecimal.ZERO);
+			unpaidByPatientId.merge(bill.getPatient().getPatientId(), unpaid, BigDecimal::add);
+		}
+		
+		List<PatientBillSummary> result = new ArrayList<>(page.size());
+		for (Object[] row : page) {
+			Integer id = (Integer) row[0];
+			result.add(new PatientBillSummary(patientsById.get(id), (Long) row[1],
+			        unpaidByPatientId.getOrDefault(id, BigDecimal.ZERO), (Date) row[2]));
+		}
+		return result;
+	}
+	
+	private Long countPatientsWithBills(Session session, CriteriaBuilder cb, List<Patient> matchedPatients) {
+		CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+		Root<Bill> root = cq.from(Bill.class);
+		Join<Bill, Patient> patient = root.join(FIELD_PATIENT);
+		cq.select(cb.countDistinct(patient.get(FIELD_PATIENT_ID)))
+		        .where(buildPatientBillSummaryPredicates(cb, root, patient, matchedPatients));
+		return session.createQuery(cq).getSingleResult();
+	}
+	
+	private Predicate[] buildPatientBillSummaryPredicates(CriteriaBuilder cb, Root<Bill> root, Join<Bill, Patient> patient,
+	        List<Patient> matchedPatients) {
+		List<Predicate> predicates = new ArrayList<>();
+		predicates.add(cb.equal(root.get(FIELD_VOIDED), false));
+		predicates.add(cb.equal(patient.get(FIELD_VOIDED), false));
+		if (matchedPatients != null) {
+			predicates.add(patient.in(matchedPatients));
+		}
+		return predicates.toArray(new Predicate[0]);
+	}
+	
+	private List<Patient> findPatientsByName(String patientName) {
+		List<Patient> patients = Context.getRegisteredComponent("patientDAO", HibernatePatientDAO.class)
+		        .getPatients(patientName, 0, null);
+		return patients != null ? patients : new ArrayList<>();
 	}
 	
 	/**

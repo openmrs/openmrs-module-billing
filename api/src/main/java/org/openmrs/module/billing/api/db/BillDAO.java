@@ -11,6 +11,7 @@ package org.openmrs.module.billing.api.db;
 
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.module.billing.api.model.PatientBillSummary;
 import org.openmrs.module.billing.api.search.BillSearch;
 
 import javax.annotation.Nonnull;
@@ -88,6 +89,20 @@ public interface BillDAO {
 	 * @see BillSearch
 	 */
 	List<Bill> getBills(@Nonnull BillSearch billSearch, PagingInfo pagingInfo);
+	
+	/**
+	 * Returns one summary row per patient that has at least one non-voided bill. Voided patients are
+	 * never returned. Rows are ordered by the latest bill date descending, then patient id ascending.
+	 * Paging counts patients, not bills.
+	 *
+	 * @param patientName optional patient name query; null or blank means no name filter. Patients are
+	 *            matched the same way as {@link BillSearch#getPatientName()}.
+	 * @param pagingInfo optional paging information (can be null for no paging). When provided, the
+	 *            total number of matching patients is always set on it.
+	 * @return the summary rows for the requested page, or an empty list if none found
+	 * @see PatientBillSummary
+	 */
+	List<PatientBillSummary> getPatientBillSummaries(String patientName, PagingInfo pagingInfo);
 	
 	/**
 	 * Persists a bill to the database.

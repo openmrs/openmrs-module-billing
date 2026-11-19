@@ -17,6 +17,7 @@ import org.openmrs.module.billing.api.BillService;
 import org.openmrs.module.billing.api.base.PagingInfo;
 import org.openmrs.module.billing.api.db.BillDAO;
 import org.openmrs.module.billing.api.model.Bill;
+import org.openmrs.module.billing.api.model.PatientBillSummary;
 import org.openmrs.module.billing.api.search.BillSearch;
 import org.openmrs.module.billing.util.ReceiptGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,6 +112,15 @@ public class BillServiceImpl extends BaseOpenmrsService implements BillService {
 			return Collections.emptyList();
 		}
 		return billDAO.getBills(billSearch, pagingInfo);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public List<PatientBillSummary> getPatientBillSummaries(String patientName, PagingInfo pagingInfo) {
+		return billDAO.getPatientBillSummaries(patientName, pagingInfo);
 	}
 	
 	/**
